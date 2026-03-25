@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -16,6 +17,7 @@ interface ParametersFormProps {
 
 export function ParametersForm({ condoId, currentParams }: ParametersFormProps) {
   const [loading, setLoading] = useState(false)
+  const [fineType, setFineType] = useState(currentParams?.fine_type || "porcentaje")
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,7 +33,10 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
       current_year: parseInt(formData.get("current_year") as string),
       payment_deadline_day: parseInt(formData.get("payment_deadline_day") as string),
       enable_late_fees: formData.get("enable_late_fees") === "on",
-      late_fee_percentage: parseFloat(formData.get("late_fee_percentage") as string) || 0,
+      fine_type: fineType,
+      late_fee_percentage: fineType === "porcentaje" ? parseFloat(formData.get("late_fee_percentage") as string) || 0 : 0,
+      fine_fixed_amount: fineType === "fijo" ? parseFloat(formData.get("fine_fixed_amount") as string) || 0 : 0,
+      fine_uf_amount: fineType === "uf" ? parseFloat(formData.get("fine_uf_amount") as string) || 0 : 0,
     }
 
     if (currentParams?.id) {
@@ -117,7 +122,7 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
           <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
             <div>
               <Label htmlFor="enable_late_fees" className="cursor-pointer">Habilitar Multa por Atraso</Label>
-              <p className="text-xs text-muted-foreground mt-1">Aplicar porcentaje a pagos atrasados</p>
+              <p className="text-xs text-muted-foreground mt-1">Aplicar multa a pagos atrasados</p>
             </div>
             <Switch
               id="enable_late_fees"
@@ -127,18 +132,71 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="late_fee_percentage">Porcentaje de Multa (%)</Label>
-            <Input
-              id="late_fee_percentage"
-              name="late_fee_percentage"
-              type="number"
-              min={0}
-              max={100}
-              step={0.01}
-              defaultValue={currentParams?.late_fee_percentage || 0}
-              placeholder="0.00"
-            />
+            <Label>Tipo de Multa</Label>
+            <Select value={fineType} onValueChange={setFineType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar tipo de multa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="porcentaje">Porcentaje del gasto comun</SelectItem>
+                <SelectItem value="fijo">Monto fijo</SelectItem>
+                <SelectItem value="uf">Monto en UF</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {fineType === "porcentaje" && "Se aplicara un porcentaje sobre el valor del gasto comun"}
+              {fineType === "fijo" && "Se cobrara un monto fijo independiente del gasto comun"}
+              {fineType === "uf" && "Se cobrara el valor en UF segun cotizacion del dia de vencimiento"}
+            </p>
           </div>
+
+          {fineType === "porcentaje" && (
+            <div className="space-y-2">
+              <Label htmlFor="late_fee_percentage">Porcentaje de Multa (%)</Label>
+              <Input
+                id="late_fee_percentage"
+                name="late_fee_percentage"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                defaultValue={currentParams?.late_fee_percentage || 0}
+                placeholder="Ej: 3"
+              />
+            </div>
+          )}
+
+          {fineType === "fijo" && (
+            <div className="space-y-2">
+              <Label htmlFor="fine_fixed_amount">Monto Fijo de Multa</Label>
+              <Input
+                id="fine_fixed_amount"
+                name="fine_fixed_amount"
+                type="number"
+                min={0}
+                step={1}
+                defaultValue={currentParams?.fine_fixed_amount || 0}
+                placeholder="Ej: 5000"
+              />
+              <p className="text-xs text-muted-foreground">En la moneda configurada del condominio</p>
+            </div>
+          )}
+
+          {fineType === "uf" && (
+            <div className="space-y-2">
+              <Label htmlFor="fine_uf_amount">Monto en UF</Label>
+              <Input
+                id="fine_uf_amount"
+                name="fine_uf_amount"
+                type="number"
+                min={0}
+                step={0.01}
+                defaultValue={currentParams?.fine_uf_amount || 0}
+                placeholder="Ej: 2"
+              />
+              <p className="text-xs text-muted-foreground">Se convertira al valor UF del dia de vencimiento</p>
+            </div>
+          )}
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
