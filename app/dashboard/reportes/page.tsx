@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { getCondoExpenses, getCondoIncome } from "../gastos/actions"
-import { Banknote, TrendingDown, TrendingUp, BarChart3 } from "lucide-react"
+import { 
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell 
+} from "recharts"
+import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 
 export default async function ReportesPage({
   searchParams,
@@ -36,7 +39,36 @@ export default async function ReportesPage({
   // Calculate totals
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalIncome = income.reduce((sum, inc) => sum + (inc.amount || 0), 0)
-  const netBalance = totalIncome - totalExpenses
+
+  // Prepare data for charts
+  const expensesByCategory: Record<string, number> = {}
+  expenses.forEach((exp) => {
+    const category = exp.category || "Otro"
+    expensesByCategory[category] = (expensesByCategory[category] || 0) + exp.amount
+  })
+
+  const incomeByType: Record<string, number> = {}
+  income.forEach((inc) => {
+    const type = inc.income_type === "cuota" ? "Cuotas" : "Variables"
+    incomeByType[type] = (incomeByType[type] || 0) + inc.amount
+  })
+
+  const pieExpensesData = Object.entries(expensesByCategory).map(([name, value]) => ({
+    name,
+    value,
+  }))
+
+  const pieIncomeData = Object.entries(incomeByType).map(([name, value]) => ({
+    name,
+    value,
+  }))
+
+  const barData = [
+    { nombre: "Ingresos", valor: totalIncome, fill: "#22c55e" },
+    { nombre: "Gastos", valor: totalExpenses, fill: "#ef4444" },
+  ]
+
+  const COLORS = ["#8b5cf6", "#06b6d4", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"]
 
   const monthName = new Date(year, month - 1).toLocaleDateString("es-CL", {
     month: "long",
@@ -46,116 +78,166 @@ export default async function ReportesPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Balance</h1>
-        <p className="text-muted-foreground">Resumen financiero del condominio - {monthName}</p>
+        <h1 className="text-3xl font-bold">Reportes de Finanzas</h1>
+        <p className="text-muted-foreground">Análisis completo de ingresos y gastos - {monthName}</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Ingresos (HABER)</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-sm text-muted-foreground">Total Ingresos</p>
+              <p className="text-3xl font-bold text-green-600 mt-1">
                 ${totalIncome.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingUp className="h-8 w-8 text-green-500 opacity-20" />
+            <TrendingUp className="h-10 w-10 text-green-500 opacity-30" />
           </div>
         </div>
 
         <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Gastos (DEBE)</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-sm text-muted-foreground">Total Gastos</p>
+              <p className="text-3xl font-bold text-red-600 mt-1">
                 ${totalExpenses.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingDown className="h-8 w-8 text-red-500 opacity-20" />
+            <TrendingDown className="h-10 w-10 text-red-500 opacity-30" />
           </div>
         </div>
 
-        <div className={`rounded-lg border bg-card p-6 ${netBalance >= 0 ? "border-green-200" : "border-red-200"}`}>
+        <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Balance del Mes</p>
-              <p className={`text-2xl font-bold ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}>
-                ${netBalance.toLocaleString("es-CL", {
+              <p className="text-sm text-muted-foreground">Diferencia</p>
+              <p className={`text-3xl font-bold mt-1 ${totalIncome - totalExpenses >= 0 ? "text-green-600" : "text-red-600"}`}>
+                ${(totalIncome - totalExpenses).toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <BarChart3 className="h-8 w-8 opacity-20" />
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Registros</p>
-              <p className="text-2xl font-bold">{expenses.length + income.length}</p>
-            </div>
-            <Banknote className="h-8 w-8 opacity-20" />
+            <DollarSign className="h-10 w-10 opacity-30" />
           </div>
         </div>
       </div>
 
-      {/* Info Box */}
-      <div className="rounded-lg border bg-blue-50 p-4">
-        <p className="text-sm text-blue-900">
-          <strong>Cálculo del Balance:</strong> Saldo anterior + Ingresos (HABER) - Gastos (DEBE) = Balance del mes
-        </p>
-      </div>
-
-      {/* Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Ingresos vs Gastos Bar Chart */}
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-4">Desglose Ingresos</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Total Registros de Ingresos</span>
-              <span className="font-semibold">{income.length}</span>
+          <h2 className="text-lg font-semibold mb-4">Comparativa Ingresos vs Gastos</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={barData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="nombre" />
+              <YAxis />
+              <Tooltip 
+                formatter={(value) => `$${value.toLocaleString("es-CL")}`}
+              />
+              <Bar dataKey="valor" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Gastos por Categoría Pie Chart */}
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-4">Distribución de Gastos por Categoría</h2>
+          {pieExpensesData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieExpensesData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieExpensesData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `$${value.toLocaleString("es-CL")}`} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-300 flex items-center justify-center text-muted-foreground">
+              Sin datos de gastos para mostrar
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Promedio por Ingreso</span>
+          )}
+        </div>
+
+        {/* Ingresos por Tipo Pie Chart */}
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-4">Distribución de Ingresos por Tipo</h2>
+          {pieIncomeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieIncomeData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieIncomeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `$${value.toLocaleString("es-CL")}`} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-300 flex items-center justify-center text-muted-foreground">
+              Sin datos de ingresos para mostrar
+            </div>
+          )}
+        </div>
+
+        {/* Estadísticas */}
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-4">Estadísticas</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-sm text-muted-foreground">Promedio por Ingreso</span>
               <span className="font-semibold">
-                {income.length > 0 
-                  ? `$${(totalIncome / income.length).toLocaleString("es-CL", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}`
-                  : "$0"
-                }
+                ${income.length > 0 ? (totalIncome / income.length).toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }) : "$0"}
               </span>
             </div>
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-4">Desglose Gastos</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Total Registros de Gastos</span>
-              <span className="font-semibold">{expenses.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Promedio por Gasto</span>
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-sm text-muted-foreground">Promedio por Gasto</span>
               <span className="font-semibold">
-                {expenses.length > 0 
-                  ? `$${(totalExpenses / expenses.length).toLocaleString("es-CL", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}`
-                  : "$0"
-                }
+                ${expenses.length > 0 ? (totalExpenses / expenses.length).toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }) : "$0"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-sm text-muted-foreground">Total de Transacciones</span>
+              <span className="font-semibold">{expenses.length + income.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Razón Gastos/Ingresos</span>
+              <span className="font-semibold">
+                {totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toFixed(1) : "0"}%
               </span>
             </div>
           </div>
@@ -164,4 +246,5 @@ export default async function ReportesPage({
     </div>
   )
 }
+
 
