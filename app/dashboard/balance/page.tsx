@@ -52,37 +52,40 @@ export default async function BalancePage({
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-lg border bg-card p-6">
+        {/* Ingresos - Green background */}
+        <div className="rounded-lg border border-green-600 bg-green-600 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Ingresos (HABER)</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-sm text-green-100">Ingresos (HABER)</p>
+              <p className="text-2xl font-bold text-white">
                 ${totalIncome.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingUp className="h-8 w-8 text-green-500 opacity-20" />
+            <TrendingUp className="h-8 w-8 text-white opacity-40" />
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-6">
+        {/* Gastos - Red background */}
+        <div className="rounded-lg border border-red-600 bg-red-600 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Gastos (DEBE)</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-sm text-red-100">Gastos (DEBE)</p>
+              <p className="text-2xl font-bold text-white">
                 ${totalExpenses.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingDown className="h-8 w-8 text-red-500 opacity-20" />
+            <TrendingDown className="h-8 w-8 text-white opacity-40" />
           </div>
         </div>
 
-        <div className={`rounded-lg border bg-card p-6 ${netBalance >= 0 ? "border-green-200" : "border-red-200"}`}>
+        {/* Balance - White background with colored text */}
+        <div className={`rounded-lg border-2 bg-card p-6 ${netBalance >= 0 ? "border-green-500" : "border-red-500"}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Balance del Mes</p>
@@ -93,7 +96,7 @@ export default async function BalancePage({
                 })}
               </p>
             </div>
-            <BarChart3 className="h-8 w-8 opacity-20" />
+            <BarChart3 className={`h-8 w-8 opacity-30 ${netBalance >= 0 ? "text-green-500" : "text-red-500"}`} />
           </div>
         </div>
 

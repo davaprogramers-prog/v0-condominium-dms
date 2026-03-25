@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { EditExpenseDialog } from "./edit-expense-dialog"
-import { Building2, User, FileText, CheckCircle } from "lucide-react"
+import { Building2, User, FileText, CheckCircle, X, ExternalLink } from "lucide-react"
 
 interface GastosListProps {
   expenses: any[]
@@ -30,6 +32,8 @@ const categoryColors: Record<string, string> = {
 }
 
 export function GastosList({ expenses, categories, isAdmin, currentYear, currentMonth }: GastosListProps) {
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
+
   if (expenses.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-12 text-center">
@@ -83,16 +87,14 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
               {/* Actions Row */}
               <div className="flex items-center gap-2 mt-3">
                 {expense.receipt_url && (
-                  <a
-                    href={expense.receipt_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-emerald-500 text-white hover:bg-emerald-600 cursor-pointer"
+                    onClick={() => setSelectedImage({ url: expense.receipt_url, title: expense.title })}
                   >
-                    <Badge variant="secondary" className="bg-emerald-500 text-white hover:bg-emerald-600 cursor-pointer">
-                      <FileText className="h-3 w-3 mr-1" />
-                      DOC
-                    </Badge>
-                  </a>
+                    <FileText className="h-3 w-3 mr-1" />
+                    DOC
+                  </Badge>
                 )}
                 <Badge variant="secondary" className="bg-emerald-500 text-white">
                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -109,6 +111,35 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
           </div>
         )
       })}
+
+      {/* Image Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg">{selectedImage?.title}</DialogTitle>
+              <a
+                href={selectedImage?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                title="Abrir en nueva pestaña"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            {selectedImage && (
+              <img
+                src={selectedImage.url}
+                alt={`Comprobante de ${selectedImage.title}`}
+                className="w-full h-auto max-h-[70vh] object-contain rounded-lg border"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
