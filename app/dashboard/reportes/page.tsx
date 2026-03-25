@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
-import { getCondoExpenses, getCondoIncome, getCondoBalance } from "../gastos/actions"
+import { getCondoExpenses, getCondoIncome } from "../gastos/actions"
 import { Banknote, TrendingDown, TrendingUp, BarChart3 } from "lucide-react"
 
 export default async function ReportesPage({
   searchParams,
 }: {
-  searchParams: { mes?: string; año?: string }
+  searchParams: Promise<{ mes?: string; año?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,19 +19,18 @@ export default async function ReportesPage({
   const condoId = profile?.condo_id
 
   // Get period from query params or use current month
+  const params = await searchParams
   const now = new Date()
-  const year = parseInt(searchParams.año as string) || now.getFullYear()
-  const month = parseInt(searchParams.mes as string) || now.getMonth() + 1
+  const year = parseInt(params.año as string) || now.getFullYear()
+  const month = parseInt(params.mes as string) || now.getMonth() + 1
 
   // Get expenses and income
   let expenses: any[] = []
   let income: any[] = []
-  let balance: any = null
 
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     income = await getCondoIncome(condoId, year, month)
-    balance = await getCondoBalance(condoId, year, month)
   }
 
   // Calculate totals

@@ -6,7 +6,7 @@ import { EditIncomeDialog } from "../ingresos/edit-income-dialog"
 export default async function IngresoVariablePage({
   searchParams,
 }: {
-  searchParams: { mes?: string; año?: string }
+  searchParams: Promise<{ mes?: string; año?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,9 +21,10 @@ export default async function IngresoVariablePage({
   const isAdmin = profile?.role === "admin"
 
   // Get period from query params or use current month
+  const params = await searchParams
   const now = new Date()
-  const year = parseInt(searchParams.año as string) || now.getFullYear()
-  const month = parseInt(searchParams.mes as string) || now.getMonth() + 1
+  const year = parseInt(params.año as string) || now.getFullYear()
+  const month = parseInt(params.mes as string) || now.getMonth() + 1
 
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
