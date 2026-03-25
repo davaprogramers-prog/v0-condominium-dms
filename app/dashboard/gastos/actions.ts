@@ -109,20 +109,59 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   return data || []
 }
 
-export async function getCondoBalance(condoId: string, year: number, month: number) {
+export async function updateExpense(
+  expenseId: string,
+  formData: {
+    title: string
+    description: string
+    amount: number
+    expenseDate: string
+    category: string
+    receiptUrl?: string
+  }
+) {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from("condo_monthly_balance")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("period_year", year)
-    .eq("period_month", month)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user is admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, condo_id")
+    .eq("id", user.id)
     .single()
 
-  if (error && error.code !== "PGRST116") {
-    console.error("[v0] Error fetching balance:", error)
+  if (profile?.role !== "admin") {
+    throw new Error("Solo administradores pueden editar gastos")
   }
 
-  return data || null
+  // Get period from expense date
+  const date = new Date(formData.expenseDate)
+  const periodYear = date.getFullYear()
+  const periodMonth = date.getMonth() + 1
+
+  const { error } = await supabase
+    .from("condo_expenses")
+    .update({
+      title: formData.title,
+      description: formData.description,
+      amount: formData.amount,
+      category: formData.category,
+      expense_date: formData.expenseDate,
+      period_year: periodYear,
+      period_month: periodMonth,
+      receipt_url: formData.receiptUrl,
+    })
+    .eq("id", expenseId)
+
+  if (error) {
+    console.error("[v0] Error updating expense:", error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath("/dashboard/gastos")
+  return { success: true }
 }
+
+
