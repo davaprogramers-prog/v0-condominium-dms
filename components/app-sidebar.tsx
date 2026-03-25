@@ -43,6 +43,8 @@ const adminMenuItems = [
     section: "Dashboard",
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
     ]
   },
   {
@@ -54,14 +56,19 @@ const adminMenuItems = [
     ]
   },
   {
+    section: "Configuraciones",
+    items: [
+      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
+      { title: "Tipos de Exoneraciones", href: "/dashboard/tipos-exoneraciones", icon: ShieldOff },
+    ]
+  },
+  {
     section: "Finanzas",
     items: [
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
-      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
-      { title: "Ingreso Variable", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
-      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
     ]
   },
   {
@@ -69,7 +76,6 @@ const adminMenuItems = [
     items: [
       { title: "Infracciones", href: "/dashboard/infracciones", icon: AlertTriangle },
       { title: "Exoneraciones", href: "/dashboard/exoneraciones", icon: ShieldOff },
-      { title: "Arriendos", href: "/dashboard/arriendos", icon: Key },
     ]
   },
   {
@@ -84,6 +90,7 @@ const adminMenuItems = [
     section: "Sistema",
     items: [
       { title: "Configuración", href: "/dashboard/configuracion", icon: Settings },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
 ]
