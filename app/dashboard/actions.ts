@@ -363,25 +363,42 @@ export async function addProjectQuote(formData: FormData) {
 export async function createSurvey(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const options = JSON.parse(formData.get("options") as string || "[]") as string[]
+  
+  console.log("[v0] Creating survey for condo:", condoId, "by user:", userId)
+  console.log("[v0] Survey data:", {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    closes_at: formData.get("closes_at"),
+    options
+  })
 
+  const closesAt = formData.get("closes_at") as string
   const { data: survey, error } = await supabase
     .from("surveys")
     .insert({
       condo_id: condoId,
       title: formData.get("title") as string,
       description: formData.get("description") as string || null,
-      closes_at: formData.get("closes_at") as string || null,
+      closes_at: closesAt && closesAt.trim() !== "" ? closesAt : null,
       created_by: userId,
+      is_active: true,
+      status: "activa",
     })
     .select()
     .single()
 
-  if (error) throw error
+  console.log("[v0] Survey insert result:", { survey, error })
+
+  if (error) {
+    console.error("[v0] Error creating survey:", error)
+    throw error
+  }
 
   if (options.length > 0) {
-    await supabase.from("survey_options").insert(
+    const { error: optError } = await supabase.from("survey_options").insert(
       options.map((opt, i) => ({ survey_id: survey.id, option_text: opt, display_order: i }))
     )
+    console.log("[v0] Options insert result:", { optError })
   }
 
   revalidatePath("/dashboard/encuestas")
