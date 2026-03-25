@@ -27,6 +27,7 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
     const formData = new FormData(e.currentTarget)
     const supabase = createClient()
 
+    const initialBalanceDate = formData.get("initial_balance_date") as string
     const data = {
       condo_id: condoId,
       current_month: parseInt(formData.get("current_month") as string),
@@ -39,6 +40,8 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
       fine_uf_amount: fineType === "uf" ? parseFloat(formData.get("fine_uf_amount") as string) || 0 : 0,
       fixed_income_amount: parseFloat(formData.get("fixed_income_amount") as string) || 0,
       variable_income_amount: parseFloat(formData.get("variable_income_amount") as string) || 0,
+      initial_balance: parseFloat(formData.get("initial_balance") as string) || 0,
+      initial_balance_date: initialBalanceDate && initialBalanceDate.trim() !== "" ? initialBalanceDate : null,
     }
 
     if (currentParams?.id) {
@@ -118,6 +121,49 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
             required
           />
           <p className="text-xs text-muted-foreground">Dia del mes en que vence el pago de gasto comun</p>
+        </div>
+
+        {/* Initial Balance Section */}
+        <div className="space-y-4 pt-4 border-t">
+          <div>
+            <h3 className="text-sm font-medium">Saldo Inicial</h3>
+            <p className="text-xs text-muted-foreground">Punto de partida para el balance del condominio (solo se usa el primer mes)</p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="initial_balance">Monto Saldo Inicial</Label>
+              <Input
+                id="initial_balance"
+                name="initial_balance"
+                type="number"
+                step={1}
+                defaultValue={currentParams?.initial_balance || 0}
+                placeholder="Ej: 500000"
+              />
+              <p className="text-xs text-muted-foreground">Saldo anterior al inicio del registro</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="initial_balance_date">Fecha de Inicio</Label>
+              <Input
+                id="initial_balance_date"
+                name="initial_balance_date"
+                type="date"
+                defaultValue={currentParams?.initial_balance_date || ""}
+              />
+              <p className="text-xs text-muted-foreground">Fecha desde cuando aplica este saldo</p>
+            </div>
+          </div>
+
+          {currentParams?.initial_balance_date && (
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Saldo inicial de <strong>${(currentParams?.initial_balance || 0).toLocaleString("es-CL")}</strong> registrado desde{" "}
+                <strong>{new Date(currentParams.initial_balance_date).toLocaleDateString("es-CL")}</strong>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Income Amounts Section */}
