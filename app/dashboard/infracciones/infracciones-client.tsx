@@ -1,17 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { createInfraction, markInfractionPaid } from "@/app/dashboard/actions"
+import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, AlertTriangle, CheckCircle } from "lucide-react"
+import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
 
 interface InfraccionesClientProps {
   infractions: Record<string, unknown>[]
@@ -24,6 +26,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [openNew, setOpenNew] = useState(false)
   const [selectedHouse, setSelectedHouse] = useState("")
   const [filter, setFilter] = useState("todas")
+  const [editOpen, setEditOpen] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
 
   const pendingCount = infractions.filter((i) => !i.is_paid).length
   const paidCount = infractions.filter((i) => i.is_paid).length
@@ -169,16 +173,91 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                       </TableCell>
                       {isAdmin && (
                         <TableCell>
-                          {!inf.is_paid && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => markInfractionPaid(inf.id as string)}
-                              className="gap-1"
-                            >
-                              <CheckCircle className="h-3 w-3" />Marcar pagada
-                            </Button>
-                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {!inf.is_paid && (
+                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)}>
+                                  <CheckCircle className="h-4 w-4 mr-2" />Marcar pagada
+                                </DropdownMenuItem>
+                              )}
+                              {!inf.is_paid && (
+                                <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)}>
+                                  <Edit2 className="h-4 w-4 mr-2" />Editar
+                                </DropdownMenuItem>
+                              )}
+                              {!inf.is_paid && (
+                                <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                </DropdownMenuItem>
+                              )}
+                              {inf.is_paid && (
+                                <DropdownMenuItem disabled className="text-muted-foreground">
+                                  No disponible (pagada)
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+
+                          {/* Edit Dialog */}
+                          <Dialog open={editOpen === inf.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                            <DialogContent>
+                              <DialogHeader><DialogTitle>Editar Infraccion</DialogTitle></DialogHeader>
+                              <form
+                                action={async (fd) => {
+                                  fd.set("id", inf.id as string)
+                                  await updateInfraction(fd)
+                                  setEditOpen(null)
+                                }}
+                                className="flex flex-col gap-4"
+                              >
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor="edit_desc">Descripcion</Label>
+                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="flex flex-col gap-2">
+                                    <Label htmlFor="edit_fine">Multa ({currencySymbol})</Label>
+                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} />
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <Label htmlFor="edit_date">Fecha</Label>
+                                    <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required />
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor="edit_notes">Notas</Label>
+                                  <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} />
+                                </div>
+                                <Button type="submit">Guardar Cambios</Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Delete Dialog */}
+                          <AlertDialog open={deleteOpen === inf.id} onOpenChange={(v) => !v && setDeleteOpen(null)}>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Eliminar Infraccion</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta accion no se puede deshacer. Se eliminara permanentemente esta infraccion.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="flex gap-3 justify-end">
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => { deleteInfraction(inf.id as string); setDeleteOpen(null) }}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </div>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </TableCell>
                       )}
                     </TableRow>

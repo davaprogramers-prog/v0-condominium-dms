@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { createExemptionType } from "@/app/dashboard/actions"
+import { createExemptionType, updateExemptionType, deleteExemptionType } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, ShieldOff } from "lucide-react"
+import { Plus, ShieldOff, Edit2, Trash2 } from "lucide-react"
 
 interface TiposExoneracionesClientProps {
   exemptionTypes: Record<string, unknown>[]
@@ -17,6 +18,7 @@ interface TiposExoneracionesClientProps {
 
 export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExoneracionesClientProps) {
   const [openNew, setOpenNew] = useState(false)
+  const [editOpen, setEditOpen] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,7 +51,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripción</Label>
+                  <Label htmlFor="description">Descripcion</Label>
                   <Textarea
                     id="description"
                     name="description"
@@ -81,6 +83,59 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                 </CardTitle>
                 {type.description && <CardDescription>{type.description as string}</CardDescription>}
               </CardHeader>
+              {isAdmin && (
+                <CardContent className="flex gap-2 pt-0">
+                  <Dialog open={editOpen === type.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={() => setEditOpen(type.id as string)}>
+                        <Edit2 className="h-4 w-4 mr-1" />Editar
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Editar Tipo de Exoneracion</DialogTitle></DialogHeader>
+                      <form
+                        action={async (fd) => {
+                          fd.set("id", type.id as string)
+                          await updateExemptionType(fd)
+                          setEditOpen(null)
+                        }}
+                        className="flex flex-col gap-4"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_name">Nombre</Label>
+                          <Input id="edit_name" name="name" defaultValue={type.name as string} required />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_desc">Descripcion</Label>
+                          <Textarea id="edit_desc" name="description" defaultValue={(type.description as string) || ""} />
+                        </div>
+                        <Button type="submit">Guardar Cambios</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <Trash2 className="h-4 w-4 mr-1" />Eliminar
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Eliminar Tipo de Exoneracion</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta accion no se puede deshacer. Se eliminara permanentemente este tipo.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="flex gap-3 justify-end">
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteExemptionType(type.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Eliminar
+                        </AlertDialogAction>
+                      </div>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              )}
             </Card>
           ))}
         </div>

@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { DocumentosClient } from "./documentos-client"
+import { AlertasClient } from "./alertas-client"
 
-export default async function DocumentosPage() {
+export default async function AlertasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login")
@@ -15,22 +15,15 @@ export default async function DocumentosPage() {
 
   if (!profile?.condo_id) redirect("/dashboard")
 
-  const { data: documents } = await supabase
-    .from("documents")
-    .select("*, document_types(*)")
+  const { data: alerts } = await supabase
+    .from("alerts")
+    .select("*")
     .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
 
-  const { data: documentTypes } = await supabase
-    .from("document_types")
-    .select("*")
-    .eq("condo_id", profile.condo_id)
-    .order("name")
-
   return (
-    <DocumentosClient
-      documents={documents || []}
-      documentTypes={documentTypes || []}
+    <AlertasClient
+      alerts={alerts || []}
       isAdmin={profile.role === "admin"}
     />
   )

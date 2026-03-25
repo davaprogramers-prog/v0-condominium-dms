@@ -167,6 +167,33 @@ export async function updateExpenseType(formData: FormData) {
   revalidatePath("/dashboard/tipos-gastos")
 }
 
+export async function deleteExpenseType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("expense_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-gastos")
+}
+
+export async function updateExemptionType(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("exemption_types")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-exoneraciones")
+}
+
+export async function deleteExemptionType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemption_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-exoneraciones")
+}
+
 // ===== Expenses =====
 export async function createExpense(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
@@ -394,12 +421,33 @@ export async function uploadDocument(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const { error } = await supabase.from("documents").insert({
     condo_id: condoId,
-    document_type_id: formData.get("document_type_id") as string,
+    document_type_id: formData.get("document_type_id") as string || null,
     title: formData.get("title") as string,
     description: formData.get("description") as string || null,
     file_url: formData.get("file_url") as string,
     uploaded_by: userId,
   })
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function updateDocument(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("documents")
+    .update({
+      title: formData.get("title") as string,
+      description: formData.get("description") as string || null,
+      file_url: formData.get("file_url") as string,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function deleteDocument(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("documents").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/documentos")
 }
@@ -426,6 +474,28 @@ export async function markInfractionPaid(id: string) {
     .from("infractions")
     .update({ is_paid: true, paid_date: new Date().toISOString().split("T")[0] })
     .eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/infracciones")
+}
+
+export async function updateInfraction(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("infractions")
+    .update({
+      description: formData.get("description") as string,
+      fine_amount: Number(formData.get("fine_amount")) || 0,
+      infraction_date: formData.get("infraction_date") as string,
+      notes: formData.get("notes") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/infracciones")
+}
+
+export async function deleteInfraction(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("infractions").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/infracciones")
 }
@@ -500,6 +570,43 @@ export async function uploadBankStatement(formData: FormData) {
   })
   if (error) throw error
   revalidatePath("/dashboard/cartolas")
+}
+
+// ===== Alerts =====
+export async function createAlert(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const { error } = await supabase.from("alerts").insert({
+    condo_id: condoId,
+    title: formData.get("title") as string,
+    message: formData.get("message") as string,
+    priority: formData.get("priority") as string || "media",
+    expires_at: formData.get("expires_at") as string || null,
+    created_by: userId,
+  })
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
+}
+
+export async function updateAlert(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("alerts")
+    .update({
+      title: formData.get("title") as string,
+      message: formData.get("message") as string,
+      priority: formData.get("priority") as string,
+      expires_at: formData.get("expires_at") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
+}
+
+export async function deleteAlert(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("alerts").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
 }
 
 // ===== File Upload Helper =====

@@ -1,19 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { uploadDocument, createDocumentType } from "@/app/dashboard/actions"
+import { uploadDocument, createDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, FileText, Download, ExternalLink } from "lucide-react"
+import { Plus, FileText, ExternalLink, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
 
 interface DocumentosClientProps {
   documents: Record<string, unknown>[]
@@ -26,6 +28,8 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
   const [openType, setOpenType] = useState(false)
   const [selectedType, setSelectedType] = useState("")
   const [fileUrl, setFileUrl] = useState("")
+  const [editOpen, setEditOpen] = useState<string | null>(null)
+  const [editFileUrl, setEditFileUrl] = useState("")
 
   return (
     <div className="flex flex-col gap-6">
@@ -132,6 +136,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                         <TableHead>Descripcion</TableHead>
                         <TableHead>Fecha</TableHead>
                         <TableHead>Archivo</TableHead>
+                        {isAdmin && <TableHead>Acciones</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -157,6 +162,73 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                               <ExternalLink className="h-3 w-3" />Ver
                             </a>
                           </TableCell>
+                          {isAdmin && (
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => { setEditFileUrl(doc.file_url as string); setEditOpen(doc.id as string) }}>
+                                    <Edit2 className="h-4 w-4 mr-2" />Editar
+                                  </DropdownMenuItem>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                        <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                      </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Eliminar Documento</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Esta accion no se puede deshacer. Se eliminara permanentemente este documento.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <div className="flex gap-3 justify-end">
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteDocument(doc.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                          Eliminar
+                                        </AlertDialogAction>
+                                      </div>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              {/* Edit Dialog */}
+                              <Dialog open={editOpen === doc.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                                <DialogContent>
+                                  <DialogHeader><DialogTitle>Editar Documento</DialogTitle></DialogHeader>
+                                  <form
+                                    action={async (fd) => {
+                                      fd.set("id", doc.id as string)
+                                      fd.set("file_url", editFileUrl || doc.file_url as string)
+                                      await updateDocument(fd)
+                                      setEditOpen(null)
+                                    }}
+                                    className="flex flex-col gap-4"
+                                  >
+                                    <div className="flex flex-col gap-2">
+                                      <Label htmlFor="edit_title">Titulo</Label>
+                                      <Input id="edit_title" name="title" defaultValue={doc.title as string} required />
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                      <Label htmlFor="edit_desc">Descripcion (max 500 caracteres)</Label>
+                                      <Textarea id="edit_desc" name="description" defaultValue={(doc.description as string) || ""} maxLength={500} rows={3} />
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                      <Label>Cambiar archivo (opcional)</Label>
+                                      <FileUpload bucket="documents" onUpload={setEditFileUrl} accept="application/pdf" label="Subir nuevo PDF" />
+                                    </div>
+                                    <Button type="submit">Guardar Cambios</Button>
+                                  </form>
+                                </DialogContent>
+                              </Dialog>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))}
                     </TableBody>
