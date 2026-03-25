@@ -13,10 +13,9 @@ interface EditHouseDialogProps {
   houseId: string
   ownerName: string
   ownerEmail: string
-  ownerPhone?: string
 }
 
-export function EditHouseDialog({ houseId, ownerName, ownerEmail, ownerPhone }: EditHouseDialogProps) {
+export function EditHouseDialog({ houseId, ownerName, ownerEmail }: EditHouseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -33,7 +32,6 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, ownerPhone }: 
       await updateHouse(houseId, {
         ownerName: (formData.get("owner_name") as string) || "",
         ownerEmail: (formData.get("owner_email") as string) || "",
-        ownerPhone: (formData.get("owner_phone") as string) || "",
       })
 
       setOpen(false)
@@ -82,15 +80,6 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, ownerPhone }: 
               placeholder="correo@ejemplo.com"
               defaultValue={ownerEmail}
               required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="owner_phone">Teléfono del Propietario</Label>
-            <Input
-              id="owner_phone"
-              name="owner_phone"
-              placeholder="+56912345678"
-              defaultValue={ownerPhone || ""}
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>

@@ -20,15 +20,6 @@ export default async function CasasPage() {
     .eq("condo_id", profile?.condo_id)
     .order("house_number")
 
-  // Get phone numbers from profiles
-  const { data: housesPhones } = await supabase
-    .from("profiles")
-    .select("house_id, phone")
-    .eq("condo_id", profile?.condo_id)
-    .eq("role", "propietario")
-
-  const phonesByHouseId = new Map(housesPhones?.map((p) => [p.house_id, p.phone]) || [])
-
   const isAdmin = profile?.role === "admin"
 
   return (
@@ -49,7 +40,6 @@ export default async function CasasPage() {
                 <th className="px-6 py-3 text-left font-semibold"># Casa</th>
                 <th className="px-6 py-3 text-left font-semibold">Propietario</th>
                 <th className="px-6 py-3 text-left font-semibold">Email</th>
-                <th className="px-6 py-3 text-left font-semibold">Teléfono</th>
                 <th className="px-6 py-3 text-left font-semibold">Estado</th>
                 {isAdmin && <th className="px-6 py-3 text-left font-semibold">Acciones</th>}
               </tr>
@@ -60,7 +50,6 @@ export default async function CasasPage() {
                   <td className="px-6 py-3 font-semibold">#{house.house_number}</td>
                   <td className="px-6 py-3">{house.owner_name || "-"}</td>
                   <td className="px-6 py-3 text-muted-foreground text-xs">{house.owner_email || "-"}</td>
-                  <td className="px-6 py-3 text-muted-foreground">{phonesByHouseId.get(house.id) || "-"}</td>
                   <td className="px-6 py-3">
                     <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                       Activo
@@ -72,7 +61,6 @@ export default async function CasasPage() {
                         houseId={house.id}
                         ownerName={house.owner_name || ""}
                         ownerEmail={house.owner_email || ""}
-                        ownerPhone={phonesByHouseId.get(house.id) || ""}
                       />
                     </td>
                   )}

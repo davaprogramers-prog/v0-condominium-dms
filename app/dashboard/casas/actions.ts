@@ -9,7 +9,7 @@ export async function createHouse(
     houseNumber: number
     ownerName: string
     ownerEmail: string
-    ownerPhone: string
+    ownerPhone?: string
   }
 ) {
   const supabase = await createClient()
@@ -28,7 +28,7 @@ export async function createHouse(
     throw new Error("No tienes permisos para crear casas")
   }
 
-  // Insert house
+  // Insert house with only existing columns
   const { data: house, error: houseError } = await supabase
     .from("houses")
     .insert({
@@ -45,28 +45,6 @@ export async function createHouse(
     throw new Error(houseError.message)
   }
 
-  // Create owner profile if email is provided
-  if (formData.ownerEmail) {
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        email: formData.ownerEmail,
-        first_name: formData.ownerName.split(" ")[0] || "",
-        last_name: formData.ownerName.split(" ").slice(1).join(" ") || "",
-        phone: formData.ownerPhone || null,
-        role: "propietario",
-        condo_id: condoId,
-        house_id: house.id,
-      })
-      .select()
-      .single()
-
-    if (profileError && !profileError.message.includes("duplicate")) {
-      console.error("[v0] Error creating owner profile:", profileError)
-      // Don't throw - house was created successfully
-    }
-  }
-
   revalidatePath("/dashboard/casas")
   return { success: true }
 }
@@ -76,7 +54,7 @@ export async function updateHouse(
   formData: {
     ownerName: string
     ownerEmail: string
-    ownerPhone: string
+    ownerPhone?: string
   }
 ) {
   const supabase = await createClient()
@@ -101,7 +79,7 @@ export async function updateHouse(
     throw new Error("No tienes permisos para editar casas")
   }
 
-  // Update house
+  // Update house with only existing columns
   const { error: houseError } = await supabase
     .from("houses")
     .update({
@@ -113,21 +91,6 @@ export async function updateHouse(
   if (houseError) {
     console.error("[v0] Error updating house:", houseError)
     throw new Error(houseError.message)
-  }
-
-  // Update or create profile with phone
-  if (formData.ownerEmail) {
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        phone: formData.ownerPhone || null,
-      })
-      .eq("email", formData.ownerEmail)
-      .eq("house_id", houseId)
-
-    if (profileError) {
-      console.error("[v0] Error updating profile phone:", profileError)
-    }
   }
 
   revalidatePath("/dashboard/casas")
