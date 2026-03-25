@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
-import { getCondoExpenses, getCondoIncome } from "../gastos/actions"
+import { getCondoExpenses, getCondoIncome, getLast12MonthsData } from "../gastos/actions"
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default async function ReportesPage({
   searchParams,
@@ -25,14 +28,23 @@ export default async function ReportesPage({
   const year = parseInt(params.año as string) || now.getFullYear()
   const month = parseInt(params.mes as string) || now.getMonth() + 1
 
-  // Get expenses and income
+  // Get expenses, income, and 12-month historical data
   let expenses: any[] = []
   let income: any[] = []
+  let last12Months: any[] = []
 
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     income = await getCondoIncome(condoId, year, month)
+    last12Months = await getLast12MonthsData(condoId)
   }
+
+  // Calculate previous and next month for navigation
+  const prevMonth = month === 1 ? 12 : month - 1
+  const prevYear = month === 1 ? year - 1 : year
+  const nextMonth = month === 12 ? 1 : month + 1
+  const nextYear = month === 12 ? year + 1 : year
+  const canGoNext = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)
 
   // Calculate totals
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
@@ -73,9 +85,35 @@ export default async function ReportesPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Reportes de Finanzas</h1>
-        <p className="text-muted-foreground">Análisis completo de ingresos y gastos - {monthName}</p>
+      {/* Header with Month Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Reportes de Finanzas</h1>
+          <p className="text-muted-foreground text-sm">Analisis completo de ingresos y gastos</p>
+        </div>
+        
+        {/* Month Selector */}
+        <div className="flex items-center gap-2 bg-muted/50 rounded-full px-2 py-1">
+          <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <span className="px-3 py-1 text-sm font-medium min-w-[100px] text-center capitalize">
+            {monthName}
+          </span>
+          {canGoNext ? (
+            <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -133,6 +171,8 @@ export default async function ReportesPage({
         barData={barData}
         pieExpensesData={pieExpensesData}
         pieIncomeData={pieIncomeData}
+        last12Months={last12Months}
+        currencySymbol="$"
       />
     </div>
   )

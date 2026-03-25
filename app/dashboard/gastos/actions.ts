@@ -109,6 +109,49 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   return data || []
 }
 
+export async function getLast12MonthsData(condoId: string) {
+  const supabase = await createClient()
+  
+  const months: { year: number; month: number; expenses: number; income: number; monthName: string }[] = []
+  const now = new Date()
+  
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const monthName = date.toLocaleDateString("es-CL", { month: "short" }).replace(".", "")
+    
+    // Get expenses for this month
+    const { data: expensesData } = await supabase
+      .from("condo_expenses")
+      .select("amount")
+      .eq("condo_id", condoId)
+      .eq("period_year", year)
+      .eq("period_month", month)
+    
+    // Get income for this month
+    const { data: incomeData } = await supabase
+      .from("condo_income")
+      .select("amount")
+      .eq("condo_id", condoId)
+      .eq("period_year", year)
+      .eq("period_month", month)
+    
+    const totalExpenses = expensesData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
+    const totalIncome = incomeData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
+    
+    months.push({
+      year,
+      month,
+      expenses: totalExpenses,
+      income: totalIncome,
+      monthName: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+    })
+  }
+  
+  return months
+}
+
 export async function updateExpense(
   expenseId: string,
   formData: {
