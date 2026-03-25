@@ -105,10 +105,6 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                   <Label htmlFor="maintenance_responsible">Responsable de mantenimiento</Label>
                   <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="maintenance_notes">Notas de mantenimiento</Label>
-                  <Textarea id="maintenance_notes" name="maintenance_notes" placeholder="Detalles del mantenimiento..." />
-                </div>
                 <Button type="submit">Guardar Area</Button>
               </form>
             </DialogContent>
@@ -158,9 +154,6 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     <Wrench className="h-4 w-4 text-muted-foreground" />
                     <span>Mantenimiento: {area.maintenance_responsible as string}</span>
                   </div>
-                )}
-                {area.maintenance_notes && (
-                  <p className="text-xs text-muted-foreground">{area.maintenance_notes as string}</p>
                 )}
 
                 {isAdmin && (
@@ -237,14 +230,6 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               id="edit_maintenance"
                               name="maintenance_responsible"
                               defaultValue={(area.maintenance_responsible as string) || ""}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_notes">Notas de mantenimiento</Label>
-                            <Textarea
-                              id="edit_notes"
-                              name="maintenance_notes"
-                              defaultValue={(area.maintenance_notes as string) || ""}
                             />
                           </div>
                           <Button type="submit">Guardar Cambios</Button>
