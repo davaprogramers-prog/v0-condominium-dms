@@ -17,19 +17,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface CreateExpenseDialogProps {
-  condoId: string
+interface ExpenseType {
+  id: string
+  name: string
+  description?: string
 }
 
-const CATEGORIES = [
-  { value: "reparacion", label: "Reparación" },
-  { value: "mantenimiento", label: "Mantenimiento" },
-  { value: "servicios", label: "Servicios" },
-  { value: "suministros", label: "Suministros" },
-  { value: "otro", label: "Otro" },
-]
+interface CreateExpenseDialogProps {
+  condoId: string
+  expenseTypes: ExpenseType[]
+}
 
-export function CreateExpenseDialog({ condoId }: CreateExpenseDialogProps) {
+export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -149,19 +148,25 @@ export function CreateExpenseDialog({ condoId }: CreateExpenseDialogProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
-              <Select name="category" defaultValue="otro">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="category">Tipo de Gasto *</Label>
+              {expenseTypes.length > 0 ? (
+                <Select name="category" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {expenseTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
+                  No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-primary underline">Crear tipos de gastos</a>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="expenseDate">Fecha del Gasto</Label>

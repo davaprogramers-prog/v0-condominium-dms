@@ -7,12 +7,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EditExpenseDialog } from "./edit-expense-dialog"
 import { Building2, User, FileText, CheckCircle, X, ExternalLink } from "lucide-react"
 
+interface ExpenseType {
+  id: string
+  name: string
+}
+
 interface GastosListProps {
   expenses: any[]
   categories: Record<string, string>
   isAdmin: boolean
   currentYear: number
   currentMonth: number
+  expenseTypes?: ExpenseType[]
 }
 
 const categoryIcons: Record<string, typeof Building2> = {
@@ -31,7 +37,7 @@ const categoryColors: Record<string, string> = {
   otro: "bg-gray-100 text-gray-700",
 }
 
-export function GastosList({ expenses, categories, isAdmin, currentYear, currentMonth }: GastosListProps) {
+export function GastosList({ expenses, categories, isAdmin, currentYear, currentMonth, expenseTypes = [] }: GastosListProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   if (expenses.length === 0) {
@@ -103,7 +109,7 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
                 
                 {isAdmin && canEdit && (
                   <div className="ml-auto">
-                    <EditExpenseDialog expense={expense} />
+                    <EditExpenseDialog expense={expense} expenseTypes={expenseTypes} />
                   </div>
                 )}
               </div>

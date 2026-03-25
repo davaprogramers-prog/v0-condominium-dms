@@ -17,19 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface EditExpenseDialogProps {
-  expense: any
+interface ExpenseType {
+  id: string
+  name: string
 }
 
-const CATEGORIES = [
-  { value: "reparacion", label: "Reparación" },
-  { value: "mantenimiento", label: "Mantenimiento" },
-  { value: "servicios", label: "Servicios" },
-  { value: "suministros", label: "Suministros" },
-  { value: "otro", label: "Otro" },
-]
+interface EditExpenseDialogProps {
+  expense: any
+  expenseTypes?: ExpenseType[]
+}
 
-export function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
+export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -145,17 +143,23 @@ export function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
-              <Select name="category" defaultValue={expense.category || "otro"}>
+              <Label htmlFor="category">Tipo de Gasto *</Label>
+              <Select name="category" defaultValue={expense.category || ""}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Seleccionar tipo..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                  {expenseTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.name}>
+                      {type.name}
                     </SelectItem>
                   ))}
+                  {/* Fallback for old data */}
+                  {!expenseTypes.find(t => t.name === expense.category) && expense.category && (
+                    <SelectItem value={expense.category}>
+                      {expense.category}
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

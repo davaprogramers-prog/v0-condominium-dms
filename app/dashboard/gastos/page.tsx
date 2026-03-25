@@ -33,12 +33,22 @@ export default async function GastosPage({
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
 
-  // Get expenses and 12-month data
+  // Get expenses, 12-month data, and expense types
   let expenses: any[] = []
   let last12Months: any[] = []
+  let expenseTypes: any[] = []
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     last12Months = await getLast12MonthsData(condoId)
+    
+    // Get expense types for this condo
+    const { data: types } = await supabase
+      .from("expense_types")
+      .select("id, name, description")
+      .eq("condo_id", condoId)
+      .eq("is_active", true)
+      .order("name")
+    expenseTypes = types || []
   }
 
   // Navigation
@@ -53,13 +63,17 @@ export default async function GastosPage({
     year: "numeric",
   }).toUpperCase()
 
-  const categories: Record<string, string> = {
-    reparacion: "Reparacion",
-    mantenimiento: "Mantenimiento",
-    servicios: "Servicios",
-    suministros: "Suministros",
-    otro: "Otro",
-  }
+  // Build categories map from expense types
+  const categories: Record<string, string> = {}
+  expenseTypes.forEach((type: any) => {
+    categories[type.name] = type.name
+  })
+  // Add fallback for old entries
+  categories["reparacion"] = "Reparacion"
+  categories["mantenimiento"] = "Mantenimiento"
+  categories["servicios"] = "Servicios"
+  categories["suministros"] = "Suministros"
+  categories["otro"] = "Otro"
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
 
@@ -97,7 +111,7 @@ export default async function GastosPage({
           </div>
           
           {isAdmin && condoId && (
-            <CreateExpenseDialog condoId={condoId} />
+            <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} />
           )}
         </div>
       </div>
@@ -120,6 +134,7 @@ export default async function GastosPage({
         isAdmin={isAdmin} 
         currentYear={currentYear}
         currentMonth={currentMonth}
+        expenseTypes={expenseTypes}
       />
     </div>
   )
