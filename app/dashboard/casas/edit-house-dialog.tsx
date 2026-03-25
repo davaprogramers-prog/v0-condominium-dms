@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Loader2 } from "lucide-react"
+import { Edit2, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createHouse } from "./actions"
+import { updateHouse } from "./actions"
 
-export function CreateHouseDialog({ condoId }: { condoId: string }) {
+interface EditHouseDialogProps {
+  houseId: string
+  ownerName: string
+  ownerEmail: string
+  ownerPhone?: string
+}
+
+export function EditHouseDialog({ houseId, ownerName, ownerEmail, ownerPhone }: EditHouseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -22,16 +29,8 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
 
     try {
       const formData = new FormData(e.currentTarget)
-      const houseNumber = parseInt(formData.get("house_number") as string)
-      
-      if (!houseNumber || houseNumber < 1) {
-        setError("El número de casa debe ser válido")
-        setLoading(false)
-        return
-      }
 
-      await createHouse(condoId, {
-        houseNumber,
+      await updateHouse(houseId, {
         ownerName: (formData.get("owner_name") as string) || "",
         ownerEmail: (formData.get("owner_email") as string) || "",
         ownerPhone: (formData.get("owner_phone") as string) || "",
@@ -40,8 +39,8 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
       setOpen(false)
       router.refresh()
     } catch (err) {
-      console.error("[v0] Error in form:", err)
-      setError(err instanceof Error ? err.message : "Error al crear la casa")
+      console.error("[v0] Error in edit form:", err)
+      setError(err instanceof Error ? err.message : "Error al editar la casa")
     } finally {
       setLoading(false)
     }
@@ -50,15 +49,14 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Casa
+        <Button size="sm" variant="outline">
+          <Edit2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Crear Nueva Casa</DialogTitle>
-          <DialogDescription>Agrega una nueva propiedad al condominio</DialogDescription>
+          <DialogTitle>Editar Casa</DialogTitle>
+          <DialogDescription>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -67,28 +65,40 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="house_number">Número de Casa *</Label>
-            <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="owner_name">Nombre del Propietario</Label>
-            <Input id="owner_name" name="owner_name" placeholder="Nombre completo" />
+            <Input
+              id="owner_name"
+              name="owner_name"
+              placeholder="Nombre completo"
+              defaultValue={ownerName}
+            />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email">Email del Propietario *</Label>
-            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required />
+            <Label htmlFor="owner_email">Email del Propietario</Label>
+            <Input
+              id="owner_email"
+              name="owner_email"
+              type="email"
+              placeholder="correo@ejemplo.com"
+              defaultValue={ownerEmail}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="owner_phone">Teléfono del Propietario</Label>
-            <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" />
+            <Input
+              id="owner_phone"
+              name="owner_phone"
+              placeholder="+56912345678"
+              defaultValue={ownerPhone || ""}
+            />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Crear Casa
+            Guardar Cambios
           </Button>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
-
