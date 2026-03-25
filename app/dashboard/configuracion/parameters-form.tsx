@@ -37,6 +37,8 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
       late_fee_percentage: fineType === "porcentaje" ? parseFloat(formData.get("late_fee_percentage") as string) || 0 : 0,
       fine_fixed_amount: fineType === "fijo" ? parseFloat(formData.get("fine_fixed_amount") as string) || 0 : 0,
       fine_uf_amount: fineType === "uf" ? parseFloat(formData.get("fine_uf_amount") as string) || 0 : 0,
+      fixed_income_amount: parseFloat(formData.get("fixed_income_amount") as string) || 0,
+      variable_income_amount: parseFloat(formData.get("variable_income_amount") as string) || 0,
     }
 
     if (currentParams?.id) {
@@ -105,7 +107,7 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="payment_deadline_day">Día de Vencimiento *</Label>
+          <Label htmlFor="payment_deadline_day">Dia de Vencimiento *</Label>
           <Input
             id="payment_deadline_day"
             name="payment_deadline_day"
@@ -115,10 +117,58 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
             defaultValue={currentParams?.payment_deadline_day || 5}
             required
           />
-          <p className="text-xs text-muted-foreground">Día del mes en que vence el pago de gasto común</p>
+          <p className="text-xs text-muted-foreground">Dia del mes en que vence el pago de gasto comun</p>
         </div>
 
-        <div className="space-y-4">
+        {/* Income Amounts Section */}
+        <div className="space-y-4 pt-4 border-t">
+          <div>
+            <h3 className="text-sm font-medium">Montos de Gasto Comun</h3>
+            <p className="text-xs text-muted-foreground">Valores que deben pagar los propietarios mensualmente</p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="fixed_income_amount">Gasto Comun Fijo</Label>
+              <Input
+                id="fixed_income_amount"
+                name="fixed_income_amount"
+                type="number"
+                min={0}
+                step={1}
+                defaultValue={currentParams?.fixed_income_amount || 0}
+                placeholder="Ej: 50000"
+              />
+              <p className="text-xs text-muted-foreground">Monto fijo mensual por unidad</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="variable_income_amount">Gasto Comun Variable</Label>
+              <Input
+                id="variable_income_amount"
+                name="variable_income_amount"
+                type="number"
+                min={0}
+                step={1}
+                defaultValue={currentParams?.variable_income_amount || 0}
+                placeholder="Ej: 15000"
+              />
+              <p className="text-xs text-muted-foreground">Monto variable (agua, luz, etc.)</p>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-muted/50 border">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Total Gasto Comun:</span>
+              <span className="font-semibold">
+                ${((currentParams?.fixed_income_amount || 0) + (currentParams?.variable_income_amount || 0)).toLocaleString("es-CL")}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Late Fees Section */}
+        <div className="space-y-4 pt-4 border-t">
           <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
             <div>
               <Label htmlFor="enable_late_fees" className="cursor-pointer">Habilitar Multa por Atraso</Label>

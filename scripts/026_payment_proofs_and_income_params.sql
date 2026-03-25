@@ -5,7 +5,7 @@ ALTER TABLE parameters ADD COLUMN IF NOT EXISTS variable_income_amount NUMERIC(1
 -- Create payment_proofs table for storing payment receipts uploaded by owners
 CREATE TABLE IF NOT EXISTS payment_proofs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  condo_id UUID NOT NULL REFERENCES condos(id) ON DELETE CASCADE,
+  condo_id UUID NOT NULL REFERENCES condominiums(id) ON DELETE CASCADE,
   house_id UUID NOT NULL REFERENCES houses(id) ON DELETE CASCADE,
   uploaded_by UUID NOT NULL REFERENCES auth.users(id),
   

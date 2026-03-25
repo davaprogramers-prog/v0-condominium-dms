@@ -65,6 +65,7 @@ const adminMenuItems = [
   {
     section: "Finanzas",
     items: [
+      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
