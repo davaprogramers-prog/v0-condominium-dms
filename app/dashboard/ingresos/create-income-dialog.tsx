@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Loader2, Upload, X } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createCondoIncome, getHouses } from "./actions"
+import { createCondoIncome } from "./actions"
 import {
   Select,
   SelectContent,
@@ -63,8 +63,9 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
         return
       }
 
+      const houseId = formData.get("houseId") as string
       await createCondoIncome(condoId, {
-        houseId: (formData.get("houseId") as string) || undefined,
+        houseId: houseId && houseId !== "none" ? houseId : undefined,
         amount,
         incomeType,
         incomeDate: (formData.get("incomeDate") as string) || new Date().toISOString().split("T")[0],
@@ -133,12 +134,12 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="houseId">Casa (Opcional)</Label>
-              <Select name="houseId">
+              <Select name="houseId" defaultValue="none">
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar casa..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin asignar</SelectItem>
+                  <SelectItem value="none">Sin asignar</SelectItem>
                   {houses.map((house) => (
                     <SelectItem key={house.id} value={house.id}>
                       Casa #{house.house_number} - {house.owner_name}

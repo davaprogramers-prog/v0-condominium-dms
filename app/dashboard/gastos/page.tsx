@@ -97,7 +97,7 @@ export default async function GastosPage({
           </div>
           
           {isAdmin && condoId && (
-            <CreateExpenseDialog condoId={condoId} year={year} month={month} />
+            <CreateExpenseDialog condoId={condoId} />
           )}
         </div>
       </div>
