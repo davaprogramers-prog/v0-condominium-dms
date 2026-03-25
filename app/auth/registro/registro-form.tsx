@@ -6,176 +6,267 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { registerOwner } from "../actions"
 
-type UserType = "super_admin" | "condo_admin" | "owner" | "renter"
+interface House {
+  id: string
+  house_number: number
+  condo_id: string
+  condoName: string
+}
 
 export function RegistroForm() {
+  const [step, setStep] = useState<"email" | "select" | "password">("email")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [passwordConfirm, setPasswordConfirm] = useState("")
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
-  const [userType, setUserType] = useState<UserType>("condo_admin")
-  const [condoName, setCondoName] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [houses, setHouses] = useState<House[]>([])
+  const [selectedHouseId, setSelectedHouseId] = useState("")
   const router = useRouter()
   const supabase = createClient()
 
-  const handleRegister = async (e: React.FormEvent) => {
+  // Step 1: Validate email exists in houses
+  const handleEmailValidation = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError("")
     setLoading(true)
 
     try {
-      // 1. Crear usuario en auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-          },
-        },
-      })
+      // Check if email exists in houses
+      const { data, error: fetchError } = await supabase
+        .from("houses")
+        .select("id, house_number, condo_id, condominiums(name)")
+        .eq("owner_email", email)
 
-      if (authError) throw authError
-      if (!authData.user) throw new Error("No se pudo crear el usuario")
-
-      // 2. Si es admin de condominio, crear condominio
-      let condoId = null
-      if (userType === "condo_admin" && condoName) {
-        const { data: condo, error: condoError } = await supabase
-          .from("condominiums")
-          .insert([
-            {
-              name: condoName,
-              created_by: authData.user.id,
-              currency_symbol: "$",
-              currency: "CLP",
-              currency_multiplier: 1,
-            },
-          ])
-          .select()
-          .single()
-
-        if (condoError) throw condoError
-        condoId = condo.id
+      if (fetchError) throw fetchError
+      if (!data || data.length === 0) {
+        throw new Error("Este correo no está registrado en ninguna propiedad. Contacta al administrador del condominio.")
       }
 
-      // 3. Crear profile
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: authData.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          role: userType === "condo_admin" ? "admin" : userType,
-          condo_id: condoId,
-        },
-      ])
+      // Map houses with condo names
+      const mappedHouses: House[] = data.map((h: any) => ({
+        id: h.id,
+        house_number: h.house_number,
+        condo_id: h.condo_id,
+        condoName: h.condominiums?.name || "Condominio",
+      }))
 
-      if (profileError) throw profileError
+      setHouses(mappedHouses)
 
-      toast.success("Cuenta creada. Por favor verifica tu email")
-      router.push("/auth/registro-exitoso")
-    } catch (error) {
-      console.error("Register error:", error)
-      toast.error(error instanceof Error ? error.message : "Error al registrarse")
+      // If only one house, skip selection
+      if (mappedHouses.length === 1) {
+        setSelectedHouseId(mappedHouses[0].id)
+        setStep("password")
+      } else {
+        setStep("select")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al validar correo")
     } finally {
       setLoading(false)
     }
   }
 
-  const isCondo = userType === "condo_admin"
+  // Step 2: Select house (if multiple)
+  const handleHouseSelection = (houseId: string) => {
+    setSelectedHouseId(houseId)
+    setStep("password")
+  }
+
+  // Step 3: Create account
+  const handlePasswordSetup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      // Validate password
+      if (password.length < 6) {
+        throw new Error("La contraseña debe tener al menos 6 caracteres")
+      }
+      if (password !== passwordConfirm) {
+        throw new Error("Las contraseñas no coinciden")
+      }
+
+      // Validate house selection
+      if (!selectedHouseId) {
+        throw new Error("Debes seleccionar una propiedad")
+      }
+
+      // Call server action to register owner
+      await registerOwner(
+        email,
+        password,
+        firstName || email.split("@")[0],
+        lastName || "",
+        selectedHouseId
+      )
+
+      router.push("/auth/registro-exitoso")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al crear cuenta")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <form onSubmit={handleRegister} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">Nombre</Label>
-          <Input
-            id="firstName"
-            type="text"
-            placeholder="Tu nombre"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            disabled={loading}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Apellido</Label>
-          <Input
-            id="lastName"
-            type="text"
-            placeholder="Tu apellido"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            disabled={loading}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">Correo electrónico</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="tu@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          disabled={loading}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password">Contraseña</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Mínimo 6 caracteres"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-          disabled={loading}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="userType">¿Qué eres?</Label>
-        <Select value={userType} onValueChange={(value) => setUserType(value as UserType)}>
-          <SelectTrigger id="userType" disabled={loading}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="condo_admin">Admin de Condominio (Crear nuevo)</SelectItem>
-            <SelectItem value="owner">Propietario</SelectItem>
-            <SelectItem value="renter">Arrendatario</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isCondo && (
-        <div className="space-y-2">
-          <Label htmlFor="condoName">Nombre del Condominio</Label>
-          <Input
-            id="condoName"
-            type="text"
-            placeholder="Ej: Condominio Los Andes"
-            value={condoName}
-            onChange={(e) => setCondoName(e.target.value)}
-            required={isCondo}
-            disabled={loading}
-          />
-        </div>
+    <div className="w-full max-w-md space-y-4">
+      {/* Step 1: Email Validation */}
+      {step === "email" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Verificar Correo</CardTitle>
+            <CardDescription>Ingresa el correo registrado en tu propiedad</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleEmailValidation} className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Verificar
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
-      <Button type="submit" className="w-full" disabled={loading || (isCondo && !condoName)}>
-        {loading ? "Creando cuenta..." : "Registrarse"}
-      </Button>
-    </form>
+      {/* Step 2: House Selection */}
+      {step === "select" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Selecciona tu Propiedad</CardTitle>
+            <CardDescription>Tienes múltiples propiedades registradas</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {houses.map((house) => (
+              <button
+                key={house.id}
+                onClick={() => handleHouseSelection(house.id)}
+                className="w-full rounded-lg border-2 border-muted p-4 text-left transition-all hover:border-primary hover:bg-accent"
+              >
+                <div className="font-semibold">Casa #{house.house_number}</div>
+                <div className="text-sm text-muted-foreground">{house.condoName}</div>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 3: Password Setup */}
+      {step === "password" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Crear Contraseña</CardTitle>
+            <CardDescription>Define tu contraseña para acceder</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordSetup} className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="Tu nombre"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Tu apellido"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="passwordConfirm">Confirmar Contraseña</Label>
+                <Input
+                  id="passwordConfirm"
+                  type="password"
+                  placeholder="Repite tu contraseña"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  required
+                  minLength={6}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setStep("email")
+                    setError("")
+                  }}
+                  disabled={loading}
+                >
+                  Atrás
+                </Button>
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Crear Cuenta
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }

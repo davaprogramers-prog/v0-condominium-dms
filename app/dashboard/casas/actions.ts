@@ -28,17 +28,43 @@ export async function createHouse(
     throw new Error("No tienes permisos para crear casas")
   }
 
-  const { error } = await supabase.from("houses").insert({
-    condo_id: condoId,
-    house_number: formData.houseNumber,
-    owner_name: formData.ownerName,
-    owner_email: formData.ownerEmail,
-    owner_phone: formData.ownerPhone,
-  })
+  // Insert house
+  const { data: house, error: houseError } = await supabase
+    .from("houses")
+    .insert({
+      condo_id: condoId,
+      house_number: formData.houseNumber,
+      owner_name: formData.ownerName,
+      owner_email: formData.ownerEmail,
+      owner_phone: formData.ownerPhone,
+    })
+    .select()
+    .single()
 
-  if (error) {
-    console.error("[v0] Error creating house:", error)
-    throw new Error(error.message)
+  if (houseError) {
+    console.error("[v0] Error creating house:", houseError)
+    throw new Error(houseError.message)
+  }
+
+  // Create owner profile if email is provided
+  if (formData.ownerEmail) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        email: formData.ownerEmail,
+        first_name: formData.ownerName.split(" ")[0] || "",
+        last_name: formData.ownerName.split(" ").slice(1).join(" ") || "",
+        role: "propietario",
+        condo_id: condoId,
+        house_id: house.id,
+      })
+      .select()
+      .single()
+
+    if (profileError && !profileError.message.includes("duplicate")) {
+      console.error("[v0] Error creating owner profile:", profileError)
+      // Don't throw - house was created successfully
+    }
   }
 
   revalidatePath("/dashboard/casas")
