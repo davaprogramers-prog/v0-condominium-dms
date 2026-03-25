@@ -34,7 +34,6 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
         houseNumber,
         ownerName: (formData.get("owner_name") as string) || "",
         ownerEmail: (formData.get("owner_email") as string) || "",
-        ownerPhone: (formData.get("owner_phone") as string) || "",
       })
 
       setOpen(false)
@@ -75,12 +74,8 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
             <Input id="owner_name" name="owner_name" placeholder="Nombre completo" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email">Email del Propietario</Label>
-            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="owner_phone">Teléfono del Propietario</Label>
-            <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" />
+            <Label htmlFor="owner_email">Email del Propietario *</Label>
+            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

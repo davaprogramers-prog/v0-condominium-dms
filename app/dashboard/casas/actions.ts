@@ -9,7 +9,6 @@ export async function createHouse(
     houseNumber: number
     ownerName: string
     ownerEmail: string
-    ownerPhone: string
   }
 ) {
   const supabase = await createClient()
@@ -36,7 +35,6 @@ export async function createHouse(
       house_number: formData.houseNumber,
       owner_name: formData.ownerName,
       owner_email: formData.ownerEmail,
-      owner_phone: formData.ownerPhone,
     })
     .select()
     .single()
