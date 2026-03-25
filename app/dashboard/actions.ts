@@ -458,7 +458,33 @@ export async function createCommonArea(formData: FormData) {
     is_paid: formData.get("is_paid") === "true",
     usage_fee: Number(formData.get("usage_fee")) || 0,
     maintenance_responsible: formData.get("maintenance_responsible") as string || null,
+    maintenance_notes: formData.get("maintenance_notes") as string || null,
   })
+  if (error) throw error
+  revalidatePath("/dashboard/areas-comunes")
+}
+
+export async function updateCommonArea(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("common_areas")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+      photo_url: formData.get("photo_url") as string || null,
+      is_paid: formData.get("is_paid") === "true",
+      usage_fee: Number(formData.get("usage_fee")) || 0,
+      maintenance_responsible: formData.get("maintenance_responsible") as string || null,
+      maintenance_notes: formData.get("maintenance_notes") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/areas-comunes")
+}
+
+export async function deleteCommonArea(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("common_areas").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/areas-comunes")
 }
