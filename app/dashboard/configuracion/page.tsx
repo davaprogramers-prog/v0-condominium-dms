@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
+import { ParametersForm } from "./parameters-form"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -21,6 +22,14 @@ export default async function ConfiguracionPage() {
     .select("*")
     .eq("id", profile?.condo_id)
     .single()
+
+  const { data: parameters } = await supabase
+    .from("parameters")
+    .select("*")
+    .eq("condo_id", profile?.condo_id)
+    .single()
+
+  const isAdmin = profile?.role === "admin"
 
   return (
     <div className="space-y-6">
@@ -44,7 +53,7 @@ export default async function ConfiguracionPage() {
             </div>
             <div>
               <p className="text-muted-foreground">Rol</p>
-              <p className="font-medium capitalize">{profile?.role}</p>
+              <p className="font-medium capitalize">{profile?.role?.replace("_", " ")}</p>
             </div>
           </div>
         </div>
@@ -72,6 +81,14 @@ export default async function ConfiguracionPage() {
           )}
         </div>
       </div>
+
+      {/* Parámetros del Condominio - Solo Admin */}
+      {isAdmin && (
+        <ParametersForm 
+          condoId={profile?.condo_id} 
+          currentParams={parameters}
+        />
+      )}
 
       {/* Sesión */}
       <div className="rounded-lg border bg-destructive/10 p-6">

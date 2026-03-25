@@ -1,4 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CreateHouseDialog } from "./create-house-dialog"
 
 export default async function CasasPage() {
   const supabase = await createClient()
@@ -6,7 +9,7 @@ export default async function CasasPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("condo_id")
+    .select("condo_id, role")
     .eq("id", user?.id)
     .single()
 
@@ -16,11 +19,16 @@ export default async function CasasPage() {
     .eq("condo_id", profile?.condo_id)
     .order("house_number")
 
+  const isAdmin = profile?.role === "admin"
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Casas</h1>
-        <p className="text-muted-foreground">Gestión de propiedades del condominio</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Casas</h1>
+          <p className="text-muted-foreground">Gestión de propiedades del condominio</p>
+        </div>
+        {isAdmin && <CreateHouseDialog condoId={profile?.condo_id} />}
       </div>
 
       <div className="rounded-lg border">
@@ -28,7 +36,7 @@ export default async function CasasPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-6 py-3 text-left font-semibold">Casa</th>
+                <th className="px-6 py-3 text-left font-semibold"># Casa</th>
                 <th className="px-6 py-3 text-left font-semibold">Propietario</th>
                 <th className="px-6 py-3 text-left font-semibold">Email</th>
                 <th className="px-6 py-3 text-left font-semibold">Teléfono</th>
@@ -38,7 +46,7 @@ export default async function CasasPage() {
             <tbody>
               {houses?.map((house) => (
                 <tr key={house.id} className="border-b hover:bg-muted/50">
-                  <td className="px-6 py-3">Casa #{house.house_number}</td>
+                  <td className="px-6 py-3 font-semibold">#{house.house_number}</td>
                   <td className="px-6 py-3">{house.owner_name || "-"}</td>
                   <td className="px-6 py-3 text-muted-foreground text-xs">{house.owner_email || "-"}</td>
                   <td className="px-6 py-3 text-muted-foreground">{house.owner_phone || "-"}</td>
@@ -54,7 +62,7 @@ export default async function CasasPage() {
         </div>
         {!houses?.length && (
           <div className="p-6 text-center text-muted-foreground">
-            No hay casas registradas aún
+            {isAdmin ? "No hay casas registradas. Crea la primera haciendo clic en el botón arriba." : "No hay casas en este condominio"}
           </div>
         )}
       </div>

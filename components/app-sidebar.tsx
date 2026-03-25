@@ -93,6 +93,7 @@ const ownerMenuItems = [
     section: "Mi Condominio",
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
       { title: "Mis Pagos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
