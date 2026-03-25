@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Home, ChevronDown, DollarSign, Newspapers, LayoutGrid, FileText, AlertCircle, FileCheck, BarChart3, TrendingDown, Trees } from "lucide-react"
+import { Home, ChevronDown, DollarSign, Newspaper, LayoutGrid, FileText, AlertCircle, FileCheck, BarChart3, TrendingDown, Trees } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +24,7 @@ interface OwnerHouseCardProps {
 
 const menuItems = [
   { href: "/dashboard/mi-casa/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo" },
-  { href: "/dashboard/mi-casa/encuestas", icon: Newspapers, label: "Encuestas", desc: "Participar en encuestas" },
+  { href: "/dashboard/mi-casa/encuestas", icon: Newspaper, label: "Encuestas", desc: "Participar en encuestas" },
   { href: "/dashboard/mi-casa/proyectos", icon: LayoutGrid, label: "Proyectos", desc: "Proyectos activos" },
   { href: "/dashboard/mi-casa/documentos", icon: FileText, label: "Documentos", desc: "Tus documentos" },
   { href: "/dashboard/mi-casa/infracciones", icon: AlertCircle, label: "Infracciones", desc: "Historial de infracciones" },

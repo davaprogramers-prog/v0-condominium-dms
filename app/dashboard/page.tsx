@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, TrendingDown, Newspapers, AlertSquare, Trees } from "lucide-react"
+import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, TrendingDown, Newspaper, AlertTriangle, Trees } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
 
   const ownerMenuItems = [
     { href: "/dashboard/mi-casa/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo" },
-    { href: "/dashboard/mi-casa/encuestas", icon: Newspapers, label: "Encuestas", desc: "Participar en encuestas" },
+    { href: "/dashboard/mi-casa/encuestas", icon: Newspaper, label: "Encuestas", desc: "Participar en encuestas" },
     { href: "/dashboard/mi-casa/proyectos", icon: LayoutGrid, label: "Proyectos", desc: "Proyectos activos" },
     { href: "/dashboard/mi-casa/documentos", icon: FileText, label: "Documentos", desc: "Tus documentos" },
     { href: "/dashboard/mi-casa/infracciones", icon: AlertCircle, label: "Infracciones", desc: "Historial de infracciones" },
