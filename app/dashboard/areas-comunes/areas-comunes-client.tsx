@@ -26,9 +26,11 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
   const [photoUrl, setPhotoUrl] = useState("")
   const [editPhotoUrl, setEditPhotoUrl] = useState("")
   const [isPaid, setIsPaid] = useState(false)
+  const [editIsPaid, setEditIsPaid] = useState(false)
 
   const handleEditClick = (area: Record<string, unknown>) => {
     setEditPhotoUrl((area.photo_url as string) || "")
+    setEditIsPaid((area.is_paid as boolean) || false)
     setOpenEdit(area.id as string)
   }
 
@@ -37,6 +39,18 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       await deleteCommonArea(id)
     } catch (error) {
       console.error("[v0] Delete error:", error)
+    }
+  }
+
+  const handleEditSubmit = async (fd: FormData, areaId: string) => {
+    try {
+      fd.set("id", areaId)
+      fd.set("photo_url", editPhotoUrl)
+      fd.set("is_paid", editIsPaid.toString())
+      await updateCommonArea(fd)
+      setOpenEdit(null)
+    } catch (error) {
+      console.error("[v0] Update error:", error)
     }
   }
 
@@ -167,11 +181,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                         <DialogHeader><DialogTitle>Editar Area Comun</DialogTitle></DialogHeader>
                         <form
                           action={async (fd) => {
-                            fd.set("id", area.id as string)
-                            fd.set("photo_url", editPhotoUrl)
-                            fd.set("is_paid", (fd.get("is_paid_area") === "on").toString())
-                            await updateCommonArea(fd)
-                            setOpenEdit(null)
+                            await handleEditSubmit(fd, area.id as string)
                           }}
                           className="flex flex-col gap-4"
                         >
@@ -204,12 +214,12 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           <div className="flex items-center gap-3">
                             <Switch
                               id="edit_is_paid"
-                              name="is_paid_area"
-                              defaultChecked={area.is_paid as boolean}
+                              checked={editIsPaid}
+                              onCheckedChange={setEditIsPaid}
                             />
                             <Label htmlFor="edit_is_paid">Uso pagado</Label>
                           </div>
-                          {area.is_paid && (
+                          {editIsPaid && (
                             <div className="flex flex-col gap-2">
                               <Label htmlFor="edit_usage_fee">Tarifa de uso ({currencySymbol})</Label>
                               <Input
