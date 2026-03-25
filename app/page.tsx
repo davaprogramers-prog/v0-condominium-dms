@@ -9,7 +9,17 @@ export default async function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/dashboard")
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
+
+    if (profile?.role === "super_admin") {
+      redirect("/admin")
+    } else {
+      redirect("/dashboard")
+    }
   }
 
   return (
@@ -23,7 +33,7 @@ export default async function LandingPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/auth/login">
-            <Button variant="outline">Iniciar Sesion</Button>
+            <Button variant="outline">Iniciar Sesión</Button>
           </Link>
           <Link href="/auth/registro">
             <Button>Registrarse</Button>
@@ -37,7 +47,7 @@ export default async function LandingPage() {
             Administra tu condominio de forma integral
           </h1>
           <p className="text-lg leading-relaxed text-muted-foreground text-pretty">
-            CondoAdmin es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho mas. Todo en un solo lugar.
+            CondoAdmin es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
           </p>
           <div className="flex items-center gap-3 pt-4">
             <Link href="/auth/registro">
@@ -51,10 +61,10 @@ export default async function LandingPage() {
 
         <div className="grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { icon: BarChart3, title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y ano con graficos interactivos" },
-            { icon: Home, title: "Control por casa", desc: "Cards de estado por casa, historico de pagos y comprobantes de deposito" },
+            { icon: BarChart3, title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos" },
+            { icon: Home, title: "Control por casa", desc: "Cards de estado por casa, histórico de pagos y comprobantes de depósito" },
             { icon: Vote, title: "Encuestas en vivo", desc: "Votaciones en tiempo real con resultados visibles al instante" },
-            { icon: FileText, title: "Documentos", desc: "Almacena reglamentos, sanciones, partes y cualquier documentacion" },
+            { icon: FileText, title: "Documentos", desc: "Almacena reglamentos, sanciones, partes y cualquier documentación" },
             { icon: ShieldCheck, title: "Exoneraciones", desc: "Gestiona exoneraciones permanentes o temporales por servicios" },
             { icon: Building2, title: "Proyectos de mejora", desc: "Crea proyectos con cotizaciones, fotos y seguimiento de estado" },
           ].map((feature) => (
@@ -68,8 +78,9 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t px-6 py-6 text-center text-sm text-muted-foreground">
-        CondoAdmin - Sistema de Administracion de Condominios
+        CondoAdmin - Sistema de Administración de Condominios
       </footer>
     </div>
   )
 }
+
