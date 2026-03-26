@@ -26,7 +26,10 @@ export async function createCondoExpense(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" || profile?.condo_id !== condoId) {
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const canAccessCondo = profile?.condo_id === condoId || profile?.role === "super_admin"
+  
+  if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para crear gastos")
   }
 
@@ -175,7 +178,7 @@ export async function updateExpense(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
     throw new Error("Solo administradores pueden editar gastos")
   }
 

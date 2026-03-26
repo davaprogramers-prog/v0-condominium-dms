@@ -24,7 +24,10 @@ export async function createHouse(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" || profile?.condo_id !== condoId) {
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const canAccessCondo = profile?.condo_id === condoId || profile?.role === "super_admin"
+  
+  if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para crear casas")
   }
 
@@ -75,7 +78,10 @@ export async function updateHouse(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" || profile?.condo_id !== house?.condo_id) {
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const canAccessCondo = profile?.condo_id === house?.condo_id || profile?.role === "super_admin"
+  
+  if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para editar casas")
   }
 

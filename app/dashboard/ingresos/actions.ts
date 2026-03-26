@@ -26,7 +26,10 @@ export async function createCondoIncome(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" || profile?.condo_id !== condoId) {
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const canAccessCondo = profile?.condo_id === condoId || profile?.role === "super_admin"
+  
+  if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para crear ingresos")
   }
 
@@ -80,7 +83,7 @@ export async function updateIncome(
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
     throw new Error("Solo administradores pueden editar ingresos")
   }
 
@@ -239,7 +242,7 @@ export async function approvePayment(incomeId: string, condoId: string) {
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
     throw new Error("Solo administradores pueden aprobar pagos")
   }
 
@@ -280,7 +283,7 @@ export async function rejectPayment(incomeId: string, condoId: string, reason?: 
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
     throw new Error("Solo administradores pueden rechazar pagos")
   }
 
