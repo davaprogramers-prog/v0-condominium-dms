@@ -385,6 +385,52 @@ export async function addProjectQuote(formData: FormData) {
   revalidatePath("/dashboard/proyectos")
 }
 
+export async function updateProject(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+      improvement_type: formData.get("improvement_type") as string || null,
+      location_description: formData.get("location_description") as string || null,
+      estimated_cost: Number(formData.get("estimated_cost")) || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function deleteProject(id: string) {
+  const { supabase } = await getCondoId()
+  // Delete quotes first
+  await supabase.from("project_quotes").delete().eq("project_id", id)
+  const { error } = await supabase.from("projects").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function updateProjectQuote(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("project_quotes")
+    .update({
+      vendor_name: formData.get("vendor_name") as string,
+      amount: Number(formData.get("amount")),
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function deleteProjectQuote(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("project_quotes").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
 // ===== Surveys =====
 export async function createSurvey(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
