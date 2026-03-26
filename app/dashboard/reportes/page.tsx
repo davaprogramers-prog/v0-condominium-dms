@@ -59,7 +59,14 @@ export default async function ReportesPage({
 
   const incomeByType: Record<string, number> = {}
   income.forEach((inc) => {
-    const type = inc.income_type === "cuota" ? "Cuotas" : "Variables"
+    let type = "Otros"
+    if (inc.income_type === "cuota" || inc.income_type === "gasto_comun") {
+      type = "Gastos Comunes"
+    } else if (inc.income_type === "gasto_comun_variable" || inc.income_type === "variable") {
+      type = "Variables"
+    } else if (inc.income_type === "multa") {
+      type = "Multas"
+    }
     incomeByType[type] = (incomeByType[type] || 0) + inc.amount
   })
 

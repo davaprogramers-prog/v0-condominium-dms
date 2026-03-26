@@ -206,22 +206,41 @@ export default async function BalancePage({
         <div className="rounded-lg border bg-card p-6">
           <h2 className="text-lg font-semibold mb-4">Desglose Ingresos</h2>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Total Registros de Ingresos</span>
-              <span className="font-semibold">{income.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Promedio por Ingreso</span>
-              <span className="font-semibold">
-                {income.length > 0 
-                  ? `$${(totalIncome / income.length).toLocaleString("es-CL", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}`
-                  : "$0"
-                }
-              </span>
-            </div>
+            {(() => {
+              const gastosComunes = income.filter(i => i.income_type === "gasto_comun" || i.income_type === "cuota").reduce((s, i) => s + (i.amount || 0), 0)
+              const variables = income.filter(i => i.income_type === "gasto_comun_variable" || i.income_type === "variable").reduce((s, i) => s + (i.amount || 0), 0)
+              const multas = income.filter(i => i.income_type === "multa").reduce((s, i) => s + (i.amount || 0), 0)
+              const otros = totalIncome - gastosComunes - variables - multas
+              return (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span>Gastos Comunes Fijos</span>
+                    <span className="font-semibold text-green-600">${gastosComunes.toLocaleString("es-CL")}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Gastos Comunes Variables</span>
+                    <span className="font-semibold text-green-600">${variables.toLocaleString("es-CL")}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                      Multas
+                    </span>
+                    <span className="font-semibold text-red-600">${multas.toLocaleString("es-CL")}</span>
+                  </div>
+                  {otros > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Otros</span>
+                      <span className="font-semibold">${otros.toLocaleString("es-CL")}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm pt-2 border-t">
+                    <span className="font-medium">Total</span>
+                    <span className="font-bold text-green-600">${totalIncome.toLocaleString("es-CL")}</span>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
 
@@ -243,6 +262,10 @@ export default async function BalancePage({
                   : "$0"
                 }
               </span>
+            </div>
+            <div className="flex justify-between text-sm pt-2 border-t">
+              <span className="font-medium">Total</span>
+              <span className="font-bold text-red-600">${totalExpenses.toLocaleString("es-CL")}</span>
             </div>
           </div>
         </div>

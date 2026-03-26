@@ -79,6 +79,7 @@ const adminMenuItems = [
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
