@@ -26,8 +26,13 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single()
 
+  console.log("[v0] Dashboard Layout - User:", user.id, user.email)
+  console.log("[v0] Dashboard Layout - Profile:", profile)
+  console.log("[v0] Dashboard Layout - Profile Error:", profileError)
+
   // If no profile, redirect to login
   if (!profile) {
+    console.log("[v0] Dashboard Layout - No profile, redirecting to login")
     redirect("/auth/login")
   }
 
