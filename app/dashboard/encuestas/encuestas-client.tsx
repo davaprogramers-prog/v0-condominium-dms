@@ -170,8 +170,10 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                                 </AlertDialogHeader>
                                 <div className="flex gap-3 justify-end">
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deleteSurvey(survey.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                    Eliminar
+                                  <AlertDialogAction asChild>
+                                    <Button variant="destructive" onClick={() => deleteSurvey(survey.id as string)}>
+                                      Eliminar
+                                    </Button>
                                   </AlertDialogAction>
                                 </div>
                               </AlertDialogContent>
