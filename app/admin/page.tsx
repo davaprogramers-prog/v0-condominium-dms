@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Building2, Users } from "lucide-react"
 import Link from "next/link"
+import { CreateCondoDialog } from "./create-condo-dialog"
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -46,10 +47,13 @@ export default async function AdminDashboard() {
 
       {/* Condominios */}
       <div className="rounded-lg border bg-card p-6 space-y-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Building2 className="h-5 w-5" />
-          Condominios Registrados
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Condominios Registrados
+          </h2>
+          <CreateCondoDialog />
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
