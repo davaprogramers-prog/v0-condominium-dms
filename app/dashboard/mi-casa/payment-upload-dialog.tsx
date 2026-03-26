@@ -116,7 +116,6 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
               receipt_url: publicUrl,
               status: 'pending', // Reset to pending if it was rejected
               uploaded_by: user?.id,
-              uploaded_at: new Date().toISOString(),
               fixed_amount: fixedIncome?.amount || parameters.fixed_income_amount || 0,
               variable_amount: variableIncome?.amount || parameters.variable_income_amount || 0,
               fixed_income_id: fixedIncome?.id || null,
