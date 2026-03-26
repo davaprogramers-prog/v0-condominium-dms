@@ -101,7 +101,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                     <Label>Archivo</Label>
                     <FileUpload bucket="documents" onUpload={setFileUrl} accept="image/*,application/pdf" label="Subir archivo (PDF o imagen)" />
                   </div>
-                  <Button type="submit" disabled={!selectedType || !fileUrl}>Guardar Documento</Button>
+                  <Button type="submit" disabled={!fileUrl}>Guardar Documento</Button>
                 </form>
               </DialogContent>
             </Dialog>

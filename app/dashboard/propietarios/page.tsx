@@ -10,9 +10,9 @@ export default async function PropietariosPage() {
 
   // Get user profile with condo and role
   const { data: profile } = await supabase
-    .from("user_condos")
+    .from("profiles")
     .select("condo_id, role")
-    .eq("user_id", user.id)
+    .eq("id", user.id)
     .single()
 
   if (!profile?.condo_id) {

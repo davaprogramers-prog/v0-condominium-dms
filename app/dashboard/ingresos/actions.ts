@@ -110,7 +110,7 @@ export async function updateIncome(
   return { success: true }
 }
 
-export async function getCondoIncome(condoId: string, year?: number, month?: number) {
+export async function getCondoIncome(condoId: string, year?: number, month?: number, incomeType?: string) {
   const supabase = await createClient()
 
   let query = supabase
@@ -123,6 +123,10 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   }
   if (month) {
     query = query.eq("period_month", month)
+  }
+  // Filter by income type - default to "cuota" for regular income page
+  if (incomeType) {
+    query = query.eq("income_type", incomeType)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })

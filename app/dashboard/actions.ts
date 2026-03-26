@@ -364,13 +364,7 @@ export async function createSurvey(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const options = JSON.parse(formData.get("options") as string || "[]") as string[]
   
-  console.log("[v0] Creating survey for condo:", condoId, "by user:", userId)
-  console.log("[v0] Survey data:", {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    closes_at: formData.get("closes_at"),
-    options
-  })
+
 
   const closesAt = formData.get("closes_at") as string
   const { data: survey, error } = await supabase
@@ -382,12 +376,9 @@ export async function createSurvey(formData: FormData) {
       closes_at: closesAt && closesAt.trim() !== "" ? closesAt : null,
       created_by: userId,
       is_active: true,
-      status: "activa",
     })
     .select()
     .single()
-
-  console.log("[v0] Survey insert result:", { survey, error })
 
   if (error) {
     console.error("[v0] Error creating survey:", error)
@@ -395,10 +386,9 @@ export async function createSurvey(formData: FormData) {
   }
 
   if (options.length > 0) {
-    const { error: optError } = await supabase.from("survey_options").insert(
+    await supabase.from("survey_options").insert(
       options.map((opt, i) => ({ survey_id: survey.id, option_text: opt, display_order: i }))
     )
-    console.log("[v0] Options insert result:", { optError })
   }
 
   revalidatePath("/dashboard/encuestas")
@@ -577,15 +567,24 @@ export async function deleteCommonArea(id: string) {
 // ===== Bank Statements =====
 export async function uploadBankStatement(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  
+  const statementDate = formData.get("statement_date") as string
+  const date = new Date(statementDate)
+  
   const { error } = await supabase.from("bank_statements").insert({
     condo_id: condoId,
     title: formData.get("title") as string,
-    statement_month: Number(formData.get("statement_month")),
-    statement_year: Number(formData.get("statement_year")),
+    statement_date: statementDate,
+    statement_month: date.getMonth() + 1,
+    statement_year: date.getFullYear(),
     file_url: formData.get("file_url") as string,
+    notes: formData.get("notes") as string || null,
     uploaded_by: userId,
   })
-  if (error) throw error
+  if (error) {
+    console.error("[v0] Error uploading bank statement:", error)
+    throw error
+  }
   revalidatePath("/dashboard/cartolas")
 }
 
