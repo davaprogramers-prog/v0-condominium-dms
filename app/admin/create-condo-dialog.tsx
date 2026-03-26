@@ -29,6 +29,10 @@ export function CreateCondoDialog() {
     try {
       const supabase = createClient()
       
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
+      
       // Create condominium
       const { data: condo, error: condoError } = await supabase
         .from("condominiums")
@@ -36,6 +40,7 @@ export function CreateCondoDialog() {
           name,
           address,
           currency_symbol: currencySymbol,
+          created_by: user.id,
         })
         .select()
         .single()
