@@ -49,9 +49,10 @@ CREATE POLICY "Users can view own payment proofs" ON payment_proofs
   FOR SELECT USING (
     uploaded_by = auth.uid() OR
     EXISTS (
-      SELECT 1 FROM condominiums c
-      WHERE c.id = payment_proofs.condo_id
-      AND c.admin_id = auth.uid()
+      SELECT 1 FROM profiles 
+      WHERE profiles.condo_id = payment_proofs.condo_id 
+      AND profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
     )
   );
 
@@ -63,8 +64,9 @@ CREATE POLICY "Users can insert own payment proofs" ON payment_proofs
 CREATE POLICY "Admins can update payment proofs" ON payment_proofs
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM condominiums c
-      WHERE c.id = payment_proofs.condo_id
-      AND c.admin_id = auth.uid()
+      SELECT 1 FROM profiles 
+      WHERE profiles.condo_id = payment_proofs.condo_id 
+      AND profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
     )
   );
