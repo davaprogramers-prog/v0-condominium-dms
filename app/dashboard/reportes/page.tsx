@@ -61,10 +61,11 @@ export default async function ReportesPage({
     expensesByCategory[category] = (expensesByCategory[category] || 0) + exp.amount
   })
 
+  // Use ONLY paid income for the pie chart (not all income)
   const incomeByType: Record<string, number> = {}
-  income.forEach((inc) => {
+  paidIncome.forEach((inc) => {
     let type = "Otros"
-    if (inc.income_type === "cuota" || inc.income_type === "gasto_comun") {
+    if (inc.income_type === "cuota" || inc.income_type === "gasto_comun" || inc.income_type === "fixed") {
       type = "Gastos Comunes"
     } else if (inc.income_type === "gasto_comun_variable" || inc.income_type === "variable") {
       type = "Variables"

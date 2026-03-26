@@ -113,55 +113,32 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   return data || []
 }
 
-// Get only income that has been paid (has approved payment proof)
+// Get only income that has been paid (status = approved)
 export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // First get income for the period
-  let incomeQuery = supabase
+  // Get income with approved status directly from condo_income table
+  let query = supabase
     .from("condo_income")
-    .select("id, amount, income_type")
-    .eq("condo_id", condoId)
-
-  if (year) {
-    incomeQuery = incomeQuery.eq("period_year", year)
-  }
-  if (month) {
-    incomeQuery = incomeQuery.eq("period_month", month)
-  }
-
-  const { data: incomes, error: incomeError } = await incomeQuery
-
-  if (incomeError || !incomes) {
-    console.error("Error fetching income:", incomeError)
-    return []
-  }
-
-  // Get approved payment proofs
-  const { data: proofs, error: proofsError } = await supabase
-    .from("payment_proofs")
-    .select("fixed_income_id, variable_income_id, status")
+    .select("*")
     .eq("condo_id", condoId)
     .eq("status", "approved")
 
-  if (proofsError) {
-    console.error("Error fetching proofs:", proofsError)
+  if (year) {
+    query = query.eq("period_year", year)
+  }
+  if (month) {
+    query = query.eq("period_month", month)
+  }
+
+  const { data, error } = await query.order("income_date", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching paid income:", error)
     return []
   }
 
-  // Find incomes that have approved proofs
-  const approvedFixedIds = new Set(proofs?.filter(p => p.fixed_income_id).map(p => p.fixed_income_id))
-  const approvedVariableIds = new Set(proofs?.filter(p => p.variable_income_id).map(p => p.variable_income_id))
-
-  const paidIncomes = incomes.filter(income => {
-    if (income.income_type === 'fixed') {
-      return approvedFixedIds.has(income.id)
-    } else {
-      return approvedVariableIds.has(income.id)
-    }
-  })
-
-  return paidIncomes
+  return data || []
 }
 
 export async function getLast12MonthsData(condoId: string) {
