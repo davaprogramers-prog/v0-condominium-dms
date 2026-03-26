@@ -38,6 +38,31 @@ export default async function DashboardLayout({
 
   // If propietario/owner without condo_id, try to get it from their house
   const isOwner = profile.role === "propietario" || profile.role === "owner"
+  
+  // If owner without house_id, try to find house by email
+  if (isOwner && !profile.house_id) {
+    const { data: houseByEmail } = await supabase
+      .from("houses")
+      .select("id, condo_id")
+      .eq("owner_email", user.email)
+      .single()
+    
+    if (houseByEmail) {
+      // Update profile with house_id and condo_id
+      await supabase
+        .from("profiles")
+        .update({ 
+          house_id: houseByEmail.id,
+          condo_id: houseByEmail.condo_id 
+        })
+        .eq("id", user.id)
+      
+      profile.house_id = houseByEmail.id
+      profile.condo_id = houseByEmail.condo_id
+    }
+  }
+  
+  // If has house_id but no condo_id, get condo from house
   if (isOwner && !profile.condo_id && profile.house_id) {
     const { data: house } = await supabase
       .from("houses")
@@ -61,9 +86,9 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
   
-  // If owner still has no condo_id, show error
+  // If owner still has no condo_id, show a more helpful error
   if (!profile.condo_id) {
-    redirect("/auth/login?error=No+tienes+una+propiedad+asignada")
+    redirect("/auth/login?error=Tu+correo+no+esta+registrado+en+ninguna+propiedad.+Contacta+al+administrador.")
   }
 
   let condo = null
