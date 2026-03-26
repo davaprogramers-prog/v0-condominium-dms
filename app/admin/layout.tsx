@@ -22,7 +22,7 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, condo_id")
     .eq("id", user.id)
     .single()
 
@@ -30,18 +30,22 @@ export default async function AdminLayout({
     redirect("/dashboard")
   }
 
+  const hasCondoSelected = !!profile?.condo_id
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver al Dashboard
-              </Link>
-            </Button>
+            {hasCondoSelected && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver al Dashboard
+                </Link>
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Shield className="h-4 w-4 text-amber-500" />

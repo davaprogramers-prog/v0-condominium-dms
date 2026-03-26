@@ -26,11 +26,18 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single()
 
-  console.log("[v0] Dashboard Layout - Profile:", profile, "Error:", profileError)
-  console.log("[v0] Dashboard Layout - Checking redirect condition:", !profile, "||", !profile?.condo_id, "&&", profile?.role !== "super_admin")
+  // If no profile, redirect to login
+  if (!profile) {
+    redirect("/auth/login")
+  }
 
-  if (!profile || (!profile.condo_id && profile.role !== "super_admin")) {
-    console.log("[v0] Dashboard Layout - REDIRECTING TO LOGIN")
+  // If super_admin without condo_id, redirect to admin panel to select one
+  if (profile.role === "super_admin" && !profile.condo_id) {
+    redirect("/admin")
+  }
+
+  // If regular user without condo_id, redirect to login
+  if (!profile.condo_id) {
     redirect("/auth/login")
   }
 

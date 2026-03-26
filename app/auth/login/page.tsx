@@ -9,17 +9,7 @@ export default async function LoginPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (profile?.role === "super_admin") {
-      redirect("/admin")
-    } else {
-      redirect("/dashboard")
-    }
+    redirect("/dashboard")
   }
 
   return (
