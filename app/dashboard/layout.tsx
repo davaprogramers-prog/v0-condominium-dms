@@ -20,13 +20,17 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, condo_id, house_id, first_name, last_name")
     .eq("id", user.id)
     .single()
 
+  console.log("[v0] Dashboard Layout - Profile:", profile, "Error:", profileError)
+  console.log("[v0] Dashboard Layout - Checking redirect condition:", !profile, "||", !profile?.condo_id, "&&", profile?.role !== "super_admin")
+
   if (!profile || (!profile.condo_id && profile.role !== "super_admin")) {
+    console.log("[v0] Dashboard Layout - REDIRECTING TO LOGIN")
     redirect("/auth/login")
   }
 
