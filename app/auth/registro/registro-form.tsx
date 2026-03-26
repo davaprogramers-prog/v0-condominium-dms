@@ -185,6 +185,21 @@ export function RegistroForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordSetup} className="space-y-4">
+              {/* Show assigned property info */}
+              {selectedHouseId && houses.length > 0 && (
+                <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-3">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-green-800 dark:text-green-200">Propiedad Asignada:</p>
+                      <p className="text-green-700 dark:text-green-300">
+                        Casa #{houses.find(h => h.id === selectedHouseId)?.house_number} - {houses.find(h => h.id === selectedHouseId)?.condoName}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
