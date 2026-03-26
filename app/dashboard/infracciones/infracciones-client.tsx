@@ -249,12 +249,12 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                               </AlertDialogHeader>
                               <div className="flex gap-3 justify-end">
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
+                                <Button
                                   onClick={() => { deleteInfraction(inf.id as string); setDeleteOpen(null) }}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="bg-red-600 text-white hover:bg-red-700"
                                 >
                                   Eliminar
-                                </AlertDialogAction>
+                                </Button>
                               </div>
                             </AlertDialogContent>
                           </AlertDialog>
