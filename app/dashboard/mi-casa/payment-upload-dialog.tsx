@@ -62,23 +62,27 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
         .eq("condo_id", condoId)
         .single()
 
-      // Find or get the income record for this house this month
-      const { data: income } = await supabase
+      // Find ALL income records for this house this month (fixed + variable)
+      const { data: incomes } = await supabase
         .from("condo_income")
-        .select("id")
+        .select("id, income_type")
         .eq("house_id", houseId)
         .eq("condo_id", condoId)
         .eq("period_month", parameters?.current_month)
         .eq("period_year", parameters?.current_year)
-        .single()
 
-      if (income) {
+      if (incomes && incomes.length > 0) {
+        // Find fixed and variable income IDs
+        const fixedIncome = incomes.find(i => i.income_type === 'fixed')
+        const variableIncome = incomes.find(i => i.income_type === 'variable')
+
         const { error: receiptError } = await supabase
           .from("payment_proofs")
           .insert({
-            income_id: income.id,
             condo_id: condoId,
             house_id: houseId,
+            fixed_income_id: fixedIncome?.id || null,
+            variable_income_id: variableIncome?.id || null,
             file_url: publicUrl,
             status: 'pending',
             uploaded_at: new Date().toISOString(),
@@ -86,6 +90,7 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
 
         if (receiptError) {
           console.error("[v0] Receipt error:", receiptError)
+          alert("Error al guardar el comprobante: " + receiptError.message)
           setLoading(false)
           return
         }

@@ -10,6 +10,7 @@ export async function createHouse(
     ownerName: string
     ownerEmail: string
     ownerPhone?: string
+    paymentDueDay?: number
   }
 ) {
   const supabase = await createClient()
@@ -39,6 +40,7 @@ export async function createHouse(
       house_number: formData.houseNumber,
       owner_name: formData.ownerName,
       owner_email: formData.ownerEmail,
+      payment_due_day: formData.paymentDueDay || 5,
     })
     .select()
     .single()
@@ -102,6 +104,7 @@ export async function updateHouse(
     ownerName: string
     ownerEmail: string
     ownerPhone?: string
+    paymentDueDay?: number
   }
 ) {
   const supabase = await createClient()
@@ -135,6 +138,7 @@ export async function updateHouse(
     .update({
       owner_name: formData.ownerName,
       owner_email: formData.ownerEmail,
+      payment_due_day: formData.paymentDueDay || 5,
     })
     .eq("id", houseId)
 

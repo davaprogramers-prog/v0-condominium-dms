@@ -35,6 +35,7 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
         ownerName: (formData.get("owner_name") as string) || "",
         ownerEmail: (formData.get("owner_email") as string) || "",
         ownerPhone: (formData.get("owner_phone") as string) || "",
+        paymentDueDay: parseInt(formData.get("payment_due_day") as string) || 5,
       })
 
       setOpen(false)
@@ -81,6 +82,19 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
           <div className="space-y-2">
             <Label htmlFor="owner_phone">Teléfono del Propietario</Label>
             <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="payment_due_day">Día de Vencimiento de Pago</Label>
+            <Input 
+              id="payment_due_day" 
+              name="payment_due_day" 
+              type="number" 
+              min={1} 
+              max={28} 
+              placeholder="5" 
+              defaultValue={5}
+            />
+            <p className="text-xs text-muted-foreground">Día del mes para vencimiento del pago (1-28). Por defecto: día 5</p>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
