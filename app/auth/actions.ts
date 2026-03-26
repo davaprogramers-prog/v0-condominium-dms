@@ -81,22 +81,44 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Update profile
+  // Wait a moment for the trigger to create the profile
+  await new Promise(resolve => setTimeout(resolve, 500))
+
+  // Try to update profile, if it fails try upsert
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({
+    .upsert({
+      id: authData.user.id,
       email,
       first_name: firstName,
       last_name: lastName,
       house_id: houseId,
       condo_id: house.condo_id,
       role: "propietario",
-    })
-    .eq("id", authData.user.id)
+    }, { onConflict: "id" })
 
   if (profileError) {
-    console.error("[v0] Profile update error:", profileError)
+    console.error("[v0] Profile upsert error:", profileError)
+    // Retry with update after another delay
+    await new Promise(resolve => setTimeout(resolve, 500))
+    await supabase
+      .from("profiles")
+      .update({
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        house_id: houseId,
+        condo_id: house.condo_id,
+        role: "propietario",
+      })
+      .eq("id", authData.user.id)
   }
+
+  // Also update the house with the owner's user_id
+  await supabase
+    .from("houses")
+    .update({ owner_id: authData.user.id })
+    .eq("id", houseId)
 
   return authData.user
 }
