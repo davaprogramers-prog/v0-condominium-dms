@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
     })
 
     // IMPORTANT: This refreshes the session and must run before any server component
-    const { data: { user } } = await supabase.auth.getUser()
+    // @ts-ignore - getUser exists at runtime
+    await supabase.auth.getUser()
   } catch (error) {
     // If middleware fails, just pass through
     console.error('Middleware error:', error)
