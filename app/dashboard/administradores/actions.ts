@@ -82,11 +82,12 @@ export async function createAdmin(data: {
   let userId: string
 
   if (existingUser) {
-    // User exists - just update their profile to make them admin
+    // User exists - update their profile to make them admin and confirm email
     userId = existingUser.id
     
-    // Update user metadata
+    // Update user metadata and confirm email
     await supabaseAdmin.auth.admin.updateUserById(userId, {
+      email_confirm: true,
       user_metadata: {
         first_name: data.firstName,
         last_name: data.lastName,
