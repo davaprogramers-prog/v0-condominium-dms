@@ -82,27 +82,62 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
         const fixedIncome = incomes.find(i => i.income_type === 'fixed')
         const variableIncome = incomes.find(i => i.income_type === 'variable')
 
-        const { error: receiptError } = await supabase
+        // Check if there's already a pending proof for this house/period
+        const { data: existingProof } = await supabase
           .from("payment_proofs")
-          .insert({
-            condo_id: condoId,
-            house_id: houseId,
-            uploaded_by: user?.id,
-            period_month: parameters.current_month,
-            period_year: parameters.current_year,
-            fixed_amount: fixedIncome?.amount || parameters.fixed_income_amount || 0,
-            variable_amount: variableIncome?.amount || parameters.variable_income_amount || 0,
-            receipt_url: publicUrl,
-            status: 'pending',
-            fixed_income_id: fixedIncome?.id || null,
-            variable_income_id: variableIncome?.id || null,
-          })
+          .select("id, status")
+          .eq("house_id", houseId)
+          .eq("period_month", parameters.current_month)
+          .eq("period_year", parameters.current_year)
+          .in("status", ["pending", "rejected"]) // Only replace pending or rejected proofs
+          .single()
 
-        if (receiptError) {
-          console.error("[v0] Receipt error:", receiptError)
-          alert("Error al guardar el comprobante: " + receiptError.message)
-          setLoading(false)
-          return
+        if (existingProof) {
+          // Update existing proof instead of creating new one
+          const { error: updateError } = await supabase
+            .from("payment_proofs")
+            .update({
+              receipt_url: publicUrl,
+              status: 'pending', // Reset to pending if it was rejected
+              uploaded_by: user?.id,
+              uploaded_at: new Date().toISOString(),
+              fixed_amount: fixedIncome?.amount || parameters.fixed_income_amount || 0,
+              variable_amount: variableIncome?.amount || parameters.variable_income_amount || 0,
+              fixed_income_id: fixedIncome?.id || null,
+              variable_income_id: variableIncome?.id || null,
+            })
+            .eq("id", existingProof.id)
+
+          if (updateError) {
+            console.error("[v0] Update proof error:", updateError)
+            alert("Error al actualizar el comprobante: " + updateError.message)
+            setLoading(false)
+            return
+          }
+        } else {
+          // Create new proof (no existing pending/rejected proof found)
+          const { error: receiptError } = await supabase
+            .from("payment_proofs")
+            .insert({
+              condo_id: condoId,
+              house_id: houseId,
+              uploaded_by: user?.id,
+              period_month: parameters.current_month,
+              period_year: parameters.current_year,
+              fixed_amount: fixedIncome?.amount || parameters.fixed_income_amount || 0,
+              variable_amount: variableIncome?.amount || parameters.variable_income_amount || 0,
+              receipt_url: publicUrl,
+              status: 'pending',
+              fixed_income_id: fixedIncome?.id || null,
+              variable_income_id: variableIncome?.id || null,
+            })
+
+          if (receiptError) {
+            console.error("[v0] Receipt error:", receiptError)
+            alert("Error al guardar el comprobante: " + receiptError.message)
+            setLoading(false)
+            return
+          }
         }
       } else {
         console.error("[v0] No income found for this house this month")
