@@ -72,51 +72,23 @@ export function CreateAdminDialog() {
     }
 
     try {
-      const supabase = createClient()
-
-      // Create the user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { createAdmin } = await import("./actions")
+      const result = await createAdmin({
         email,
         password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            role: "admin",
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        firstName,
+        lastName,
+        condoId,
       })
 
-      if (authError) {
-        if (authError.message.includes("already registered")) {
+      if (!result.success) {
+        if (result.error?.includes("already registered")) {
           setError("Este correo ya está registrado")
         } else {
-          setError(authError.message)
+          setError(result.error || "Error al crear el administrador")
         }
         setLoading(false)
         return
-      }
-
-      if (authData.user) {
-        // Update the profile with condo_id and admin role
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .upsert({
-            id: authData.user.id,
-            email: email,
-            first_name: firstName,
-            last_name: lastName,
-            role: "admin",
-            condo_id: condoId,
-          })
-
-        if (profileError) {
-          console.error("Profile error:", profileError)
-          setError("Error al crear el perfil del administrador")
-          setLoading(false)
-          return
-        }
       }
 
       setOpen(false)

@@ -1,11 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -16,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { deleteAdmin } from "./actions"
 
 interface DeleteUserButtonProps {
   userId: string
@@ -30,23 +29,13 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   const handleDelete = async () => {
     setLoading(true)
     try {
-      const supabase = createClient()
+      const result = await deleteAdmin(userId)
       
-      // Delete from profiles table first
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId)
-
-      if (profileError) {
-        console.error("Error deleting profile:", profileError)
-        alert("Error al eliminar el perfil: " + profileError.message)
+      if (!result.success) {
+        alert("Error al eliminar: " + result.error)
         setLoading(false)
         return
       }
-
-      // Note: Deleting from auth.users requires admin API or service role
-      // The profile deletion is enough to revoke access
       
       setOpen(false)
       router.refresh()
