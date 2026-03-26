@@ -161,15 +161,15 @@ export function ApproveProofDialog({
           Revisar Comprobante
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Revisar Comprobante de Pago</DialogTitle>
           <DialogDescription>
             Casa #{house.house_number} - {house.owner_name}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           {error && (
             <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
               {error}
@@ -184,13 +184,14 @@ export function ApproveProofDialog({
                 <img
                   src={proof.receipt_url}
                   alt="Comprobante"
-                  className="w-full max-h-64 object-contain rounded-lg border bg-muted"
+                  className="w-full max-h-48 object-contain rounded-lg border bg-muted"
                 />
                 <a
                   href={proof.receipt_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute top-2 right-2 p-2 rounded-lg bg-background/80 hover:bg-background transition-colors"
+                  title="Ver en pantalla completa"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -202,17 +203,17 @@ export function ApproveProofDialog({
           </div>
 
           {/* Amount Summary */}
-          <div className="p-4 rounded-lg bg-muted/50 space-y-2">
+          <div className="p-3 rounded-lg bg-muted/50 space-y-1">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Comun Fijo</span>
+              <span className="text-muted-foreground">Gasto Fijo</span>
               <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Comun Variable</span>
+              <span className="text-muted-foreground">Gasto Variable</span>
               <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
             </div>
-            <div className="flex justify-between font-medium pt-2 border-t">
-              <span>Total Esperado</span>
+            <div className="flex justify-between font-medium pt-1 border-t">
+              <span>Total</span>
               <span className="text-primary">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
             </div>
           </div>
@@ -229,14 +230,15 @@ export function ApproveProofDialog({
           </Button>
 
           {/* Reject Form */}
-          <div className="pt-4 border-t">
-            <form onSubmit={handleReject} className="space-y-3">
-              <Label htmlFor="rejection_reason">Motivo de Rechazo</Label>
+          <div className="pt-3 border-t">
+            <form onSubmit={handleReject} className="space-y-2">
+              <Label htmlFor="rejection_reason" className="text-sm">Motivo de Rechazo (opcional)</Label>
               <Textarea
                 id="rejection_reason"
                 name="rejection_reason"
                 placeholder="Ej: Monto no coincide, imagen ilegible..."
                 rows={2}
+                className="text-sm"
               />
               <Button
                 type="submit"
@@ -246,7 +248,7 @@ export function ApproveProofDialog({
               >
                 {loading && action === "reject" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <XCircle className="h-4 w-4 mr-2" />
-                Rechazar Comprobante
+                Rechazar
               </Button>
             </form>
           </div>
