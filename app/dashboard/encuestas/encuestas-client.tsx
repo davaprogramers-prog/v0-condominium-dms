@@ -163,7 +163,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Eliminar Encuesta</AlertDialogTitle>
+                                  <AlertDialogTitle>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
                                   </AlertDialogDescription>
