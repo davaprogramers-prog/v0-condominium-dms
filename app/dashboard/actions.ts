@@ -2,6 +2,32 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+
+// ===== Condo Switching =====
+export async function switchCondo(condoId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user has access to this condo
+  const { data: userCondo } = await supabase
+    .from("user_condos")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("condo_id", condoId)
+    .single()
+
+  if (!userCondo) throw new Error("No tienes acceso a este condominio")
+
+  // Update user's current condo_id in profiles
+  const { error } = await supabase
+    .from("profiles")
+    .update({ condo_id: condoId })
+    .eq("id", user.id)
+
+  if (error) throw error
+  revalidatePath("/dashboard")
+}
 import { redirect } from "next/navigation"
 
 async function getCondoId() {
@@ -420,6 +446,26 @@ export async function createDocumentType(formData: FormData) {
     name: formData.get("name") as string,
     description: formData.get("description") as string || null,
   })
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function updateDocumentType(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("document_types")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function deleteDocumentType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("document_types").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/documentos")
 }

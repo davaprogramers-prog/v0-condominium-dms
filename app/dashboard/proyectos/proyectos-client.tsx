@@ -284,45 +284,47 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
       {/* Fullscreen Quote Viewer */}
       {viewQuote && (
         <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
-          <div className="flex items-center justify-between p-4 bg-black/50">
-            <h3 className="text-white font-medium">Cotizacion - {viewQuote.vendor}</h3>
-            <div className="flex items-center gap-2">
+          <div className="flex-shrink-0 flex items-center justify-between p-3 bg-black/50 border-b border-white/10">
+            <h3 className="text-white font-medium text-sm">Cotizacion - {viewQuote.vendor}</h3>
+            <div className="flex items-center gap-1">
               <a
                 href={viewQuote.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/70 hover:text-white p-2"
+                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
                 title="Abrir en nueva pestana"
               >
                 <ExternalLink className="h-5 w-5" />
               </a>
               <button
                 onClick={() => setViewQuote(null)}
-                className="text-white/70 hover:text-white p-2"
+                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
                 title="Cerrar (ESC)"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
           </div>
-          <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+          <div className="flex-1 min-h-0 p-2 overflow-auto">
             {viewQuote.url.toLowerCase().endsWith(".pdf") ? (
               <iframe
                 src={viewQuote.url}
-                className="w-full h-full max-w-5xl rounded-lg"
+                className="w-full h-full min-h-[80vh] rounded-lg bg-white"
                 title={`Cotizacion de ${viewQuote.vendor}`}
               />
             ) : (
-              <img
-                src={viewQuote.url}
-                alt={`Cotizacion de ${viewQuote.vendor}`}
-                className="max-w-full max-h-full object-contain rounded-lg"
-                crossOrigin="anonymous"
-              />
+              <div className="flex items-center justify-center min-h-full">
+                <img
+                  src={viewQuote.url}
+                  alt={`Cotizacion de ${viewQuote.vendor}`}
+                  className="max-w-full h-auto object-contain rounded-lg"
+                  crossOrigin="anonymous"
+                />
+              </div>
             )}
           </div>
-          <div className="p-4 text-center">
-            <p className="text-white/50 text-sm">Presiona ESC o haz clic en X para cerrar</p>
+          <div className="flex-shrink-0 p-2 text-center border-t border-white/10">
+            <p className="text-white/50 text-xs">Presiona ESC o haz clic en X para cerrar</p>
           </div>
         </div>
       )}

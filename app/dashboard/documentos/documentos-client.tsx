@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { uploadDocument, createDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
+import { uploadDocument, createDocumentType, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -30,6 +30,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
   const [fileUrl, setFileUrl] = useState("")
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [editFileUrl, setEditFileUrl] = useState("")
+  const [editTypeOpen, setEditTypeOpen] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -252,6 +253,68 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                         <p className="text-sm font-medium">{t.name as string}</p>
                         {t.description && <p className="text-xs text-muted-foreground">{t.description as string}</p>}
                       </div>
+                      {isAdmin && (
+                        <div className="flex items-center gap-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setEditTypeOpen(t.id as string)}>
+                                <Edit2 className="h-4 w-4 mr-2" />Editar
+                              </DropdownMenuItem>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                    <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Eliminar Tipo de Documento</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Esta accion no se puede deshacer. Los documentos de este tipo quedaran sin categoria.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <div className="flex gap-3 justify-end">
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteDocumentType(t.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                      Eliminar
+                                    </AlertDialogAction>
+                                  </div>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+
+                          {/* Edit Type Dialog */}
+                          <Dialog open={editTypeOpen === t.id} onOpenChange={(v) => !v && setEditTypeOpen(null)}>
+                            <DialogContent>
+                              <DialogHeader><DialogTitle>Editar Tipo de Documento</DialogTitle></DialogHeader>
+                              <form
+                                action={async (fd) => {
+                                  fd.set("id", t.id as string)
+                                  await updateDocumentType(fd)
+                                  setEditTypeOpen(null)
+                                }}
+                                className="flex flex-col gap-4"
+                              >
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor="edit_type_name">Nombre</Label>
+                                  <Input id="edit_type_name" name="name" defaultValue={t.name as string} required />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor="edit_type_desc">Descripcion</Label>
+                                  <Textarea id="edit_type_desc" name="description" defaultValue={(t.description as string) || ""} />
+                                </div>
+                                <Button type="submit">Guardar Cambios</Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

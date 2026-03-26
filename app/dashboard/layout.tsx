@@ -31,6 +31,8 @@ export default async function DashboardLayout({
   }
 
   let condo = null
+  let allCondos: { id: string; name: string }[] = []
+
   if (profile.condo_id) {
     const { data } = await supabase
       .from("condominiums")
@@ -40,9 +42,26 @@ export default async function DashboardLayout({
     condo = data
   }
 
+  // For super_admin, fetch all condos they can access
+  if (profile.role === "super_admin" || profile.role === "admin") {
+    const { data: userCondos } = await supabase
+      .from("user_condos")
+      .select("condo_id, condominiums(id, name)")
+      .eq("user_id", user.id)
+    
+    if (userCondos) {
+      allCondos = userCondos
+        .filter(uc => uc.condominiums)
+        .map(uc => ({
+          id: (uc.condominiums as any).id,
+          name: (uc.condominiums as any).name
+        }))
+    }
+  }
+
   return (
     <SidebarProvider>
-      <AppSidebar user={user} profile={profile} condo={condo} />
+      <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
       <SidebarInset>
         <DashboardHeader user={user} />
         <main className="flex-1 p-4 md:p-6">

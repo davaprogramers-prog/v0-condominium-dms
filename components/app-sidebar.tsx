@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +13,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Building2,
   LayoutDashboard,
@@ -32,10 +40,12 @@ import {
   Settings,
   LogOut,
   Users,
+  ChevronDown,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "@/app/auth/actions"
+import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
 const adminMenuItems = [
@@ -114,12 +124,27 @@ interface AppSidebarProps {
   user: User
   profile: Record<string, unknown> | null
   condo: Record<string, unknown> | null
+  allCondos?: { id: string; name: string }[]
 }
 
-export function AppSidebar({ user, profile, condo }: AppSidebarProps) {
+export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarProps) {
   const pathname = usePathname()
-  const isAdmin = profile?.role === "admin"
+  const router = useRouter()
+  const [switching, setSwitching] = useState(false)
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const hasCondo = !!profile?.condo_id
+  const canSwitchCondo = allCondos.length > 1
+
+  const handleCondoSwitch = async (condoId: string) => {
+    if (condoId === profile?.condo_id) return
+    setSwitching(true)
+    try {
+      await switchCondo(condoId)
+      router.refresh()
+    } finally {
+      setSwitching(false)
+    }
+  }
 
   const menuSections = !hasCondo && isAdmin
     ? [
@@ -142,11 +167,35 @@ export function AppSidebar({ user, profile, condo }: AppSidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">CondoAdmin</span>
-            <span className="text-xs text-muted-foreground">
-              {condo ? String(condo.name) : "Sin condominio"}
-            </span>
+            {!canSwitchCondo && (
+              <span className="text-xs text-muted-foreground">
+                {condo ? String(condo.name) : "Sin condominio"}
+              </span>
+            )}
           </div>
         </Link>
+        
+        {/* Condo Selector for admins with multiple condos */}
+        {canSwitchCondo && (
+          <div className="mt-3">
+            <Select 
+              value={profile?.condo_id as string || ""} 
+              onValueChange={handleCondoSwitch}
+              disabled={switching}
+            >
+              <SelectTrigger className="w-full text-xs h-8">
+                <SelectValue placeholder="Seleccionar condominio" />
+              </SelectTrigger>
+              <SelectContent>
+                {allCondos.map((c) => (
+                  <SelectItem key={c.id} value={c.id} className="text-xs">
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </SidebarHeader>
       
       <SidebarContent>
