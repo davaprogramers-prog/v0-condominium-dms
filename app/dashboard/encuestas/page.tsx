@@ -7,26 +7,46 @@ export default async function EncuestasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login")
 
-  const { data: profile } = await supabase.from("profiles").select("condo_id, role").eq("id", user.id).single()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("condo_id, role, house_id")
+    .eq("id", user.id)
+    .single()
+  
   if (!profile?.condo_id) redirect("/dashboard")
 
+  // Get surveys with options and votes
   const { data: surveys } = await supabase
     .from("surveys")
-    .select("*, survey_options(*, survey_votes(*))")
+    .select(`
+      *,
+      survey_options (
+        id,
+        option_text,
+        display_order,
+        survey_votes (
+          id,
+          voter_id
+        )
+      )
+    `)
     .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
 
-  const { data: houses } = await supabase
+  // Get total houses count
+  const { count: totalHouses } = await supabase
     .from("houses")
-    .select("id")
+    .select("*", { count: "exact", head: true })
     .eq("condo_id", profile.condo_id)
+
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
 
   return (
     <EncuestasClient
       surveys={surveys || []}
       userId={user.id}
-      totalHouses={houses?.length || 0}
-      isAdmin={profile.role === "admin"}
+      totalHouses={totalHouses || 0}
+      isAdmin={isAdmin}
     />
   )
 }

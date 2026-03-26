@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +13,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Building2,
   LayoutDashboard,
@@ -32,10 +40,12 @@ import {
   Settings,
   LogOut,
   Users,
+  ChevronDown,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "@/app/auth/actions"
+import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
 const adminMenuItems = [
@@ -43,6 +53,8 @@ const adminMenuItems = [
     section: "Dashboard",
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
     ]
   },
   {
@@ -54,14 +66,21 @@ const adminMenuItems = [
     ]
   },
   {
+    section: "Configuraciones",
+    items: [
+      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
+      { title: "Tipos de Exoneraciones", href: "/dashboard/tipos-exoneraciones", icon: ShieldOff },
+    ]
+  },
+  {
     section: "Finanzas",
     items: [
+      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
-      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
-      { title: "Ingreso Variable", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
-      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
     ]
   },
   {
@@ -69,7 +88,6 @@ const adminMenuItems = [
     items: [
       { title: "Infracciones", href: "/dashboard/infracciones", icon: AlertTriangle },
       { title: "Exoneraciones", href: "/dashboard/exoneraciones", icon: ShieldOff },
-      { title: "Arriendos", href: "/dashboard/arriendos", icon: Key },
     ]
   },
   {
@@ -84,19 +102,34 @@ const adminMenuItems = [
     section: "Sistema",
     items: [
       { title: "Configuración", href: "/dashboard/configuracion", icon: Settings },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
 ]
 
 const ownerMenuItems = [
   {
-    section: "Mi Condominio",
+    section: "Dashboard",
     items: [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { title: "Mis Pagos", href: "/dashboard/ingresos", icon: DollarSign },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+    ]
+  },
+  {
+    section: "Mi Propiedad",
+    items: [
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    ]
+  },
+  {
+    section: "Condominio",
+    items: [
+      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+      { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
       { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
 ]
@@ -105,12 +138,29 @@ interface AppSidebarProps {
   user: User
   profile: Record<string, unknown> | null
   condo: Record<string, unknown> | null
+  allCondos?: { id: string; name: string }[]
 }
 
-export function AppSidebar({ user, profile, condo }: AppSidebarProps) {
+export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarProps) {
   const pathname = usePathname()
-  const isAdmin = profile?.role === "admin"
+  const router = useRouter()
+  const [switching, setSwitching] = useState(false)
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isSuperAdmin = profile?.role === "super_admin"
+  const isOwner = profile?.role === "propietario" || profile?.role === "owner"
   const hasCondo = !!profile?.condo_id
+  const canSwitchCondo = allCondos.length > 1
+
+  const handleCondoSwitch = async (condoId: string) => {
+    if (condoId === profile?.condo_id) return
+    setSwitching(true)
+    try {
+      await switchCondo(condoId)
+      router.refresh()
+    } finally {
+      setSwitching(false)
+    }
+  }
 
   const menuSections = !hasCondo && isAdmin
     ? [
@@ -133,11 +183,35 @@ export function AppSidebar({ user, profile, condo }: AppSidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">CondoAdmin</span>
-            <span className="text-xs text-muted-foreground">
-              {condo ? String(condo.name) : "Sin condominio"}
-            </span>
+            {!canSwitchCondo && (
+              <span className="text-xs text-muted-foreground">
+                {condo ? String(condo.name) : "Sin condominio"}
+              </span>
+            )}
           </div>
         </Link>
+        
+        {/* Condo Selector for admins with multiple condos */}
+        {canSwitchCondo && (
+          <div className="mt-3">
+            <Select 
+              value={profile?.condo_id as string || ""} 
+              onValueChange={handleCondoSwitch}
+              disabled={switching}
+            >
+              <SelectTrigger className="w-full text-xs h-8">
+                <SelectValue placeholder="Seleccionar condominio" />
+              </SelectTrigger>
+              <SelectContent>
+                {allCondos.map((c) => (
+                  <SelectItem key={c.id} value={c.id} className="text-xs">
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </SidebarHeader>
       
       <SidebarContent>
@@ -166,19 +240,64 @@ export function AppSidebar({ user, profile, condo }: AppSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* Super Admin Section */}
+        {isSuperAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Super Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={pathname === "/admin"}
+                  >
+                    <Link href="/admin">
+                      <Key className="h-4 w-4" />
+                      <span>Panel de Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                {hasCondo && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={pathname === "/dashboard/administradores"}
+                    >
+                      <Link href="/dashboard/administradores">
+                        <Users className="h-4 w-4" />
+                        <span>Administradores</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
-              {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
-            </div>
+            {profile?.avatar_url ? (
+              <img 
+                src={profile.avatar_url as string} 
+                alt="Avatar" 
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
+              </div>
+            )}
             <div className="flex flex-col">
               <span className="text-xs font-medium">
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs text-muted-foreground">{isAdmin ? "Administrador" : "Propietario"}</span>
+              <span className="text-xs text-muted-foreground">
+                {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
+              </span>
             </div>
           </div>
           <form action={signOut}>

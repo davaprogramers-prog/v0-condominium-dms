@@ -1,17 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { createProject, updateProjectStatus, addProjectQuote } from "@/app/dashboard/actions"
+import { createProject, updateProjectStatus, addProjectQuote, updateProject, deleteProject, updateProjectQuote, deleteProjectQuote } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Hammer, ChevronDown, ChevronUp, FileText } from "lucide-react"
+import { Plus, Hammer, ChevronDown, ChevronUp, FileText, ExternalLink, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   propuesto: { label: "Propuesto", color: "bg-blue-500/10 text-blue-700" },
@@ -34,6 +36,8 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
   const [docUrl, setDocUrl] = useState("")
   const [expandedProject, setExpandedProject] = useState<string | null>(null)
   const [statusUpdate, setStatusUpdate] = useState("")
+  const [editProject, setEditProject] = useState<string | null>(null)
+  const [editQuote, setEditQuote] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -155,12 +159,90 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                       </div>
                       <CardTitle className="text-base">{project.name as string}</CardTitle>
                     </div>
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <div className="flex items-center gap-2">
+                      {isAdmin && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditProject(project.id as string) }}>
+                              <Edit2 className="h-4 w-4 mr-2" />Editar
+                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Eliminar Proyecto: {project.name as string}</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta accion eliminara el proyecto y todas sus cotizaciones. No se puede deshacer.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="flex gap-3 justify-end">
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction asChild>
+                                    <Button variant="destructive" onClick={() => deleteProject(project.id as string)}>
+                                      Eliminar
+                                    </Button>
+                                  </AlertDialogAction>
+                                </div>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
                   </div>
                   {project.improvement_type && (
                     <CardDescription>{project.improvement_type as string}</CardDescription>
                   )}
                 </CardHeader>
+                
+                {/* Edit Project Dialog */}
+                {isAdmin && (
+                  <Dialog open={editProject === project.id} onOpenChange={(v) => !v && setEditProject(null)}>
+                    <DialogContent onClick={(e) => e.stopPropagation()}>
+                      <DialogHeader><DialogTitle>Editar Proyecto</DialogTitle></DialogHeader>
+                      <form
+                        action={async (fd) => {
+                          fd.set("id", project.id as string)
+                          await updateProject(fd)
+                          setEditProject(null)
+                        }}
+                        className="flex flex-col gap-4"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_name">Nombre</Label>
+                          <Input id="edit_name" name="name" defaultValue={project.name as string} required />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_type">Tipo de Mejora</Label>
+                          <Input id="edit_type" name="improvement_type" defaultValue={(project.improvement_type as string) || ""} />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_desc">Descripcion</Label>
+                          <Textarea id="edit_desc" name="description" defaultValue={(project.description as string) || ""} />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_location">Ubicacion</Label>
+                          <Input id="edit_location" name="location_description" defaultValue={(project.location_description as string) || ""} />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_cost">Costo Estimado</Label>
+                          <Input id="edit_cost" name="estimated_cost" type="number" defaultValue={(project.estimated_cost as number) || ""} />
+                        </div>
+                        <Button type="submit">Guardar Cambios</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                )}
                 {isExpanded && (
                   <CardContent className="flex flex-col gap-4">
                     {project.description && <p className="text-sm">{project.description as string}</p>}
@@ -221,13 +303,89 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                                   {q.description && <p className="text-xs text-muted-foreground">{q.description as string}</p>}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 <span className="text-sm font-semibold">{currencySymbol}{Number(q.amount).toLocaleString()}</span>
                                 {q.is_selected && <Badge>Seleccionada</Badge>}
-                                {q.document_url && (
-                                  <a href={q.document_url as string} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs">
-                                    Ver
-                                  </a>
+                                {q.document_url ? (
+                                  <Button asChild variant="outline" size="sm">
+                                    <a 
+                                      href={q.document_url as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-1" />Ver
+                                    </a>
+                                  </Button>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">Sin doc</span>
+                                )}
+                                {isAdmin && (
+                                  <>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setEditQuote(q.id as string)}>
+                                          <Edit2 className="h-4 w-4 mr-2" />Editar
+                                        </DropdownMenuItem>
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                              <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                            </DropdownMenuItem>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle>Eliminar Cotizacion: {q.vendor_name as string}</AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                Esta accion eliminara la cotizacion. No se puede deshacer.
+                                              </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <div className="flex gap-3 justify-end">
+                                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction asChild>
+                                                <Button variant="destructive" onClick={() => deleteProjectQuote(q.id as string)}>
+                                                  Eliminar
+                                                </Button>
+                                              </AlertDialogAction>
+                                            </div>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    {/* Edit Quote Dialog */}
+                                    <Dialog open={editQuote === q.id} onOpenChange={(v) => !v && setEditQuote(null)}>
+                                      <DialogContent>
+                                        <DialogHeader><DialogTitle>Editar Cotizacion</DialogTitle></DialogHeader>
+                                        <form
+                                          action={async (fd) => {
+                                            fd.set("id", q.id as string)
+                                            await updateProjectQuote(fd)
+                                            setEditQuote(null)
+                                          }}
+                                          className="flex flex-col gap-4"
+                                        >
+                                          <div className="flex flex-col gap-2">
+                                            <Label htmlFor="edit_vendor">Proveedor</Label>
+                                            <Input id="edit_vendor" name="vendor_name" defaultValue={q.vendor_name as string} required />
+                                          </div>
+                                          <div className="flex flex-col gap-2">
+                                            <Label htmlFor="edit_amount">Monto</Label>
+                                            <Input id="edit_amount" name="amount" type="number" defaultValue={q.amount as number} required />
+                                          </div>
+                                          <div className="flex flex-col gap-2">
+                                            <Label htmlFor="edit_quote_desc">Descripcion</Label>
+                                            <Textarea id="edit_quote_desc" name="description" defaultValue={(q.description as string) || ""} />
+                                          </div>
+                                          <Button type="submit">Guardar Cambios</Button>
+                                        </form>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </>
                                 )}
                               </div>
                             </div>

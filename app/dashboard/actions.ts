@@ -2,6 +2,32 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+
+// ===== Condo Switching =====
+export async function switchCondo(condoId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user has access to this condo
+  const { data: userCondo } = await supabase
+    .from("user_condos")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("condo_id", condoId)
+    .single()
+
+  if (!userCondo) throw new Error("No tienes acceso a este condominio")
+
+  // Update user's current condo_id in profiles
+  const { error } = await supabase
+    .from("profiles")
+    .update({ condo_id: condoId })
+    .eq("id", user.id)
+
+  if (error) throw error
+  revalidatePath("/dashboard")
+}
 import { redirect } from "next/navigation"
 
 async function getCondoId() {
@@ -165,6 +191,33 @@ export async function updateExpenseType(formData: FormData) {
     .eq("id", formData.get("id") as string)
   if (error) throw error
   revalidatePath("/dashboard/tipos-gastos")
+}
+
+export async function deleteExpenseType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("expense_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-gastos")
+}
+
+export async function updateExemptionType(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("exemption_types")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-exoneraciones")
+}
+
+export async function deleteExemptionType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemption_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/tipos-exoneraciones")
 }
 
 // ===== Expenses =====
@@ -332,19 +385,67 @@ export async function addProjectQuote(formData: FormData) {
   revalidatePath("/dashboard/proyectos")
 }
 
+export async function updateProject(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+      improvement_type: formData.get("improvement_type") as string || null,
+      location_description: formData.get("location_description") as string || null,
+      estimated_cost: Number(formData.get("estimated_cost")) || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function deleteProject(id: string) {
+  const { supabase } = await getCondoId()
+  // Delete quotes first
+  await supabase.from("project_quotes").delete().eq("project_id", id)
+  const { error } = await supabase.from("projects").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function updateProjectQuote(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("project_quotes")
+    .update({
+      vendor_name: formData.get("vendor_name") as string,
+      amount: Number(formData.get("amount")),
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
+export async function deleteProjectQuote(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("project_quotes").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/proyectos")
+}
+
 // ===== Surveys =====
 export async function createSurvey(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const options = JSON.parse(formData.get("options") as string || "[]") as string[]
-
+  const closesAt = formData.get("closes_at") as string
+  
   const { data: survey, error } = await supabase
     .from("surveys")
     .insert({
       condo_id: condoId,
       title: formData.get("title") as string,
       description: formData.get("description") as string || null,
-      closes_at: formData.get("closes_at") as string || null,
+      closes_at: closesAt && closesAt.trim() !== "" ? closesAt : null,
       created_by: userId,
+      is_active: true,
     })
     .select()
     .single()
@@ -361,19 +462,72 @@ export async function createSurvey(formData: FormData) {
 }
 
 export async function voteSurvey(surveyId: string, optionId: string) {
-  const { supabase, userId } = await getCondoId()
-  const { error } = await supabase.from("survey_votes").insert({
-    survey_id: surveyId,
-    option_id: optionId,
-    voter_id: userId,
-  })
-  if (error) throw error
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+  
+  const { data: profile } = await supabase.from("profiles").select("condo_id, house_id").eq("id", user.id).single()
+  if (!profile) throw new Error("Perfil no encontrado")
+  
+  // Check if user already voted - if so, update their vote (allows changing vote while survey is open)
+  const { data: existingVote } = await supabase
+    .from("survey_votes")
+    .select("id")
+    .eq("survey_id", surveyId)
+    .eq("voter_id", user.id)
+    .single()
+  
+  if (existingVote) {
+    // Update existing vote
+    const { error } = await supabase
+      .from("survey_votes")
+      .update({ option_id: optionId })
+      .eq("id", existingVote.id)
+    
+    if (error) {
+      throw new Error("Error al actualizar voto: " + error.message)
+    }
+  } else {
+    // Create new vote
+    const { error } = await supabase.from("survey_votes").insert({
+      survey_id: surveyId,
+      option_id: optionId,
+      voter_id: user.id,
+    })
+    if (error) {
+      throw new Error("Error al votar: " + error.message)
+    }
+  }
+  
   revalidatePath("/dashboard/encuestas")
 }
 
 export async function closeSurvey(id: string) {
   const { supabase } = await getCondoId()
   const { error } = await supabase.from("surveys").update({ is_active: false }).eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/encuestas")
+}
+
+export async function updateSurvey(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("surveys")
+    .update({
+      title: formData.get("title") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/encuestas")
+}
+
+export async function deleteSurvey(id: string) {
+  const { supabase } = await getCondoId()
+  // Delete votes first (cascade should handle this, but being explicit)
+  await supabase.from("survey_votes").delete().eq("survey_id", id)
+  await supabase.from("survey_options").delete().eq("survey_id", id)
+  const { error } = await supabase.from("surveys").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/encuestas")
 }
@@ -390,16 +544,57 @@ export async function createDocumentType(formData: FormData) {
   revalidatePath("/dashboard/documentos")
 }
 
+export async function updateDocumentType(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("document_types")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function deleteDocumentType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("document_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
 export async function uploadDocument(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const { error } = await supabase.from("documents").insert({
     condo_id: condoId,
-    document_type_id: formData.get("document_type_id") as string,
+    document_type_id: formData.get("document_type_id") as string || null,
     title: formData.get("title") as string,
     description: formData.get("description") as string || null,
     file_url: formData.get("file_url") as string,
     uploaded_by: userId,
   })
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function updateDocument(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("documents")
+    .update({
+      title: formData.get("title") as string,
+      description: formData.get("description") as string || null,
+      file_url: formData.get("file_url") as string,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/documentos")
+}
+
+export async function deleteDocument(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("documents").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/documentos")
 }
@@ -426,6 +621,28 @@ export async function markInfractionPaid(id: string) {
     .from("infractions")
     .update({ is_paid: true, paid_date: new Date().toISOString().split("T")[0] })
     .eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/infracciones")
+}
+
+export async function updateInfraction(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("infractions")
+    .update({
+      description: formData.get("description") as string,
+      fine_amount: Number(formData.get("fine_amount")) || 0,
+      infraction_date: formData.get("infraction_date") as string,
+      notes: formData.get("notes") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/infracciones")
+}
+
+export async function deleteInfraction(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("infractions").delete().eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/infracciones")
 }
@@ -463,19 +680,89 @@ export async function createCommonArea(formData: FormData) {
   revalidatePath("/dashboard/areas-comunes")
 }
 
+export async function updateCommonArea(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("common_areas")
+    .update({
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || null,
+      photo_url: formData.get("photo_url") as string || null,
+      is_paid: formData.get("is_paid") === "true",
+      usage_fee: Number(formData.get("usage_fee")) || 0,
+      maintenance_responsible: formData.get("maintenance_responsible") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/areas-comunes")
+}
+
+export async function deleteCommonArea(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("common_areas").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/areas-comunes")
+}
+
 // ===== Bank Statements =====
 export async function uploadBankStatement(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  
+  const statementDate = formData.get("statement_date") as string
+  const date = new Date(statementDate)
+  
   const { error } = await supabase.from("bank_statements").insert({
     condo_id: condoId,
     title: formData.get("title") as string,
-    statement_month: Number(formData.get("statement_month")),
-    statement_year: Number(formData.get("statement_year")),
+    statement_date: statementDate,
+    statement_month: date.getMonth() + 1,
+    statement_year: date.getFullYear(),
     file_url: formData.get("file_url") as string,
+    notes: formData.get("notes") as string || null,
     uploaded_by: userId,
   })
-  if (error) throw error
+  if (error) {
+    console.error("[v0] Error uploading bank statement:", error)
+    throw error
+  }
   revalidatePath("/dashboard/cartolas")
+}
+
+// ===== Alerts =====
+export async function createAlert(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const { error } = await supabase.from("alerts").insert({
+    condo_id: condoId,
+    title: formData.get("title") as string,
+    message: formData.get("message") as string,
+    priority: formData.get("priority") as string || "media",
+    expires_at: formData.get("expires_at") as string || null,
+    created_by: userId,
+  })
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
+}
+
+export async function updateAlert(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("alerts")
+    .update({
+      title: formData.get("title") as string,
+      message: formData.get("message") as string,
+      priority: formData.get("priority") as string,
+      expires_at: formData.get("expires_at") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
+}
+
+export async function deleteAlert(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("alerts").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/alertas")
 }
 
 // ===== File Upload Helper =====

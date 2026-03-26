@@ -59,8 +59,9 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                   <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="payment_deadline_day">Dia de vencimiento de pago</Label>
-                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={31} placeholder="5" />
+                  <Label htmlFor="payment_deadline_day">Día de vencimiento de pago</Label>
+                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} />
+                  <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
                 </div>
                 <Button type="submit">Guardar Casa</Button>
               </form>
@@ -92,8 +93,9 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                 <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_deadline">Dia de vencimiento</Label>
-                <Input id="edit_deadline" name="payment_deadline_day" type="number" min={1} max={31} defaultValue={(editHouse.payment_deadline_day as number) || ""} />
+                <Label htmlFor="edit_due_day">Día de vencimiento</Label>
+                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} />
+                <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
               </div>
               <Button type="submit">Actualizar</Button>
             </form>
@@ -132,7 +134,7 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                       <TableCell>{(house.owner_name as string) || "-"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{(house.owner_email as string) || "-"}</TableCell>
                       <TableCell>
-                        {house.payment_deadline_day ? `Dia ${house.payment_deadline_day}` : "-"}
+                        {house.payment_deadline_day ? `Día ${house.payment_deadline_day}` : "Día 5"}
                       </TableCell>
                       <TableCell>
                         <Badge variant={house.is_active !== false ? "default" : "secondary"}>

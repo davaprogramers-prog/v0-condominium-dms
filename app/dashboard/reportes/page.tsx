@@ -1,19 +1,226 @@
 import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { ReportesClient } from "./reportes-client"
+import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsData } from "../gastos/actions"
+import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
+import { ReportesCharts } from "./reportes-charts"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-export default async function ReportesPage() {
+export default async function ReportesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mes?: string; año?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/login")
-  const { data: profile } = await supabase.from("profiles").select("condo_id").eq("id", user.id).single()
-  if (!profile?.condo_id) redirect("/dashboard")
 
-  const [{ data: expenses }, { data: expenseTypes }, { data: condo }] = await Promise.all([
-    supabase.from("expenses").select("*, expense_types(name)").eq("condo_id", profile.condo_id).order("expense_date"),
-    supabase.from("expense_types").select("*").eq("condo_id", profile.condo_id),
-    supabase.from("condominiums").select("currency_symbol").eq("id", profile.condo_id).single(),
-  ])
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("condo_id, role")
+    .eq("id", user?.id)
+    .single()
 
-  return <ReportesClient expenses={expenses || []} expenseTypes={expenseTypes || []} currencySymbol={condo?.currency_symbol || "$"} />
+  const condoId = profile?.condo_id
+
+  // Get period from query params or use current month
+  const params = await searchParams
+  const now = new Date()
+  const year = parseInt(params.año as string) || now.getFullYear()
+  const month = parseInt(params.mes as string) || now.getMonth() + 1
+
+  // Get expenses, income, and 12-month historical data
+  let expenses: any[] = []
+  let income: any[] = []
+  let paidIncome: any[] = []
+  let last12Months: any[] = []
+
+  if (condoId) {
+    expenses = await getCondoExpenses(condoId, year, month)
+    income = await getCondoIncome(condoId, year, month)
+    paidIncome = await getPaidCondoIncome(condoId, year, month)
+    last12Months = await getLast12MonthsData(condoId)
+  }
+
+  // Calculate previous and next month for navigation
+  const prevMonth = month === 1 ? 12 : month - 1
+  const prevYear = month === 1 ? year - 1 : year
+  const nextMonth = month === 12 ? 1 : month + 1
+  const nextYear = month === 12 ? year + 1 : year
+  const canGoNext = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)
+
+  // Calculate totals
+  const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
+  const totalExpected = income.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Por cobrar
+  const totalCollected = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Recaudado
+  const totalPending = totalExpected - totalCollected // Pendiente
+
+  // Prepare data for charts
+  const expensesByCategory: Record<string, number> = {}
+  expenses.forEach((exp) => {
+    const category = exp.category || "Otro"
+    expensesByCategory[category] = (expensesByCategory[category] || 0) + exp.amount
+  })
+
+  // Use ONLY paid income for the pie chart (not all income)
+  const incomeByType: Record<string, number> = {}
+  paidIncome.forEach((inc) => {
+    let type = "Otros"
+    if (inc.income_type === "cuota" || inc.income_type === "gasto_comun" || inc.income_type === "fixed") {
+      type = "Gastos Comunes"
+    } else if (inc.income_type === "gasto_comun_variable" || inc.income_type === "variable") {
+      type = "Variables"
+    } else if (inc.income_type === "multa") {
+      type = "Multas"
+    }
+    incomeByType[type] = (incomeByType[type] || 0) + inc.amount
+  })
+
+  const pieExpensesData = Object.entries(expensesByCategory).map(([name, value]) => ({
+    name,
+    value,
+  }))
+
+  const pieIncomeData = Object.entries(incomeByType).map(([name, value]) => ({
+    name,
+    value,
+  }))
+
+  const barData = [
+    { nombre: "Por Cobrar", valor: totalExpected, fill: "#3b82f6" },
+    { nombre: "Recaudado", valor: totalCollected, fill: "#22c55e" },
+    { nombre: "Gastos", valor: totalExpenses, fill: "#ef4444" },
+  ]
+
+  const monthName = new Date(year, month - 1).toLocaleDateString("es-CL", {
+    month: "long",
+    year: "numeric",
+  })
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Month Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Reportes de Finanzas</h1>
+          <p className="text-muted-foreground text-sm">Analisis completo de ingresos y gastos</p>
+        </div>
+        
+        {/* Month Selector */}
+        <div className="flex items-center gap-2 bg-muted/50 rounded-full px-2 py-1">
+          <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <span className="px-3 py-1 text-sm font-medium min-w-[100px] text-center capitalize">
+            {monthName}
+          </span>
+          {canGoNext ? (
+            <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Por Cobrar</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">
+                ${totalExpected.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <DollarSign className="h-8 w-8 text-blue-500 opacity-30" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Recaudado</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                ${totalCollected.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <CheckCircle className="h-8 w-8 text-green-500 opacity-30" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Pendiente</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">
+                ${totalPending.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <Clock className="h-8 w-8 text-amber-500 opacity-30" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Gastos</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">
+                ${totalExpenses.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <TrendingDown className="h-8 w-8 text-red-500 opacity-30" />
+          </div>
+        </div>
+      </div>
+
+      {/* Balance Card */}
+      <div className="rounded-lg border bg-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">Balance Real (Recaudado - Gastos)</p>
+            <p className={`text-3xl font-bold mt-1 ${totalCollected - totalExpenses >= 0 ? "text-green-600" : "text-red-600"}`}>
+              ${(totalCollected - totalExpenses).toLocaleString("es-CL", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </p>
+          </div>
+          <TrendingUp className={`h-10 w-10 opacity-30 ${totalCollected - totalExpenses >= 0 ? "text-green-500" : "text-red-500"}`} />
+        </div>
+      </div>
+
+      {/* Charts Component */}
+      <ReportesCharts 
+        totalExpenses={totalExpenses}
+        totalIncome={totalCollected}
+        barData={barData}
+        pieExpensesData={pieExpensesData}
+        pieIncomeData={pieIncomeData}
+        last12Months={last12Months}
+        currencySymbol="$"
+      />
+    </div>
+  )
 }
+
+
+

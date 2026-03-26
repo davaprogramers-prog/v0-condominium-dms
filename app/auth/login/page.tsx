@@ -1,48 +1,37 @@
-import { login } from "@/app/auth/actions"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Building2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import Link from "next/link"
+import { LoginForm } from "./login-form"
+import { Building2 } from "lucide-react"
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const params = await searchParams
+export default async function LoginPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect("/dashboard")
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-            <Building2 className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-balance">CondoAdmin</CardTitle>
-          <CardDescription>Ingresa a tu cuenta para administrar tu condominio</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {params.error && (
-            <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{params.error}</div>
-          )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Correo electr&oacute;nico</Label>
-              <Input id="email" name="email" type="email" placeholder="tu@correo.com" required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Contrase&ntilde;a</Label>
-              <Input id="password" name="password" type="password" placeholder="Tu contrase&ntilde;a" required />
-            </div>
-            <Button formAction={login} className="w-full">
-              Iniciar Sesi&oacute;n
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {"&iquest;No tienes cuenta? "}
-            <Link href="/auth/registro" className="text-primary underline-offset-4 hover:underline">
-              Reg&iacute;strate aqu&iacute;
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+    <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
+      <div className="flex flex-col items-center justify-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+          <Building2 className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">CondoAdmin</h1>
+          <p className="text-sm text-muted-foreground">Inicia sesión en tu cuenta</p>
+        </div>
+      </div>
+      
+      <LoginForm />
+
+      <div className="text-center text-sm">
+        ¿No tienes cuenta?{" "}
+        <Link href="/auth/registro" className="font-semibold text-primary hover:underline">
+          Registrarse aquí
+        </Link>
+      </div>
     </div>
   )
 }

@@ -22,7 +22,7 @@ export default async function ArriendosPage() {
     <ArriendosClient
       rentals={rentals || []}
       currencySymbol={(condo?.currency_symbol as string) || "$"}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }
