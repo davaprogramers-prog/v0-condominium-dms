@@ -43,11 +43,18 @@ export default async function MiCasaPage() {
     .eq("condo_id", profile.condo_id)
     .single()
 
+  // Get incomes without the problematic join (payment_proofs has two FK to condo_income)
   const { data: incomes } = await supabase
     .from("condo_income")
-    .select("*, payment_proofs(*)")
+    .select("*")
     .eq("house_id", profile.house_id)
     .order("income_date", { ascending: false })
+
+  // Get payment proofs separately
+  const { data: paymentProofs } = await supabase
+    .from("payment_proofs")
+    .select("*")
+    .eq("house_id", profile.house_id)
 
   const { data: condo } = await supabase
     .from("condominiums")
@@ -61,9 +68,30 @@ export default async function MiCasaPage() {
            i.period_year === parameters?.current_year
   }) || []
 
+  // Create a helper to check if income has approved proof
+  const hasApprovedProof = (incomeId: string, incomeType: string) => {
+    return paymentProofs?.some(p => {
+      if (incomeType === 'fixed') {
+        return p.fixed_income_id === incomeId && p.status === 'approved'
+      } else {
+        return p.variable_income_id === incomeId && p.status === 'approved'
+      }
+    }) || false
+  }
+
+  const getProofsForIncome = (incomeId: string, incomeType: string) => {
+    return paymentProofs?.filter(p => {
+      if (incomeType === 'fixed') {
+        return p.fixed_income_id === incomeId
+      } else {
+        return p.variable_income_id === incomeId
+      }
+    }) || []
+  }
+
   const totalDue = currentMonthIncomes.reduce((acc, i) => acc + (i.amount || 0), 0)
   const totalPaid = currentMonthIncomes
-    .filter(i => i.payment_proofs?.some((r: { status: string }) => r.status === 'approved'))
+    .filter(i => hasApprovedProof(i.id, i.income_type))
     .reduce((acc, i) => acc + (i.amount || 0), 0)
   const balance = totalDue - totalPaid
 
@@ -139,8 +167,9 @@ export default async function MiCasaPage() {
               </thead>
               <tbody>
                 {currentMonthIncomes?.map((income) => {
-                  const hasReceipt = income.payment_proofs?.length > 0
-                  const isApproved = income.payment_proofs?.some((r: { status: string }) => r.status === 'approved')
+                  const proofs = getProofsForIncome(income.id, income.income_type)
+                  const hasReceipt = proofs.length > 0
+                  const isApproved = hasApprovedProof(income.id, income.income_type)
                   
                   return (
                     <tr key={income.id} className="border-b hover:bg-muted/50">
@@ -149,7 +178,7 @@ export default async function MiCasaPage() {
                       <td className="px-6 py-3">
                         {hasReceipt ? (
                           <span className="text-xs text-blue-600">
-                            {income.payment_proofs.length} comprobante(s)
+                            {proofs.length} comprobante(s)
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">Sin comprobante</span>
