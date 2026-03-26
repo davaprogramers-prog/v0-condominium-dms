@@ -70,9 +70,10 @@ export default async function PropietariosPage() {
     .eq("period_year", currentYear)
 
   // Get existing income records for current period to check paid status
+  // Only check income with status "approved" (paid)
   const { data: incomeRecords } = await supabase
     .from("condo_income")
-    .select("house_id, income_type, amount")
+    .select("house_id, income_type, amount, status")
     .eq("condo_id", condoId)
     .eq("period_month", currentMonth)
     .eq("period_year", currentYear)
@@ -87,12 +88,17 @@ export default async function PropietariosPage() {
     const gastosProof = houseProofs.find(p => p.payment_type === "gastos_comunes" || !p.payment_type)
     const multasProof = houseProofs.find(p => p.payment_type === "multas")
     
-    // Check if income was recorded for this house
+    // Check if income was recorded AND APPROVED for this house
+    // Handle multiple income_type naming conventions
     const fixedIncome = (incomeRecords || []).find(
-      r => r.house_id === house.id && r.income_type === "gasto_comun"
+      r => r.house_id === house.id && 
+           (r.income_type === "fixed" || r.income_type === "gasto_comun" || r.income_type === "cuota") &&
+           r.status === "approved"
     )
     const variableIncome = (incomeRecords || []).find(
-      r => r.house_id === house.id && r.income_type === "gasto_comun_variable"
+      r => r.house_id === house.id && 
+           (r.income_type === "variable" || r.income_type === "gasto_comun_variable") &&
+           r.status === "approved"
     )
     
     const isPaidFixed = !!fixedIncome

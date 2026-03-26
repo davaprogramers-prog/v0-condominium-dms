@@ -52,55 +52,52 @@ export function ApproveProofDialog({
       const today = new Date().toISOString().split("T")[0]
 
       if (isGastosComunes) {
-        // Create fixed income record
-        const { data: fixedIncome, error: fixedError } = await supabase
+        // Find EXISTING income records for this house/period (created from Parameters)
+        const { data: existingIncomes } = await supabase
           .from("condo_income")
-          .insert({
-            condo_id: proof.condo_id,
-            house_id: proof.house_id,
-            income_type: "gasto_comun",
-            amount: fixedAmount,
-            income_date: today,
-            period_month: proof.period_month,
-            period_year: proof.period_year,
-            description: `Gasto comun fijo - Casa #${house.house_number}`,
-            receipt_url: proof.receipt_url,
-            created_by: user.id,
-          })
-          .select()
-          .single()
+          .select("id, income_type")
+          .eq("condo_id", proof.condo_id)
+          .eq("house_id", proof.house_id)
+          .eq("period_month", proof.period_month)
+          .eq("period_year", proof.period_year)
 
-        if (fixedError) throw fixedError
+        const fixedIncome = existingIncomes?.find(i => i.income_type === "fixed" || i.income_type === "gasto_comun" || i.income_type === "cuota")
+        const variableIncome = existingIncomes?.find(i => i.income_type === "variable" || i.income_type === "gasto_comun_variable")
 
-        // Create variable income record
-        const { data: variableIncome, error: variableError } = await supabase
-          .from("condo_income")
-          .insert({
-            condo_id: proof.condo_id,
-            house_id: proof.house_id,
-            income_type: "gasto_comun_variable",
-            amount: variableAmount,
-            income_date: today,
-            period_month: proof.period_month,
-            period_year: proof.period_year,
-            description: `Gasto comun variable - Casa #${house.house_number}`,
-            receipt_url: proof.receipt_url,
-            created_by: user.id,
-          })
-          .select()
-          .single()
+        // Update existing income records to approved status with receipt URL
+        if (fixedIncome) {
+          const { error: fixedError } = await supabase
+            .from("condo_income")
+            .update({
+              status: "approved",
+              receipt_url: proof.receipt_url,
+            })
+            .eq("id", fixedIncome.id)
 
-        if (variableError) throw variableError
+          if (fixedError) throw fixedError
+        }
 
-        // Update proof status
+        if (variableIncome) {
+          const { error: variableError } = await supabase
+            .from("condo_income")
+            .update({
+              status: "approved",
+              receipt_url: proof.receipt_url,
+            })
+            .eq("id", variableIncome.id)
+
+          if (variableError) throw variableError
+        }
+
+        // Update proof status with income IDs
         const { error: updateError } = await supabase
           .from("payment_proofs")
           .update({
             status: "approved",
             reviewed_by: user.id,
             reviewed_at: new Date().toISOString(),
-            fixed_income_id: fixedIncome.id,
-            variable_income_id: variableIncome.id,
+            fixed_income_id: fixedIncome?.id || null,
+            variable_income_id: variableIncome?.id || null,
           })
           .eq("id", proof.id)
 
