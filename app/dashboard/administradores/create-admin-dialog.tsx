@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,39 +12,19 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { UserPlus, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-interface Condo {
-  id: string
-  name: string
+interface CreateAdminDialogProps {
+  condoId: string
+  condoName: string
 }
 
-export function CreateAdminDialog() {
+export function CreateAdminDialog({ condoId, condoName }: CreateAdminDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [condos, setCondos] = useState<Condo[]>([])
   const [error, setError] = useState("")
   const router = useRouter()
-
-  useEffect(() => {
-    const fetchCondos = async () => {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from("condominiums")
-        .select("id, name")
-        .order("name")
-      setCondos(data || [])
-    }
-    if (open) fetchCondos()
-  }, [open])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -56,10 +35,9 @@ export function CreateAdminDialog() {
     const email = formData.get("email") as string
     const firstName = formData.get("first_name") as string
     const lastName = formData.get("last_name") as string
-    const condoId = formData.get("condo_id") as string
     const password = formData.get("password") as string
 
-    if (!email || !firstName || !condoId || !password) {
+    if (!email || !firstName || !password) {
       setError("Todos los campos son requeridos")
       setLoading(false)
       return
@@ -113,7 +91,7 @@ export function CreateAdminDialog() {
         <DialogHeader>
           <DialogTitle>Crear Administrador</DialogTitle>
           <DialogDescription>
-            Crea un nuevo administrador y asignalo a un condominio
+            Crea un nuevo administrador para {condoName}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -143,22 +121,6 @@ export function CreateAdminDialog() {
             <Label htmlFor="password">Contraseña *</Label>
             <Input id="password" name="password" type="password" minLength={6} required />
             <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="condo_id">Condominio *</Label>
-            <Select name="condo_id" required>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar condominio" />
-              </SelectTrigger>
-              <SelectContent>
-                {condos.map((condo) => (
-                  <SelectItem key={condo.id} value={condo.id}>
-                    {condo.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>

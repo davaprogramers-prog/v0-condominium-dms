@@ -258,6 +258,19 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {hasCondo && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={pathname === "/dashboard/administradores"}
+                    >
+                      <Link href="/dashboard/administradores">
+                        <Users className="h-4 w-4" />
+                        <span>Administradores</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
