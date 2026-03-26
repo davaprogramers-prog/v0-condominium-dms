@@ -90,6 +90,8 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 export async function getCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
+  console.log("[v0] getCondoIncome called with:", { condoId, year, month })
+
   let query = supabase
     .from("condo_income")
     .select("*, payment_proofs(*)")
@@ -103,6 +105,8 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
+
+  console.log("[v0] getCondoIncome result:", { dataCount: data?.length, error, firstItem: data?.[0] })
 
   if (error) {
     console.error("Error fetching income:", error)
