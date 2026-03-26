@@ -16,7 +16,7 @@ export default async function EncuestasPage() {
   if (!profile?.condo_id) redirect("/dashboard")
 
   // Get surveys with options and votes
-  const { data: surveys, error: surveysError } = await supabase
+  const { data: surveys } = await supabase
     .from("surveys")
     .select(`
       *,
@@ -26,16 +26,12 @@ export default async function EncuestasPage() {
         display_order,
         survey_votes (
           id,
-          user_id
+          voter_id
         )
       )
     `)
     .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
-  
-  console.log("[v0] Profile condo_id:", profile.condo_id)
-  console.log("[v0] Surveys found:", surveys?.length, surveys)
-  console.log("[v0] Surveys error:", surveysError)
 
   // Get total houses count
   const { count: totalHouses } = await supabase

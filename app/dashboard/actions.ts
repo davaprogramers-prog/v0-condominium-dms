@@ -433,6 +433,29 @@ export async function closeSurvey(id: string) {
   revalidatePath("/dashboard/encuestas")
 }
 
+export async function updateSurvey(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("surveys")
+    .update({
+      title: formData.get("title") as string,
+      description: formData.get("description") as string || null,
+    })
+    .eq("id", formData.get("id") as string)
+  if (error) throw error
+  revalidatePath("/dashboard/encuestas")
+}
+
+export async function deleteSurvey(id: string) {
+  const { supabase } = await getCondoId()
+  // Delete votes first (cascade should handle this, but being explicit)
+  await supabase.from("survey_votes").delete().eq("survey_id", id)
+  await supabase.from("survey_options").delete().eq("survey_id", id)
+  const { error } = await supabase.from("surveys").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/encuestas")
+}
+
 // ===== Documents =====
 export async function createDocumentType(formData: FormData) {
   const { supabase, condoId } = await getCondoId()

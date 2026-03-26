@@ -1,16 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { createSurvey, voteSurvey, closeSurvey } from "@/app/dashboard/actions"
+import { createSurvey, voteSurvey, closeSurvey, updateSurvey, deleteSurvey } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Plus, Vote, X, Trash2 } from "lucide-react"
+import { Plus, Vote, X, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
 
 interface EncuestasClientProps {
   surveys: Record<string, unknown>[]
@@ -23,6 +25,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
   const [openNew, setOpenNew] = useState(false)
   const [options, setOptions] = useState<string[]>(["", ""])
   const [voting, setVoting] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState<string | null>(null)
 
   const addOption = () => setOptions([...options, ""])
   const removeOption = (i: number) => setOptions(options.filter((_, idx) => idx !== i))
@@ -112,7 +115,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
               (acc, opt) => acc + ((opt.survey_votes as Record<string, unknown>[])?.length || 0), 0
             )
             const userVoted = surveyOptions.some((opt) =>
-              (opt.survey_votes as Record<string, unknown>[])?.some((v) => v.user_id === userId)
+              (opt.survey_votes as Record<string, unknown>[])?.some((v) => v.voter_id === userId)
             )
             const isActive = survey.is_active as boolean
 
@@ -131,14 +134,76 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                         <CardDescription className="mt-1">{survey.description as string}</CardDescription>
                       )}
                     </div>
-                    {isAdmin && isActive && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => closeSurvey(survey.id as string)}
-                      >
-                        Cerrar Encuesta
-                      </Button>
+                    {isAdmin && (
+                      <div className="flex items-center gap-2">
+                        {isActive && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => closeSurvey(survey.id as string)}
+                          >
+                            Cerrar
+                          </Button>
+                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditOpen(survey.id as string)}>
+                              <Edit2 className="h-4 w-4 mr-2" />Editar
+                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Eliminar Encuesta</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="flex gap-3 justify-end">
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteSurvey(survey.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Eliminar
+                                  </AlertDialogAction>
+                                </div>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Edit Dialog */}
+                        <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                          <DialogContent>
+                            <DialogHeader><DialogTitle>Editar Encuesta</DialogTitle></DialogHeader>
+                            <form
+                              action={async (fd) => {
+                                fd.set("id", survey.id as string)
+                                await updateSurvey(fd)
+                                setEditOpen(null)
+                              }}
+                              className="flex flex-col gap-4"
+                            >
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor="edit_title">Titulo</Label>
+                                <Input id="edit_title" name="title" defaultValue={survey.title as string} required />
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor="edit_desc">Descripcion</Label>
+                                <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} />
+                              </div>
+                              <Button type="submit">Guardar Cambios</Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     )}
                   </div>
                 </CardHeader>
@@ -149,7 +214,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                       const optVotes = (opt.survey_votes as Record<string, unknown>[])?.length || 0
                       const percentage = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0
                       const isUserVote = (opt.survey_votes as Record<string, unknown>[])?.some(
-                        (v) => v.user_id === userId
+                        (v) => v.voter_id === userId
                       )
 
                       return (
