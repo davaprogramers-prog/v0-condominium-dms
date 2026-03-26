@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { uploadBankStatement } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Landmark, ExternalLink } from "lucide-react"
+import { Plus, Landmark, ExternalLink, X } from "lucide-react"
 
 interface CartolasClientProps {
   statements: Record<string, unknown>[]
@@ -20,6 +20,18 @@ interface CartolasClientProps {
 export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
+  const [viewStatement, setViewStatement] = useState<{ url: string; title: string } | null>(null)
+
+  // Handle ESC key to close viewer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && viewStatement) {
+        setViewStatement(null)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [viewStatement])
 
   return (
     <div className="flex flex-col gap-6">
@@ -100,14 +112,12 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                       </TableCell>
                       <TableCell className="text-sm">{new Date(stmt.created_at as string).toLocaleDateString("es-CL")}</TableCell>
                       <TableCell>
-                        <a
-                          href={stmt.file_url as string}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => setViewStatement({ url: stmt.file_url as string, title: stmt.title as string })}
                           className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                         >
                           <ExternalLink className="h-3 w-3" />Ver PDF
-                        </a>
+                        </button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -117,6 +127,54 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Fullscreen Statement Viewer */}
+      {viewStatement && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+          <div className="flex-shrink-0 flex items-center justify-between p-3 bg-black/50 border-b border-white/10">
+            <h3 className="text-white font-medium text-sm">Cartola - {viewStatement.title}</h3>
+            <div className="flex items-center gap-1">
+              <a
+                href={viewStatement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
+                title="Abrir en nueva pestana"
+              >
+                <ExternalLink className="h-5 w-5" />
+              </a>
+              <button
+                onClick={() => setViewStatement(null)}
+                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
+                title="Cerrar (ESC)"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 p-2 overflow-auto">
+            {viewStatement.url.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={viewStatement.url}
+                className="w-full h-full min-h-[80vh] rounded-lg bg-white"
+                title={`Cartola ${viewStatement.title}`}
+              />
+            ) : (
+              <div className="flex items-center justify-center min-h-full">
+                <img
+                  src={viewStatement.url}
+                  alt={`Cartola ${viewStatement.title}`}
+                  className="max-w-full h-auto object-contain rounded-lg"
+                  crossOrigin="anonymous"
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex-shrink-0 p-2 text-center border-t border-white/10">
+            <p className="text-white/50 text-xs">Presiona ESC o haz clic en X para cerrar</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
