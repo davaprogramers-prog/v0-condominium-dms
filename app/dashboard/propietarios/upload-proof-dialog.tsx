@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Upload, Loader2, Image as ImageIcon, X } from "lucide-react"
-import { upload } from "@vercel/blob/client"
 
 interface UploadProofDialogProps {
   houseId: string
@@ -81,11 +80,20 @@ export function UploadProofDialog({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      // Upload image to blob
-      const blob = await upload(`payment-proofs/${condoId}/${houseId}/${Date.now()}.jpg`, selectedFile, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
-      })
+      // Upload image to Supabase Storage
+      const ext = selectedFile.name.split(".").pop() || "jpg"
+      const filePath = `payment-proofs/${condoId}/${houseId}/${Date.now()}.${ext}`
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(filePath, selectedFile, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("receipts")
+        .getPublicUrl(uploadData.path)
 
       const formData = new FormData(e.currentTarget)
 
@@ -100,7 +108,7 @@ export function UploadProofDialog({
           period_year: currentYear,
           fixed_amount: fixedAmount,
           variable_amount: variableAmount,
-          receipt_url: blob.url,
+          receipt_url: urlData.publicUrl,
           notes: formData.get("notes") as string || null,
           status: "pending",
         })
@@ -110,7 +118,7 @@ export function UploadProofDialog({
       setOpen(false)
       router.refresh()
     } catch (err: any) {
-      console.error("[v0] Error uploading proof:", err)
+      console.error("Error uploading proof:", err)
       setError(err.message || "Error al subir el comprobante")
     } finally {
       setLoading(false)
