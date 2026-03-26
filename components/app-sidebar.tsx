@@ -109,14 +109,27 @@ const adminMenuItems = [
 
 const ownerMenuItems = [
   {
-    section: "Mi Condominio",
+    section: "Dashboard",
     items: [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+    ]
+  },
+  {
+    section: "Mi Propiedad",
+    items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Pagos", href: "/dashboard/ingresos", icon: DollarSign },
+    ]
+  },
+  {
+    section: "Condominio",
+    items: [
+      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+      { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
       { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
 ]
@@ -260,7 +273,9 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               <span className="text-xs font-medium">
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs text-muted-foreground">{isAdmin ? "Administrador" : "Propietario"}</span>
+              <span className="text-xs text-muted-foreground">
+                {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
+              </span>
             </div>
           </div>
           <form action={signOut}>

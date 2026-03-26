@@ -15,9 +15,20 @@ export default async function MiCasaPage() {
     .eq("id", user.id)
     .single()
 
-  // Propietarios deben tener house_id
-  if (!profile?.house_id || profile.role !== "propietario") {
+  // Propietarios deben tener house_id (cualquier usuario que no sea admin/super_admin)
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  if (!profile?.house_id && !isAdmin) {
     redirect("/dashboard")
+  }
+  
+  // Si es admin sin house_id, mostrar mensaje
+  if (!profile?.house_id) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Mi Casa</h1>
+        <p className="text-muted-foreground">Esta página es para propietarios con una casa asignada.</p>
+      </div>
+    )
   }
 
   const { data: house } = await supabase
