@@ -59,8 +59,8 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                   <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="payment_due_day">Día de vencimiento de pago</Label>
-                  <Input id="payment_due_day" name="payment_due_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} />
+                  <Label htmlFor="payment_deadline_day">Día de vencimiento de pago</Label>
+                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} />
                   <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
                 </div>
                 <Button type="submit">Guardar Casa</Button>
@@ -94,7 +94,7 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit_due_day">Día de vencimiento</Label>
-                <Input id="edit_due_day" name="payment_due_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_due_day as number) || 5} />
+                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} />
                 <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
               </div>
               <Button type="submit">Actualizar</Button>
@@ -134,7 +134,7 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                       <TableCell>{(house.owner_name as string) || "-"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{(house.owner_email as string) || "-"}</TableCell>
                       <TableCell>
-                        {house.payment_due_day ? `Día ${house.payment_due_day}` : "Día 5"}
+                        {house.payment_deadline_day ? `Día ${house.payment_deadline_day}` : "Día 5"}
                       </TableCell>
                       <TableCell>
                         <Badge variant={house.is_active !== false ? "default" : "secondary"}>

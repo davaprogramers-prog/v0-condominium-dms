@@ -40,7 +40,7 @@ export async function createHouse(
       house_number: formData.houseNumber,
       owner_name: formData.ownerName,
       owner_email: formData.ownerEmail,
-      payment_due_day: formData.paymentDueDay || 5,
+      payment_deadline_day: formData.paymentDueDay || 5,
     })
     .select()
     .single()
@@ -138,7 +138,7 @@ export async function updateHouse(
     .update({
       owner_name: formData.ownerName,
       owner_email: formData.ownerEmail,
-      payment_due_day: formData.paymentDueDay || 5,
+      payment_deadline_day: formData.paymentDueDay || 5,
     })
     .eq("id", houseId)
 

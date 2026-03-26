@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DollarSign, FileText, TrendingUp } from "lucide-react"
 import { PaymentUploadDialog } from "./payment-upload-dialog"
+import { AvatarUpload } from "./avatar-upload"
 
 export default async function MiCasaPage() {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export default async function MiCasaPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("condo_id, role, house_id, first_name")
+    .select("condo_id, role, house_id, first_name, last_name, avatar_url")
     .eq("id", user.id)
     .single()
 
@@ -98,9 +99,15 @@ export default async function MiCasaPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Mi Casa #{house?.house_number}</h1>
-          <p className="text-muted-foreground">Bienvenido, {profile?.first_name}</p>
+        <div className="flex items-center gap-4">
+          <AvatarUpload 
+            currentAvatarUrl={profile?.avatar_url || undefined}
+            userName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario"}
+          />
+          <div>
+            <h1 className="text-3xl font-bold">Mi Casa #{house?.house_number}</h1>
+            <p className="text-muted-foreground">Bienvenido, {profile?.first_name}</p>
+          </div>
         </div>
         <PaymentUploadDialog 
           condoId={profile.condo_id} 

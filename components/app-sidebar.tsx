@@ -267,9 +267,17 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarFooter className="border-t p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
-              {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
-            </div>
+            {profile?.avatar_url ? (
+              <img 
+                src={profile.avatar_url as string} 
+                alt="Avatar" 
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
+              </div>
+            )}
             <div className="flex flex-col">
               <span className="text-xs font-medium">
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
