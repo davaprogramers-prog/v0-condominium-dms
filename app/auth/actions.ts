@@ -94,7 +94,7 @@ export async function registerOwner(
       last_name: lastName,
       house_id: houseId,
       condo_id: house.condo_id,
-      role: "propietario",
+      role: "owner",
     }, { onConflict: "id" })
 
   if (profileError) {
@@ -109,7 +109,7 @@ export async function registerOwner(
         last_name: lastName,
         house_id: houseId,
         condo_id: house.condo_id,
-        role: "propietario",
+        role: "owner",
       })
       .eq("id", authData.user.id)
   }

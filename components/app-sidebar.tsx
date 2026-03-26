@@ -147,6 +147,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const [switching, setSwitching] = useState(false)
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isSuperAdmin = profile?.role === "super_admin"
+  const isOwner = profile?.role === "propietario" || profile?.role === "owner"
   const hasCondo = !!profile?.condo_id
   const canSwitchCondo = allCondos.length > 1
 
