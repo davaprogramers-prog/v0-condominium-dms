@@ -15,6 +15,10 @@ const nextConfig = {
       },
     ],
   },
+  // Fix for __dirname issue in edge runtime
+  experimental: {
+    serverComponentsExternalPackages: ['postgres'],
+  },
 }
 
-export default nextConfig
+module.exports = nextConfig
