@@ -19,6 +19,7 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(currentUrl || null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,18 +27,27 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
     if (!file) return
 
     setUploading(true)
+    setError(null)
     try {
       const supabase = createClient()
       const ext = file.name.split(".").pop()
       const path = `${folder ? folder + "/" : ""}${Date.now()}.${ext}`
-      const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-      if (error) throw error
+      const { data, error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+      if (uploadError) {
+        if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("bucket")) {
+          setError(`Bucket "${bucket}" no existe. Contacta al administrador.`)
+        } else {
+          setError(uploadError.message)
+        }
+        return
+      }
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
       setPreview(urlData.publicUrl)
       setFileName(file.name)
       onUpload(urlData.publicUrl)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error uploading:", err)
+      setError(err.message || "Error al subir archivo")
     } finally {
       setUploading(false)
     }
@@ -58,6 +68,11 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
         <Upload className="h-4 w-4" />
         {uploading ? "Subiendo..." : label}
       </Button>
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+          {error}
+        </div>
+      )}
       {preview && (
         <div className="relative rounded-lg border p-2">
           <button
