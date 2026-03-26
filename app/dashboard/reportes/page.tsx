@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
-import { getCondoExpenses, getCondoIncome, getLast12MonthsData } from "../gastos/actions"
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
+import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsData } from "../gastos/actions"
+import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -31,11 +31,13 @@ export default async function ReportesPage({
   // Get expenses, income, and 12-month historical data
   let expenses: any[] = []
   let income: any[] = []
+  let paidIncome: any[] = []
   let last12Months: any[] = []
 
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     income = await getCondoIncome(condoId, year, month)
+    paidIncome = await getPaidCondoIncome(condoId, year, month)
     last12Months = await getLast12MonthsData(condoId)
   }
 
@@ -48,7 +50,9 @@ export default async function ReportesPage({
 
   // Calculate totals
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
-  const totalIncome = income.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+  const totalExpected = income.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Por cobrar
+  const totalCollected = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Recaudado
+  const totalPending = totalExpected - totalCollected // Pendiente
 
   // Prepare data for charts
   const expensesByCategory: Record<string, number> = {}
@@ -81,7 +85,8 @@ export default async function ReportesPage({
   }))
 
   const barData = [
-    { nombre: "Ingresos", valor: totalIncome, fill: "#22c55e" },
+    { nombre: "Por Cobrar", valor: totalExpected, fill: "#3b82f6" },
+    { nombre: "Recaudado", valor: totalCollected, fill: "#22c55e" },
     { nombre: "Gastos", valor: totalExpenses, fill: "#ef4444" },
   ]
 
@@ -124,19 +129,49 @@ export default async function ReportesPage({
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total Ingresos</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">
-                ${totalIncome.toLocaleString("es-CL", {
+              <p className="text-sm text-muted-foreground">Por Cobrar</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">
+                ${totalExpected.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingUp className="h-10 w-10 text-green-500 opacity-30" />
+            <DollarSign className="h-8 w-8 text-blue-500 opacity-30" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Recaudado</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                ${totalCollected.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <CheckCircle className="h-8 w-8 text-green-500 opacity-30" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Pendiente</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">
+                ${totalPending.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <Clock className="h-8 w-8 text-amber-500 opacity-30" />
           </div>
         </div>
 
@@ -144,37 +179,38 @@ export default async function ReportesPage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Gastos</p>
-              <p className="text-3xl font-bold text-red-600 mt-1">
+              <p className="text-2xl font-bold text-red-600 mt-1">
                 ${totalExpenses.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingDown className="h-10 w-10 text-red-500 opacity-30" />
+            <TrendingDown className="h-8 w-8 text-red-500 opacity-30" />
           </div>
         </div>
+      </div>
 
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Diferencia</p>
-              <p className={`text-3xl font-bold mt-1 ${totalIncome - totalExpenses >= 0 ? "text-green-600" : "text-red-600"}`}>
-                ${(totalIncome - totalExpenses).toLocaleString("es-CL", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
-              </p>
-            </div>
-            <DollarSign className="h-10 w-10 opacity-30" />
+      {/* Balance Card */}
+      <div className="rounded-lg border bg-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">Balance Real (Recaudado - Gastos)</p>
+            <p className={`text-3xl font-bold mt-1 ${totalCollected - totalExpenses >= 0 ? "text-green-600" : "text-red-600"}`}>
+              ${(totalCollected - totalExpenses).toLocaleString("es-CL", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </p>
           </div>
+          <TrendingUp className={`h-10 w-10 opacity-30 ${totalCollected - totalExpenses >= 0 ? "text-green-500" : "text-red-500"}`} />
         </div>
       </div>
 
       {/* Charts Component */}
       <ReportesCharts 
         totalExpenses={totalExpenses}
-        totalIncome={totalIncome}
+        totalIncome={totalCollected}
         barData={barData}
         pieExpensesData={pieExpensesData}
         pieIncomeData={pieIncomeData}

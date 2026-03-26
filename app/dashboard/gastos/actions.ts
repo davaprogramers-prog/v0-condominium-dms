@@ -92,7 +92,7 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 
   let query = supabase
     .from("condo_income")
-    .select("*")
+    .select("*, payment_proofs(*)")
     .eq("condo_id", condoId)
 
   if (year) {
@@ -106,6 +106,33 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 
   if (error) {
     console.error("Error fetching income:", error)
+    return []
+  }
+
+  return data || []
+}
+
+// Get only income that has been paid (has approved payment proof)
+export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from("condo_income")
+    .select("*, payment_proofs!inner(*)")
+    .eq("condo_id", condoId)
+    .eq("payment_proofs.status", "approved")
+
+  if (year) {
+    query = query.eq("period_year", year)
+  }
+  if (month) {
+    query = query.eq("period_month", month)
+  }
+
+  const { data, error } = await query.order("income_date", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching paid income:", error)
     return []
   }
 
