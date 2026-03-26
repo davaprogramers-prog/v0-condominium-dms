@@ -49,12 +49,12 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage using receipts bucket (which already exists)
       const fileExt = file.name.split(".").pop()
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("avatars")
+      const { error: uploadError } = await supabase.storage
+        .from("receipts")
         .upload(fileName, file, {
           cacheControl: "3600",
           upsert: true,
@@ -62,39 +62,23 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
 
       if (uploadError) {
         console.error("[v0] Upload error:", uploadError)
-        // Try with public bucket approach
-        const { error: publicUploadError } = await supabase.storage
-          .from("public")
-          .upload(`avatars/${fileName}`, file, {
-            cacheControl: "3600",
-            upsert: true,
-          })
-        
-        if (publicUploadError) {
-          throw publicUploadError
-        }
-        
-        // Get public URL from public bucket
-        const { data: publicUrlData } = supabase.storage
-          .from("public")
-          .getPublicUrl(`avatars/${fileName}`)
-        
-        // Update profile
-        await supabase
-          .from("profiles")
-          .update({ avatar_url: publicUrlData.publicUrl })
-          .eq("id", user.id)
-      } else {
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(fileName)
+        throw uploadError
+      }
+      
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("receipts")
+        .getPublicUrl(fileName)
 
-        // Update profile
-        await supabase
-          .from("profiles")
-          .update({ avatar_url: urlData.publicUrl })
-          .eq("id", user.id)
+      // Update profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: urlData.publicUrl })
+        .eq("id", user.id)
+      
+      if (updateError) {
+        console.error("[v0] Profile update error:", updateError)
+        throw updateError
       }
 
       setOpen(false)
