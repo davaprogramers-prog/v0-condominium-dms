@@ -41,6 +41,7 @@ export function UploadProofDialog({
   const [error, setError] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [notes, setNotes] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -113,8 +114,6 @@ export function UploadProofDialog({
         .from("receipts")
         .getPublicUrl(uploadData.path)
 
-      const formData = new FormData(e.currentTarget)
-
       // Create payment proof record
       const { error: insertError } = await supabase
         .from("payment_proofs")
@@ -129,7 +128,7 @@ export function UploadProofDialog({
           fines_amount: paymentType === "multas" ? finesAmount : 0,
           payment_type: paymentType,
           receipt_url: urlData.publicUrl,
-          notes: formData.get("notes") as string || null,
+          notes: notes || null,
           status: "pending",
         })
 
@@ -249,6 +248,8 @@ export function UploadProofDialog({
             <Textarea
               id="notes"
               name="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Ej: Transferencia desde Banco Estado"
               rows={2}
             />
