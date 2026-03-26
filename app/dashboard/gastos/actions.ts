@@ -62,15 +62,6 @@ export async function createCondoExpense(
 export async function getCondoExpenses(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // First, check all expenses for this condo without filters
-  const { data: allExpenses, error: allError } = await supabase
-    .from("condo_expenses")
-    .select("id, period_year, period_month, amount")
-    .eq("condo_id", condoId)
-  
-  console.log("[v0] getCondoExpenses - All expenses for condo:", condoId, "count:", allExpenses?.length, "data:", allExpenses)
-  if (allError) console.log("[v0] getCondoExpenses - Error fetching all:", allError)
-
   let query = supabase
     .from("condo_expenses")
     .select("*")
@@ -85,10 +76,8 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 
   const { data, error } = await query.order("expense_date", { ascending: false })
 
-  console.log("[v0] getCondoExpenses - Filtered by year:", year, "month:", month, "count:", data?.length)
-
   if (error) {
-    console.error("[v0] Error fetching expenses:", error)
+    console.error("Error fetching expenses:", error)
     return []
   }
 
@@ -97,15 +86,6 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 
 export async function getCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
-
-  // First, check all income for this condo without filters
-  const { data: allIncome, error: allError } = await supabase
-    .from("condo_income")
-    .select("id, period_year, period_month, amount")
-    .eq("condo_id", condoId)
-  
-  console.log("[v0] getCondoIncome - All income for condo:", condoId, "count:", allIncome?.length, "data:", allIncome)
-  if (allError) console.log("[v0] getCondoIncome - Error fetching all:", allError)
 
   let query = supabase
     .from("condo_income")
@@ -121,10 +101,8 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 
   const { data, error } = await query.order("income_date", { ascending: false })
 
-  console.log("[v0] getCondoIncome - Filtered by year:", year, "month:", month, "count:", data?.length)
-
   if (error) {
-    console.error("[v0] Error fetching income:", error)
+    console.error("Error fetching income:", error)
     return []
   }
 

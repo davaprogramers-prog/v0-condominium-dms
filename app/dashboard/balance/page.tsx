@@ -17,9 +17,6 @@ export default async function BalancePage({
     .single()
 
   const condoId = profile?.condo_id
-  
-  console.log("[v0] Balance - Profile:", profile)
-  console.log("[v0] Balance - CondoId:", condoId)
 
   // Get period from query params or use current month
   const params = await searchParams
@@ -45,10 +42,6 @@ export default async function BalancePage({
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     income = await getCondoIncome(condoId, year, month)
-    console.log("[v0] Balance - Expenses count:", expenses.length, "for year:", year, "month:", month)
-    console.log("[v0] Balance - Income count:", income.length)
-  } else {
-    console.log("[v0] Balance - NO CONDO ID, cannot fetch data")
   }
 
   // Calculate previous balance (saldo anterior)
