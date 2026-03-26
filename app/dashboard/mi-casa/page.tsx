@@ -44,10 +44,10 @@ export default async function MiCasaPage() {
     .single()
 
   const { data: incomes } = await supabase
-    .from("incomes")
-    .select("*, payment_receipts(*)")
+    .from("condo_income")
+    .select("*, payment_proofs(*)")
     .eq("house_id", profile.house_id)
-    .order("date", { ascending: false })
+    .order("income_date", { ascending: false })
 
   const { data: condo } = await supabase
     .from("condominiums")
@@ -55,16 +55,15 @@ export default async function MiCasaPage() {
     .eq("id", profile.condo_id)
     .single()
 
-  // Calcular información de deuda
+  // Calcular información de deuda - filtrar por mes/año actual
   const currentMonthIncomes = incomes?.filter(i => {
-    const incomeDate = new Date(i.date)
-    return incomeDate.getMonth() + 1 === parameters?.current_month && 
-           incomeDate.getFullYear() === parameters?.current_year
+    return i.period_month === parameters?.current_month && 
+           i.period_year === parameters?.current_year
   }) || []
 
   const totalDue = currentMonthIncomes.reduce((acc, i) => acc + (i.amount || 0), 0)
   const totalPaid = currentMonthIncomes
-    .filter(i => i.payment_receipts?.some(r => r.verified))
+    .filter(i => i.payment_proofs?.some((r: { status: string }) => r.status === 'approved'))
     .reduce((acc, i) => acc + (i.amount || 0), 0)
   const balance = totalDue - totalPaid
 
@@ -140,8 +139,8 @@ export default async function MiCasaPage() {
               </thead>
               <tbody>
                 {currentMonthIncomes?.map((income) => {
-                  const hasReceipt = income.payment_receipts?.length > 0
-                  const isVerified = income.payment_receipts?.some(r => r.verified)
+                  const hasReceipt = income.payment_proofs?.length > 0
+                  const isApproved = income.payment_proofs?.some((r: { status: string }) => r.status === 'approved')
                   
                   return (
                     <tr key={income.id} className="border-b hover:bg-muted/50">
@@ -150,7 +149,7 @@ export default async function MiCasaPage() {
                       <td className="px-6 py-3">
                         {hasReceipt ? (
                           <span className="text-xs text-blue-600">
-                            {income.payment_receipts.length} comprobante(s)
+                            {income.payment_proofs.length} comprobante(s)
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">Sin comprobante</span>
@@ -158,13 +157,13 @@ export default async function MiCasaPage() {
                       </td>
                       <td className="px-6 py-3">
                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                          isVerified 
+                          isApproved 
                             ? "bg-green-100 text-green-700" 
                             : hasReceipt 
                             ? "bg-amber-100 text-amber-700"
                             : "bg-red-100 text-red-700"
                         }`}>
-                          {isVerified ? "Verificado" : hasReceipt ? "Pendiente" : "Pendiente"}
+                          {isApproved ? "Aprobado" : hasReceipt ? "En Revisión" : "Pendiente"}
                         </span>
                       </td>
                     </tr>

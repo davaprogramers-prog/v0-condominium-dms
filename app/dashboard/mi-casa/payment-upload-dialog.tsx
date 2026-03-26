@@ -55,28 +55,33 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
         .eq("id", user?.id)
         .single()
 
-      // Get current month's income
+      // Get current month's income from condo_income
       const { data: parameters } = await supabase
         .from("parameters")
         .select("current_month, current_year")
         .eq("condo_id", condoId)
         .single()
 
+      // Find or get the income record for this house this month
       const { data: income } = await supabase
-        .from("incomes")
+        .from("condo_income")
         .select("id")
         .eq("house_id", houseId)
         .eq("condo_id", condoId)
+        .eq("period_month", parameters?.current_month)
+        .eq("period_year", parameters?.current_year)
         .single()
 
       if (income) {
         const { error: receiptError } = await supabase
-          .from("payment_receipts")
+          .from("payment_proofs")
           .insert({
             income_id: income.id,
+            condo_id: condoId,
             house_id: houseId,
-            receipt_url: publicUrl,
-            verified: false,
+            file_url: publicUrl,
+            status: 'pending',
+            uploaded_at: new Date().toISOString(),
           })
 
         if (receiptError) {
@@ -84,6 +89,11 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
           setLoading(false)
           return
         }
+      } else {
+        console.error("[v0] No income found for this house this month")
+        alert("No hay cargos registrados para este mes. Contacte al administrador.")
+        setLoading(false)
+        return
       }
 
       setOpen(false)
