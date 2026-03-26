@@ -469,7 +469,7 @@ export async function voteSurvey(surveyId: string, optionId: string) {
   const { data: profile } = await supabase.from("profiles").select("condo_id, house_id").eq("id", user.id).single()
   if (!profile) throw new Error("Perfil no encontrado")
   
-  // Check if user already voted
+  // Check if user already voted - if so, update their vote (allows changing vote while survey is open)
   const { data: existingVote } = await supabase
     .from("survey_votes")
     .select("id")
@@ -478,18 +478,27 @@ export async function voteSurvey(surveyId: string, optionId: string) {
     .single()
   
   if (existingVote) {
-    throw new Error("Ya has votado en esta encuesta")
+    // Update existing vote
+    const { error } = await supabase
+      .from("survey_votes")
+      .update({ option_id: optionId })
+      .eq("id", existingVote.id)
+    
+    if (error) {
+      throw new Error("Error al actualizar voto: " + error.message)
+    }
+  } else {
+    // Create new vote
+    const { error } = await supabase.from("survey_votes").insert({
+      survey_id: surveyId,
+      option_id: optionId,
+      user_id: user.id,
+    })
+    if (error) {
+      throw new Error("Error al votar: " + error.message)
+    }
   }
   
-  const { error } = await supabase.from("survey_votes").insert({
-    survey_id: surveyId,
-    option_id: optionId,
-    user_id: user.id,
-  })
-  if (error) {
-    console.error("[v0] Error voting:", error)
-    throw new Error("Error al votar: " + error.message)
-  }
   revalidatePath("/dashboard/encuestas")
 }
 
