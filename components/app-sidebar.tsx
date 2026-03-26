@@ -133,6 +133,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const router = useRouter()
   const [switching, setSwitching] = useState(false)
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isSuperAdmin = profile?.role === "super_admin"
   const hasCondo = !!profile?.condo_id
   const canSwitchCondo = allCondos.length > 1
 
@@ -225,6 +226,28 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* Super Admin Section */}
+        {isSuperAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Super Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={pathname === "/admin"}
+                  >
+                    <Link href="/admin">
+                      <Key className="h-4 w-4" />
+                      <span>Panel de Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4">
