@@ -75,32 +75,54 @@ export async function createAdmin(data: {
     }
   )
 
-  // Create user with admin API (bypasses rate limits and auto-confirms email)
-  const { data: newUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-    email: data.email,
-    password: data.password,
-    email_confirm: true,
-    user_metadata: {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      role: "admin",
+  // First check if user already exists
+  const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+  const existingUser = existingUsers?.users?.find(u => u.email === data.email)
+
+  let userId: string
+
+  if (existingUser) {
+    // User exists - just update their profile to make them admin
+    userId = existingUser.id
+    
+    // Update user metadata
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        role: "admin",
+      }
+    })
+  } else {
+    // Create new user with admin API (bypasses rate limits and auto-confirms email)
+    const { data: newUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        role: "admin",
+      }
+    })
+
+    if (authError) {
+      console.error("[v0] Error creating auth user:", authError)
+      return { success: false, error: authError.message }
     }
-  })
 
-  if (authError) {
-    console.error("[v0] Error creating auth user:", authError)
-    return { success: false, error: authError.message }
-  }
-
-  if (!newUser.user) {
-    return { success: false, error: "No se pudo crear el usuario" }
+    if (!newUser.user) {
+      return { success: false, error: "No se pudo crear el usuario" }
+    }
+    
+    userId = newUser.user.id
   }
 
   // Update profile with condo_id and role (service role bypasses RLS)
   const { error: profileError } = await supabaseAdmin
     .from("profiles")
     .upsert({
-      id: newUser.user.id,
+      id: userId,
       email: data.email,
       first_name: data.firstName,
       last_name: data.lastName,
@@ -110,7 +132,20 @@ export async function createAdmin(data: {
 
   if (profileError) {
     console.error("[v0] Profile upsert error:", profileError)
-    // User was created, profile will be created on first login
+    // Try direct update instead
+    const { error: updateError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        role: "admin",
+        condo_id: data.condoId || null,
+      })
+      .eq("id", userId)
+    
+    if (updateError) {
+      console.error("[v0] Profile update error:", updateError)
+    }
   }
 
   revalidatePath("/dashboard/administradores")
