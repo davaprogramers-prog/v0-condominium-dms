@@ -55,24 +55,30 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
         .eq("id", user?.id)
         .single()
 
-      // Get current month's income from condo_income
+      // Get current month parameters and income amounts
       const { data: parameters } = await supabase
         .from("parameters")
-        .select("current_month, current_year")
+        .select("current_month, current_year, fixed_income_amount, variable_income_amount")
         .eq("condo_id", condoId)
         .single()
+
+      if (!parameters) {
+        alert("Error: No se encontraron parámetros del condominio.")
+        setLoading(false)
+        return
+      }
 
       // Find ALL income records for this house this month (fixed + variable)
       const { data: incomes } = await supabase
         .from("condo_income")
-        .select("id, income_type")
+        .select("id, income_type, amount")
         .eq("house_id", houseId)
         .eq("condo_id", condoId)
-        .eq("period_month", parameters?.current_month)
-        .eq("period_year", parameters?.current_year)
+        .eq("period_month", parameters.current_month)
+        .eq("period_year", parameters.current_year)
 
       if (incomes && incomes.length > 0) {
-        // Find fixed and variable income IDs
+        // Find fixed and variable income IDs and amounts
         const fixedIncome = incomes.find(i => i.income_type === 'fixed')
         const variableIncome = incomes.find(i => i.income_type === 'variable')
 
@@ -81,11 +87,15 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
           .insert({
             condo_id: condoId,
             house_id: houseId,
+            uploaded_by: user?.id,
+            period_month: parameters.current_month,
+            period_year: parameters.current_year,
+            fixed_amount: fixedIncome?.amount || parameters.fixed_income_amount || 0,
+            variable_amount: variableIncome?.amount || parameters.variable_income_amount || 0,
+            receipt_url: publicUrl,
+            status: 'pending',
             fixed_income_id: fixedIncome?.id || null,
             variable_income_id: variableIncome?.id || null,
-            file_url: publicUrl,
-            status: 'pending',
-            uploaded_at: new Date().toISOString(),
           })
 
         if (receiptError) {
