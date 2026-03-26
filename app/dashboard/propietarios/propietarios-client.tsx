@@ -353,8 +353,8 @@ function HouseCard({
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-2">
-              {/* Owner can upload proof if not paid and no pending proof */}
-              {!house.isPaidComplete && (!house.paymentProof || house.paymentProof.status === "rejected") && (
+              {/* Owner can upload proof for gastos comunes if not paid */}
+              {!house.isPaidComplete && (!house.paymentProof || house.paymentProof.status === "rejected" || house.paymentProof.payment_type !== "gastos_comunes") && (
                 <UploadProofDialog
                   houseId={house.id}
                   condoId={condoId}
@@ -363,6 +363,23 @@ function HouseCard({
                   fixedAmount={fixedAmount}
                   variableAmount={variableAmount}
                   currencySymbol={currencySymbol}
+                  paymentType="gastos_comunes"
+                />
+              )}
+
+              {/* Owner can upload proof for multas if there are pending fines */}
+              {house.totalFines > 0 && (
+                <UploadProofDialog
+                  houseId={house.id}
+                  condoId={condoId}
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                  fixedAmount={fixedAmount}
+                  variableAmount={variableAmount}
+                  finesAmount={house.totalFines}
+                  currencySymbol={currencySymbol}
+                  paymentType="multas"
+                  infractions={house.infractions}
                 />
               )}
 

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Upload, Loader2, Image as ImageIcon, X } from "lucide-react"
 
+type PaymentType = "gastos_comunes" | "multas"
+
 interface UploadProofDialogProps {
   houseId: string
   condoId: string
@@ -16,7 +18,10 @@ interface UploadProofDialogProps {
   currentYear: number
   fixedAmount: number
   variableAmount: number
+  finesAmount?: number
   currencySymbol: string
+  paymentType: PaymentType
+  infractions?: any[]
 }
 
 export function UploadProofDialog({
@@ -26,7 +31,10 @@ export function UploadProofDialog({
   currentYear,
   fixedAmount,
   variableAmount,
+  finesAmount = 0,
   currencySymbol,
+  paymentType,
+  infractions = [],
 }: UploadProofDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -36,7 +44,17 @@ export function UploadProofDialog({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  const totalAmount = fixedAmount + variableAmount
+  const totalAmount = paymentType === "gastos_comunes" 
+    ? fixedAmount + variableAmount 
+    : finesAmount
+  
+  const dialogTitle = paymentType === "gastos_comunes" 
+    ? "Subir Comprobante de Gastos Comunes" 
+    : "Subir Comprobante de Multas"
+  
+  const buttonLabel = paymentType === "gastos_comunes" 
+    ? "Subir Comprobante Gastos" 
+    : "Subir Comprobante Multas"
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -106,8 +124,10 @@ export function UploadProofDialog({
           uploaded_by: user.id,
           period_month: currentMonth,
           period_year: currentYear,
-          fixed_amount: fixedAmount,
-          variable_amount: variableAmount,
+          fixed_amount: paymentType === "gastos_comunes" ? fixedAmount : 0,
+          variable_amount: paymentType === "gastos_comunes" ? variableAmount : 0,
+          fines_amount: paymentType === "multas" ? finesAmount : 0,
+          payment_type: paymentType,
           receipt_url: urlData.publicUrl,
           notes: formData.get("notes") as string || null,
           status: "pending",
@@ -128,14 +148,14 @@ export function UploadProofDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm">
+        <Button variant={paymentType === "multas" ? "destructive" : "default"} size="sm">
           <Upload className="h-4 w-4 mr-2" />
-          Subir Comprobante
+          {buttonLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Subir Comprobante de Pago</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
             Sube la imagen del comprobante de transferencia o deposito
           </DialogDescription>
@@ -150,17 +170,33 @@ export function UploadProofDialog({
 
           {/* Amount Summary */}
           <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Comun Fijo</span>
-              <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Comun Variable</span>
-              <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
-            </div>
+            {paymentType === "gastos_comunes" ? (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Gasto Comun Fijo</span>
+                  <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Gasto Comun Variable</span>
+                  <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-red-600 mb-2">Multas a Pagar:</p>
+                {infractions.map((inf: any) => (
+                  <div key={inf.id} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{inf.description}</span>
+                    <span className="text-red-600">{currencySymbol}{inf.fine_amount?.toLocaleString("es-CL")}</span>
+                  </div>
+                ))}
+              </>
+            )}
             <div className="flex justify-between font-medium pt-2 border-t">
               <span>Total a Pagar</span>
-              <span className="text-primary">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
+              <span className={paymentType === "multas" ? "text-red-600" : "text-primary"}>
+                {currencySymbol}{totalAmount.toLocaleString("es-CL")}
+              </span>
             </div>
           </div>
 
