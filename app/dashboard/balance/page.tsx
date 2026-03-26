@@ -223,10 +223,10 @@ export default async function BalancePage({
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                       Multas
                     </span>
-                    <span className="font-semibold text-red-600">${multas.toLocaleString("es-CL")}</span>
+                    <span className="font-semibold text-amber-600">${multas.toLocaleString("es-CL")}</span>
                   </div>
                   {otros > 0 && (
                     <div className="flex justify-between text-sm">
@@ -265,7 +265,7 @@ export default async function BalancePage({
             </div>
             <div className="flex justify-between text-sm pt-2 border-t">
               <span className="font-medium">Total</span>
-              <span className="font-bold text-red-600">${totalExpenses.toLocaleString("es-CL")}</span>
+              <span className="font-bold">${totalExpenses.toLocaleString("es-CL")}</span>
             </div>
           </div>
         </div>
