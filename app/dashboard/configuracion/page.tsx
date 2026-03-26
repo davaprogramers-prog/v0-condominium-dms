@@ -29,7 +29,7 @@ export default async function ConfiguracionPage() {
     .eq("condo_id", profile?.condo_id)
     .single()
 
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   return (
     <div className="space-y-6">

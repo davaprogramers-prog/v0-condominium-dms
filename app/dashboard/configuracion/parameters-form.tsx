@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { Loader2, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { regenerateMonthlyIncome } from "./actions"
 
 interface ParametersFormProps {
   condoId: string
@@ -17,8 +18,23 @@ interface ParametersFormProps {
 
 export function ParametersForm({ condoId, currentParams }: ParametersFormProps) {
   const [loading, setLoading] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenerateResult, setRegenerateResult] = useState<{success: boolean, message: string} | null>(null)
   const [fineType, setFineType] = useState(currentParams?.fine_type || "porcentaje")
   const router = useRouter()
+
+  async function handleRegenerate() {
+    setRegenerating(true)
+    setRegenerateResult(null)
+    try {
+      const result = await regenerateMonthlyIncome(condoId)
+      setRegenerateResult(result)
+      router.refresh()
+    } catch (error) {
+      setRegenerateResult({ success: false, message: error instanceof Error ? error.message : "Error desconocido" })
+    }
+    setRegenerating(false)
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -300,6 +316,47 @@ export function ParametersForm({ condoId, currentParams }: ParametersFormProps) 
           Guardar Parámetros
         </Button>
       </form>
+
+      {/* Regenerate Income Section */}
+      <div className="space-y-4 pt-4 border-t">
+        <div>
+          <h3 className="text-sm font-medium">Generar Ingresos Mensuales</h3>
+          <p className="text-xs text-muted-foreground">
+            Crea automáticamente los registros de gasto común (fijo y variable) para todas las casas que no lo tengan en el mes actual
+          </p>
+        </div>
+        
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="w-full"
+          onClick={handleRegenerate}
+          disabled={regenerating || !currentParams?.fixed_income_amount}
+        >
+          {regenerating ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Generar Ingresos para Mes Actual
+        </Button>
+
+        {!currentParams?.fixed_income_amount && (
+          <p className="text-xs text-amber-600">
+            Primero configura los montos de gasto común fijo y variable arriba
+          </p>
+        )}
+
+        {regenerateResult && (
+          <div className={`p-3 rounded-lg border ${
+            regenerateResult.success 
+              ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-300"
+              : "bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-300"
+          }`}>
+            <p className="text-sm">{regenerateResult.message}</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

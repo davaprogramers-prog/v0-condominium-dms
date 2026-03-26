@@ -462,13 +462,35 @@ export async function createSurvey(formData: FormData) {
 }
 
 export async function voteSurvey(surveyId: string, optionId: string) {
-  const { supabase, userId } = await getCondoId()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+  
+  const { data: profile } = await supabase.from("profiles").select("condo_id, house_id").eq("id", user.id).single()
+  if (!profile) throw new Error("Perfil no encontrado")
+  
+  // Check if user already voted
+  const { data: existingVote } = await supabase
+    .from("survey_votes")
+    .select("id")
+    .eq("survey_id", surveyId)
+    .eq("voter_id", user.id)
+    .single()
+  
+  if (existingVote) {
+    throw new Error("Ya has votado en esta encuesta")
+  }
+  
   const { error } = await supabase.from("survey_votes").insert({
     survey_id: surveyId,
     option_id: optionId,
-    voter_id: userId,
+    voter_id: user.id,
+    house_id: profile.house_id,
   })
-  if (error) throw error
+  if (error) {
+    console.error("[v0] Error voting:", error)
+    throw new Error("Error al votar: " + error.message)
+  }
   revalidatePath("/dashboard/encuestas")
 }
 

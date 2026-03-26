@@ -48,7 +48,51 @@ export async function createHouse(
     throw new Error(houseError.message)
   }
 
+  // Auto-generate income for this house based on parameters
+  const { data: parameters } = await supabase
+    .from("parameters")
+    .select("current_month, current_year, fixed_income_amount, variable_income_amount")
+    .eq("condo_id", condoId)
+    .single()
+
+  if (parameters && house) {
+    const { current_month, current_year, fixed_income_amount, variable_income_amount } = parameters
+
+    // Create fixed income if configured
+    if (fixed_income_amount > 0) {
+      await supabase.from("condo_income").insert({
+        condo_id: condoId,
+        house_id: house.id,
+        description: `Gasto Común Fijo - Casa ${formData.houseNumber}`,
+        amount: fixed_income_amount,
+        income_date: new Date().toISOString().split("T")[0],
+        period_month: current_month,
+        period_year: current_year,
+        income_type: "fixed",
+        status: "pending",
+        created_by: user.id,
+      })
+    }
+
+    // Create variable income if configured
+    if (variable_income_amount > 0) {
+      await supabase.from("condo_income").insert({
+        condo_id: condoId,
+        house_id: house.id,
+        description: `Gasto Común Variable - Casa ${formData.houseNumber}`,
+        amount: variable_income_amount,
+        income_date: new Date().toISOString().split("T")[0],
+        period_month: current_month,
+        period_year: current_year,
+        income_type: "variable",
+        status: "pending",
+        created_by: user.id,
+      })
+    }
+  }
+
   revalidatePath("/dashboard/casas")
+  revalidatePath("/dashboard/ingresos")
   return { success: true }
 }
 
