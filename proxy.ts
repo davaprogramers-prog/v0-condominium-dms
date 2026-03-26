@@ -1,8 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 export function proxy(request: NextRequest) {
-  // Simple pass-through middleware
-  // Auth session handling is done in server components/actions
   return NextResponse.next()
 }
 
