@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,9 @@ import {
   Clock,
   Upload,
   FileCheck,
-  User
+  User,
+  X,
+  ExternalLink
 } from "lucide-react"
 import { UploadProofDialog } from "./upload-proof-dialog"
 import { ApproveProofDialog } from "./approve-proof-dialog"
@@ -59,6 +61,18 @@ export function PropietariosClient({
   currencySymbol,
 }: PropietariosClientProps) {
   const [expandedHouse, setExpandedHouse] = useState<string | null>(null)
+  const [viewReceipt, setViewReceipt] = useState<{ url: string; houseName: string } | null>(null)
+
+  // Handle ESC key to close viewer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && viewReceipt) {
+        setViewReceipt(null)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [viewReceipt])
 
   const totalAmount = fixedAmount + variableAmount
   const periodLabel = `${monthNames[currentMonth - 1]} ${currentYear}`
@@ -177,9 +191,56 @@ export function PropietariosClient({
             currencySymbol={currencySymbol}
             isExpanded={expandedHouse === house.id}
             onToggle={() => setExpandedHouse(expandedHouse === house.id ? null : house.id)}
+            onViewReceipt={(url) => setViewReceipt({ url, houseName: `Casa #${house.house_number}` })}
           />
         ))}
       </div>
+
+      {/* Fullscreen Receipt Viewer Modal */}
+      {viewReceipt && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+          <div className="flex items-center justify-between p-4 bg-black/50">
+            <h3 className="text-white font-medium">Comprobante - {viewReceipt.houseName}</h3>
+            <div className="flex items-center gap-2">
+              <a
+                href={viewReceipt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/70 hover:text-white p-2"
+                title="Abrir en nueva pestana"
+              >
+                <ExternalLink className="h-5 w-5" />
+              </a>
+              <button
+                onClick={() => setViewReceipt(null)}
+                className="text-white/70 hover:text-white p-2"
+                title="Cerrar (ESC)"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+            {viewReceipt.url.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={viewReceipt.url}
+                className="w-full h-full max-w-5xl rounded-lg"
+                title={`Comprobante de ${viewReceipt.houseName}`}
+              />
+            ) : (
+              <img
+                src={viewReceipt.url}
+                alt={`Comprobante de ${viewReceipt.houseName}`}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                crossOrigin="anonymous"
+              />
+            )}
+          </div>
+          <div className="p-4 text-center">
+            <p className="text-white/50 text-sm">Presiona ESC o haz clic en X para cerrar</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -195,6 +256,7 @@ function HouseCard({
   currencySymbol,
   isExpanded,
   onToggle,
+  onViewReceipt,
 }: {
   house: HouseWithStatus
   isAdmin: boolean
@@ -206,6 +268,7 @@ function HouseCard({
   currencySymbol: string
   isExpanded: boolean
   onToggle: () => void
+  onViewReceipt: (url: string) => void
 }) {
   const totalAmount = fixedAmount + variableAmount + house.totalFines
   const proofStatus = house.paymentProof?.status
@@ -334,14 +397,12 @@ function HouseCard({
                   </Badge>
                 </div>
                 {house.paymentProof.receipt_url && (
-                  <a 
-                    href={house.paymentProof.receipt_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                  <button 
+                    onClick={() => onViewReceipt(house.paymentProof.receipt_url)}
                     className="text-sm text-primary hover:underline"
                   >
                     Ver comprobante
-                  </a>
+                  </button>
                 )}
                 {house.paymentProof.rejection_reason && (
                   <p className="text-sm text-red-600 mt-2">
