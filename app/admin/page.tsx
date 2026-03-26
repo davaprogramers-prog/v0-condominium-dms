@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
-import { Building2, Users } from "lucide-react"
-import Link from "next/link"
+import { Building2 } from "lucide-react"
 import { CreateCondoDialog } from "./create-condo-dialog"
+import { CondoList } from "./condo-list"
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -11,6 +11,12 @@ export default async function AdminDashboard() {
     .from("condominiums")
     .select("id, name, created_at")
     .order("created_at", { ascending: false })
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("condo_id")
+    .eq("id", user?.id || "")
+    .single()
 
   const { data: allProfiles } = await supabase
     .from("profiles")
@@ -55,32 +61,7 @@ export default async function AdminDashboard() {
           <CreateCondoDialog />
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-semibold">Nombre</th>
-                <th className="px-4 py-3 text-left font-semibold">Creado por</th>
-                <th className="px-4 py-3 text-left font-semibold">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {condos?.map((condo) => (
-                <tr key={condo.id} className="border-b hover:bg-muted/50">
-                  <td className="px-4 py-3 font-medium">{condo.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">-</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(condo.created_at).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {!condos?.length && (
-          <div className="p-6 text-center text-muted-foreground">
-            No hay condominios registrados
-          </div>
-        )}
+        <CondoList condos={condos || []} currentCondoId={profile?.condo_id} />
       </div>
     </div>
   )
