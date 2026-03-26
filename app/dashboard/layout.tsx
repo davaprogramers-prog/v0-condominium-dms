@@ -36,9 +36,33 @@ export default async function DashboardLayout({
     redirect("/admin")
   }
 
-  // If regular user without condo_id, redirect to login
-  if (!profile.condo_id) {
+  // If propietario without condo_id, try to get it from their house
+  if (profile.role === "propietario" && !profile.condo_id && profile.house_id) {
+    const { data: house } = await supabase
+      .from("houses")
+      .select("condo_id")
+      .eq("id", profile.house_id)
+      .single()
+    
+    if (house?.condo_id) {
+      // Update profile with condo_id
+      await supabase
+        .from("profiles")
+        .update({ condo_id: house.condo_id })
+        .eq("id", user.id)
+      
+      profile.condo_id = house.condo_id
+    }
+  }
+
+  // If regular user without condo_id and no house_id, redirect to login
+  if (!profile.condo_id && profile.role !== "propietario") {
     redirect("/auth/login")
+  }
+  
+  // If propietario still has no condo_id, show error
+  if (!profile.condo_id) {
+    redirect("/auth/login?error=No+tienes+una+propiedad+asignada")
   }
 
   let condo = null
