@@ -62,45 +62,21 @@ export async function createAdmin(data: {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
   
-  // Create user in auth
-  const { data: newUser, error: authError } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-    options: {
-      data: {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        role: "admin",
-      }
-    }
+  // Use the API route which has service role access
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/create-user`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
   })
 
-  if (authError) {
-    console.error("[v0] Error creating auth user:", authError)
-    return { success: false, error: authError.message }
+  const result = await response.json()
+  
+  if (!response.ok) {
+    return { success: false, error: result.error }
   }
 
-  if (!newUser.user) {
-    return { success: false, error: "No se pudo crear el usuario" }
-  }
-
-  // Update profile with condo_id and role
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({
-      id: newUser.user.id,
-      email: data.email,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      role: "admin",
-      condo_id: data.condoId || null,
-    })
-
-  if (profileError) {
-    console.error("[v0] Error updating profile:", profileError)
-    return { success: false, error: profileError.message }
-  }
-
-  revalidatePath("/admin")
+  revalidatePath("/dashboard/administradores")
   return { success: true }
 }
