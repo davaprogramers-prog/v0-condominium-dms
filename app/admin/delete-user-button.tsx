@@ -75,14 +75,15 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
+          <Button
             onClick={handleDelete}
             disabled={loading}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            variant="destructive"
+            className="bg-red-600 text-white hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Eliminar
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
