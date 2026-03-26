@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createProject, updateProjectStatus, addProjectQuote } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Hammer, ChevronDown, ChevronUp, FileText, X, ExternalLink } from "lucide-react"
+import { Plus, Hammer, ChevronDown, ChevronUp, FileText, ExternalLink } from "lucide-react"
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   propuesto: { label: "Propuesto", color: "bg-blue-500/10 text-blue-700" },
@@ -34,18 +34,6 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
   const [docUrl, setDocUrl] = useState("")
   const [expandedProject, setExpandedProject] = useState<string | null>(null)
   const [statusUpdate, setStatusUpdate] = useState("")
-  const [viewQuote, setViewQuote] = useState<{ url: string; vendor: string } | null>(null)
-
-  // Handle ESC key to close quote viewer
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && viewQuote) {
-        setViewQuote(null)
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [viewQuote])
 
   return (
     <div className="flex flex-col gap-6">
@@ -237,12 +225,14 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                                 <span className="text-sm font-semibold">{currencySymbol}{Number(q.amount).toLocaleString()}</span>
                                 {q.is_selected && <Badge>Seleccionada</Badge>}
                                 {q.document_url && (
-                                  <button 
-                                    onClick={() => setViewQuote({ url: q.document_url as string, vendor: q.vendor_name as string })}
-                                    className="text-primary hover:underline text-xs"
+                                  <a 
+                                    href={q.document_url as string}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-primary hover:underline text-xs"
                                   >
-                                    Ver
-                                  </button>
+                                    <ExternalLink className="h-3 w-3" />Ver
+                                  </a>
                                 )}
                               </div>
                             </div>
@@ -278,54 +268,6 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
               </Card>
             )
           })}
-        </div>
-      )}
-
-      {/* Fullscreen Quote Viewer */}
-      {viewQuote && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
-          <div className="flex-shrink-0 flex items-center justify-between p-3 bg-black/50 border-b border-white/10">
-            <h3 className="text-white font-medium text-sm">Cotizacion - {viewQuote.vendor}</h3>
-            <div className="flex items-center gap-1">
-              <a
-                href={viewQuote.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
-                title="Abrir en nueva pestana"
-              >
-                <ExternalLink className="h-5 w-5" />
-              </a>
-              <button
-                onClick={() => setViewQuote(null)}
-                className="text-white/70 hover:text-white p-2 rounded hover:bg-white/10"
-                title="Cerrar (ESC)"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 min-h-0 p-2 overflow-auto">
-            {viewQuote.url.toLowerCase().endsWith(".pdf") ? (
-              <iframe
-                src={viewQuote.url}
-                className="w-full h-full min-h-[80vh] rounded-lg bg-white"
-                title={`Cotizacion de ${viewQuote.vendor}`}
-              />
-            ) : (
-              <div className="flex items-center justify-center min-h-full">
-                <img
-                  src={viewQuote.url}
-                  alt={`Cotizacion de ${viewQuote.vendor}`}
-                  className="max-w-full h-auto object-contain rounded-lg"
-                  crossOrigin="anonymous"
-                />
-              </div>
-            )}
-          </div>
-          <div className="flex-shrink-0 p-2 text-center border-t border-white/10">
-            <p className="text-white/50 text-xs">Presiona ESC o haz clic en X para cerrar</p>
-          </div>
         </div>
       )}
     </div>
