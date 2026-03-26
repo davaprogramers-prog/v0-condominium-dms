@@ -79,10 +79,13 @@ export default async function PropietariosPage() {
 
   // Build houses data with payment status
   const housesWithStatus = (houses || []).map(house => {
-    const houseInfractions = (infractions || []).filter(inf => inf.house_id === house.id)
+    const houseInfractions = (infractions || []).filter(inf => inf.house_id === house.id && inf.status !== "pagada")
     const totalFines = houseInfractions.reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
     
-    const houseProof = (paymentProofs || []).find(p => p.house_id === house.id)
+    // Get proofs separated by type
+    const houseProofs = (paymentProofs || []).filter(p => p.house_id === house.id)
+    const gastosProof = houseProofs.find(p => p.payment_type === "gastos_comunes" || !p.payment_type)
+    const multasProof = houseProofs.find(p => p.payment_type === "multas")
     
     // Check if income was recorded for this house
     const fixedIncome = (incomeRecords || []).find(
@@ -99,7 +102,8 @@ export default async function PropietariosPage() {
       ...house,
       infractions: houseInfractions,
       totalFines,
-      paymentProof: houseProof,
+      paymentProof: gastosProof, // Main proof for gastos comunes
+      finesProof: multasProof, // Separate proof for fines
       isPaidFixed,
       isPaidVariable,
       isPaidComplete: isPaidFixed && isPaidVariable,

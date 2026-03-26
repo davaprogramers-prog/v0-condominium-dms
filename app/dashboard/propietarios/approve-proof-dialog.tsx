@@ -7,14 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink, AlertTriangle } from "lucide-react"
 
 interface ApproveProofDialogProps {
   proof: any
   house: any
   fixedAmount: number
   variableAmount: number
+  finesAmount?: number
   currencySymbol: string
+  infractions?: any[]
 }
 
 export function ApproveProofDialog({
@@ -22,7 +25,9 @@ export function ApproveProofDialog({
   house,
   fixedAmount,
   variableAmount,
+  finesAmount = 0,
   currencySymbol,
+  infractions = [],
 }: ApproveProofDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -30,7 +35,9 @@ export function ApproveProofDialog({
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  const totalAmount = fixedAmount + variableAmount
+  const paymentType = proof.payment_type || "gastos_comunes"
+  const isGastosComunes = paymentType === "gastos_comunes"
+  const totalAmount = isGastosComunes ? fixedAmount + variableAmount : (proof.fines_amount || finesAmount)
 
   async function handleApprove() {
     setLoading(true)
@@ -44,59 +51,104 @@ export function ApproveProofDialog({
 
       const today = new Date().toISOString().split("T")[0]
 
-      // Create fixed income record
-      const { data: fixedIncome, error: fixedError } = await supabase
-        .from("condo_income")
-        .insert({
-          condo_id: proof.condo_id,
-          house_id: proof.house_id,
-          income_type: "gasto_comun",
-          amount: fixedAmount,
-          income_date: today,
-          period_month: proof.period_month,
-          period_year: proof.period_year,
-          description: `Gasto comun fijo - Casa #${house.house_number}`,
-          receipt_url: proof.receipt_url,
-          created_by: user.id,
-        })
-        .select()
-        .single()
+      if (isGastosComunes) {
+        // Create fixed income record
+        const { data: fixedIncome, error: fixedError } = await supabase
+          .from("condo_income")
+          .insert({
+            condo_id: proof.condo_id,
+            house_id: proof.house_id,
+            income_type: "gasto_comun",
+            amount: fixedAmount,
+            income_date: today,
+            period_month: proof.period_month,
+            period_year: proof.period_year,
+            description: `Gasto comun fijo - Casa #${house.house_number}`,
+            receipt_url: proof.receipt_url,
+            created_by: user.id,
+          })
+          .select()
+          .single()
 
-      if (fixedError) throw fixedError
+        if (fixedError) throw fixedError
 
-      // Create variable income record
-      const { data: variableIncome, error: variableError } = await supabase
-        .from("condo_income")
-        .insert({
-          condo_id: proof.condo_id,
-          house_id: proof.house_id,
-          income_type: "gasto_comun_variable",
-          amount: variableAmount,
-          income_date: today,
-          period_month: proof.period_month,
-          period_year: proof.period_year,
-          description: `Gasto comun variable - Casa #${house.house_number}`,
-          receipt_url: proof.receipt_url,
-          created_by: user.id,
-        })
-        .select()
-        .single()
+        // Create variable income record
+        const { data: variableIncome, error: variableError } = await supabase
+          .from("condo_income")
+          .insert({
+            condo_id: proof.condo_id,
+            house_id: proof.house_id,
+            income_type: "gasto_comun_variable",
+            amount: variableAmount,
+            income_date: today,
+            period_month: proof.period_month,
+            period_year: proof.period_year,
+            description: `Gasto comun variable - Casa #${house.house_number}`,
+            receipt_url: proof.receipt_url,
+            created_by: user.id,
+          })
+          .select()
+          .single()
 
-      if (variableError) throw variableError
+        if (variableError) throw variableError
 
-      // Update proof status
-      const { error: updateError } = await supabase
-        .from("payment_proofs")
-        .update({
-          status: "approved",
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-          fixed_income_id: fixedIncome.id,
-          variable_income_id: variableIncome.id,
-        })
-        .eq("id", proof.id)
+        // Update proof status
+        const { error: updateError } = await supabase
+          .from("payment_proofs")
+          .update({
+            status: "approved",
+            reviewed_by: user.id,
+            reviewed_at: new Date().toISOString(),
+            fixed_income_id: fixedIncome.id,
+            variable_income_id: variableIncome.id,
+          })
+          .eq("id", proof.id)
 
-      if (updateError) throw updateError
+        if (updateError) throw updateError
+      } else {
+        // For fines - create income record for fines
+        const { data: fineIncome, error: fineError } = await supabase
+          .from("condo_income")
+          .insert({
+            condo_id: proof.condo_id,
+            house_id: proof.house_id,
+            income_type: "multa",
+            amount: totalAmount,
+            income_date: today,
+            period_month: proof.period_month,
+            period_year: proof.period_year,
+            description: `Pago de multas - Casa #${house.house_number}`,
+            receipt_url: proof.receipt_url,
+            created_by: user.id,
+          })
+          .select()
+          .single()
+
+        if (fineError) throw fineError
+
+        // Update infractions to paid status
+        if (infractions.length > 0) {
+          const infractionIds = infractions.map((inf: any) => inf.id)
+          const { error: infError } = await supabase
+            .from("infractions")
+            .update({ status: "pagada" })
+            .in("id", infractionIds)
+          
+          if (infError) throw infError
+        }
+
+        // Update proof status
+        const { error: updateError } = await supabase
+          .from("payment_proofs")
+          .update({
+            status: "approved",
+            reviewed_by: user.id,
+            reviewed_at: new Date().toISOString(),
+          })
+          .eq("id", proof.id)
+
+        if (updateError) throw updateError
+      }
 
       setOpen(false)
       router.refresh()
@@ -163,7 +215,15 @@ export function ApproveProofDialog({
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Revisar Comprobante de Pago</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Revisar Comprobante de Pago
+            {!isGastosComunes && (
+              <Badge variant="destructive" className="text-xs">
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                Multas
+              </Badge>
+            )}
+          </DialogTitle>
           <DialogDescription>
             Casa #{house.house_number} - {house.owner_name}
           </DialogDescription>
@@ -175,6 +235,11 @@ export function ApproveProofDialog({
               {error}
             </div>
           )}
+
+          {/* Payment Type Badge */}
+          <div className={`p-2 rounded-lg text-center text-sm font-medium ${isGastosComunes ? "bg-blue-50 text-blue-700" : "bg-red-50 text-red-700"}`}>
+            {isGastosComunes ? "Comprobante de Gastos Comunes" : "Comprobante de Pago de Multas"}
+          </div>
 
           {/* Receipt Image */}
           <div className="space-y-2">
@@ -203,18 +268,41 @@ export function ApproveProofDialog({
           </div>
 
           {/* Amount Summary */}
-          <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Fijo</span>
-              <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Gasto Variable</span>
-              <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
-            </div>
+          <div className={`p-3 rounded-lg space-y-1 ${isGastosComunes ? "bg-muted/50" : "bg-red-50"}`}>
+            {isGastosComunes ? (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Gasto Fijo</span>
+                  <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Gasto Variable</span>
+                  <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-red-700 mb-2">Multas Incluidas:</p>
+                {infractions.length > 0 ? (
+                  infractions.map((inf: any) => (
+                    <div key={inf.id} className="flex justify-between text-sm">
+                      <span className="text-red-600">{inf.description || inf.infraction_type}</span>
+                      <span className="text-red-700">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-red-600">Multas</span>
+                    <span className="text-red-700">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
+                  </div>
+                )}
+              </>
+            )}
             <div className="flex justify-between font-medium pt-1 border-t">
               <span>Total</span>
-              <span className="text-primary">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
+              <span className={isGastosComunes ? "text-primary" : "text-red-700"}>
+                {currencySymbol}{totalAmount.toLocaleString("es-CL")}
+              </span>
             </div>
           </div>
 
@@ -226,7 +314,7 @@ export function ApproveProofDialog({
           >
             {loading && action === "approve" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             <CheckCircle className="h-4 w-4 mr-2" />
-            Aprobar y Registrar Ingresos
+            {isGastosComunes ? "Aprobar y Registrar Ingresos" : "Aprobar y Marcar Multas como Pagadas"}
           </Button>
 
           {/* Reject Form */}

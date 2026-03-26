@@ -28,7 +28,8 @@ interface HouseWithStatus {
   owner_email?: string
   infractions: any[]
   totalFines: number
-  paymentProof?: any
+  paymentProof?: any // Proof for gastos comunes
+  finesProof?: any // Proof for multas
   isPaidFixed: boolean
   isPaidVariable: boolean
   isPaidComplete: boolean
@@ -384,13 +385,13 @@ function HouseCard({
               </div>
             )}
 
-            {/* Payment Proof Section */}
+            {/* Payment Proof Section - Gastos Comunes */}
             {house.paymentProof && (
               <div className="p-4 rounded-lg border bg-card">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium flex items-center gap-2">
-                    <FileCheck className="h-4 w-4" />
-                    Comprobante Subido
+                    <FileCheck className="h-4 w-4 text-blue-600" />
+                    Comprobante Gastos Comunes
                   </span>
                   <Badge variant={proofStatus === "pending" ? "secondary" : proofStatus === "approved" ? "default" : "destructive"}>
                     {proofStatus === "pending" ? "Pendiente de Revision" : proofStatus === "approved" ? "Aprobado" : "Rechazado"}
@@ -412,10 +413,38 @@ function HouseCard({
               </div>
             )}
 
+            {/* Payment Proof Section - Multas */}
+            {house.finesProof && (
+              <div className="p-4 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium flex items-center gap-2 text-red-700">
+                    <AlertTriangle className="h-4 w-4" />
+                    Comprobante de Multas
+                  </span>
+                  <Badge variant={house.finesProof.status === "pending" ? "secondary" : house.finesProof.status === "approved" ? "default" : "destructive"}>
+                    {house.finesProof.status === "pending" ? "Pendiente de Revision" : house.finesProof.status === "approved" ? "Aprobado" : "Rechazado"}
+                  </Badge>
+                </div>
+                {house.finesProof.receipt_url && (
+                  <button 
+                    onClick={() => onViewReceipt(house.finesProof.receipt_url)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Ver comprobante
+                  </button>
+                )}
+                {house.finesProof.rejection_reason && (
+                  <p className="text-sm text-red-600 mt-2">
+                    Motivo: {house.finesProof.rejection_reason}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-2">
-              {/* Owner can upload proof for gastos comunes if not paid */}
-              {!house.isPaidComplete && (!house.paymentProof || house.paymentProof.status === "rejected" || house.paymentProof.payment_type !== "gastos_comunes") && (
+              {/* Owner can upload proof for gastos comunes if not paid and no pending proof */}
+              {!house.isPaidComplete && (!house.paymentProof || house.paymentProof.status === "rejected") && (
                 <UploadProofDialog
                   houseId={house.id}
                   condoId={condoId}
@@ -428,8 +457,8 @@ function HouseCard({
                 />
               )}
 
-              {/* Owner can upload proof for multas if there are pending fines */}
-              {house.totalFines > 0 && (
+              {/* Owner can upload proof for multas if there are pending fines and no pending fines proof */}
+              {house.totalFines > 0 && (!house.finesProof || house.finesProof.status === "rejected") && (
                 <UploadProofDialog
                   houseId={house.id}
                   condoId={condoId}
@@ -444,14 +473,29 @@ function HouseCard({
                 />
               )}
 
-              {/* Admin can approve pending proofs */}
+              {/* Admin can approve pending proofs for gastos comunes */}
               {isAdmin && house.paymentProof?.status === "pending" && (
                 <ApproveProofDialog
                   proof={house.paymentProof}
                   house={house}
                   fixedAmount={fixedAmount}
                   variableAmount={variableAmount}
+                  finesAmount={house.totalFines}
                   currencySymbol={currencySymbol}
+                  infractions={house.infractions}
+                />
+              )}
+
+              {/* Admin can approve pending proofs for multas */}
+              {isAdmin && house.finesProof?.status === "pending" && (
+                <ApproveProofDialog
+                  proof={house.finesProof}
+                  house={house}
+                  fixedAmount={fixedAmount}
+                  variableAmount={variableAmount}
+                  finesAmount={house.totalFines}
+                  currencySymbol={currencySymbol}
+                  infractions={house.infractions}
                 />
               )}
             </div>
