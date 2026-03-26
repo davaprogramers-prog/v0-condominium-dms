@@ -36,8 +36,8 @@ export default async function IngresosPage({
   let houses: any[] = []
 
   if (condoId) {
-    // Filter only "cuota" type - variable income is shown in /ingreso-variable
-    income = await getCondoIncome(condoId, year, month, "cuota")
+    // Filter only "fixed" type - variable income is shown in /ingreso-variable
+    income = await getCondoIncome(condoId, year, month, "fixed")
     houses = await getHouses(condoId)
   }
 
