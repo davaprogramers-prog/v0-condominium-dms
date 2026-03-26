@@ -389,10 +389,8 @@ export async function addProjectQuote(formData: FormData) {
 export async function createSurvey(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const options = JSON.parse(formData.get("options") as string || "[]") as string[]
-  
-
-
   const closesAt = formData.get("closes_at") as string
+  
   const { data: survey, error } = await supabase
     .from("surveys")
     .insert({
@@ -406,10 +404,7 @@ export async function createSurvey(formData: FormData) {
     .select()
     .single()
 
-  if (error) {
-    console.error("[v0] Error creating survey:", error)
-    throw error
-  }
+  if (error) throw error
 
   if (options.length > 0) {
     await supabase.from("survey_options").insert(
