@@ -82,14 +82,30 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
         const fixedIncome = incomes.find(i => i.income_type === 'fixed')
         const variableIncome = incomes.find(i => i.income_type === 'variable')
 
-        // Check if there's already a pending proof for this house/period
+        // Check if there's already an APPROVED proof for this house/period - block if so
+        const { data: approvedProof } = await supabase
+          .from("payment_proofs")
+          .select("id")
+          .eq("house_id", houseId)
+          .eq("period_month", parameters.current_month)
+          .eq("period_year", parameters.current_year)
+          .eq("status", "approved")
+          .single()
+
+        if (approvedProof) {
+          alert("El pago de este mes ya fue aprobado. No puede subir otro comprobante.")
+          setLoading(false)
+          return
+        }
+
+        // Check if there's a pending/rejected proof for this house/period (to update)
         const { data: existingProof } = await supabase
           .from("payment_proofs")
           .select("id, status")
           .eq("house_id", houseId)
           .eq("period_month", parameters.current_month)
           .eq("period_year", parameters.current_year)
-          .in("status", ["pending", "rejected"]) // Only replace pending or rejected proofs
+          .in("status", ["pending", "rejected"])
           .single()
 
         if (existingProof) {
