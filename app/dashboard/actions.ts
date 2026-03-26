@@ -474,7 +474,7 @@ export async function voteSurvey(surveyId: string, optionId: string) {
     .from("survey_votes")
     .select("id")
     .eq("survey_id", surveyId)
-    .eq("user_id", user.id)
+    .eq("voter_id", user.id)
     .single()
   
   if (existingVote) {
@@ -492,7 +492,7 @@ export async function voteSurvey(surveyId: string, optionId: string) {
     const { error } = await supabase.from("survey_votes").insert({
       survey_id: surveyId,
       option_id: optionId,
-      user_id: user.id,
+      voter_id: user.id,
     })
     if (error) {
       throw new Error("Error al votar: " + error.message)
