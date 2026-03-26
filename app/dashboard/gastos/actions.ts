@@ -90,11 +90,10 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 export async function getCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  console.log("[v0] getCondoIncome called with:", { condoId, year, month })
-
+  // Get all income first (without join)
   let query = supabase
     .from("condo_income")
-    .select("*, payment_proofs(*)")
+    .select("*")
     .eq("condo_id", condoId)
 
   if (year) {
@@ -105,8 +104,6 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
-
-  console.log("[v0] getCondoIncome result:", { dataCount: data?.length, error, firstItem: data?.[0] })
 
   if (error) {
     console.error("Error fetching income:", error)
@@ -120,27 +117,51 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  let query = supabase
+  // First get income for the period
+  let incomeQuery = supabase
     .from("condo_income")
-    .select("*, payment_proofs!inner(*)")
+    .select("id, amount, income_type")
     .eq("condo_id", condoId)
-    .eq("payment_proofs.status", "approved")
 
   if (year) {
-    query = query.eq("period_year", year)
+    incomeQuery = incomeQuery.eq("period_year", year)
   }
   if (month) {
-    query = query.eq("period_month", month)
+    incomeQuery = incomeQuery.eq("period_month", month)
   }
 
-  const { data, error } = await query.order("income_date", { ascending: false })
+  const { data: incomes, error: incomeError } = await incomeQuery
 
-  if (error) {
-    console.error("Error fetching paid income:", error)
+  if (incomeError || !incomes) {
+    console.error("Error fetching income:", incomeError)
     return []
   }
 
-  return data || []
+  // Get approved payment proofs
+  const { data: proofs, error: proofsError } = await supabase
+    .from("payment_proofs")
+    .select("fixed_income_id, variable_income_id, status")
+    .eq("condo_id", condoId)
+    .eq("status", "approved")
+
+  if (proofsError) {
+    console.error("Error fetching proofs:", proofsError)
+    return []
+  }
+
+  // Find incomes that have approved proofs
+  const approvedFixedIds = new Set(proofs?.filter(p => p.fixed_income_id).map(p => p.fixed_income_id))
+  const approvedVariableIds = new Set(proofs?.filter(p => p.variable_income_id).map(p => p.variable_income_id))
+
+  const paidIncomes = incomes.filter(income => {
+    if (income.income_type === 'fixed') {
+      return approvedFixedIds.has(income.id)
+    } else {
+      return approvedVariableIds.has(income.id)
+    }
+  })
+
+  return paidIncomes
 }
 
 export async function getLast12MonthsData(condoId: string) {
