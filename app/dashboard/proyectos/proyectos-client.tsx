@@ -221,18 +221,21 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                                   {q.description && <p className="text-xs text-muted-foreground">{q.description as string}</p>}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 <span className="text-sm font-semibold">{currencySymbol}{Number(q.amount).toLocaleString()}</span>
                                 {q.is_selected && <Badge>Seleccionada</Badge>}
-                                {q.document_url && (
-                                  <a 
-                                    href={q.document_url as string}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-primary hover:underline text-xs"
-                                  >
-                                    <ExternalLink className="h-3 w-3" />Ver
-                                  </a>
+                                {q.document_url ? (
+                                  <Button asChild variant="outline" size="sm">
+                                    <a 
+                                      href={q.document_url as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-1" />Ver Cotizacion
+                                    </a>
+                                  </Button>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">Sin documento</span>
                                 )}
                               </div>
                             </div>
