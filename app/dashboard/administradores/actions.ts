@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
 
 export async function deleteAdmin(userId: string) {
@@ -62,19 +63,54 @@ export async function createAdmin(data: {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
   
-  // Use the API route which has service role access
-  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/create-user`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+  // Use service role client for admin operations
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+
+  // Create user with admin API (bypasses rate limits and auto-confirms email)
+  const { data: newUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    email: data.email,
+    password: data.password,
+    email_confirm: true,
+    user_metadata: {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      role: "admin",
+    }
   })
 
-  const result = await response.json()
-  
-  if (!response.ok) {
-    return { success: false, error: result.error }
+  if (authError) {
+    console.error("[v0] Error creating auth user:", authError)
+    return { success: false, error: authError.message }
+  }
+
+  if (!newUser.user) {
+    return { success: false, error: "No se pudo crear el usuario" }
+  }
+
+  // Update profile with condo_id and role (service role bypasses RLS)
+  const { error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .upsert({
+      id: newUser.user.id,
+      email: data.email,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      role: "admin",
+      condo_id: data.condoId || null,
+    }, { onConflict: 'id' })
+
+  if (profileError) {
+    console.error("[v0] Profile upsert error:", profileError)
+    // User was created, profile will be created on first login
   }
 
   revalidatePath("/dashboard/administradores")

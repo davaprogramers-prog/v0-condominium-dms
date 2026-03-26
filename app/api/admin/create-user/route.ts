@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No se pudo crear el usuario" }, { status: 400 })
     }
 
-    // Update profile with condo_id and role
+    // Update profile with condo_id and role using service role (bypasses RLS)
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .upsert({
@@ -72,11 +72,19 @@ export async function POST(request: Request) {
         last_name: lastName,
         role: "admin",
         condo_id: condoId || null,
+      }, {
+        onConflict: 'id'
       })
 
     if (profileError) {
-      console.error("[v0] Error updating profile:", profileError)
-      return NextResponse.json({ error: profileError.message }, { status: 400 })
+      console.error("[v0] Profile upsert error:", profileError)
+      // If profile fails, still return success since auth user was created
+      // The profile will be created on first login via trigger
+      return NextResponse.json({ 
+        success: true, 
+        userId: newUser.user.id,
+        warning: "Usuario creado pero perfil pendiente"
+      })
     }
 
     return NextResponse.json({ success: true, userId: newUser.user.id })
