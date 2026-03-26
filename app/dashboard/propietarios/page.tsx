@@ -23,7 +23,7 @@ export default async function PropietariosPage() {
     )
   }
 
-  const isAdmin = profile.role === "admin"
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
   const condoId = profile.condo_id
 
   // Get condo currency

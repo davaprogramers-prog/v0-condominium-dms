@@ -24,7 +24,7 @@ export default async function TiposExoneracionesPage() {
   return (
     <TiposExoneracionesClient
       exemptionTypes={exemptionTypes || []}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

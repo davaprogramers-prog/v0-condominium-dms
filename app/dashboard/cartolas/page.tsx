@@ -19,7 +19,7 @@ export default async function CartolasPage() {
   return (
     <CartolasClient
       statements={statements || []}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

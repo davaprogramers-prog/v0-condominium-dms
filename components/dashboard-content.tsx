@@ -44,7 +44,7 @@ export function DashboardContent({
   profile,
 }: DashboardContentProps) {
   const currencySymbol = (condo?.currency_symbol as string) || "$"
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const balance = totalPayments + totalVariableIncome - totalExpenses
 
   return (

@@ -27,7 +27,7 @@ export default async function ExoneracionesPage() {
       exemptions={exemptions || []}
       exemptionTypes={exemptionTypes || []}
       houses={houses || []}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

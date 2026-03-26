@@ -26,7 +26,7 @@ export default async function InfraccionesPage() {
       infractions={infractions || []}
       houses={houses || []}
       currencySymbol={(condo?.currency_symbol as string) || "$"}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

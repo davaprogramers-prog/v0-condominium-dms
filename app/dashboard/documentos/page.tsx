@@ -31,7 +31,7 @@ export default async function DocumentosPage() {
     <DocumentosClient
       documents={documents || []}
       documentTypes={documentTypes || []}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

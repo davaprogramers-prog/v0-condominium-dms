@@ -39,7 +39,7 @@ export default async function EncuestasPage() {
     .select("*", { count: "exact", head: true })
     .eq("condo_id", profile.condo_id)
 
-  const isAdmin = profile.role === "admin"
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
 
   return (
     <EncuestasClient

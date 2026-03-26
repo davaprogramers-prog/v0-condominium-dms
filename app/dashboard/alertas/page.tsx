@@ -24,7 +24,7 @@ export default async function AlertasPage() {
   return (
     <AlertasClient
       alerts={alerts || []}
-      isAdmin={profile.role === "admin"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
     />
   )
 }

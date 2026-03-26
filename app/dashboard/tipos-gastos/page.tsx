@@ -15,5 +15,5 @@ export default async function TiposGastosPage() {
     .eq("condo_id", profile.condo_id)
     .order("name")
 
-  return <TiposGastosClient types={types || []} isAdmin={profile.role === "admin"} />
+  return <TiposGastosClient types={types || []} isAdmin={profile.role === "admin" || profile.role === "super_admin"} />
 }
