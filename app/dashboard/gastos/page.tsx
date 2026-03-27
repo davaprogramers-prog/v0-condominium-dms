@@ -4,7 +4,7 @@ import { CreateExpenseDialog } from "./create-expense-dialog"
 import { GastosList } from "./gastos-list"
 import { GastosChart } from "./gastos-chart"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default async function GastosPage({
@@ -22,7 +22,7 @@ export default async function GastosPage({
     .single()
 
   const condoId = profile?.condo_id
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   // Get period from query params or use current month
   const params = await searchParams
@@ -111,7 +111,15 @@ export default async function GastosPage({
           </div>
           
           {isAdmin && condoId && (
-            <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} />
+            <>
+              <Link href="/dashboard/gastos/logos">
+                <Button variant="outline" size="sm">
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Logos
+                </Button>
+              </Link>
+              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} />
+            </>
           )}
         </div>
       </div>

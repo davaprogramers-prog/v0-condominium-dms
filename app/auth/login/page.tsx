@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { LoginForm } from "./login-form"
-import { Building2 } from "lucide-react"
 
 export default async function LoginPage() {
   const supabase = await createClient()
@@ -15,13 +15,14 @@ export default async function LoginPage() {
   return (
     <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
       <div className="flex flex-col items-center justify-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-          <Building2 className="h-6 w-6 text-primary-foreground" />
-        </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">CondoAdmin</h1>
-          <p className="text-sm text-muted-foreground">Inicia sesión en tu cuenta</p>
-        </div>
+        <Image 
+          src="/logo.png" 
+          alt="InteliCon Logo" 
+          width={150} 
+          height={60} 
+          className="h-16 w-auto object-contain"
+        />
+        <p className="text-sm text-muted-foreground">Inicia sesión en tu cuenta</p>
       </div>
       
       <LoginForm />

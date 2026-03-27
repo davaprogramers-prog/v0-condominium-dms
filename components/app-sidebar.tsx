@@ -43,6 +43,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "@/app/auth/actions"
 import { switchCondo } from "@/app/dashboard/actions"
@@ -178,17 +179,26 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     <Sidebar>
       <SidebarHeader className="border-b p-4">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">CondoAdmin</span>
-            {!canSwitchCondo && (
-              <span className="text-xs text-muted-foreground">
-                {condo ? String(condo.name) : "Sin condominio"}
-              </span>
-            )}
-          </div>
+          {condo?.logo_url ? (
+            <Image
+              src={String(condo.logo_url)}
+              alt={String(condo.name || "Logo")}
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg object-contain"
+            />
+          ) : (
+            <Image
+              src="/logo.png"
+              alt="InteliCon"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg object-contain"
+            />
+          )}
+          <span className="text-sm font-semibold truncate max-w-[140px]">
+            {condo ? String(condo.name) : "Sin condominio"}
+          </span>
         </Link>
         
         {/* Condo Selector for admins with multiple condos */}

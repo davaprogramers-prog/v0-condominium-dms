@@ -9,7 +9,7 @@ export default async function AdminDashboard() {
 
   const { data: condos } = await supabase
     .from("condominiums")
-    .select("id, name, created_at")
+    .select("id, name, created_at, logo_url")
     .order("created_at", { ascending: false })
 
   const { data: profile } = await supabase

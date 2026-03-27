@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'CondoAdmin - Administracion de Condominios',
-  description: 'Sistema integral de administracion de condominios. Gestiona gastos, ingresos, comprobantes, encuestas, documentos y mas.',
+  title: 'InteliCon - Administracion de Condominios',
+  description: 'Sistema integral de administracion de condominios. Gestiona gastos, ingresos, comprobantes, encuestas, documentos y mas. Creado por AdministracionCondominio.App',
 }
 
 export const viewport: Viewport = {

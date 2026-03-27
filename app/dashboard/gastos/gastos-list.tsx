@@ -1,11 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { EditExpenseDialog } from "./edit-expense-dialog"
-import { Building2, User, FileText, CheckCircle, X, ExternalLink } from "lucide-react"
+import { deleteExpense } from "./actions"
+import { Building2, User, FileText, CheckCircle, X, ExternalLink, Trash2, Loader2 } from "lucide-react"
 
 interface ExpenseType {
   id: string
@@ -39,6 +42,23 @@ const categoryColors: Record<string, string> = {
 
 export function GastosList({ expenses, categories, isAdmin, currentYear, currentMonth, expenseTypes = [] }: GastosListProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; expense: any | null }>({ open: false, expense: null })
+  const [deleting, setDeleting] = useState(false)
+  const router = useRouter()
+
+  async function handleDelete() {
+    if (!deleteDialog.expense) return
+    setDeleting(true)
+    try {
+      await deleteExpense(deleteDialog.expense.id)
+      setDeleteDialog({ open: false, expense: null })
+      router.refresh()
+    } catch (error) {
+      console.error("[v0] Error deleting expense:", error)
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   if (expenses.length === 0) {
     return (
@@ -64,9 +84,19 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
             key={expense.id} 
             className="flex items-start gap-4 p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow"
           >
-            {/* Icon */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Icon className="h-6 w-6 text-muted-foreground" />
+            {/* Icon or Logo */}
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+              {expense.expense_logo?.logo_url ? (
+                <Image
+                  src={expense.expense_logo.logo_url}
+                  alt={expense.expense_logo.name || "Logo"}
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain p-1"
+                />
+              ) : (
+                <Icon className="h-6 w-6 text-muted-foreground" />
+              )}
             </div>
 
             {/* Content */}
@@ -108,8 +138,16 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
                 </Badge>
                 
                 {isAdmin && canEdit && (
-                  <div className="ml-auto">
+                  <div className="ml-auto flex gap-2">
                     <EditExpenseDialog expense={expense} expenseTypes={expenseTypes} />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => setDeleteDialog({ open: true, expense })}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 )}
               </div>
@@ -117,6 +155,36 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
           </div>
         )
       })}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => !deleting && setDeleteDialog({ open, expense: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar Gasto</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar el gasto &quot;{deleteDialog.expense?.title}&quot;? 
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialog({ open: false, expense: null })}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Image Modal */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>

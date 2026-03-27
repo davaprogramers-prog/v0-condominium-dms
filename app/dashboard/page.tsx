@@ -36,7 +36,11 @@ export default async function DashboardPage() {
     { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades" },
     { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes" },
     { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes" },
+    { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos" },
+    { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios" },
+    { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas" },
     { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante" },
+    { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas" },
   ]
 
   const ownerMenuItems = [
@@ -51,7 +55,7 @@ export default async function DashboardPage() {
     { href: "/dashboard/mi-casa/areas-comunes", icon: Trees, label: "Áreas Comunes", desc: "Información de áreas" },
   ]
 
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario"
 
   return (

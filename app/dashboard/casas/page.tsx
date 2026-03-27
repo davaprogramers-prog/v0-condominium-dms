@@ -14,11 +14,17 @@ export default async function CasasPage() {
     .eq("id", user?.id)
     .single()
 
-  const { data: houses } = await supabase
+  const { data: housesRaw } = await supabase
     .from("houses")
     .select("*")
     .eq("condo_id", profile?.condo_id)
-    .order("house_number")
+
+  // Sort houses numerically by house_number
+  const houses = housesRaw?.sort((a, b) => {
+    const numA = parseInt(a.house_number?.replace(/\D/g, '') || '0', 10)
+    const numB = parseInt(b.house_number?.replace(/\D/g, '') || '0', 10)
+    return numA - numB
+  })
 
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
