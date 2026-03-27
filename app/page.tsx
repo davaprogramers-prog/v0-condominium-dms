@@ -26,9 +26,8 @@ export default async function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
           <SiteLogo />
-          <span className="text-lg font-bold">InteliCon</span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/auth/login">

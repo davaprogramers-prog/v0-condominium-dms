@@ -19,9 +19,9 @@ export function SiteLogo() {
     <Image 
       src="/logo.png" 
       alt="InteliCon Logo" 
-      width={36} 
-      height={36} 
-      className="h-9 w-9 rounded-lg object-contain"
+      width={120} 
+      height={48} 
+      className="h-12 w-auto object-contain"
       onError={() => setHasError(true)}
     />
   )
