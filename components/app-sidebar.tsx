@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import {
   Select,
@@ -146,11 +147,18 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const pathname = usePathname()
   const router = useRouter()
   const [switching, setSwitching] = useState(false)
+  const { isMobile, setOpenMobile } = useSidebar()
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isSuperAdmin = profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
   const hasCondo = !!profile?.condo_id
   const canSwitchCondo = allCondos.length > 1
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   const handleCondoSwitch = async (condoId: string) => {
     if (condoId === profile?.condo_id) return
@@ -178,7 +186,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Link href="/dashboard" className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
           {condo?.logo_url ? (
             <Image
               src={String(condo.logo_url)}
@@ -238,7 +246,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                         asChild 
                         isActive={pathname === item.href}
                       >
-                        <Link href={item.href}>
+                        <Link href={item.href} onClick={handleNavClick}>
                           <IconComponent className="h-4 w-4" />
                           <span>{item.title}</span>
                         </Link>
@@ -262,7 +270,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                     asChild 
                     isActive={pathname === "/admin"}
                   >
-                    <Link href="/admin">
+                    <Link href="/admin" onClick={handleNavClick}>
                       <Key className="h-4 w-4" />
                       <span>Panel de Admin</span>
                     </Link>
@@ -274,7 +282,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                       asChild 
                       isActive={pathname === "/dashboard/administradores"}
                     >
-                      <Link href="/dashboard/administradores">
+                      <Link href="/dashboard/administradores" onClick={handleNavClick}>
                         <Users className="h-4 w-4" />
                         <span>Administradores</span>
                       </Link>
