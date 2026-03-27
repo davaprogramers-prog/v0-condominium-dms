@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +12,7 @@ interface Condo {
   id: string
   name: string
   created_at: string
+  logo_url?: string | null
 }
 
 interface CondoListProps {
@@ -76,7 +78,17 @@ export function CondoList({ condos, currentCondoId }: CondoListProps) {
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <Building2 className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    {condo.logo_url ? (
+                      <Image
+                        src={condo.logo_url}
+                        alt={condo.name}
+                        width={24}
+                        height={24}
+                        className="h-6 w-6 rounded object-contain"
+                      />
+                    ) : (
+                      <Building2 className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    )}
                     <span className="font-medium">{condo.name}</span>
                     {isActive && (
                       <Badge variant="default" className="text-xs">
