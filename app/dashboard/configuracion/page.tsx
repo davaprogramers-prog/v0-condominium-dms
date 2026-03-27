@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
+import { CondoLogoUploader } from "./condo-logo-uploader"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -81,6 +82,14 @@ export default async function ConfiguracionPage() {
           )}
         </div>
       </div>
+
+      {/* Logo del Condominio - Solo Admin */}
+      {isAdmin && condo && (
+        <CondoLogoUploader 
+          condoId={condo.id} 
+          currentLogoUrl={condo.logo_url}
+        />
+      )}
 
       {/* Parámetros del Condominio - Solo Admin */}
       {isAdmin && (
