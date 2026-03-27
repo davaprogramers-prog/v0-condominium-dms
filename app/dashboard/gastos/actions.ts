@@ -241,4 +241,33 @@ export async function updateExpense(
   return { success: true }
 }
 
+export async function deleteExpense(expenseId: string) {
+  const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user is admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, condo_id")
+    .eq("id", user.id)
+    .single()
+
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    throw new Error("Solo administradores pueden eliminar gastos")
+  }
+
+  const { error } = await supabase
+    .from("condo_expenses")
+    .delete()
+    .eq("id", expenseId)
+
+  if (error) {
+    console.error("[v0] Error deleting expense:", error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath("/dashboard/gastos")
+  return { success: true }
+}
