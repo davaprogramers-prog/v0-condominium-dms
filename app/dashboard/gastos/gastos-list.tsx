@@ -143,7 +143,7 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
                       onClick={() => setDeleteDialog({ open: true, expense })}
                     >
                       <Trash2 className="h-4 w-4" />
