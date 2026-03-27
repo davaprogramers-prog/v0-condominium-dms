@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -64,9 +65,19 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
             key={expense.id} 
             className="flex items-start gap-4 p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow"
           >
-            {/* Icon */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Icon className="h-6 w-6 text-muted-foreground" />
+            {/* Icon or Logo */}
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+              {expense.expense_logo?.logo_url ? (
+                <Image
+                  src={expense.expense_logo.logo_url}
+                  alt={expense.expense_logo.name || "Logo"}
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain p-1"
+                />
+              ) : (
+                <Icon className="h-6 w-6 text-muted-foreground" />
+              )}
             </div>
 
             {/* Content */}

@@ -69,7 +69,7 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 
   let query = supabase
     .from("condo_expenses")
-    .select("*")
+    .select("*, expense_logo:expense_logos(id, name, logo_url)")
     .eq("condo_id", condoId)
 
   if (year) {
