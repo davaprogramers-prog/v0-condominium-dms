@@ -1,14 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Loader2, Upload, X } from "lucide-react"
+import { Plus, Loader2, Upload, X, Settings, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoExpense } from "./actions"
+import { createClient } from "@/lib/supabase/client"
 import {
   Select,
   SelectContent,
@@ -23,6 +26,12 @@ interface ExpenseType {
   description?: string
 }
 
+interface ExpenseLogo {
+  id: string
+  name: string
+  logo_url: string
+}
+
 interface CreateExpenseDialogProps {
   condoId: string
   expenseTypes: ExpenseType[]
@@ -34,7 +43,24 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
   const [error, setError] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [expenseLogos, setExpenseLogos] = useState<ExpenseLogo[]>([])
+  const [selectedLogoId, setSelectedLogoId] = useState<string>("")
   const router = useRouter()
+
+  useEffect(() => {
+    async function loadLogos() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("expense_logos")
+        .select("id, name, logo_url")
+        .eq("condo_id", condoId)
+        .order("name")
+      setExpenseLogos(data || [])
+    }
+    if (open) {
+      loadLogos()
+    }
+  }, [open, condoId])
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -80,10 +106,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
         category: (formData.get("category") as string) || "otro",
         expenseDate: (formData.get("expenseDate") as string) || new Date().toISOString().split("T")[0],
         receiptUrl: previewUrl || undefined,
+        expenseLogoId: selectedLogoId || undefined,
       })
 
       setOpen(false)
       clearFile()
+      setSelectedLogoId("")
       router.refresh()
     } catch (err) {
       console.error("[v0] Error in expense form:", err)
@@ -177,6 +205,66 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                 defaultValue={new Date().toISOString().split("T")[0]}
               />
             </div>
+          </div>
+
+          {/* Logo Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Logo del Proveedor</Label>
+              <Link 
+                href="/dashboard/gastos/logos" 
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
+                <Settings className="h-3 w-3" />
+                Gestionar logos
+              </Link>
+            </div>
+            {expenseLogos.length > 0 ? (
+              <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar logo (opcional)">
+                    {selectedLogoId && (
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={expenseLogos.find(l => l.id === selectedLogoId)?.logo_url || ""}
+                          alt=""
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 object-contain"
+                        />
+                        <span>{expenseLogos.find(l => l.id === selectedLogoId)?.name}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                      <span>Sin logo</span>
+                    </div>
+                  </SelectItem>
+                  {expenseLogos.map((logo) => (
+                    <SelectItem key={logo.id} value={logo.id}>
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={logo.logo_url}
+                          alt={logo.name}
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 object-contain"
+                        />
+                        <span>{logo.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
+                No hay logos. <Link href="/dashboard/gastos/logos" className="text-primary underline">Agregar logos</Link>
+              </div>
+            )}
           </div>
 
           {/* Receipt Upload */}

@@ -12,6 +12,7 @@ export async function createCondoExpense(
     category: string
     expenseDate: string
     receiptUrl?: string
+    expenseLogoId?: string
   }
 ) {
   const supabase = await createClient()
@@ -50,6 +51,7 @@ export async function createCondoExpense(
       period_year: periodYear,
       period_month: periodMonth,
       receipt_url: formData.receiptUrl,
+      expense_logo_id: formData.expenseLogoId && formData.expenseLogoId !== "none" ? formData.expenseLogoId : null,
       created_by: user.id,
     })
 
