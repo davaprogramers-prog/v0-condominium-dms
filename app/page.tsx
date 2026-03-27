@@ -1,12 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Building2, BarChart3, Home, Vote, FileText, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LogoUploader } from "@/components/logo-uploader"
 
 export default async function LandingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Get site settings for logo
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("logo_url")
+    .eq("id", "default")
+    .single()
 
   if (user) {
     const { data: profile } = await supabase
@@ -26,10 +35,18 @@ export default async function LandingPage() {
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold">CondoAdmin</span>
+          {settings?.logo_url ? (
+            <Image 
+              src={settings.logo_url} 
+              alt="Logo" 
+              width={36} 
+              height={36} 
+              className="h-9 w-9 rounded-lg object-contain"
+            />
+          ) : (
+            <LogoUploader />
+          )}
+          <span className="text-lg font-bold">InteliCon</span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/auth/login">
@@ -47,7 +64,7 @@ export default async function LandingPage() {
             Administra tu condominio de forma integral
           </h1>
           <p className="text-lg leading-relaxed text-muted-foreground text-pretty">
-            CondoAdmin es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
+            InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar. - Creado por AdministracionCondominio.App
           </p>
           <div className="flex items-center gap-3 pt-4">
             <Link href="/auth/registro">
@@ -78,7 +95,7 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t px-6 py-6 text-center text-sm text-muted-foreground">
-        CondoAdmin - Sistema de Administración de Condominios
+        InteliCon - Sistema de Administración de Condominios
       </footer>
     </div>
   )
