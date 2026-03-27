@@ -129,7 +129,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
           Agregar Gasto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Registrar Nuevo Gasto</DialogTitle>
           <DialogDescription>Agrega un gasto del condominio con la boleta/factura</DialogDescription>
