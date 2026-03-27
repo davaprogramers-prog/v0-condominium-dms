@@ -1,21 +1,13 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
-import { Building2, BarChart3, Home, Vote, FileText, ShieldCheck } from "lucide-react"
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { LogoUploader } from "@/components/logo-uploader"
+import { SiteLogo } from "@/components/site-logo"
 
 export default async function LandingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  // Get site settings for logo
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("logo_url")
-    .eq("id", "default")
-    .single()
 
   if (user) {
     const { data: profile } = await supabase
@@ -35,17 +27,7 @@ export default async function LandingPage() {
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-3">
-          {settings?.logo_url ? (
-            <Image 
-              src={settings.logo_url} 
-              alt="Logo" 
-              width={36} 
-              height={36} 
-              className="h-9 w-9 rounded-lg object-contain"
-            />
-          ) : (
-            <LogoUploader />
-          )}
+          <SiteLogo />
           <span className="text-lg font-bold">InteliCon</span>
         </div>
         <div className="flex items-center gap-3">
