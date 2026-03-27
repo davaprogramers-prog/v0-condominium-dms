@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 
 export const metadata = {
-  title: "Dashboard - CondoAdmin",
+  title: "Dashboard - InteliCon",
 }
 
 export default async function DashboardLayout({
@@ -97,7 +97,7 @@ export default async function DashboardLayout({
   if (profile.condo_id) {
     const { data } = await supabase
       .from("condominiums")
-      .select("id, name, currency_symbol")
+      .select("id, name, currency_symbol, logo_url")
       .eq("id", profile.condo_id)
       .single()
     condo = data

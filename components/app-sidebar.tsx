@@ -188,20 +188,17 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               className="h-9 w-9 rounded-lg object-contain"
             />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="InteliCon"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg object-contain"
+            />
           )}
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold truncate max-w-[140px]">
-              {condo ? String(condo.name) : "InteliCon"}
-            </span>
-            {!canSwitchCondo && !condo && (
-              <span className="text-xs text-muted-foreground">
-                Sin condominio
-              </span>
-            )}
-          </div>
+          <span className="text-sm font-semibold truncate max-w-[140px]">
+            {condo ? String(condo.name) : "Sin condominio"}
+          </span>
         </Link>
         
         {/* Condo Selector for admins with multiple condos */}
