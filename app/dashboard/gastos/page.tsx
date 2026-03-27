@@ -22,7 +22,7 @@ export default async function GastosPage({
     .single()
 
   const condoId = profile?.condo_id
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   // Get period from query params or use current month
   const params = await searchParams
