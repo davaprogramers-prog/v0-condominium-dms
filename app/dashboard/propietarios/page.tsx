@@ -48,11 +48,17 @@ export default async function PropietariosPage() {
   const variableAmount = params?.variable_income_amount || 0
 
   // Get all houses with their owners
-  const { data: houses } = await supabase
+  const { data: housesRaw } = await supabase
     .from("houses")
     .select("*")
     .eq("condo_id", condoId)
-    .order("house_number")
+
+  // Sort houses numerically by house_number
+  const houses = housesRaw?.sort((a, b) => {
+    const numA = parseInt(a.house_number?.replace(/\D/g, '') || '0', 10)
+    const numB = parseInt(b.house_number?.replace(/\D/g, '') || '0', 10)
+    return numA - numB
+  })
 
   // Get infractions (unpaid fines)
   const { data: infractions } = await supabase
