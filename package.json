@@ -6,19 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
-    "cap": "capacitor",
-    "cap:build:android": "npm run build && capacitor copy android && capacitor open android",
-    "cap:build:ios": "npm run build && capacitor copy ios && capacitor open ios",
-    "cap:sync": "npm run build && capacitor sync"
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@capacitor/app": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/splash-screen": "^6.0.0",
-    "@capacitor/status-bar": "^6.0.0",
-    "@capacitor/keyboard": "^6.0.0",
-    "@capacitor/storage": "^6.0.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
@@ -75,7 +65,6 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
     "@types/react": "19.2.14",
