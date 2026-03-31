@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, Download, Smartphone, Apple } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { SiteLogo } from "@/components/site-logo"
 
 export default async function LandingPage() {
@@ -54,6 +55,42 @@ export default async function LandingPage() {
             <Link href="/auth/login">
               <Button size="lg" variant="outline">Ya tengo cuenta</Button>
             </Link>
+          </div>
+        </div>
+
+        {/* Download Apps Section */}
+        <div className="w-full max-w-2xl border-t pt-12">
+          <h2 className="text-2xl font-bold text-center mb-6">Descargar App</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Android */}
+            <Card className="p-4 hover:shadow-lg transition-shadow">
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Smartphone className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold">Android</h3>
+                <p className="text-xs text-muted-foreground">Google Play Store</p>
+                <Button size="sm" variant="outline" disabled className="w-full">
+                  <Download className="h-3 w-3 mr-2" />
+                  Próximamente
+                </Button>
+              </div>
+            </Card>
+
+            {/* iOS */}
+            <Card className="p-4 hover:shadow-lg transition-shadow">
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center">
+                  <Apple className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold">iOS</h3>
+                <p className="text-xs text-muted-foreground">App Store</p>
+                <Button size="sm" variant="outline" disabled className="w-full">
+                  <Download className="h-3 w-3 mr-2" />
+                  Próximamente
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
 
