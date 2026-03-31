@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-  serverExternalPackages: ['postgres'],
-}
+  output: 'export',
+  distDir: 'out',
+  reactCompiler: true,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
