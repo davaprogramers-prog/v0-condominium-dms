@@ -42,6 +42,7 @@ import {
   LogOut,
   Users,
   ChevronDown,
+  Calendar,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -101,6 +102,13 @@ const adminMenuItems = [
     ]
   },
   {
+    section: "Gestión",
+    items: [
+      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
+    ]
+  },
+  {
     section: "Sistema",
     items: [
       { title: "Configuración", href: "/dashboard/configuracion", icon: Settings },
@@ -127,6 +135,9 @@ const ownerMenuItems = [
     section: "Condominio",
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
+    ]
+  },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
