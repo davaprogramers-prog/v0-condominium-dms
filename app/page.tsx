@@ -1,29 +1,10 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, Download, Smartphone, Apple } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { SiteLogo } from "@/components/site-logo"
 
-export default async function LandingPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (profile?.role === "super_admin") {
-      redirect("/admin")
-    } else {
-      redirect("/dashboard")
-    }
-  }
-
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
@@ -46,7 +27,7 @@ export default async function LandingPage() {
             Administra tu condominio de forma integral
           </h1>
           <p className="text-lg leading-relaxed text-muted-foreground text-pretty">
-            InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar. - Creado por AdministracionCondominio.App
+            InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
           </p>
           <div className="flex items-center gap-3 pt-4">
             <Link href="/auth/registro">
