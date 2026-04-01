@@ -4,7 +4,7 @@ import { Building2 } from "lucide-react"
 import { useState, useEffect } from "react"
 
 export function SiteLogo() {
-  const [logoUrl, setLogoUrl] = useState<string>('/logo.png')
+  const [logoUrl, setLogoUrl] = useState<string>('/intelicon-logo.png')
   const [hasError, setHasError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
