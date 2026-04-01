@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createAdminClient } from "@supabase/supabase-js"
 
 export async function createConcierge(condoId: string, data: {
   email: string
@@ -29,16 +30,19 @@ export async function createConcierge(condoId: string, data: {
   }
 
   // Create a temporary UUID for the concierge profile
-  // The actual auth user creation should be done via Supabase Admin API
-  // For now, we'll insert with a generated ID that will be updated when the auth user is created
-  const { v4: uuidv4 } = require('uuid')
-  const tempId = uuidv4()
+  const tempId = crypto.randomUUID()
 
-  const { data: newProfile, error } = await supabase
+  // Use Supabase admin client to bypass RLS policies
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  )
+
+  const { data: newProfile, error } = await adminSupabase
     .from("profiles")
     .insert({
-      id: tempId, // Explicitly provide ID to satisfy RLS
-      email: data.email, // Store email in profile too
+      id: tempId,
+      email: data.email,
       role: "conserje",
       condo_id: condoId,
       first_name: data.firstName,
