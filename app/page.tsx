@@ -8,22 +8,27 @@ import { CompanyLogo } from "@/components/company-logo"
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex flex-col gap-4 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-        <SiteLogo />
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/auth/login" className="px-3 py-2 text-sm sm:px-4 sm:py-2 border rounded-md hover:bg-gray-100 whitespace-nowrap">
-              Iniciar Sesión
-            </Link>
-            <Link href="/auth/registro" className="px-3 py-2 text-sm sm:px-4 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap">
-              Registrarse
-            </Link>
-          </div>
+      <header className="flex flex-col items-center justify-center gap-6 border-b px-4 py-6 sm:px-6 sm:py-8">
+        {/* Logos centrados */}
+        <div className="flex items-center justify-center gap-8 flex-wrap">
+          <SiteLogo />
           <div className="hidden sm:block">
             <CompanyLogo />
           </div>
         </div>
-        <div className="block sm:hidden w-16 h-16 flex items-center justify-center">
+        
+        {/* Botones centrados */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <Link href="/auth/login" className="px-6 py-2 text-sm sm:text-base border rounded-md hover:bg-gray-100 whitespace-nowrap text-center">
+            Iniciar Sesión
+          </Link>
+          <Link href="/auth/registro" className="px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap text-center">
+            Registrarse
+          </Link>
+        </div>
+        
+        {/* Logo empresa en móvil centrado */}
+        <div className="sm:hidden">
           <CompanyLogo />
         </div>
       </header>
