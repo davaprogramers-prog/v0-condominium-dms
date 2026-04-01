@@ -11,7 +11,7 @@ export function CompanyLogo() {
     <img 
       src={logoUrl} 
       alt="DMS INNOVA SPA Logo" 
-      className="h-16 w-auto object-contain"
+      className="h-20 w-auto object-contain"
       onError={() => setHasError(true)}
     />
   )
