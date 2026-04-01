@@ -1,10 +1,12 @@
+'use client'
+
 import { getConcierges } from "./actions"
 import { CreateConciergeDialog } from "./create-concierge-dialog"
 import { useAsync } from "@/lib/hooks/use-async"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Trash2, Mail, User, Plus, Edit2 } from "lucide-react"
+import { Trash2, Mail, User, Edit2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { deleteConcierge } from "./actions"
 import { useState, useEffect } from "react"
@@ -114,7 +116,7 @@ export default function ConserjesPage() {
             </Card>
           ))}
         </div>
-      ) : !concierges || concierges.length === 0 ? (
+      ) : concierges.length === 0 ? (
         <Card className="p-12 text-center">
           <User className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
           <p className="text-muted-foreground">No hay conserjes registrados aún</p>
@@ -136,35 +138,6 @@ export default function ConserjesPage() {
                       <Mail className="h-4 w-4" />
                       <span>ID: {concierge.id.slice(0, 8)}</span>
                     </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(concierge.id)}
-                    disabled={deleting === concierge.id}
-                    className="text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
                   </div>
                 </div>
                 <div className="flex gap-2">
