@@ -132,8 +132,6 @@ const ownerMenuItems = [
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
       { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-    ]
-  },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
