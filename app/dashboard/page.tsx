@@ -4,6 +4,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -61,13 +63,13 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="rounded-lg border bg-card p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold">Bienvenido, {profile?.first_name}</h1>
             <p className="text-muted-foreground">{condo?.name || "Condominio"}</p>
           </div>
-          <Link href="/dashboard/configuracion">
-            <Button variant="outline" size="sm">
+          <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="w-full sm:w-fit">
               <Settings className="h-4 w-4 mr-2" />
               Configuración
             </Button>
