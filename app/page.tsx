@@ -1,49 +1,62 @@
-export default function Home() {
+import Link from "next/link"
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { SiteLogo } from "@/components/site-logo"
+
+export default function LandingPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <header style={{ borderBottom: "1px solid #e5e7eb", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: "1.25rem", fontWeight: "bold" }}>InteliCon</div>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <a href="/auth/login" style={{ padding: "0.5rem 1rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", textDecoration: "none", color: "#000" }}>Iniciar Sesión</a>
-          <a href="/auth/registro" style={{ padding: "0.5rem 1rem", background: "#0066cc", color: "#fff", borderRadius: "0.375rem", textDecoration: "none" }}>Registrarse</a>
+    <div className="flex min-h-screen flex-col">
+      <header className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center">
+          <SiteLogo />
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/auth/login">
+            <Button variant="outline">Iniciar Sesión</Button>
+          </Link>
+          <Link href="/auth/registro">
+            <Button>Registrarse</Button>
+          </Link>
         </div>
       </header>
 
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "3rem", padding: "2rem" }}>
-        <div style={{ maxWidth: "42rem", textAlign: "center" }}>
-          <h1 style={{ fontSize: "2.25rem", fontWeight: "bold", marginBottom: "1rem" }}>
+      <main className="flex flex-1 flex-col items-center justify-center gap-12 px-6 py-16">
+        <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
             Administra tu condominio de forma integral
           </h1>
-          <p style={{ fontSize: "1.125rem", color: "#6b7280", marginBottom: "2rem" }}>
-            InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más.
+          <p className="text-lg leading-relaxed text-muted-foreground text-pretty">
+            InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
           </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <a href="/auth/registro" style={{ padding: "0.75rem 1.5rem", background: "#0066cc", color: "#fff", borderRadius: "0.375rem", textDecoration: "none", fontWeight: "500" }}>Comenzar ahora</a>
-            <a href="/auth/login" style={{ padding: "0.75rem 1.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", textDecoration: "none", color: "#000", fontWeight: "500" }}>Ya tengo cuenta</a>
+          <div className="flex items-center gap-3 pt-4">
+            <Link href="/auth/registro">
+              <Button size="lg">Comenzar ahora</Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button size="lg" variant="outline">Ya tengo cuenta</Button>
+            </Link>
           </div>
         </div>
 
-        <div style={{ width: "100%", maxWidth: "42rem", borderTop: "1px solid #e5e7eb", paddingTop: "3rem" }}>
-          <h2 style={{ fontSize: "1.875rem", fontWeight: "bold", textAlign: "center", marginBottom: "1.5rem" }}>Características</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem" }}>
-            {[
-              { title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y año" },
-              { title: "Control por casa", desc: "Cards de estado por casa e histórico de pagos" },
-              { title: "Encuestas en vivo", desc: "Votaciones en tiempo real con resultados" },
-              { title: "Documentos", desc: "Almacena reglamentos, sanciones y documentación" },
-              { title: "Gestión de visitas", desc: "Registro de visitantes y control de acceso" },
-              { title: "Proyectos de mejora", desc: "Crea proyectos con cotizaciones y seguimiento" },
-            ].map((feature) => (
-              <div key={feature.title} style={{ padding: "1.5rem", border: "1px solid #e5e7eb", borderRadius: "0.5rem" }}>
-                <h3 style={{ fontWeight: "600", marginBottom: "0.5rem" }}>{feature.title}</h3>
-                <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>{feature.desc}</p>
-              </div>
-            ))}
-          </div>
+        <div className="grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { icon: BarChart3, title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos" },
+            { icon: Home, title: "Control por casa", desc: "Cards de estado por casa, histórico de pagos y comprobantes de depósito" },
+            { icon: Vote, title: "Encuestas en vivo", desc: "Votaciones en tiempo real con resultados visibles al instante" },
+            { icon: FileText, title: "Documentos", desc: "Almacena reglamentos, sanciones, partes y cualquier documentación" },
+            { icon: ShieldCheck, title: "Exoneraciones", desc: "Gestiona exoneraciones permanentes o temporales por servicios" },
+            { icon: Building2, title: "Proyectos de mejora", desc: "Crea proyectos con cotizaciones, fotos y seguimiento de estado" },
+          ].map((feature) => (
+            <div key={feature.title} className="flex flex-col gap-2 rounded-xl border bg-card p-6">
+              <feature.icon className="h-8 w-8 text-primary" />
+              <h3 className="font-semibold">{feature.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
+            </div>
+          ))}
         </div>
       </main>
 
-      <footer style={{ borderTop: "1px solid #e5e7eb", padding: "1.5rem", textAlign: "center", color: "#6b7280", fontSize: "0.875rem" }}>
+      <footer className="border-t px-6 py-6 text-center text-sm text-muted-foreground">
         InteliCon - Sistema de Administración de Condominios
       </footer>
     </div>
