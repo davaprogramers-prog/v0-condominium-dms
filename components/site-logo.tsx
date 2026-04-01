@@ -18,7 +18,7 @@ export function SiteLogo() {
     <img 
       src="/logo.png" 
       alt="InteliCon Logo" 
-      className="h-12 w-auto object-contain"
+      className="h-20 w-auto object-contain"
       onError={() => setHasError(true)}
     />
   )
