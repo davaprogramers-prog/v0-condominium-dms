@@ -28,11 +28,17 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No autorizado para este condominio")
   }
 
-  // Create auth user with Supabase Admin API would require server-side SDK
-  // For now, we'll create a profile and return instructions
+  // Create a temporary UUID for the concierge profile
+  // The actual auth user creation should be done via Supabase Admin API
+  // For now, we'll insert with a generated ID that will be updated when the auth user is created
+  const { v4: uuidv4 } = require('uuid')
+  const tempId = uuidv4()
+
   const { data: newProfile, error } = await supabase
     .from("profiles")
     .insert({
+      id: tempId, // Explicitly provide ID to satisfy RLS
+      email: data.email, // Store email in profile too
       role: "conserje",
       condo_id: condoId,
       first_name: data.firstName,
@@ -43,7 +49,7 @@ export async function createConcierge(condoId: string, data: {
 
   if (error) {
     console.error("[v0] Error creating concierge:", error)
-    throw new Error(error.message)
+    throw new Error(error.message || "Error al crear conserje")
   }
 
   return { success: true, profile: newProfile }
