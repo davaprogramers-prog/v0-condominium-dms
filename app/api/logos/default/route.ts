@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const supabase = await createClient()
@@ -15,7 +17,7 @@ export async function GET() {
 
     if (error || !data) {
       return NextResponse.json(
-        { blob_url: '/logo.png' },
+        { blob_url: '/intelicon-logo.png' },
         { status: 200 }
       )
     }
@@ -24,7 +26,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching default logo:', error)
     return NextResponse.json(
-      { blob_url: '/logo.png' },
+      { blob_url: '/intelicon-logo.png' },
       { status: 200 }
     )
   }

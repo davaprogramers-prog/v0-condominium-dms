@@ -4,6 +4,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { LoginForm } from "./login-form"
 
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
