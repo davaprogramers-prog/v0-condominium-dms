@@ -3,19 +3,23 @@
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { SiteLogo } from "@/components/site-logo"
+import { CompanyLogo } from "@/components/company-logo"
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
         <SiteLogo />
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="px-4 py-2 border rounded-md hover:bg-gray-100">
-            Iniciar Sesión
-          </Link>
-          <Link href="/auth/registro" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            Registrarse
-          </Link>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Link href="/auth/login" className="px-4 py-2 border rounded-md hover:bg-gray-100">
+              Iniciar Sesión
+            </Link>
+            <Link href="/auth/registro" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              Registrarse
+            </Link>
+          </div>
+          <CompanyLogo />
         </div>
       </header>
 
