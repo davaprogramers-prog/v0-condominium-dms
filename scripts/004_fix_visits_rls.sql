@@ -1,50 +1,60 @@
 -- Fix RLS policy for visits table to allow owners to insert visits
--- This policy allows authenticated users to insert visits for their own condominium and house
+-- This corrects the logic to properly handle inserts without circular references
 
 ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
 
--- Drop existing insert policy if it exists
+-- Drop existing policies
 DROP POLICY IF EXISTS "visits_insert_policy" ON visits;
+DROP POLICY IF EXISTS "visits_select_policy" ON visits;
+DROP POLICY IF EXISTS "visits_update_policy" ON visits;
+DROP POLICY IF EXISTS "visits_delete_policy" ON visits;
 
--- Create new insert policy that allows owners and admins to insert visits
+-- Create insert policy: allow owners/admins to insert visits for their condominium
 CREATE POLICY "visits_insert_policy" ON visits FOR INSERT
 WITH CHECK (
-  -- Allow if user is an admin or super_admin
-  (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
+  -- Allow admins and super_admins from same condo
+  ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
+   AND (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id)
   OR
-  -- Allow if user is the owner of the house they're creating a visit for
-  (SELECT id FROM profiles WHERE id = auth.uid() AND condo_id = (SELECT condo_id FROM visits WHERE id = visits.id LIMIT 1))
+  -- Allow property owners to insert visits for their own houses
+  ((SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id
+   AND (SELECT id FROM profiles WHERE id = auth.uid() AND role = 'owner') IS NOT NULL
+   AND house_id IN (
+     SELECT id FROM houses WHERE owner_id = auth.uid()
+   ))
 );
 
--- Ensure select, update, delete policies exist
-DROP POLICY IF EXISTS "visits_select_policy" ON visits;
+-- Select policy: users can see visits in their condominium or visits they created
 CREATE POLICY "visits_select_policy" ON visits FOR SELECT
 USING (
-  -- Allow if user is admin/super_admin in the same condo
+  -- User is in the same condo
   (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id
   OR
-  -- Allow if user created the visit
+  -- User is the owner of the house
+  house_id IN (SELECT id FROM houses WHERE owner_id = auth.uid())
+  OR
+  -- User created the visit
   created_by = auth.uid()
 );
 
-DROP POLICY IF EXISTS "visits_update_policy" ON visits;
+-- Update policy: admins and creators can update
 CREATE POLICY "visits_update_policy" ON visits FOR UPDATE
 USING (
-  -- Allow if user is admin/super_admin in the same condo
-  (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
-  AND (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id
+  -- Admins/super_admins in same condo
+  ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
+   AND (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id)
   OR
-  -- Allow if user created the visit
+  -- Creator can update their own visits
   created_by = auth.uid()
 );
 
-DROP POLICY IF EXISTS "visits_delete_policy" ON visits;
+-- Delete policy: admins and creators can delete
 CREATE POLICY "visits_delete_policy" ON visits FOR DELETE
 USING (
-  -- Allow if user is admin/super_admin in the same condo
-  (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
-  AND (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id
+  -- Admins/super_admins in same condo
+  ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin')
+   AND (SELECT condo_id FROM profiles WHERE id = auth.uid()) = condo_id)
   OR
-  -- Allow if user created the visit
+  -- Creator can delete their own visits
   created_by = auth.uid()
 );
