@@ -1,36 +1,106 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+'use client'
+
+import { useState } from "react"
 import Link from "next/link"
-import { LoginForm } from "./login-form"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
-export const dynamic = 'force-dynamic'
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-export default async function LoginPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
 
-  if (user) {
-    redirect("/dashboard")
+    try {
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError(signInError.message)
+        return
+      }
+
+      router.push("/dashboard")
+    } catch (err) {
+      setError("Error al iniciar sesión. Intenta de nuevo.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
-      <div className="flex flex-col items-center justify-center gap-3">
-        <img 
-          src="/intelicon-logo.png" 
-          alt="InteliCon Logo" 
-          className="h-16 w-auto object-contain"
-        />
-        <p className="text-sm text-muted-foreground">Inicia sesión en tu cuenta</p>
-      </div>
-      
-      <LoginForm />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md space-y-8 rounded-lg border bg-white p-6 shadow-lg">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <img 
+            src="/intelicon-logo.png" 
+            alt="InteliCon Logo" 
+            className="h-16 w-auto object-contain"
+          />
+          <p className="text-sm text-gray-600">Inicia sesión en tu cuenta</p>
+        </div>
+        
+        <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div className="rounded bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-      <div className="text-center text-sm">
-        ¿No tienes cuenta?{" "}
-        <Link href="/auth/registro" className="font-semibold text-primary hover:underline">
-          Registrarse aquí
-        </Link>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              placeholder="tu@email.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+          </button>
+        </form>
+
+        <div className="text-center text-sm">
+          ¿No tienes cuenta?{" "}
+          <Link href="/auth/registro" className="font-semibold text-blue-600 hover:underline">
+            Registrarse aquí
+          </Link>
+        </div>
       </div>
     </div>
   )
