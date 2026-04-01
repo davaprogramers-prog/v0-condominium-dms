@@ -116,7 +116,7 @@ export default function ConserjesPage() {
             </Card>
           ))}
         </div>
-      ) : concierges.length === 0 ? (
+      ) : !concierges || concierges.length === 0 ? (
         <Card className="p-12 text-center">
           <User className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
           <p className="text-muted-foreground">No hay conserjes registrados aún</p>
