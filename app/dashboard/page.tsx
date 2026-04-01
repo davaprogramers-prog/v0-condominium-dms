@@ -4,8 +4,6 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
-export const dynamic = 'force-dynamic'
-
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -4,8 +4,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 
-export const dynamic = 'force-dynamic'
-
 export const metadata = {
   title: "Dashboard - InteliCon",
 }

@@ -6,18 +6,48 @@ import { useAsync } from "@/lib/hooks/use-async"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Trash2, Mail, User } from "lucide-react"
+import { Trash2, Mail, User, Plus, Edit2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { deleteConcierge } from "./actions"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 
 export default function ConserjesPage() {
   const router = useRouter()
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [condoId, setCondoId] = useState<string>("")
+  const [loadingCondo, setLoadingCondo] = useState(true)
 
-  // We need to get the user's condo_id from props or context
-  // For now, we'll use a placeholder - this should come from the layout
-  const condoId = typeof window !== "undefined" ? localStorage.getItem("condo_id") || "" : ""
+  // Get condo_id from authenticated user
+  useEffect(() => {
+    const fetchCondoId = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setLoadingCondo(false)
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("condo_id")
+          .eq("id", user.id)
+          .single()
+
+        if (profile?.condo_id) {
+          setCondoId(profile.condo_id)
+        }
+      } catch (error) {
+        console.error("[v0] Error fetching condo_id:", error)
+      } finally {
+        setLoadingCondo(false)
+      }
+    }
+
+    fetchCondoId()
+  }, [])
 
   const { data: concierges = [], isLoading } = useAsync(() => {
     if (!condoId) return Promise.resolve([])
@@ -37,6 +67,22 @@ export default function ConserjesPage() {
     }
   }
 
+  if (loadingCondo) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3" />
+        <div className="grid gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="p-6">
+              <Skeleton className="h-6 w-1/3 mb-4" />
+              <Skeleton className="h-4 w-1/2" />
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -44,7 +90,12 @@ export default function ConserjesPage() {
           <h1 className="text-3xl font-bold">Gestión de Conserjes</h1>
           <p className="text-muted-foreground">Administra los conserjes del condominio</p>
         </div>
-        <CreateConciergeDialog condoId={condoId} />
+        <div className="flex gap-2">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nuevo Conserje
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -56,7 +107,7 @@ export default function ConserjesPage() {
             </Card>
           ))}
         </div>
-      ) : concierges.length === 0 ? (
+      ) : !concierges || concierges.length === 0 ? (
         <Card className="p-12 text-center">
           <User className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
           <p className="text-muted-foreground">No hay conserjes registrados aún</p>
@@ -80,15 +131,25 @@ export default function ConserjesPage() {
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(concierge.id)}
-                  disabled={deleting === concierge.id}
-                  className="text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(concierge.id)}
+                    disabled={deleting === concierge.id}
+                    className="text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
