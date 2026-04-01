@@ -29,19 +29,37 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No autorizado para este condominio")
   }
 
-  // Create a temporary UUID for the concierge profile
-  const tempId = crypto.randomUUID()
-
-  // Use Supabase admin client to bypass RLS policies
+  // Use Supabase Admin client to create auth user
   const adminSupabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY || ""
   )
 
-  const { data: newProfile, error } = await adminSupabase
+  // Step 1: Create auth user first (this will generate the ID)
+  const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+    email: data.email,
+    password: data.password,
+    email_confirm: true, // Auto-confirm the email
+    user_metadata: {
+      first_name: data.firstName,
+      last_name: data.lastName
+    }
+  })
+
+  if (authError) {
+    console.error("[v0] Error creating auth user:", authError)
+    throw new Error(authError.message || "Error al crear usuario de autenticación")
+  }
+
+  if (!authData.user?.id) {
+    throw new Error("No se generó ID de usuario")
+  }
+
+  // Step 2: Now create the profile with the auth user ID
+  const { data: profileData, error: profileError } = await adminSupabase
     .from("profiles")
     .insert({
-      id: tempId,
+      id: authData.user.id, // Use the ID from auth user
       email: data.email,
       role: "conserje",
       condo_id: condoId,
@@ -51,12 +69,14 @@ export async function createConcierge(condoId: string, data: {
     .select()
     .single()
 
-  if (error) {
-    console.error("[v0] Error creating concierge:", error)
-    throw new Error(error.message || "Error al crear conserje")
+  if (profileError) {
+    console.error("[v0] Error creating profile:", profileError)
+    // Try to delete the auth user if profile creation failed
+    await adminSupabase.auth.admin.deleteUser(authData.user.id).catch(() => {})
+    throw new Error(profileError.message || "Error al crear perfil del conserje")
   }
 
-  return { success: true, profile: newProfile }
+  return { success: true, profile: profileData }
 }
 
 export async function getConcierges(condoId: string) {
