@@ -8,40 +8,45 @@ import { CompanyLogo } from "@/components/company-logo"
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b px-6 py-4">
+      <header className="flex flex-col gap-4 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
         <SiteLogo />
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="px-4 py-2 border rounded-md hover:bg-gray-100">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/auth/login" className="px-3 py-2 text-sm sm:px-4 sm:py-2 border rounded-md hover:bg-gray-100 whitespace-nowrap">
               Iniciar Sesión
             </Link>
-            <Link href="/auth/registro" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <Link href="/auth/registro" className="px-3 py-2 text-sm sm:px-4 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap">
               Registrarse
             </Link>
           </div>
+          <div className="hidden sm:block">
+            <CompanyLogo />
+          </div>
+        </div>
+        <div className="block sm:hidden w-16 h-16 flex items-center justify-center">
           <CompanyLogo />
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-12 px-6 py-16">
+      <main className="flex flex-1 flex-col items-center justify-center gap-12 px-4 py-12 sm:px-6 sm:py-16">
         <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-3xl font-bold sm:text-4xl">
             Administra tu condominio de forma integral
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-base text-gray-600 sm:text-lg">
             InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
           </p>
-          <div className="flex items-center gap-3 pt-4">
-            <Link href="/auth/registro" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+          <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+            <Link href="/auth/registro" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-center">
               Comenzar ahora
             </Link>
-            <Link href="/auth/login" className="px-6 py-2 border rounded-md hover:bg-gray-100 font-medium">
+            <Link href="/auth/login" className="px-6 py-2 border rounded-md hover:bg-gray-100 font-medium text-center">
               Ya tengo cuenta
             </Link>
           </div>
         </div>
 
-        <div className="grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full grid max-w-4xl grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { icon: BarChart3, title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos" },
             { icon: Home, title: "Control por casa", desc: "Cards de estado por casa, histórico de pagos y comprobantes de depósito" },
@@ -59,7 +64,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <footer className="border-t px-6 py-6 text-center text-sm text-gray-600">
+      <footer className="border-t px-4 py-6 text-center text-xs text-gray-600 sm:px-6 sm:text-sm">
         InteliCon - Sistema de Administración de Condominios
       </footer>
     </div>
