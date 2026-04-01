@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { LoginForm } from "./login-form"
 
 export const dynamic = 'force-dynamic'
@@ -17,11 +16,9 @@ export default async function LoginPage() {
   return (
     <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
       <div className="flex flex-col items-center justify-center gap-3">
-        <Image 
-          src="/logo.png" 
+        <img 
+          src="/intelicon-logo.png" 
           alt="InteliCon Logo" 
-          width={150} 
-          height={60} 
           className="h-16 w-auto object-contain"
         />
         <p className="text-sm text-muted-foreground">Inicia sesión en tu cuenta</p>
