@@ -29,17 +29,86 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No autorizado para este condominio")
   }
 
-  // Use Supabase Admin client to create auth user
+  // Use Supabase Admin client
   const adminSupabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY || ""
   )
 
-  // Step 1: Create auth user first (this will generate the ID)
+  // Step 1: Check if profile already exists for this email in this condo
+  const { data: existingProfile } = await adminSupabase
+    .from("profiles")
+    .select("id, role, condo_id")
+    .eq("email", data.email)
+    .single()
+
+  if (existingProfile) {
+    // Profile exists
+    if (existingProfile.condo_id === condoId && existingProfile.role === "conserje") {
+      // Already assigned to this condo as conserje
+      throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe en este condominio`)
+    } else if (existingProfile.condo_id !== condoId) {
+      // Profile exists but for a different condo - REASSIGN it
+      console.log(`[v0] Reasignando conserje ${data.email} del condominio ${existingProfile.condo_id} al ${condoId}`)
+      
+      const { data: updatedProfile, error: updateError } = await adminSupabase
+        .from("profiles")
+        .update({
+          condo_id: condoId,
+          role: "conserje",
+          first_name: data.firstName,
+          last_name: data.lastName
+        })
+        .eq("id", existingProfile.id)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error("[v0] Error updating profile condo:", updateError)
+        throw new Error("Error al asignar conserje al condominio")
+      }
+
+      return { success: true, profile: updatedProfile, wasReassigned: true }
+    }
+  }
+
+  // Step 2: Check if auth user exists with this email
+  const { data: authUsers, error: listError } = await adminSupabase.auth.admin.listUsers({
+    pageSize: 1000
+  })
+
+  const existingAuthUser = authUsers?.users?.find(u => u.email === data.email)
+
+  if (existingAuthUser) {
+    // Auth user exists, create/update profile for this condo
+    console.log(`[v0] Usuario auth existe: ${existingAuthUser.id}`)
+
+    const { data: profileData, error: profileError } = await adminSupabase
+      .from("profiles")
+      .upsert({
+        id: existingAuthUser.id,
+        email: data.email,
+        role: "conserje",
+        condo_id: condoId,
+        first_name: data.firstName,
+        last_name: data.lastName
+      }, { onConflict: "id" })
+      .select()
+      .single()
+
+    if (profileError) {
+      console.error("[v0] Error upserting profile:", profileError)
+      throw new Error(profileError.message || "Error al crear perfil del conserje")
+    }
+
+    return { success: true, profile: profileData }
+  }
+
+  // Step 3: Create new auth user
   const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
     email: data.email,
     password: data.password,
-    email_confirm: true, // Auto-confirm the email
+    email_confirm: true,
     user_metadata: {
       first_name: data.firstName,
       last_name: data.lastName
@@ -47,48 +116,6 @@ export async function createConcierge(condoId: string, data: {
   })
 
   if (authError) {
-    // Check if user already exists
-    if (authError.message?.includes("already exists")) {
-      // Try to find the existing user by email to get their ID
-      const { data: existingUsers } = await adminSupabase.auth.admin.listUsers()
-      const existingUser = existingUsers?.users.find(u => u.email === data.email)
-      
-      if (existingUser) {
-        // Check if profile already exists
-        const { data: existingProfile } = await adminSupabase
-          .from("profiles")
-          .select("*")
-          .eq("id", existingUser.id)
-          .eq("condo_id", condoId)
-          .single()
-
-        if (existingProfile) {
-          throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe en el condominio`)
-        }
-
-        // Profile doesn't exist yet, create it with the existing user ID
-        const { data: profileData, error: profileError } = await adminSupabase
-          .from("profiles")
-          .insert({
-            id: existingUser.id,
-            email: data.email,
-            role: "conserje",
-            condo_id: condoId,
-            first_name: data.firstName,
-            last_name: data.lastName
-          })
-          .select()
-          .single()
-
-        if (profileError) {
-          console.error("[v0] Error creating profile for existing user:", profileError)
-          throw new Error(profileError.message || "Error al crear perfil del conserje")
-        }
-
-        return { success: true, profile: profileData }
-      }
-    }
-
     console.error("[v0] Error creating auth user:", authError)
     throw new Error(authError.message || "Error al crear usuario de autenticación")
   }
@@ -97,11 +124,11 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No se generó ID de usuario")
   }
 
-  // Step 2: Now create the profile with the auth user ID
+  // Step 4: Create profile for new auth user
   const { data: profileData, error: profileError } = await adminSupabase
     .from("profiles")
     .insert({
-      id: authData.user.id, // Use the ID from auth user
+      id: authData.user.id,
       email: data.email,
       role: "conserje",
       condo_id: condoId,
@@ -113,11 +140,7 @@ export async function createConcierge(condoId: string, data: {
 
   if (profileError) {
     console.error("[v0] Error creating profile:", profileError)
-    // Check if this is a duplicate key error
-    if (profileError.code === "23505") {
-      throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe`)
-    }
-    // Try to delete the auth user if profile creation failed
+    // Delete auth user if profile creation failed
     await adminSupabase.auth.admin.deleteUser(authData.user.id).catch(() => {})
     throw new Error(profileError.message || "Error al crear perfil del conserje")
   }
