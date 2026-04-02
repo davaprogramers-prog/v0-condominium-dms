@@ -47,6 +47,48 @@ export async function createConcierge(condoId: string, data: {
   })
 
   if (authError) {
+    // Check if user already exists
+    if (authError.message?.includes("already exists")) {
+      // Try to find the existing user by email to get their ID
+      const { data: existingUsers } = await adminSupabase.auth.admin.listUsers()
+      const existingUser = existingUsers?.users.find(u => u.email === data.email)
+      
+      if (existingUser) {
+        // Check if profile already exists
+        const { data: existingProfile } = await adminSupabase
+          .from("profiles")
+          .select("*")
+          .eq("id", existingUser.id)
+          .eq("condo_id", condoId)
+          .single()
+
+        if (existingProfile) {
+          throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe en el condominio`)
+        }
+
+        // Profile doesn't exist yet, create it with the existing user ID
+        const { data: profileData, error: profileError } = await adminSupabase
+          .from("profiles")
+          .insert({
+            id: existingUser.id,
+            email: data.email,
+            role: "conserje",
+            condo_id: condoId,
+            first_name: data.firstName,
+            last_name: data.lastName
+          })
+          .select()
+          .single()
+
+        if (profileError) {
+          console.error("[v0] Error creating profile for existing user:", profileError)
+          throw new Error(profileError.message || "Error al crear perfil del conserje")
+        }
+
+        return { success: true, profile: profileData }
+      }
+    }
+
     console.error("[v0] Error creating auth user:", authError)
     throw new Error(authError.message || "Error al crear usuario de autenticación")
   }
@@ -71,6 +113,10 @@ export async function createConcierge(condoId: string, data: {
 
   if (profileError) {
     console.error("[v0] Error creating profile:", profileError)
+    // Check if this is a duplicate key error
+    if (profileError.code === "23505") {
+      throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe`)
+    }
     // Try to delete the auth user if profile creation failed
     await adminSupabase.auth.admin.deleteUser(authData.user.id).catch(() => {})
     throw new Error(profileError.message || "Error al crear perfil del conserje")
