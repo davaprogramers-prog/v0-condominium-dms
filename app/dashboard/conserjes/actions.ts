@@ -45,8 +45,10 @@ export async function createConcierge(condoId: string, data: {
   if (existingProfile) {
     // Profile exists
     if (existingProfile.condo_id === condoId && existingProfile.role === "conserje") {
-      // Already assigned to this condo as conserje
-      throw new Error(`El conserje ${data.firstName} ${data.lastName} ya existe en este condominio`)
+      // Already assigned to this condo as conserje - This is OK, just return success
+      // (idempotent operation)
+      console.log(`[v0] Conserje ${data.email} ya estaba asignado a este condominio`)
+      return { success: true, profile: existingProfile, alreadyExists: true }
     } else if (existingProfile.condo_id !== condoId) {
       // Profile exists but for a different condo - REASSIGN it
       console.log(`[v0] Reasignando conserje ${data.email} del condominio ${existingProfile.condo_id} al ${condoId}`)
