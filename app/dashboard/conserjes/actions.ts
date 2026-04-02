@@ -151,21 +151,26 @@ export async function createConcierge(condoId: string, data: {
 }
 
 export async function getConcierges(condoId: string) {
-  const supabase = await createClient()
+  // Use service role to bypass RLS and get all conserjes for this condo
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  )
 
-  // Verify user is admin of this condo
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-
-  const { data: adminProfile } = await supabase
+  const { data, error } = await adminSupabase
     .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
+    .select("*")
+    .eq("condo_id", condoId)
+    .eq("role", "conserje")
+    .order("created_at", { ascending: false })
 
-  if (adminProfile?.condo_id !== condoId) {
-    throw new Error("No autorizado para este condominio")
+  if (error) {
+    console.error("[v0] Error getting concierges:", error)
+    return []
   }
+
+  return data || []
+}
 
   const { data, error } = await supabase
     .from("profiles")

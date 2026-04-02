@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus, Loader2, CheckCircle2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createConcierge } from "./actions"
 
@@ -17,12 +17,15 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setSuccess(false)
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get("email") as string
@@ -31,15 +34,30 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
     const lastName = formData.get("lastName") as string
 
     try {
-      await createConcierge(condoId, {
+      const result = await createConcierge(condoId, {
         email,
         password,
         firstName,
         lastName,
       })
 
-      setOpen(false)
-      router.refresh()
+      // Show success message
+      const message = result.alreadyExists 
+        ? `${firstName} ${lastName} ya estaba asignado`
+        : result.wasReassigned
+        ? `${firstName} ${lastName} ha sido reasignado`
+        : `${firstName} ${lastName} ha sido creado`
+      
+      setSuccessMessage(message)
+      setSuccess(true)
+
+      // Close dialog after 2 seconds
+      setTimeout(() => {
+        setOpen(false)
+        setSuccess(false)
+        setSuccessMessage("")
+        router.refresh()
+      }, 2000)
     } catch (err: any) {
       console.error("[v0] Error creating concierge:", err)
       setError(err.message || "Error al crear conserje")
@@ -61,44 +79,54 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
           <DialogTitle>Crear Nuevo Conserje</DialogTitle>
           <DialogDescription>Agrega un nuevo conserje para el condominio</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-              {error}
-            </div>
-          )}
+        
+        {success && (
+          <div className="animate-in fade-in duration-300 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
-          <div className="grid grid-cols-2 gap-4">
+        {!success && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Nombre</Label>
+                <Input id="firstName" name="firstName" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Apellido</Label>
+                <Input id="lastName" name="lastName" required />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="firstName">Nombre</Label>
-              <Input id="firstName" name="firstName" required />
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input id="email" name="email" type="email" required />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="lastName">Apellido</Label>
-              <Input id="lastName" name="lastName" required />
+              <Label htmlFor="password">Contraseña</Label>
+              <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
-            <Input id="email" name="email" type="email" required />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" />
-          </div>
-
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Crear Conserje
-            </Button>
-          </div>
-        </form>
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Crear Conserje
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   )
