@@ -28,7 +28,7 @@ export function LoginForm() {
       if (error) throw error
 
       toast.success("Sesión iniciada correctamente")
-      router.push("/")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Login error:", error)
       toast.error(error instanceof Error ? error.message : "Error al iniciar sesión")
