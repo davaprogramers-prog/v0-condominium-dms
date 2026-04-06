@@ -76,7 +76,7 @@ export async function createConcierge(condoId: string, data: {
 
   // Step 2: Check if auth user exists with this email
   const { data: authUsers, error: listError } = await adminSupabase.auth.admin.listUsers({
-    pageSize: 1000
+    perPage: 1000
   })
 
   const existingAuthUser = authUsers?.users?.find(u => u.email === data.email)
