@@ -92,12 +92,12 @@ export default function MiCuentaPage() {
     setSuccess("")
 
     if (newPassword !== confirmPassword) {
-      setError("Las contrasenas no coinciden")
+      setError("Las contraseñas no coinciden")
       return
     }
 
     if (newPassword.length < 8) {
-      setError("La contrasena debe tener al menos 8 caracteres")
+      setError("La contraseña debe tener al menos 8 caracteres")
       return
     }
 
@@ -115,7 +115,7 @@ export default function MiCuentaPage() {
       })
 
       if (signInError) {
-        throw new Error("La contrasena actual es incorrecta")
+        throw new Error("La contraseña actual es incorrecta")
       }
 
       // Update to new password
@@ -125,14 +125,14 @@ export default function MiCuentaPage() {
 
       if (updateError) throw updateError
 
-      setSuccess("Contrasena actualizada correctamente")
+      setSuccess("Contraseña actualizada correctamente")
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
       setTimeout(() => setSuccess(""), 3000)
     } catch (err: any) {
       console.error("Error changing password:", err)
-      setError(err.message || "Error al cambiar la contrasena")
+      setError(err.message || "Error al cambiar la contraseña")
     } finally {
       setSavingPassword(false)
     }
@@ -160,7 +160,7 @@ export default function MiCuentaPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Mi Cuenta</h1>
-        <p className="text-muted-foreground">Administra tu informacion personal y seguridad</p>
+        <p className="text-muted-foreground">Administra tu información personal y seguridad</p>
       </div>
 
       {success && (
@@ -182,7 +182,7 @@ export default function MiCuentaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Informacion Personal
+            Información Personal
           </CardTitle>
           <CardDescription>
             Actualiza tu nombre y datos de contacto
@@ -212,7 +212,7 @@ export default function MiCuentaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electronico</Label>
+              <Label htmlFor="email">Correo Electrónico</Label>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <Input
@@ -223,7 +223,7 @@ export default function MiCuentaPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                El correo electronico no puede ser modificado
+                El correo electrónico no puede ser modificado
               </p>
             </div>
 
@@ -250,13 +250,13 @@ export default function MiCuentaPage() {
             Cambiar Contrasena
           </CardTitle>
           <CardDescription>
-            Actualiza tu contrasena para mantener tu cuenta segura
+            Actualiza tu contraseña para mantener tu cuenta segura
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Contrasena Actual</Label>
+              <Label htmlFor="currentPassword">Contraseña Actual</Label>
               <div className="relative">
                 <Input
                   id="currentPassword"
@@ -278,11 +278,11 @@ export default function MiCuentaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nueva Contrasena</Label>
+              <Label htmlFor="newPassword">Nueva Contraseña</Label>
               <Input
                 id="newPassword"
                 type={showPassword ? "text" : "password"}
-                placeholder="Minimo 8 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -291,11 +291,11 @@ export default function MiCuentaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Nueva Contrasena</Label>
+              <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
-                placeholder="Repite tu nueva contrasena"
+                placeholder="Repite tu nueva contraseña"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -305,7 +305,7 @@ export default function MiCuentaPage() {
 
             <Button type="submit" disabled={savingPassword}>
               {savingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Cambiar Contrasena
+            Cambiar Contraseña
             </Button>
           </form>
         </CardContent>
