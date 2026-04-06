@@ -34,7 +34,9 @@ export async function POST(request: Request) {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
     })
 
-    if (linkError || !data?.action_link) {
+    console.error('[v0] generateLink response:', { data, linkError })
+
+    if (linkError || !data) {
       console.error('[v0] Generate recovery link error:', linkError)
       return NextResponse.json(
         { error: 'No se pudo generar el enlace de recuperación' },
@@ -42,7 +44,15 @@ export async function POST(request: Request) {
       )
     }
 
-    const resetUrl = data.action_link
+    const resetUrl = data.properties?.recovery_link || data.action_link || data.recovery_link
+
+    if (!resetUrl) {
+      console.error('[v0] No recovery link found in data:', data)
+      return NextResponse.json(
+        { error: 'No se pudo generar el enlace de recuperación' },
+        { status: 500 }
+      )
+    }
     const result = await resend.emails.send({
       from: 'noreply@administracioncondominio.app',
       to: email,
