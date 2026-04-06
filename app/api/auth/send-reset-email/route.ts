@@ -43,8 +43,14 @@ export async function POST(request: Request) {
     }
 
     const resetUrl = data.properties?.action_link
+    
+    // Fix the redirect_to parameter to point to /auth/reset-password
+    const fixedResetUrl = resetUrl?.replace(
+      `redirect_to=${encodeURIComponent(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}`,
+      `redirect_to=${encodeURIComponent(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`)}`
+    ) || resetUrl
 
-    if (!resetUrl) {
+    if (!resetUrl && !fixedResetUrl) {
       console.error('[v0] No recovery link found in data:', data)
       return NextResponse.json(
         { error: 'No se pudo generar el enlace de recuperación' },
@@ -61,12 +67,12 @@ export async function POST(request: Request) {
           <p>Hola,</p>
           <p>Recibimos una solicitud para recuperar tu contraseña. Haz clic en el botón de abajo para establecer una nueva contraseña:</p>
           <p style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            <a href="${fixedResetUrl}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Recuperar Contraseña
             </a>
           </p>
           <p>O copia y pega este enlace en tu navegador:</p>
-          <p style="word-break: break-all; color: #0066cc;">${resetUrl}</p>
+          <p style="word-break: break-all; color: #0066cc;">${fixedResetUrl}</p>
           <p style="color: #999; font-size: 12px;">
             Este enlace expirará en 24 horas.
           </p>
