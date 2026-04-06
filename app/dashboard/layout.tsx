@@ -20,33 +20,27 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
 
+  // For super_admin (davaprogramers@gmail.com), allow access without profile
+  const isSuperAdmin = user.user_metadata?.role === "super_admin"
+
   const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("role, condo_id, house_id, first_name, last_name, avatar_url")
     .eq("id", user.id)
     .single()
 
-  // If no profile, create one automatically
-  let profile = profileData
-  if (!profile) {
-    // Create profile for user
-    const { data: newProfile, error: createError } = await supabase
-      .from("profiles")
-      .insert({
-        id: user.id,
-        email: user.email,
-        first_name: user.user_metadata?.first_name || "Usuario",
-        last_name: user.user_metadata?.last_name || "Sin Apellido",
-        role: user.user_metadata?.role || "propietario",
-      })
-      .select()
-      .single()
+  // If no profile and not super_admin, redirect to login
+  if (!profileData && !isSuperAdmin) {
+    redirect("/auth/login?error=Tu+perfil+no+esta+configurado.+Contacta+al+administrador.")
+  }
 
-    if (createError || !newProfile) {
-      redirect("/auth/login")
-    }
-
-    profile = newProfile
+  let profile = profileData || {
+    role: user.user_metadata?.role || "propietario",
+    condo_id: null,
+    house_id: null,
+    first_name: user.user_metadata?.first_name || "Usuario",
+    last_name: user.user_metadata?.last_name || "Sin Apellido",
+    avatar_url: null,
   }
 
   // If super_admin without condo_id, redirect to admin panel to select one
@@ -96,6 +90,13 @@ export default async function DashboardLayout({
         .eq("id", user.id)
       
       profile.condo_id = house.condo_id
+    }
+  }
+
+  // If still no condo_id and not super_admin, redirect
+  if (!profile.condo_id && !isSuperAdmin) {
+    redirect("/auth/login?error=No+tienes+acceso+a+ningun+condominio.")
+  }
 
   let condo = null
   let allCondos: { id: string; name: string }[] = []
