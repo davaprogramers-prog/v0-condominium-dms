@@ -23,24 +23,43 @@ export default async function DashboardLayout({
   // For super_admin (davaprogramers@gmail.com), allow access without profile
   const isSuperAdmin = user.user_metadata?.role === "super_admin"
 
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("role, condo_id, house_id, first_name, last_name, avatar_url")
-    .eq("id", user.id)
-    .single()
+  let profile: any = null
+  let profileError = null
 
-  // If no profile and not super_admin, redirect to login
-  if (!profileData && !isSuperAdmin) {
-    redirect("/auth/login?error=Tu+perfil+no+esta+configurado.+Contacta+al+administrador.")
+  try {
+    const { data: profileData, error: pError } = await supabase
+      .from("profiles")
+      .select("role, condo_id, house_id, first_name, last_name, avatar_url")
+      .eq("id", user.id)
+      .single()
+
+    if (!pError && profileData) {
+      profile = profileData
+    } else {
+      profileError = pError
+    }
+  } catch (e) {
+    console.error("[v0] Error reading profile:", e)
+    profileError = e
   }
 
-  let profile = profileData || {
-    role: user.user_metadata?.role || "propietario",
-    condo_id: null,
-    house_id: null,
-    first_name: user.user_metadata?.first_name || "Usuario",
-    last_name: user.user_metadata?.last_name || "Sin Apellido",
-    avatar_url: null,
+  // If no profile, create fallback from metadata
+  if (!profile) {
+    profile = {
+      role: user.user_metadata?.role || "propietario",
+      condo_id: null,
+      house_id: null,
+      first_name: user.user_metadata?.first_name || "Usuario",
+      last_name: user.user_metadata?.last_name || "Sin Apellido",
+      avatar_url: null,
+    }
+  }
+
+  // If no condo_id and not super_admin, allow temporary access (no redirect)
+  // This permits users to enter dashboard and see an admin message
+  if (!profile.condo_id && !isSuperAdmin && profile.role !== "admin") {
+    // For regular users without condo, we'll still show dashboard
+    // but with limited functionality until admin assigns them
   }
 
   // If super_admin without condo_id, redirect to admin panel to select one
@@ -93,9 +112,10 @@ export default async function DashboardLayout({
     }
   }
 
-  // If still no condo_id and not super_admin, redirect
-  if (!profile.condo_id && !isSuperAdmin) {
-    redirect("/auth/login?error=No+tienes+acceso+a+ningun+condominio.")
+  // If still no condo_id and not super_admin/admin, mark as needs setup
+  // But allow access to dashboard
+  if (!profile.condo_id && profile.role !== "super_admin" && profile.role !== "admin") {
+    profile.needs_setup = true
   }
 
   let condo = null
