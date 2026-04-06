@@ -16,6 +16,7 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [successTimer, setSuccessTimer] = useState(5)
   const [error, setError] = useState("")
   const router = useRouter()
   const supabase = createClient()
@@ -24,7 +25,6 @@ export default function ResetPasswordPage() {
     // Handle the hash fragment that Supabase sends for password recovery
     // The URL will be like: /auth/reset-password#access_token=...&type=recovery
     const handleHashFragment = async () => {
-      // Check if there's a hash fragment with tokens
       if (typeof window !== 'undefined' && window.location.hash) {
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
           })
 
           if (error) {
-            console.error('Error setting session:', error)
+            console.error('[v0] Error setting session:', error)
             setError('El enlace de recuperación ha expirado o es inválido')
           }
 
@@ -51,6 +51,24 @@ export default function ResetPasswordPage() {
 
     handleHashFragment()
   }, [supabase])
+
+  // Success timer countdown
+  useEffect(() => {
+    if (!success) return
+
+    const interval = setInterval(() => {
+      setSuccessTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          router.push("/auth/login")
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [success, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,17 +91,14 @@ export default function ResetPasswordPage() {
         password: password
       })
 
-      if (error) throw error
+      if (error) {
+        throw error
+      }
 
       setSuccess(true)
-      
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        router.push("/auth/login")
-      }, 3000)
     } catch (err: any) {
-      console.error("Update password error:", err)
-      setError(err.message || "Error al actualizar la contraseña")
+      console.error("[v0] Update password error:", err)
+      setError(err.message || "Error al actualizar la contraseña. Intenta de nuevo.")
     } finally {
       setLoading(false)
     }
@@ -105,15 +120,17 @@ export default function ResetPasswordPage() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Contraseña actualizada</h3>
-                <p className="text-muted-foreground text-sm">
-                  Tu contraseña ha sido actualizada correctamente. 
-                  Serás redirigido al inicio de sesión en unos segundos...
+                <h3 className="font-semibold text-lg mb-2">¡Contraseña actualizada!</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Tu contraseña ha sido cambiada exitosamente.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Serás redirigido al inicio de sesión en <span className="font-semibold text-foreground">{successTimer}</span> segundos...
                 </p>
               </div>
               <Link href="/auth/login">
                 <Button className="w-full">
-                  Ir a iniciar sesión
+                  Ir a iniciar sesión ahora
                 </Button>
               </Link>
             </div>
