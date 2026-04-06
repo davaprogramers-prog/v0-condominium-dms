@@ -1,11 +1,24 @@
 'use client'
 
+import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { SiteLogo } from "@/components/site-logo"
 import { CompanyLogo } from "@/components/company-logo"
 
 export default function LandingPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // If there's a code parameter, redirect to auth callback
+    const code = searchParams.get("code")
+    if (code) {
+      router.replace(`/auth/callback?code=${code}&type=recovery`)
+    }
+  }, [searchParams, router])
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-col items-center justify-center gap-6 border-b px-4 py-6 sm:px-6 sm:py-8">

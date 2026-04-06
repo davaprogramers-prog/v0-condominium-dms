@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
       })
 
       if (error) throw error
@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
       setSent(true)
     } catch (err: any) {
       console.error("Reset password error:", err)
-      setError(err.message || "Error al enviar el correo de recuperacion")
+      setError(err.message || "Error al enviar el correo de recuperación")
     } finally {
       setLoading(false)
     }
@@ -41,9 +41,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Recuperar contrasena</CardTitle>
+          <CardTitle className="text-2xl font-bold">Recuperar contraseña</CardTitle>
           <CardDescription>
-            Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena
+            Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Correo enviado</h3>
                 <p className="text-muted-foreground text-sm">
-                  Hemos enviado un enlace de recuperacion a <strong>{email}</strong>. 
+                  Hemos enviado un enlace de recuperación a <strong>{email}</strong>. 
                   Por favor revisa tu bandeja de entrada y sigue las instrucciones.
                 </p>
               </div>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
                 <Link href="/auth/login">
                   <Button variant="ghost" className="w-full">
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Volver al inicio de sesion
+                    Volver al inicio de sesión
                   </Button>
                 </Link>
               </div>
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electronico</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   type="email"
@@ -99,13 +99,13 @@ export default function ForgotPasswordPage() {
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Enviar enlace de recuperacion
+                Enviar enlace de recuperación
               </Button>
 
               <Link href="/auth/login">
                 <Button variant="ghost" className="w-full">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver al inicio de sesion
+                  Volver al inicio de sesión
                 </Button>
               </Link>
             </form>

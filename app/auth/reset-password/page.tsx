@@ -38,12 +38,12 @@ export default function ResetPasswordPage() {
     setError("")
 
     if (password !== confirmPassword) {
-      setError("Las contrasenas no coinciden")
+      setError("Las contraseñas no coinciden")
       return
     }
 
     if (password.length < 8) {
-      setError("La contrasena debe tener al menos 8 caracteres")
+      setError("La contraseña debe tener al menos 8 caracteres")
       return
     }
 
@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
       }, 3000)
     } catch (err: any) {
       console.error("Update password error:", err)
-      setError(err.message || "Error al actualizar la contrasena")
+      setError(err.message || "Error al actualizar la contraseña")
     } finally {
       setLoading(false)
     }
@@ -74,9 +74,9 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Restablecer contrasena</CardTitle>
+          <CardTitle className="text-2xl font-bold">Restablecer contraseña</CardTitle>
           <CardDescription>
-            Ingresa tu nueva contrasena para acceder a tu cuenta
+            Ingresa tu nueva contraseña para acceder a tu cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,15 +86,15 @@ export default function ResetPasswordPage() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Contrasena actualizada</h3>
+                <h3 className="font-semibold text-lg mb-2">Contraseña actualizada</h3>
                 <p className="text-muted-foreground text-sm">
-                  Tu contrasena ha sido actualizada correctamente. 
-                  Seras redirigido al inicio de sesion en unos segundos...
+                  Tu contraseña ha sido actualizada correctamente. 
+                  Serás redirigido al inicio de sesión en unos segundos...
                 </p>
               </div>
               <Link href="/auth/login">
                 <Button className="w-full">
-                  Ir a iniciar sesion
+                  Ir a iniciar sesión
                 </Button>
               </Link>
             </div>
@@ -107,12 +107,12 @@ export default function ResetPasswordPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="password">Nueva contrasena</Label>
+                <Label htmlFor="password">Nueva contraseña</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Minimo 8 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -130,11 +130,11 @@ export default function ResetPasswordPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar contrasena</Label>
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Repite tu contrasena"
+                  placeholder="Repite tu contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -144,13 +144,13 @@ export default function ResetPasswordPage() {
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Actualizar contrasena
+                Actualizar contraseña
               </Button>
 
               <Link href="/auth/login">
                 <Button variant="ghost" className="w-full">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver al inicio de sesion
+                  Volver al inicio de sesión
                 </Button>
               </Link>
             </form>
