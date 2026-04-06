@@ -20,15 +20,33 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("role, condo_id, house_id, first_name, last_name, avatar_url")
     .eq("id", user.id)
     .single()
 
-  // If no profile, redirect to login
+  // If no profile, create one automatically
+  let profile = profileData
   if (!profile) {
-    redirect("/auth/login")
+    // Create profile for user
+    const { data: newProfile, error: createError } = await supabase
+      .from("profiles")
+      .insert({
+        id: user.id,
+        email: user.email,
+        first_name: user.user_metadata?.first_name || "Usuario",
+        last_name: user.user_metadata?.last_name || "Sin Apellido",
+        role: user.user_metadata?.role || "propietario",
+      })
+      .select()
+      .single()
+
+    if (createError || !newProfile) {
+      redirect("/auth/login")
+    }
+
+    profile = newProfile
   }
 
   // If super_admin without condo_id, redirect to admin panel to select one
@@ -78,18 +96,6 @@ export default async function DashboardLayout({
         .eq("id", user.id)
       
       profile.condo_id = house.condo_id
-    }
-  }
-
-  // If regular user without condo_id and not an owner, redirect to login
-  if (!profile.condo_id && !isOwner) {
-    redirect("/auth/login")
-  }
-  
-  // If owner still has no condo_id, show a more helpful error
-  if (!profile.condo_id) {
-    redirect("/auth/login?error=Tu+correo+no+esta+registrado+en+ninguna+propiedad.+Contacta+al+administrador.")
-  }
 
   let condo = null
   let allCondos: { id: string; name: string }[] = []
