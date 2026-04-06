@@ -21,16 +21,35 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Supabase automatically handles the token from the URL
-    // We just need to check if there's a session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        // If no session, the token might not have been processed yet
-        // Supabase handles this automatically when the page loads with the token
+    // Handle the hash fragment that Supabase sends for password recovery
+    // The URL will be like: /auth/reset-password#access_token=...&type=recovery
+    const handleHashFragment = async () => {
+      // Check if there's a hash fragment with tokens
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        const type = hashParams.get('type')
+
+        if (accessToken && type === 'recovery') {
+          // Set the session with the tokens from the hash
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          })
+
+          if (error) {
+            console.error('Error setting session:', error)
+            setError('El enlace de recuperación ha expirado o es inválido')
+          }
+
+          // Clean up the URL hash
+          window.history.replaceState(null, '', window.location.pathname)
+        }
       }
     }
-    checkSession()
+
+    handleHashFragment()
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
