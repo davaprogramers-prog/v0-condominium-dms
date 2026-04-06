@@ -140,21 +140,21 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     {area.is_paid ? "Pagado" : "Gratis"}
                   </Badge>
                 </div>
-                {area.description && <CardDescription>{area.description as string}</CardDescription>}
+                {area.description ? <CardDescription>{area.description as string}</CardDescription> : null}
               </CardHeader>
               <CardContent className="flex flex-col gap-3 text-sm">
-                {area.is_paid && area.usage_fee && (
+                {area.is_paid && area.usage_fee ? (
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span>Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
                   </div>
-                )}
-                {area.maintenance_responsible && (
+                ) : null}
+                {area.maintenance_responsible ? (
                   <div className="flex items-center gap-2">
                     <Wrench className="h-4 w-4 text-muted-foreground" />
                     <span>Mantenimiento: {area.maintenance_responsible as string}</span>
                   </div>
-                )}
+                ) : null}
 
                 {isAdmin && (
                   <div className="mt-3 flex gap-2 pt-3 border-t">
