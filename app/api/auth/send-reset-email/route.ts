@@ -1,19 +1,46 @@
 import { Resend } from 'resend'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 const resend = new Resend(process.env.RESENDCONDO_API_KEY)
 
 export async function POST(request: Request) {
   try {
-    const { email, resetUrl } = await request.json()
+    const { email } = await request.json()
 
-    if (!email || !resetUrl) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Email and resetUrl are required' },
+        { error: 'Email is required' },
         { status: 400 }
       )
     }
 
+    // Create Supabase admin client to generate recovery link
+    const adminClient = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
+
+    // Generate recovery link using Supabase Admin API
+    const { data, error: linkError } = await adminClient.auth.admin.generateRecoveryLink(email)
+
+    if (linkError || !data?.recovery_link) {
+      console.error('[v0] Generate recovery link error:', linkError)
+      return NextResponse.json(
+        { error: 'No se pudo generar el enlace de recuperación' },
+        { status: 500 }
+      )
+    }
+
+    const resetUrl = data.recovery_link
+
+    // Send email via Resend
     const result = await resend.emails.send({
       from: 'noreply@administracioncondominio.app',
       to: email,
@@ -43,7 +70,7 @@ export async function POST(request: Request) {
     if (result.error) {
       console.error('[v0] Resend error:', result.error)
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'No se pudo enviar el correo' },
         { status: 500 }
       )
     }
@@ -52,7 +79,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[v0] Send reset email error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }
