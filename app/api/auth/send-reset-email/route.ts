@@ -28,9 +28,13 @@ export async function POST(request: Request) {
     )
 
     // Generate recovery link using Supabase Admin API
-    const { data, error: linkError } = await adminClient.auth.admin.generateRecoveryLink(email)
+    const { data, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: email,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
+    })
 
-    if (linkError || !data?.recovery_link) {
+    if (linkError || !data?.action_link) {
       console.error('[v0] Generate recovery link error:', linkError)
       return NextResponse.json(
         { error: 'No se pudo generar el enlace de recuperación' },
@@ -38,9 +42,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const resetUrl = data.recovery_link
-
-    // Send email via Resend
+    const resetUrl = data.action_link
     const result = await resend.emails.send({
       from: 'noreply@administracioncondominio.app',
       to: email,
