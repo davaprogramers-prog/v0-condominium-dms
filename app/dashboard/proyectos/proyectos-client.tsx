@@ -200,9 +200,9 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </div>
                   </div>
-                  {project.improvement_type && (
+                  {project.improvement_type ? (
                     <CardDescription>{project.improvement_type as string}</CardDescription>
-                  )}
+                  ) : null}
                 </CardHeader>
                 
                 {/* Edit Project Dialog */}
