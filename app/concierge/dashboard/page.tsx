@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, AlertCircle, ClipboardList } from 'lucide-react'
-import { getCondoVisitsForConcierge, getHousesWithPendingVisits, getSupplyRequests } from './actions'
+import { getCondoVisitsForConcierge, getHousesWithPendingVisits, getSupplyRequests } from '../actions'
 
 export const metadata: Metadata = {
   title: 'Dashboard Conserje | Condominio',

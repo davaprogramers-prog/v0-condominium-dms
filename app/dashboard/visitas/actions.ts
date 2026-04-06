@@ -101,30 +101,6 @@ export async function updateVisitStatus(visitId: string, status: 'scheduled' | '
   revalidatePath('/dashboard/visitas')
 }
 
-export async function getCondoVisitsForConcierge() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('No autenticado')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('condo_id, role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.condo_id || profile.role !== 'conserje') {
-    throw new Error('No tienes permiso para ver estas visitas')
-  }
-
-  const { data: visits } = await supabase
-    .from('visits')
-    .select('*, house:houses(id, house_number), created_by_profile:profiles!created_by(name, email)')
-    .eq('condo_id', profile.condo_id)
-    .order('visit_date', { ascending: false })
-
-  return visits || []
-}
-
 export async function deleteVisit(visitId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
