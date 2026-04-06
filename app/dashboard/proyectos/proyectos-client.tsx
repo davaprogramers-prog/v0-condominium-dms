@@ -245,43 +245,43 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                 )}
                 {isExpanded && (
                   <CardContent className="flex flex-col gap-4">
-                    {project.description && <p className="text-sm">{project.description as string}</p>}
+                    {project.description ? <p className="text-sm">{project.description as string}</p> : null}
 
                     <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-                      {project.location_description && (
+                      {project.location_description ? (
                         <div>
                           <p className="text-muted-foreground">Ubicacion</p>
                           <p className="font-medium">{project.location_description as string}</p>
                         </div>
-                      )}
-                      {project.estimated_cost && (
+                      ) : null}
+                      {project.estimated_cost ? (
                         <div>
                           <p className="text-muted-foreground">Costo Estimado</p>
                           <p className="font-medium">{currencySymbol}{Number(project.estimated_cost).toLocaleString()}</p>
                         </div>
-                      )}
-                      {project.actual_cost && (
+                      ) : null}
+                      {project.actual_cost ? (
                         <div>
                           <p className="text-muted-foreground">Costo Real</p>
                           <p className="font-medium">{currencySymbol}{Number(project.actual_cost).toLocaleString()}</p>
                         </div>
-                      )}
-                      {project.start_date && (
+                      ) : null}
+                      {project.start_date ? (
                         <div>
                           <p className="text-muted-foreground">Inicio</p>
                           <p className="font-medium">{project.start_date as string}</p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
 
-                    {project.location_photo_url && (
+                    {project.location_photo_url ? (
                       <img
                         src={project.location_photo_url as string}
                         alt="Ubicacion del proyecto"
                         className="h-48 w-full rounded-lg object-cover"
                         crossOrigin="anonymous"
                       />
-                    )}
+                    ) : null}
 
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
@@ -300,12 +300,12 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                                 <FileText className="h-4 w-4 text-muted-foreground" />
                                 <div>
                                   <p className="text-sm font-medium">{q.vendor_name as string}</p>
-                                  {q.description && <p className="text-xs text-muted-foreground">{q.description as string}</p>}
+                                  {q.description ? <p className="text-xs text-muted-foreground">{q.description as string}</p> : null}
                                 </div>
                               </div>
                               <div className="flex items-center gap-3">
                                 <span className="text-sm font-semibold">{currencySymbol}{Number(q.amount).toLocaleString()}</span>
-                                {q.is_selected && <Badge>Seleccionada</Badge>}
+                                {q.is_selected ? <Badge>Seleccionada</Badge> : null}
                                 {q.document_url ? (
                                   <Button asChild variant="outline" size="sm">
                                     <a 
