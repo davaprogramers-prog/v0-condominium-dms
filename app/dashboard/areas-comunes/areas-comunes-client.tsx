@@ -123,7 +123,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {areas.map((area) => (
             <Card key={area.id as string}>
-              {area.photo_url && (
+              {area.photo_url ? (
                 <div className="aspect-video overflow-hidden rounded-t-lg">
                   <img
                     src={area.photo_url as string}
@@ -132,7 +132,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     crossOrigin="anonymous"
                   />
                 </div>
-              )}
+              ) : null}
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{area.name as string}</CardTitle>
