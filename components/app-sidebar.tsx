@@ -42,6 +42,7 @@ import {
   LogOut,
   Users,
   ChevronDown,
+  Calendar,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -93,8 +94,11 @@ const adminMenuItems = [
     ]
   },
   {
-    section: "Participación",
+    section: "Administración",
     items: [
+      { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
       { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
@@ -127,6 +131,7 @@ const ownerMenuItems = [
     section: "Condominio",
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
@@ -318,13 +323,20 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               </span>
             </div>
           </div>
+          <Link
+            href="/dashboard/mi-cuenta"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <Settings className="h-4 w-4" />
+            Mi Cuenta
+          </Link>
           <form action={signOut}>
             <button
               type="submit"
               className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
-              Cerrar sesión
+              Cerrar sesion
             </button>
           </form>
         </div>

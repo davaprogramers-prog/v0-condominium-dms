@@ -8,3 +8,11 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+
+# Capacitor (no longer used)
+capacitor.config.json
+.npmrc
+lib/capacitor-init.ts
+components/capacitor-provider.tsx
+/android/
+/ios/
