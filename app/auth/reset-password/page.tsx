@@ -44,7 +44,7 @@ export default function ResetPasswordPage() {
           }
 
           // Clean up the URL hash
-          window.history.replaceState(null, '', window.location.pathname)
+          window.history.replaceState({}, document.title, window.location.pathname)
         }
       }
     }
