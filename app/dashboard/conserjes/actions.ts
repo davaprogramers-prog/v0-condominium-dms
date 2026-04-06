@@ -172,21 +172,6 @@ export async function getConcierges(condoId: string) {
   return data || []
 }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("role", "conserje")
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("[v0] Error fetching concierges:", error)
-    throw new Error(error.message)
-  }
-
-  return data || []
-}
-
 export async function updateConcierge(condoId: string, profileId: string, data: {
   firstName?: string
   lastName?: string
