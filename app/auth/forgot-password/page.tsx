@@ -22,11 +22,35 @@ export default function ForgotPasswordPage() {
     setError("")
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      // Generate reset token using Supabase
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: email,
+        password: Math.random().toString(36).slice(-8), // Temporary password
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/reset-password`,
+        },
       })
 
-      if (error) throw error
+      if (signUpError && signUpError.message !== "User already registered") {
+        throw signUpError
+      }
+
+      // Send email via Resend endpoint
+      const resetUrl = `${window.location.origin}/auth/callback?type=recovery&token_hash=${email}&redirect_to=${window.location.origin}/auth/reset-password`
+      
+      const response = await fetch("/api/auth/send-reset-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: email,
+          resetUrl: resetUrl,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Error al enviar el correo")
+      }
 
       setSent(true)
     } catch (err: any) {
