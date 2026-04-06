@@ -34,8 +34,6 @@ export async function POST(request: Request) {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
     })
 
-    console.error('[v0] generateLink response:', { data, linkError })
-
     if (linkError || !data) {
       console.error('[v0] Generate recovery link error:', linkError)
       return NextResponse.json(
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const resetUrl = data.properties?.recovery_link || data.action_link || data.recovery_link
+    const resetUrl = data.properties?.action_link
 
     if (!resetUrl) {
       console.error('[v0] No recovery link found in data:', data)
