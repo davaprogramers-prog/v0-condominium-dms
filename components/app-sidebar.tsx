@@ -323,13 +323,20 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               </span>
             </div>
           </div>
+          <Link
+            href="/dashboard/mi-cuenta"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <Settings className="h-4 w-4" />
+            Mi Cuenta
+          </Link>
           <form action={signOut}>
             <button
               type="submit"
               className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
-              Cerrar sesión
+              Cerrar sesion
             </button>
           </form>
         </div>

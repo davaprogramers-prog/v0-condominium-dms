@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,11 +28,11 @@ export function LoginForm() {
 
       if (error) throw error
 
-      toast.success("Sesión iniciada correctamente")
+      toast.success("Sesion iniciada correctamente")
       router.push("/dashboard")
     } catch (error) {
       console.error("Login error:", error)
-      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión")
+      toast.error(error instanceof Error ? error.message : "Error al iniciar sesion")
     } finally {
       setLoading(false)
     }
@@ -40,7 +41,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electrónico</Label>
+        <Label htmlFor="email">Correo electronico</Label>
         <Input
           id="email"
           type="email"
@@ -53,11 +54,19 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Contraseña</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Contrasena</Label>
+          <Link 
+            href="/auth/forgot-password" 
+            className="text-sm text-primary hover:underline"
+          >
+            Olvide mi contrasena
+          </Link>
+        </div>
         <Input
           id="password"
           type="password"
-          placeholder="Tu contraseña"
+          placeholder="Tu contrasena"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -66,7 +75,7 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+        {loading ? "Iniciando sesion..." : "Iniciar sesion"}
       </Button>
     </form>
   )
