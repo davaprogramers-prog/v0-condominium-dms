@@ -22,6 +22,10 @@ export async function uploadLogo(
     .eq('id', user.id)
     .single()
 
+  if (!profile) {
+    throw new Error('Perfil no encontrado')
+  }
+
   if (scope === 'global' && profile.role !== 'super_admin') {
     throw new Error('Solo super admin puede crear logos globales')
   }
@@ -112,6 +116,10 @@ export async function setDefaultLogo(logoId: string) {
     .eq('id', user.id)
     .single()
 
+  if (!profile) {
+    throw new Error('Perfil no encontrado')
+  }
+
   if (logo.scope === 'global' && profile.role !== 'super_admin') {
     throw new Error('Solo super admin puede actualizar logos globales')
   }
@@ -156,6 +164,10 @@ export async function deleteLogo(logoId: string) {
     .select('role, condo_id')
     .eq('id', user.id)
     .single()
+
+  if (!profile) {
+    throw new Error('Perfil no encontrado')
+  }
 
   if (logo.scope === 'global' && profile.role !== 'super_admin') {
     throw new Error('Solo super admin puede eliminar logos globales')
