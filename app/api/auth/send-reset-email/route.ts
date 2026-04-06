@@ -31,7 +31,6 @@ export async function POST(request: Request) {
     const { data, error: linkError } = await adminClient.auth.admin.generateLink({
       type: 'recovery',
       email: email,
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
     })
 
     if (linkError || !data) {
