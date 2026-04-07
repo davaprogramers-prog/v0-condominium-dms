@@ -39,19 +39,17 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
   const router = useRouter()
 
   useEffect(() => {
-    if (open) {
-      async function loadLogos() {
-        const supabase = createClient()
-        const { data } = await supabase
-          .from("expense_logos")
-          .select("id, name, logo_url")
-          .is("condo_id", null)
-          .order("name")
-        setExpenseLogos(data || [])
-      }
-      loadLogos()
+    async function loadLogos() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("expense_logos")
+        .select("id, name, logo_url")
+        .is("condo_id", null)
+        .order("name")
+      setExpenseLogos(data || [])
     }
-  }, [open])
+    loadLogos()
+  }, [])
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
