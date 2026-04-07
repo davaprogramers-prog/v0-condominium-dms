@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EditIncomeDialog } from "./edit-income-dialog"
 import { ExternalLink, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { deleteIncome } from "@/app/dashboard/actions"
+import { deleteIncome } from "./actions"
 
 interface IngresosTableProps {
   income: any[]
