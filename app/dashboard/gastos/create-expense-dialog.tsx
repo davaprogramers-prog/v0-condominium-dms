@@ -35,9 +35,10 @@ interface ExpenseLogo {
 interface CreateExpenseDialogProps {
   condoId: string
   expenseTypes: ExpenseType[]
+  isSuperAdmin?: boolean
 }
 
-export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDialogProps) {
+export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = false }: CreateExpenseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -53,7 +54,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
       const { data } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
-        .eq("condo_id", condoId)
+        .is("condo_id", null)
         .order("name")
       setExpenseLogos(data || [])
     }
@@ -211,13 +212,15 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Logo del Proveedor</Label>
-              <Link 
-                href="/dashboard/gastos/logos" 
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                <Settings className="h-3 w-3" />
-                Gestionar logos
-              </Link>
+              {isSuperAdmin && (
+                <Link 
+                  href="/dashboard/gastos/logos" 
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <Settings className="h-3 w-3" />
+                  Gestionar logos
+                </Link>
+              )}
             </div>
             {expenseLogos.length > 0 ? (
               <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>

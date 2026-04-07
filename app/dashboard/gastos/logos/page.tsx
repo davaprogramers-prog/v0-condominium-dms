@@ -22,7 +22,7 @@ interface ExpenseLogo {
 export default function ExpenseLogosPage() {
   const [logos, setLogos] = useState<ExpenseLogo[]>([])
   const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [condoId, setCondoId] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -56,19 +56,20 @@ export default function ExpenseLogosPage() {
       return
     }
 
-    const isAdminUser = profile.role === "admin" || profile.role === "super_admin"
-    setIsAdmin(isAdminUser)
+    const isSuperAdminUser = profile.role === "super_admin"
+    setIsSuperAdmin(isSuperAdminUser)
     setCondoId(profile.condo_id)
 
-    if (!isAdminUser) {
+    if (!isSuperAdminUser) {
       router.push("/dashboard")
       return
     }
 
+    // Get logos without condo_id filter - all logos across all condos
     const { data: logosData } = await supabase
       .from("expense_logos")
       .select("*")
-      .eq("condo_id", profile.condo_id)
+      .is("condo_id", null)
       .order("name")
 
     setLogos(logosData || [])
@@ -109,11 +110,11 @@ export default function ExpenseLogosPage() {
         .from("documents")
         .getPublicUrl(filePath)
 
-      // Create expense_logo record
+      // Create expense_logo record (global, not tied to condo)
       const { data: newLogo, error: insertError } = await supabase
         .from("expense_logos")
         .insert({
-          condo_id: condoId,
+          condo_id: null,
           name: newLogoName.trim(),
           logo_url: publicUrl
         })
@@ -287,28 +288,28 @@ export default function ExpenseLogosPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {logos.map((logo) => (
-            <Card key={logo.id} className="group relative">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <div className="h-16 w-16 mb-2 flex items-center justify-center">
+            <div key={logo.id} className="group flex flex-col items-center">
+              <div className="relative mb-3">
+                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center overflow-hidden shadow-sm border-2 border-muted hover:shadow-md transition-shadow">
                   <Image
                     src={logo.logo_url}
                     alt={logo.name}
-                    width={64}
-                    height={64}
-                    className="max-h-16 max-w-16 object-contain"
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-contain p-2"
                   />
                 </div>
-                <span className="text-sm font-medium text-center truncate w-full">
-                  {logo.name}
-                </span>
                 <button
                   onClick={() => handleDelete(logo)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-destructive/10 hover:bg-destructive/20 text-destructive"
+                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-destructive text-white hover:bg-destructive/90 shadow-sm"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </button>
-              </CardContent>
-            </Card>
+              </div>
+              <span className="text-sm font-medium text-center truncate w-full px-1">
+                {logo.name}
+              </span>
+            </div>
           ))}
         </div>
       )}

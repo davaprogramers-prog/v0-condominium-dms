@@ -23,6 +23,7 @@ export default async function GastosPage({
 
   const condoId = profile?.condo_id
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isSuperAdmin = profile?.role === "super_admin"
 
   // Get period from query params or use current month
   const params = await searchParams
@@ -118,7 +119,7 @@ export default async function GastosPage({
                   Logos
                 </Button>
               </Link>
-              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} />
+              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} isSuperAdmin={isSuperAdmin} />
             </>
           )}
         </div>
