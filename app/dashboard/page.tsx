@@ -3,7 +3,6 @@ import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
-import { SuperAdminDashboard } from "./super-admin-dashboard"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -15,11 +14,6 @@ export default async function DashboardPage() {
     .select("role, condo_id, first_name, house_id")
     .eq("id", user?.id)
     .single()
-
-  // If super_admin, show dedicated dashboard
-  if (profile?.role === "super_admin") {
-    return <SuperAdminDashboard userEmail={user?.email || ""} />
-  }
 
   // If admin without condo_id, show admin setup message
   if (profile?.role === "admin" && !profile?.condo_id) {
