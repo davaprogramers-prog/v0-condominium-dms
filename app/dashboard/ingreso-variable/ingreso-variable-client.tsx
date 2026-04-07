@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { createVariableIncome, deleteVariableIncome } from "@/app/dashboard/ingresos/actions"
+import { createVariableIncome } from "@/app/dashboard/actions"
+import { deleteVariableIncome } from "@/app/dashboard/ingresos/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
