@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus, Building2, MoreVertical, Trash2, Edit } from "lucide-react"
+import { Plus, Building2, MoreVertical, Trash2, Edit, LogIn, Eye } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Card } from "@/components/ui/card"
+import Link from "next/link"
 
 export function SuperAdminDashboard({ user }: { user: any }) {
   const router = useRouter()
@@ -28,7 +30,7 @@ export function SuperAdminDashboard({ user }: { user: any }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
-  const [formData, setFormData] = useState({ name: "", country: "", city: "" })
+  const [formData, setFormData] = useState({ name: "", address: "", city: "", country: "" })
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function SuperAdminDashboard({ user }: { user: any }) {
       const res = await fetch("/api/super-admin/condos")
       if (!res.ok) throw new Error("Error al cargar condominios")
       const data = await res.json()
-      setCondos(data)
+      setCondos(data.condos || data)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido")
     } finally {
@@ -59,7 +61,7 @@ export function SuperAdminDashboard({ user }: { user: any }) {
         body: JSON.stringify(formData),
       })
       if (!res.ok) throw new Error("Error al crear condominio")
-      setFormData({ name: "", country: "", city: "" })
+      setFormData({ name: "", address: "", city: "", country: "" })
       setCreateOpen(false)
       await fetchCondos()
     } catch (err) {
@@ -82,25 +84,35 @@ export function SuperAdminDashboard({ user }: { user: any }) {
     }
   }
 
+  async function enterAsAdmin(condoId: string, condoName: string) {
+    // Store the condominium context in localStorage for super_admin
+    localStorage.setItem('super_admin_condo_id', condoId)
+    localStorage.setItem('super_admin_condo_name', condoName)
+    router.push(`/dashboard?condo=${condoId}&mode=super_admin_view`)
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="rounded-lg border bg-card p-6">
-        <div className="flex flex-col gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold">Panel de Super Administrador</h1>
-            <p className="text-muted-foreground">Gestiona condominios del sistema</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Panel de Super Administrador</h1>
+          <p className="text-lg text-slate-600 mb-2">Gestión de Condominios del Sistema</p>
+          <p className="text-sm text-slate-500">Usuario: {user?.email}</p>
+        </div>
+
+        {/* Create Button */}
+        <div className="mb-8">
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Condominio
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Crear Nuevo Condominio
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Crear nuevo condominio</DialogTitle>
+                <DialogTitle>Crear Nuevo Condominio</DialogTitle>
                 <DialogDescription>
                   Ingresa los datos del nuevo condominio
                 </DialogDescription>
@@ -116,16 +128,16 @@ export function SuperAdminDashboard({ user }: { user: any }) {
                     required
                   />
                 </div>
+                <div>
+                  <Label htmlFor="address">Dirección</Label>
+                  <Input
+                    id="address"
+                    placeholder="Ej: Calle Principal 123"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="country">País</Label>
-                    <Input
-                      id="country"
-                      placeholder="Ej: Chile"
-                      value={formData.country}
-                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    />
-                  </div>
                   <div>
                     <Label htmlFor="city">Ciudad</Label>
                     <Input
@@ -135,71 +147,123 @@ export function SuperAdminDashboard({ user }: { user: any }) {
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="country">País</Label>
+                    <Input
+                      id="country"
+                      placeholder="Ej: Chile"
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={submitting}>
-                  {submitting ? "Creando..." : "Crear"}
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={submitting}>
+                  {submitting ? "Creando..." : "Crear Condominio"}
                 </Button>
               </form>
             </DialogContent>
           </Dialog>
         </div>
-      </div>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      {/* Condos List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Condominios ({condos.length})</h2>
+        {/* Condos List */}
         {loading ? (
-          <p className="text-muted-foreground">Cargando...</p>
-        ) : condos.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center">
-            <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-            <p className="text-muted-foreground">No hay condominios creados aún</p>
+          <div className="text-center py-12">
+            <p className="text-slate-600">Cargando condominios...</p>
           </div>
+        ) : condos.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Building2 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Sin Condominios</h3>
+            <p className="text-slate-600">Crea tu primer condominio para comenzar</p>
+          </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {condos.map((condo) => (
-              <div key={condo.id} className="rounded-lg border bg-card p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <h3 className="font-semibold">{condo.name}</h3>
-                    {condo.city && <p className="text-sm text-muted-foreground">{condo.city}, {condo.country}</p>}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => router.push(`/super-admin/condos/${condo.id}`)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteCondo(condo.id)}
-                        className="text-destructive"
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-900">Condominios ({condos.length})</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {condos.map((condo) => (
+                <Card key={condo.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <h3 className="font-semibold text-slate-900 text-lg">{condo.name}</h3>
+                        {condo.address && (
+                          <p className="text-sm text-slate-600">{condo.address}</p>
+                        )}
+                        {condo.city && (
+                          <p className="text-sm text-slate-500">{condo.city}, {condo.country}</p>
+                        )}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteCondo(condo.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {condo.created_at && (
+                      <div className="text-xs text-slate-500">
+                        <p>Creado: {new Date(condo.created_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2 border-t border-slate-200">
+                      <button
+                        onClick={() => enterAsAdmin(condo.id, condo.name)}
+                        className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded flex items-center justify-center gap-2 transition-colors"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <LogIn className="h-4 w-4" />
+                        Entrar
+                      </button>
+                      <button
+                        onClick={() => router.push(`/dashboard?condo=${condo.id}&mode=view`)}
+                        className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-900 text-sm font-medium rounded flex items-center justify-center gap-1 transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer Stats */}
+        {condos.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-slate-200">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <Card className="p-4 text-center">
+                <Building2 className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-slate-900">{condos.length}</p>
+                <p className="text-sm text-slate-600">Condominios</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="h-6 w-6 text-green-600 mx-auto mb-2 flex items-center justify-center">
+                  <span className="text-lg font-bold">👥</span>
                 </div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>ID: {condo.id}</p>
-                  {condo.created_at && (
-                    <p>Creado: {new Date(condo.created_at).toLocaleDateString()}</p>
-                  )}
-                </div>
-              </div>
-            ))}
+                <p className="text-2xl font-bold text-slate-900">{condos.length}</p>
+                <p className="text-sm text-slate-600">Total de Administraciones</p>
+              </Card>
+            </div>
           </div>
         )}
       </div>
