@@ -24,7 +24,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
-export function SuperAdminDashboard({ user }: { user: any }) {
+export function SuperAdminDashboard({ userEmail }: { userEmail: string }) {
   const router = useRouter()
   const [condos, setCondos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -98,7 +98,7 @@ export function SuperAdminDashboard({ user }: { user: any }) {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Panel de Super Administrador</h1>
           <p className="text-lg text-slate-600 mb-2">Gestión de Condominios del Sistema</p>
-          <p className="text-sm text-slate-500">Usuario: {user?.email}</p>
+          <p className="text-sm text-slate-500">Usuario: {userEmail}</p>
         </div>
 
         {/* Create Button */}

@@ -18,10 +18,12 @@ export default async function DashboardPage() {
 
   console.log("[v0] Dashboard - User:", user?.email, "Profile role:", profile?.role, "Condo ID:", profile?.condo_id)
 
+  console.log("[v0] Dashboard - User:", user?.email, "Profile role:", profile?.role, "Condo ID:", profile?.condo_id)
+
   // If super_admin, show dedicated dashboard
   if (profile?.role === "super_admin") {
     console.log("[v0] Showing SuperAdminDashboard for", user?.email)
-    return <SuperAdminDashboard user={user} />
+    return <SuperAdminDashboard userEmail={user?.email || ""} />
   }
 
   // If admin without condo_id, show admin setup message
