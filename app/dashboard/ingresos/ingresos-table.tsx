@@ -17,6 +17,25 @@ interface IngresosTableProps {
 
 type IncomeStatus = "pending" | "paid" | "overdue"
 
+// Comparador natural para ordenar números correctamente (101, 102, 103, 101-A, 101-B, etc)
+function compareHouseNumbers(a: string | number, b: string | number): number {
+  const aStr = String(a).toLowerCase()
+  const bStr = String(b).toLowerCase()
+  
+  const aMatch = aStr.match(/^(\d+)([a-z]?)$/)
+  const bMatch = bStr.match(/^(\d+)([a-z]?)$/)
+  
+  if (aMatch && bMatch) {
+    const aNum = parseInt(aMatch[1], 10)
+    const bNum = parseInt(bMatch[1], 10)
+    
+    if (aNum !== bNum) return aNum - bNum
+    return aMatch[2].localeCompare(bMatch[2])
+  }
+  
+  return aStr.localeCompare(bStr)
+}
+
 function getIncomeStatus(inc: any): { status: IncomeStatus; color: string; textColor: string } {
   const hasReceipt = inc.receipt_url
   const incomeDate = new Date(inc.income_date)
@@ -42,12 +61,23 @@ export function IngresosTable({ income, houses, isAdmin, currentYear, currentMon
     }
   }
 
+  // Ordenar ingresos por número de casa naturalmente
+  const sortedIncome = [...income].sort((a, b) => {
+    const houseA = a.house_id ? houses.find((h: any) => h.id === a.house_id) : null
+    const houseB = b.house_id ? houses.find((h: any) => h.id === b.house_id) : null
+    
+    const numberA = houseA?.house_number || ""
+    const numberB = houseB?.house_number || ""
+    
+    return compareHouseNumbers(numberA, numberB)
+  })
+
   return (
     <>
       <div className="space-y-6">
-        {income && income.length > 0 ? (
+        {sortedIncome && sortedIncome.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {income.map((inc) => {
+            {sortedIncome.map((inc) => {
               const incomeYear = new Date(inc.income_date).getFullYear()
               const incomeMonth = new Date(inc.income_date).getMonth() + 1
               const isCurrentIncomeMonth = incomeYear === currentYear && incomeMonth === currentMonth

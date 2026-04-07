@@ -18,6 +18,25 @@ interface IngresoVariableClientProps {
 
 type IncomeStatus = "pending" | "paid"
 
+// Comparador natural para ordenar números correctamente (101, 102, 103, 101-A, 101-B, etc)
+function compareHouseNumbers(a: string | number, b: string | number): number {
+  const aStr = String(a).toLowerCase()
+  const bStr = String(b).toLowerCase()
+  
+  const aMatch = aStr.match(/^(\d+)([a-z]?)$/)
+  const bMatch = bStr.match(/^(\d+)([a-z]?)$/)
+  
+  if (aMatch && bMatch) {
+    const aNum = parseInt(aMatch[1], 10)
+    const bNum = parseInt(bMatch[1], 10)
+    
+    if (aNum !== bNum) return aNum - bNum
+    return aMatch[2].localeCompare(bMatch[2])
+  }
+  
+  return aStr.localeCompare(bStr)
+}
+
 function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: string; textColor: string } {
   const hasReceipt = inc.receipt_url
   return hasReceipt 
@@ -31,6 +50,13 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   const total = incomes.reduce((a, i) => a + Number(i.amount || 0), 0)
+
+  // Ordenar ingresos por descripción/fuente naturalmente
+  const sortedIncomes = [...incomes].sort((a, b) => {
+    const descA = (a.description as string) || ""
+    const descB = (b.description as string) || ""
+    return compareHouseNumbers(descA, descB)
+  })
 
   const handleDelete = async (incomeId: string) => {
     if (confirm("¿Estás seguro de que quieres eliminar este ingreso variable?")) {
@@ -102,7 +128,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {incomes.map((income) => {
+          {sortedIncomes.map((income) => {
             const { status, color, textColor } = getVariableIncomeStatus(income)
 
             return (
