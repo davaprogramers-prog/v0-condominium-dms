@@ -130,11 +130,11 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           {isActive ? "Activa" : "Cerrada"}
                         </Badge>
                       </div>
-                      {survey.description && (
+                      {survey.description ? (
                         <CardDescription className="mt-1">{survey.description as string}</CardDescription>
-                      )}
+                      ) : null}
                     </div>
-                    {isAdmin && (
+                    {isAdmin ? (
                       <div className="flex items-center gap-2">
                         {isActive && (
                           <Button
@@ -206,7 +206,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           </DialogContent>
                         </Dialog>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">

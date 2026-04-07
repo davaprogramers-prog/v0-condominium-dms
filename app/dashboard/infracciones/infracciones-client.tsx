@@ -190,16 +190,16 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                   <Edit2 className="h-4 w-4 mr-2" />Editar
                                 </DropdownMenuItem>
                               )}
-                              {!inf.is_paid && (
+                              {!inf.is_paid ? (
                                 <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive">
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
-                              )}
-                              {inf.is_paid && (
+                              ) : null}
+                              {inf.is_paid ? (
                                 <DropdownMenuItem disabled className="text-muted-foreground">
                                   No disponible (pagada)
                                 </DropdownMenuItem>
-                              )}
+                              ) : null}
                             </DropdownMenuContent>
                           </DropdownMenu>
 

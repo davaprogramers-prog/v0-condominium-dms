@@ -102,7 +102,7 @@ export function ArriendosClient({ rentals, currencySymbol, isAdmin }: ArriendosC
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {rentals.map((rental) => (
             <Card key={rental.id as string} className={!rental.is_active ? "opacity-60" : ""}>
-              {rental.photo_url && (
+              {rental.photo_url ? (
                 <div className="aspect-video overflow-hidden rounded-t-lg">
                   <img
                     src={rental.photo_url as string}
@@ -111,7 +111,7 @@ export function ArriendosClient({ rentals, currencySymbol, isAdmin }: ArriendosC
                     crossOrigin="anonymous"
                   />
                 </div>
-              )}
+              ) : null}
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{rental.space_name as string}</CardTitle>
@@ -119,25 +119,25 @@ export function ArriendosClient({ rentals, currencySymbol, isAdmin }: ArriendosC
                     {rental.is_active ? "Activo" : "Inactivo"}
                   </Badge>
                 </div>
-                {rental.description && <CardDescription>{rental.description as string}</CardDescription>}
+                {rental.description ? <CardDescription>{rental.description as string}</CardDescription> : null}
               </CardHeader>
               <CardContent className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <span className="font-semibold">{currencySymbol}{Number(rental.rental_amount).toLocaleString()}/mes</span>
                 </div>
-                {rental.tenant_name && (
+                {rental.tenant_name ? (
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span>{rental.tenant_name as string}</span>
                   </div>
-                )}
-                {(rental.start_date || rental.end_date) && (
+                ) : null}
+                {(rental.start_date || rental.end_date) ? (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>{(rental.start_date as string) || "?"} - {(rental.end_date as string) || "indefinido"}</span>
                   </div>
-                )}
+                ) : null}
               </CardContent>
             </Card>
           ))}

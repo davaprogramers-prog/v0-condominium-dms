@@ -251,9 +251,9 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                     <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3">
                       <div>
                         <p className="text-sm font-medium">{t.name as string}</p>
-                        {t.description && <p className="text-xs text-muted-foreground">{t.description as string}</p>}
+                        {t.description ? <p className="text-xs text-muted-foreground">{t.description as string}</p> : null}
                       </div>
-                      {isAdmin && (
+                      {isAdmin ? (
                         <div className="flex items-center gap-1">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -314,7 +314,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                             </DialogContent>
                           </Dialog>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>

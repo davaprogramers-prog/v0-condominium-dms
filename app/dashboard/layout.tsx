@@ -151,7 +151,7 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
       <SidebarInset>
-        <DashboardHeader user={user} />
+        <DashboardHeader user={user} profile={profile} />
         <main className="flex-1 p-4 md:p-6">
           {children}
         </main>

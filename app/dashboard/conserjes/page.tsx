@@ -54,7 +54,7 @@ export default function ConserjesPage() {
   const { data: concierges = [], isLoading } = useAsync(() => {
     if (!condoId) return Promise.resolve([])
     return getConcierges(condoId)
-  }, [condoId])
+  }, true, [condoId])
 
   async function handleDelete(profileId: string) {
     if (!condoId) return

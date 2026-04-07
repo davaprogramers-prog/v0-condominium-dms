@@ -88,7 +88,7 @@ export function CreateVisitDialog({ houses }: CreateVisitDialogProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="house_id">Casa *</Label>
-              {hasOneHouse && <Lock className="h-3 w-3 text-muted-foreground" title="Solo lectura" />}
+              {hasOneHouse ? <Lock className="h-3 w-3 text-muted-foreground" aria-label="Solo lectura" /> : null}
             </div>
             {hasOneHouse ? (
               <div className="px-3 py-2 rounded-md border bg-muted text-sm text-muted-foreground">

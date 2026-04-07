@@ -267,7 +267,7 @@ export function DashboardContent({
                         Casa {(payment.houses as Record<string, unknown>)?.house_number as string || "?"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Período: {payment.period_month}/{payment.period_year}
+                        Período: {payment.period_month as string}/{payment.period_year as string}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

@@ -81,9 +81,9 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   <ShieldOff className="h-5 w-5" />
                   {type.name as string}
                 </CardTitle>
-                {type.description && <CardDescription>{type.description as string}</CardDescription>}
+                {type.description ? <CardDescription>{type.description as string}</CardDescription> : null}
               </CardHeader>
-              {isAdmin && (
+              {isAdmin ? (
                 <CardContent className="flex gap-2 pt-0">
                   <Dialog open={editOpen === type.id} onOpenChange={(v) => !v && setEditOpen(null)}>
                     <DialogTrigger asChild>
@@ -135,7 +135,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                     </AlertDialogContent>
                   </AlertDialog>
                 </CardContent>
-              )}
+              ) : null}
             </Card>
           ))}
         </div>

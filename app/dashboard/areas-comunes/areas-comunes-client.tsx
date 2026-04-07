@@ -248,7 +248,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                         <AlertDialogHeader>
                           <AlertDialogTitle>Eliminar Area Comun</AlertDialogTitle>
                           <AlertDialogDescription>
-                            ¿Estás seguro de que deseas eliminar "{area.name}"? Esta acción no puede deshacerse.
+                            {"¿Estás seguro de que deseas eliminar \"" + (area.name as string) + "\"? Esta acción no puede deshacerse."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 justify-end">

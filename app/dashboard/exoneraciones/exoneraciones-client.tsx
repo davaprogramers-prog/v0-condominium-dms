@@ -213,7 +213,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                     <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3">
                       <div>
                         <p className="text-sm font-medium">{t.name as string}</p>
-                        {t.description && <p className="text-xs text-muted-foreground">{t.description as string}</p>}
+                        {t.description ? <p className="text-xs text-muted-foreground">{t.description as string}</p> : null}
                       </div>
                     </div>
                   ))}
