@@ -9,13 +9,14 @@ DELETE FROM public.payments;
 
 -- 3. Borrar gastos e ingresos (hijos de houses/condominiums)
 DELETE FROM public.expenses;
+DELETE FROM public.incomes;
 
 -- 4. Borrar común areas (hijas de condominiums)
 DELETE FROM public.common_areas;
 
--- 5. Borrar tipos de gastos/exoneraciones (hijas de condominiums)
+-- 5. Borrar tipos de gastos/exempciones (hijas de condominiums)
 DELETE FROM public.expense_types;
-DELETE FROM public.exoneration_types;
+DELETE FROM public.exemptions;
 
 -- 6. Borrar casas (hijas de condominiums)
 DELETE FROM public.houses;
