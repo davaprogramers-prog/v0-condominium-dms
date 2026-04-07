@@ -9,17 +9,16 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Check if super_admin from user metadata
-  const isSuperAdmin = user?.user_metadata?.role === "super_admin"
+  // Get profile to check role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, condo_id, first_name, house_id")
+    .eq("id", user?.id)
+    .single()
 
-  let profile: any = null
-  if (!isSuperAdmin) {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("role, condo_id, first_name, house_id")
-      .eq("id", user?.id)
-      .single()
-    profile = profileData
+  // If super_admin, show dedicated dashboard
+  if (profile?.role === "super_admin") {
+    return <SuperAdminDashboard user={user} />
   }
 
   const { data: condo } = await supabase
@@ -27,11 +26,6 @@ export default async function DashboardPage() {
     .select("name")
     .eq("id", profile?.condo_id)
     .single()
-
-  // If super_admin, show dedicated dashboard
-  if (isSuperAdmin) {
-    return <SuperAdminDashboard user={user} />
-  }
 
   // For propietarios, get their houses
   let ownerHouses: any[] = []
