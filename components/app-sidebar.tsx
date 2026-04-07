@@ -273,9 +273,9 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={pathname === "/admin"}
+                    isActive={pathname === "/dashboard"}
                   >
-                    <Link href="/admin" onClick={handleNavClick}>
+                    <Link href="/dashboard" onClick={handleNavClick}>
                       <Key className="h-4 w-4" />
                       <span>Panel de Admin</span>
                     </Link>
