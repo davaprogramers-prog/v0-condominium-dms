@@ -355,19 +355,67 @@ export async function getUnreadNotificationsCount(condoId: string) {
   return count || 0
 }
 
-export async function markNotificationAsRead(notificationId: string) {
+export async function deleteIncome(incomeId: string) {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user is admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    throw new Error("Solo administradores pueden eliminar ingresos")
+  }
+
+  // Delete the income record (reverses to pending by just removing the record)
   const { error } = await supabase
-    .from("notifications")
-    .update({ is_read: true })
-    .eq("id", notificationId)
+    .from("condo_income")
+    .delete()
+    .eq("id", incomeId)
 
   if (error) {
-    console.error("[v0] Error marking notification as read:", error)
+    console.error("[v0] Error deleting income:", error)
     throw new Error(error.message)
   }
 
+  revalidatePath("/dashboard/ingresos")
+  return { success: true }
+}
+
+export async function deleteVariableIncome(incomeId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Verify user is admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    throw new Error("Solo administradores pueden eliminar ingresos variables")
+  }
+
+  // Delete the income record
+  const { error } = await supabase
+    .from("condo_income")
+    .delete()
+    .eq("id", incomeId)
+
+  if (error) {
+    console.error("[v0] Error deleting variable income:", error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath("/dashboard/ingreso-variable")
   return { success: true }
 }
 
