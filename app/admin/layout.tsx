@@ -26,7 +26,10 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single()
 
+  console.log("[v0] Admin layout - User:", user.email, "Profile role:", profile?.role, "Condo ID:", profile?.condo_id)
+
   if (profile?.role !== "super_admin") {
+    console.log("[v0] Admin layout - NOT super_admin, redirecting to /dashboard. Role is:", profile?.role)
     redirect("/dashboard")
   }
 
