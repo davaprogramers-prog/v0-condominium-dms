@@ -21,20 +21,51 @@ export default async function DashboardPage() {
     return <SuperAdminDashboard user={user} />
   }
 
-  const { data: condo } = await supabase
-    .from("condominiums")
-    .select("name")
-    .eq("id", profile?.condo_id)
-    .single()
+  // If admin without condo_id, show admin setup message
+  if (profile?.role === "admin" && !profile?.condo_id) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-lg border bg-card p-6">
+          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name}</h1>
+          <p className="text-muted-foreground mb-4">Administrador</p>
+          <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
+        </div>
+      </div>
+    )
+  }
 
-  // For propietarios, get their houses
+  // For other roles, fetch condo data
+  let condo = null
+  if (profile?.condo_id) {
+    const { data } = await supabase
+      .from("condominiums")
+      .select("name")
+      .eq("id", profile.condo_id)
+      .single()
+    condo = data
+  }
+
+  // If propietario without condo_id, show message
+  if (profile?.role === "propietario" && !profile?.condo_id) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-lg border bg-card p-6">
+          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name}</h1>
+          <p className="text-muted-foreground mb-4">Propietario</p>
+          <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // For propietarios with condo_id, get their houses
   let ownerHouses: any[] = []
-  if (profile?.role === "propietario") {
+  if (profile?.role === "propietario" && profile?.condo_id) {
     const { data: houses } = await supabase
       .from("houses")
       .select("*")
-      .eq("condo_id", profile?.condo_id)
-      .in("id", [profile?.house_id])
+      .eq("condo_id", profile.condo_id)
+      .in("id", [profile.house_id])
 
     ownerHouses = houses || []
   }

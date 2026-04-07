@@ -20,9 +20,6 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
 
-  // For super_admin (davaprogramers@gmail.com), allow access without profile
-  const isSuperAdmin = user.user_metadata?.role === "super_admin"
-
   let profile: any = null
   let profileError = null
 
@@ -43,6 +40,9 @@ export default async function DashboardLayout({
     profileError = e
   }
 
+  // Check if super_admin from profiles table
+  const isSuperAdmin = profile?.role === "super_admin"
+
   // If no profile, create fallback from metadata
   if (!profile) {
     profile = {
@@ -55,17 +55,15 @@ export default async function DashboardLayout({
     }
   }
 
-  // If no condo_id and not super_admin, allow temporary access (no redirect)
-  // This permits users to enter dashboard and see an admin message
+  // Allow super_admin and admins without condo_id
+  // Other users need condo_id or redirect to error
   if (!profile.condo_id && !isSuperAdmin && profile.role !== "admin") {
     // For regular users without condo, we'll still show dashboard
     // but with limited functionality until admin assigns them
   }
 
-  // If super_admin without condo_id, redirect to admin panel to select one
-  if (profile.role === "super_admin" && !profile.condo_id) {
-    redirect("/admin")
-  }
+  // If super_admin without condo_id, that's ok - show super admin dashboard
+  // Don't redirect, just pass profile to children
 
   // If propietario/owner without condo_id, try to get it from their house
   const isOwner = profile.role === "propietario" || profile.role === "owner"
