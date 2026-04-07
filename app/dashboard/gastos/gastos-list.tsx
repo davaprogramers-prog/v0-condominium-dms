@@ -92,7 +92,7 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
                   alt={expense.expense_logo.name || "Logo"}
                   width={48}
                   height={48}
-                  className="w-full h-full object-contain p-1"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <Icon className="h-6 w-6 text-muted-foreground" />

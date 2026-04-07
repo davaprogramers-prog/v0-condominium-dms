@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { createClient } from "@/lib/supabase/client"
 
 interface ExpenseType {
   id: string
@@ -33,7 +34,24 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
   const [error, setError] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string>(expense.receipt_url || "")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [expenseLogos, setExpenseLogos] = useState<any[]>([])
+  const [selectedLogoId, setSelectedLogoId] = useState<string>(expense.expense_logo_id || "")
   const router = useRouter()
+
+  useEffect(() => {
+    if (open) {
+      async function loadLogos() {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from("expense_logos")
+          .select("id, name, logo_url")
+          .is("condo_id", null)
+          .order("name")
+        setExpenseLogos(data || [])
+      }
+      loadLogos()
+    }
+  }, [open])
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -73,6 +91,7 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
         amount,
         expenseDate: (formData.get("expenseDate") as string),
         category: (formData.get("category") as string) || "otro",
+        expenseLogoId: selectedLogoId || undefined,
         receiptUrl: previewUrl || undefined,
       })
 
@@ -172,6 +191,24 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
                 defaultValue={new Date(expense.expense_date).toISOString().split("T")[0]}
               />
             </div>
+          </div>
+
+          {/* Logo Selector */}
+          <div className="space-y-2">
+            <Label>Logo del Proveedor</Label>
+            <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar logo..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sin logo</SelectItem>
+                {expenseLogos.map((logo) => (
+                  <SelectItem key={logo.id} value={logo.id}>
+                    {logo.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Receipt Upload */}
