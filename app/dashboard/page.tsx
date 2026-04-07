@@ -1,24 +1,37 @@
 import { createClient } from "@/lib/supabase/server"
-import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, TrendingDown, Newspaper, AlertTriangle, Trees } from "lucide-react"
+import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, TrendingDown, Newspaper, AlertTriangle, Trees, Plus, Building2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
+import { SuperAdminDashboard } from "./super-admin-dashboard"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id, first_name, house_id")
-    .eq("id", user?.id)
-    .single()
+  // Check if super_admin from user metadata
+  const isSuperAdmin = user?.user_metadata?.role === "super_admin"
+
+  let profile: any = null
+  if (!isSuperAdmin) {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role, condo_id, first_name, house_id")
+      .eq("id", user?.id)
+      .single()
+    profile = profileData
+  }
 
   const { data: condo } = await supabase
     .from("condominiums")
     .select("name")
     .eq("id", profile?.condo_id)
     .single()
+
+  // If super_admin, show dedicated dashboard
+  if (isSuperAdmin) {
+    return <SuperAdminDashboard user={user} />
+  }
 
   // For propietarios, get their houses
   let ownerHouses: any[] = []
