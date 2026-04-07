@@ -7,37 +7,29 @@ DELETE FROM public.surveys;
 -- 2. Borrar pagos (hijos de houses/condominiums)
 DELETE FROM public.payments;
 
--- 3. Borrar gastos (hijos de houses/condominiums)
+-- 3. Borrar gastos e ingresos (hijos de houses/condominiums)
 DELETE FROM public.expenses;
 
--- 4. Borrar ingresos (hijos de houses/condominiums)
-DELETE FROM public.income;
-
--- 5. Borrar común areas (hijas de condominiums)
+-- 4. Borrar común areas (hijas de condominiums)
 DELETE FROM public.common_areas;
 
--- 6. Borrar tipos de gastos/exoneraciones (hijas de condominiums)
+-- 5. Borrar tipos de gastos/exoneraciones (hijas de condominiums)
 DELETE FROM public.expense_types;
 DELETE FROM public.exoneration_types;
 
--- 7. Borrar casas (hijas de condominiums)
+-- 6. Borrar casas (hijas de condominiums)
 DELETE FROM public.houses;
 
--- 8. Borrar condominiums
+-- 7. Borrar condominiums
 DELETE FROM public.condominiums;
 
--- 9. Borrar profiles (vinculados a auth.users)
+-- 8. Borrar profiles (vinculados a auth.users pero no eliminamos usuarios auth)
 DELETE FROM public.profiles;
-
--- 10. Borrar usuarios de auth (CUIDADO - esto borra la autenticación)
--- Opcionalmente descomentar si quieres limpiar usuarios auth también
--- DELETE FROM auth.users WHERE email LIKE '%@%';
 
 -- Verificar que está limpio
 SELECT 
   (SELECT COUNT(*) FROM public.profiles) as profiles_count,
   (SELECT COUNT(*) FROM public.condominiums) as condominiums_count,
   (SELECT COUNT(*) FROM public.houses) as houses_count,
-  (SELECT COUNT(*) FROM public.income) as income_count,
   (SELECT COUNT(*) FROM public.expenses) as expenses_count,
   (SELECT COUNT(*) FROM public.payments) as payments_count;
