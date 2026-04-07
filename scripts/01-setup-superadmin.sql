@@ -1,6 +1,8 @@
--- SETUP INICIAL - SUPER ADMIN + 1 CONDOMINIO BÁSICO
+-- SETUP INICIAL: CREAR SUPER_ADMIN + 1 CONDOMINIO DE PRUEBA
+-- Este script asume que ya existe el usuario davaprogramers@gmail.com en auth.users
 
--- 1. Insertar profile para super_admin (el usuario davaprogramers@gmail.com ya existe en auth.users)
+-- 1. Insertar perfil de super_admin
+-- El ID debe coincidir con el usuario en auth.users (757c0357-9af5-4c41-ba86-ebb230f4250a)
 INSERT INTO public.profiles (
   id,
   email,
@@ -25,31 +27,47 @@ INSERT INTO public.profiles (
   NOW()
 ) ON CONFLICT (id) DO UPDATE SET
   role = 'super_admin',
-  condo_id = NULL;
+  condo_id = NULL,
+  updated_at = NOW();
 
--- 2. Crear 1 condominio básico
+-- 2. Crear un condominio de prueba
 INSERT INTO public.condominiums (
   name,
+  description,
   address,
   city,
+  province,
   country,
+  postal_code,
+  phone,
+  email,
   created_by,
   created_at,
-  updated_at
+  updated_at,
+  logo_url
 ) VALUES (
   'Condominio Test',
-  'Calle Principal 123',
+  'Condominio de prueba para testing del sistema',
+  'Calle Test 123',
   'Santiago',
+  'Metropolitana',
   'Chile',
+  '8320000',
+  '+56912345678',
+  'info@test.cl',
   '757c0357-9af5-4c41-ba86-ebb230f4250a',
   NOW(),
-  NOW()
-) RETURNING id;
+  NOW(),
+  NULL
+);
 
--- Verificar setup
-SELECT 
-  p.id, p.email, p.role, p.condo_id,
-  c.id as condo_id, c.name as condo_name
-FROM public.profiles p
-LEFT JOIN public.condominiums c ON c.created_by = p.id
-WHERE p.email = 'davaprogramers@gmail.com';
+-- 3. Verificar que el setup está correcto
+SELECT 'PERFILES' as tipo, COUNT(*) as cantidad FROM public.profiles
+UNION ALL
+SELECT 'CONDOMINIOS', COUNT(*) FROM public.condominiums;
+
+SELECT 'Profile creado:' as info;
+SELECT id, email, role, condo_id FROM public.profiles WHERE email = 'davaprogramers@gmail.com';
+
+SELECT 'Condominio creado:' as info;
+SELECT id, name, created_by FROM public.condominiums WHERE name = 'Condominio Test' LIMIT 1;
