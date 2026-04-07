@@ -41,17 +41,10 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
   useEffect(() => {
     async function loadLogos() {
       const supabase = createClient()
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
-        .is("condo_id", null)
         .order("name")
-      
-      if (error) {
-        console.error("[v0] Error loading logos:", error)
-      } else {
-        console.log("[v0] Logos loaded successfully:", data)
-      }
       setExpenseLogos(data || [])
     }
     loadLogos()

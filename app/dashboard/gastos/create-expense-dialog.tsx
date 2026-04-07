@@ -54,7 +54,6 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
       const { data } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
-        .is("condo_id", null)
         .order("name")
       setExpenseLogos(data || [])
     }
