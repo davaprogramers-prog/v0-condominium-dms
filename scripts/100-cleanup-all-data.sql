@@ -1,8 +1,7 @@
--- 01-cleanup-all-data.sql
--- Borra TODOS los datos manteniendo la estructura de tablas
--- Ejecutar primero
+-- 100-cleanup-all-data.sql
+-- LIMPIAR BASE DE DATOS COMPLETAMENTE
+-- Ejecutar en orden para respetar foreign keys
 
--- Borrar en orden respetando foreign keys (más dependientes primero)
 DELETE FROM public.payment_proofs;
 DELETE FROM public.project_quotes;
 DELETE FROM public.survey_votes;
@@ -36,7 +35,7 @@ DELETE FROM public.houses;
 DELETE FROM public.condominiums;
 DELETE FROM public.profiles;
 
--- Verificar que está completamente limpio
+-- Verificar que está limpio
 SELECT 
   'profiles' as tabla, COUNT(*) as registros FROM public.profiles
 UNION ALL
