@@ -196,12 +196,12 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
           {/* Logo Selector */}
           <div className="space-y-2">
             <Label>Logo del Proveedor</Label>
-            <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
+            <Select value={selectedLogoId || "none"} onValueChange={(val) => setSelectedLogoId(val === "none" ? "" : val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar logo..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin logo</SelectItem>
+                <SelectItem value="none">Sin logo</SelectItem>
                 {expenseLogos.map((logo) => (
                   <SelectItem key={logo.id} value={logo.id}>
                     {logo.name}
