@@ -25,11 +25,13 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 interface ProyectosClientProps {
   projects: Record<string, unknown>[]
+  commonAreas: Array<{ id: string; name: string }>
   currencySymbol: string
   isAdmin: boolean
+  canView: boolean
 }
 
-export function ProyectosClient({ projects, currencySymbol, isAdmin }: ProyectosClientProps) {
+export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin, canView }: ProyectosClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [openQuote, setOpenQuote] = useState<string | null>(null)
   const [locationUrl, setLocationUrl] = useState("")
@@ -76,7 +78,18 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="location_description">Ubicacion / Area</Label>
-                  <Input id="location_description" name="location_description" placeholder="Donde se realizara" />
+                  <Select name="location_description" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar área común" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {commonAreas.map((area) => (
+                        <SelectItem key={area.id} value={area.name}>
+                          {area.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label>Foto del area</Label>
@@ -231,8 +244,19 @@ export function ProyectosClient({ projects, currencySymbol, isAdmin }: Proyectos
                           <Textarea id="edit_desc" name="description" defaultValue={(project.description as string) || ""} />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_location">Ubicacion</Label>
-                          <Input id="edit_location" name="location_description" defaultValue={(project.location_description as string) || ""} />
+                          <Label htmlFor="edit_location">Ubicacion / Area</Label>
+                          <Select name="location_description" defaultValue={(project.location_description as string) || ""}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {commonAreas.map((area) => (
+                                <SelectItem key={area.id} value={area.name}>
+                                  {area.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="flex flex-col gap-2">
                           <Label htmlFor="edit_cost">Costo Estimado</Label>
