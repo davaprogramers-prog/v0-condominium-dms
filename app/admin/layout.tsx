@@ -29,14 +29,12 @@ export default async function AdminLayout({
       .eq("id", user.id)
       .single()
     profile = data
-    console.log("[v0] Admin layout - User:", user.email, "Profile:", profile)
   } catch (e) {
     console.error("[v0] Error fetching profile:", e)
   }
 
   // Check if super_admin - if not, redirect
   if (profile?.role !== "super_admin") {
-    console.log("[v0] Admin layout - NOT super_admin. Role is:", profile?.role, "Expected: super_admin")
     redirect("/dashboard")
   }
 
