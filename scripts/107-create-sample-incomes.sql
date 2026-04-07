@@ -8,6 +8,7 @@ INSERT INTO public.condo_income (
   income_date,
   period_month,
   period_year,
+  income_type,
   created_at
 )
 SELECT
@@ -17,6 +18,7 @@ SELECT
   income_date,
   period_month,
   period_year,
+  'maintenance_fee',
   NOW()
 FROM (VALUES
   (300000, 'Cuota mantenimiento Abril - Casa 101', '2026-04-07'::date, 4, 2026),
@@ -28,4 +30,4 @@ FROM (VALUES
 
 -- Verificar que los ingresos fueron creados
 SELECT 'INGRESOS CREADOS' as status;
-SELECT id, amount, description, income_date, period_month, period_year FROM public.condo_income WHERE condo_id = (SELECT id FROM public.condominiums WHERE name = 'Condominio Test') ORDER BY income_date DESC;
+SELECT id, amount, description, income_date, period_month, period_year, income_type FROM public.condo_income WHERE condo_id = (SELECT id FROM public.condominiums WHERE name = 'Condominio Test') ORDER BY income_date DESC;
