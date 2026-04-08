@@ -24,26 +24,36 @@ export default async function VisitasPage() {
   let condo_id: string | null = null
 
   // Try to get from houses first (for owners)
-  const { data: house } = await supabase
-    .from("houses")
-    .select("condo_id")
-    .eq("owner_id", user.id)
-    .limit(1)
-    .single()
-
-  if (house?.condo_id) {
-    condo_id = house.condo_id
-  } else {
-    // Try to get from user_condos (for admin/super_admin)
-    const { data: userCondos } = await supabase
-      .from("user_condos")
+  try {
+    const { data: house, error: hError } = await supabase
+      .from("houses")
       .select("condo_id")
-      .eq("user_id", user.id)
+      .eq("owner_id", user.id)
       .limit(1)
       .single()
 
-    if (userCondos?.condo_id) {
-      condo_id = userCondos.condo_id
+    if (house?.condo_id && !hError) {
+      condo_id = house.condo_id
+    }
+  } catch (e) {
+    console.log("[v0] No owner house found in visitas")
+  }
+
+  // If not found, try to get from user_condos (for admin/super_admin)
+  if (!condo_id) {
+    try {
+      const { data: userCondos, error: ucError } = await supabase
+        .from("user_condos")
+        .select("condo_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .single()
+
+      if (userCondos?.condo_id && !ucError) {
+        condo_id = userCondos.condo_id
+      }
+    } catch (e) {
+      console.log("[v0] No admin condo found in visitas")
     }
   }
 

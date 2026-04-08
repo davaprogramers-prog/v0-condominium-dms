@@ -16,19 +16,27 @@ export default async function IngresosPage({
   if (!user) redirect("/auth/login")
 
   // Try to get condo_id from user_condos (for admin/super_admin)
-  const { data: userCondos } = await supabase
-    .from("user_condos")
-    .select("condo_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .single()
-    .catch(() => ({ data: null }))
+  let condoId: string | null = null
 
-  if (!userCondos?.condo_id) {
+  try {
+    const { data: userCondos, error: ucError } = await supabase
+      .from("user_condos")
+      .select("condo_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+
+    if (userCondos?.condo_id && !ucError) {
+      condoId = userCondos.condo_id
+    }
+  } catch (e) {
+    console.log("[v0] Error getting user_condos in ingresos:", e)
+  }
+
+  if (!condoId) {
     redirect("/dashboard")
   }
 
-  const condoId = userCondos.condo_id
   const isAdmin = true
 
   // Get period from query params or use current month

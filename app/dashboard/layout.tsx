@@ -22,7 +22,6 @@ export default async function DashboardLayout({
   }
 
   let profile: any = null
-  let profileError = null
 
   // Try to read profile with safe fallback
   try {
@@ -31,16 +30,12 @@ export default async function DashboardLayout({
       .select("role, condo_id, house_id, first_name, last_name, avatar_url")
       .eq("id", user.id)
       .single()
-      .catch(() => ({ data: null, error: null })) // Gracefully handle RLS errors
 
     if (profileData && !pError) {
       profile = profileData
-    } else {
-      profileError = pError
     }
   } catch (e) {
     console.error("[v0] Error reading profile:", e)
-    profileError = e
   }
 
   // Check if super_admin from profiles table

@@ -12,27 +12,37 @@ export default async function AlertasPage() {
   let role = "propietario"
 
   // Try to get from user_condos first (for admin/super_admin)
-  const { data: userCondos } = await supabase
-    .from("user_condos")
-    .select("condo_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .single()
-
-  if (userCondos?.condo_id) {
-    condo_id = userCondos.condo_id
-    role = "admin" // If in user_condos, likely admin
-  } else {
-    // Try to get from houses (for owners)
-    const { data: house } = await supabase
-      .from("houses")
+  try {
+    const { data: userCondos, error: ucError } = await supabase
+      .from("user_condos")
       .select("condo_id")
-      .eq("owner_id", user.id)
+      .eq("user_id", user.id)
       .limit(1)
       .single()
 
-    if (house?.condo_id) {
-      condo_id = house.condo_id
+    if (userCondos?.condo_id && !ucError) {
+      condo_id = userCondos.condo_id
+      role = "admin" // If in user_condos, likely admin
+    }
+  } catch (e) {
+    console.log("[v0] No admin condo found:", e)
+  }
+
+  // If not found as admin, try to get from houses (for owners)
+  if (!condo_id) {
+    try {
+      const { data: house, error: hError } = await supabase
+        .from("houses")
+        .select("condo_id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .single()
+
+      if (house?.condo_id && !hError) {
+        condo_id = house.condo_id
+      }
+    } catch (e) {
+      console.log("[v0] No owner house found:", e)
     }
   }
 

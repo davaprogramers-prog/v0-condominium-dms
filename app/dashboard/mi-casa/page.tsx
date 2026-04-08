@@ -23,21 +23,38 @@ export default async function MiCasaPage() {
     .eq("id", houseId)
     .single()
 
-  // Get profile for display (using catch to handle potential RLS failures)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("first_name, last_name, avatar_url")
-    .eq("id", user.id)
-    .limit(1)
-    .single()
-    .catch(() => ({ data: null }))
+  // Get profile for display (with error handling)
+  let profile: any = null
+  try {
+    const { data: profileData, error: pError } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, avatar_url")
+      .eq("id", user.id)
+      .limit(1)
+      .single()
 
-  const { data: parameters } = await supabase
-    .from("parameters")
-    .select("current_month, current_year, payment_deadline_day")
-    .eq("condo_id", condoId)
-    .single()
-    .catch(() => ({ data: null }))
+    if (profileData && !pError) {
+      profile = profileData
+    }
+  } catch (e) {
+    console.log("[v0] Could not fetch profile:", e)
+  }
+
+  // Get parameters with error handling
+  let parameters: any = null
+  try {
+    const { data: paramsData, error: pError } = await supabase
+      .from("parameters")
+      .select("current_month, current_year, payment_deadline_day")
+      .eq("condo_id", condoId)
+      .single()
+
+    if (paramsData && !pError) {
+      parameters = paramsData
+    }
+  } catch (e) {
+    console.log("[v0] Could not fetch parameters:", e)
+  }
 
   // Get incomes without the problematic join (payment_proofs has two FK to condo_income)
   const { data: incomes } = await supabase
