@@ -8,28 +8,49 @@ export async function getUserCondoId(
   supabase: SupabaseClient,
   userId: string
 ): Promise<string | null> {
-  // Try to get from houses first (for owners)
-  const { data: house } = await supabase
-    .from("houses")
-    .select("condo_id")
-    .eq("owner_id", userId)
-    .limit(1)
-    .single()
+  try {
+    // Try to get from houses first (for owners)
+    const { data: houses } = await supabase
+      .from("houses")
+      .select("condo_id")
+      .eq("owner_id", userId)
+      .limit(1)
 
-  if (house?.condo_id) {
-    return house.condo_id
+    if (houses && houses.length > 0 && houses[0]?.condo_id) {
+      return houses[0].condo_id
+    }
+  } catch (e) {
+    console.log("[v0] Error getting condo from houses:", e)
   }
 
-  // Try to get from user_condos (for admin/super_admin)
-  const { data: userCondos } = await supabase
-    .from("user_condos")
-    .select("condo_id")
-    .eq("user_id", userId)
-    .limit(1)
-    .single()
+  try {
+    // Try to get from user_condos (for admin/super_admin)
+    const { data: userCondos } = await supabase
+      .from("user_condos")
+      .select("condo_id")
+      .eq("user_id", userId)
+      .limit(1)
 
-  if (userCondos?.condo_id) {
-    return userCondos.condo_id
+    if (userCondos && userCondos.length > 0 && userCondos[0]?.condo_id) {
+      return userCondos[0].condo_id
+    }
+  } catch (e) {
+    console.log("[v0] Error getting condo from user_condos:", e)
+  }
+
+  try {
+    // Last fallback: try to get from profiles if available
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("condo_id")
+      .eq("id", userId)
+      .limit(1)
+
+    if (profile && profile.length > 0 && profile[0]?.condo_id) {
+      return profile[0].condo_id
+    }
+  } catch (e) {
+    console.log("[v0] Error getting condo from profiles:", e)
   }
 
   return null
