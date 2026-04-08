@@ -49,11 +49,14 @@ export async function uploadExpenseLogo(formData: FormData) {
     .from("documents")
     .getPublicUrl(filePath)
 
-  // Insert logo record (using service role via server action)
+  // Insert logo record with a special global condo_id for shared logos
+  // Using a fixed UUID for "global" logos instead of null to work with RLS policies
+  const GLOBAL_LOGOS_CONDO_ID = "00000000-0000-0000-0000-000000000000"
+  
   const { data: newLogo, error: insertError } = await supabase
     .from("expense_logos")
     .insert({
-      condo_id: null,
+      condo_id: GLOBAL_LOGOS_CONDO_ID,
       name: logoName.trim(),
       logo_url: publicUrl,
     })

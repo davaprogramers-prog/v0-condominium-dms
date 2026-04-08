@@ -66,10 +66,12 @@ export default function ExpenseLogosPage() {
       return
     }
 
-    // Get all logos regardless of condo_id
+    // Get all logos using the global logos UUID
+    const GLOBAL_LOGOS_CONDO_ID = "00000000-0000-0000-0000-000000000000"
     const { data: logosData } = await supabase
       .from("expense_logos")
       .select("*")
+      .eq("condo_id", GLOBAL_LOGOS_CONDO_ID)
       .order("name")
 
     setLogos(logosData || [])
