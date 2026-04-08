@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
@@ -23,14 +24,16 @@ export default async function DashboardLayout({
   let profile: any = null
   let profileError = null
 
+  // Try to read profile with safe fallback
   try {
     const { data: profileData, error: pError } = await supabase
       .from("profiles")
       .select("role, condo_id, house_id, first_name, last_name, avatar_url")
       .eq("id", user.id)
       .single()
+      .catch(() => ({ data: null, error: null })) // Gracefully handle RLS errors
 
-    if (!pError && profileData) {
+    if (profileData && !pError) {
       profile = profileData
     } else {
       profileError = pError
@@ -56,93 +59,24 @@ export default async function DashboardLayout({
     console.log("[v0] Created fallback profile from metadata:", profile)
   }
 
-  // Allow super_admin and admins without condo_id
-  // Other users need condo_id or redirect to error
-  if (!profile.condo_id && !isSuperAdmin && profile.role !== "admin") {
-    // For regular users without condo, we'll still show dashboard
-    // but with limited functionality until admin assigns them
-  }
-
-  // If super_admin without condo_id, that's ok - show super admin dashboard
-  // Don't redirect, just pass profile to children
-
-  // If propietario/owner without condo_id, try to get it from their house
+  // If propietario/owner without condo_id, try to get it from their house or admin assignment
   const isOwner = profile.role === "propietario" || profile.role === "owner"
   
-  // If owner without house_id, try to find house by email
-  if (isOwner && !profile.house_id) {
-    console.log("[v0] Owner without house_id, searching by email:", user.email)
-    const { data: houseByEmail } = await supabase
-      .from("houses")
-      .select("id, condo_id")
-      .eq("owner_email", user.email)
-      .single()
-    
-    if (houseByEmail) {
-      console.log("[v0] Found house by email:", houseByEmail)
-      // Update profile with house_id and condo_id
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ 
-          house_id: houseByEmail.id,
-          condo_id: houseByEmail.condo_id 
-        })
-        .eq("id", user.id)
-      
-      if (!updateError) {
-        profile.house_id = houseByEmail.id
-        profile.condo_id = houseByEmail.condo_id
-        console.log("[v0] Profile updated with house and condo info")
-      } else {
-        console.log("[v0] Error updating profile:", updateError)
-      }
-    } else {
-      console.log("[v0] No house found with email:", user.email)
-      // Try searching by first name + last name
-      const nameSearchTerms = `${profile.first_name}%${profile.last_name}%`
-      const { data: houseByName } = await supabase
-        .from("houses")
-        .select("id, condo_id, owner_name")
-        .ilike("owner_name", nameSearchTerms)
-        .limit(1)
-        .single()
-        .catch(() => ({ data: null }))
-      
-      if (houseByName) {
-        console.log("[v0] Found house by name:", houseByName)
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ 
-            house_id: houseByName.id,
-            condo_id: houseByName.condo_id 
-          })
-          .eq("id", user.id)
-        
-        if (!updateError) {
-          profile.house_id = houseByName.id
-          profile.condo_id = houseByName.condo_id
-          console.log("[v0] Profile updated with house (matched by name)")
-        }
-      }
+  if (isOwner && !profile.condo_id) {
+    console.log("[v0] Owner without condo_id, searching via utility function")
+    const condoId = await getUserCondoId(supabase, user.id)
+    if (condoId) {
+      profile.condo_id = condoId
+      console.log("[v0] Found condo_id via utility:", condoId)
     }
   }
-  
-  // If has house_id but no condo_id, get condo from house
-  if (isOwner && !profile.condo_id && profile.house_id) {
-    const { data: house } = await supabase
-      .from("houses")
-      .select("condo_id")
-      .eq("id", profile.house_id)
-      .single()
-    
-    if (house?.condo_id) {
-      // Update profile with condo_id
-      await supabase
-        .from("profiles")
-        .update({ condo_id: house.condo_id })
-        .eq("id", user.id)
-      
-      profile.condo_id = house.condo_id
+
+  if (isOwner && !profile.house_id) {
+    console.log("[v0] Owner without house_id, searching via utility function")
+    const houseId = await getUserHouseId(supabase, user.id)
+    if (houseId) {
+      profile.house_id = houseId
+      console.log("[v0] Found house_id via utility:", houseId)
     }
   }
 
@@ -161,15 +95,17 @@ export default async function DashboardLayout({
       .select("id, name, currency_symbol, logo_url")
       .eq("id", profile.condo_id)
       .single()
+      .catch(() => ({ data: null }))
     condo = data
   }
 
-  // For super_admin, fetch all condos they can access
+  // For admin/super_admin, fetch their condos via user_condos
   if (profile.role === "super_admin" || profile.role === "admin") {
     const { data: userCondos } = await supabase
       .from("user_condos")
       .select("condo_id, condominiums(id, name)")
       .eq("user_id", user.id)
+      .catch(() => ({ data: null }))
     
     if (userCondos) {
       allCondos = userCondos

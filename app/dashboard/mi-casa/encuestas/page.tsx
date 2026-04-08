@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { Vote, Clock, CheckCircle, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,22 +11,16 @@ export default async function EncuestasPage() {
 
   if (!user) redirect("/auth/login")
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role, house_id")
-    .eq("id", user.id)
-    .single()
+  // Get condo_id using utility function to avoid RLS issues
+  const condoId = await getUserCondoId(supabase, user.id)
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  if (!profile?.house_id && !isAdmin) {
-    redirect("/dashboard/mi-casa")
-  }
+  if (!condoId) redirect("/dashboard/mi-casa")
 
   // Get surveys for this condominium
   const { data: surveys } = await supabase
     .from("surveys")
     .select("*")
-    .eq("condo_id", profile?.condo_id)
+    .eq("condo_id", condoId)
     .order("created_at", { ascending: false })
 
   const now = new Date()

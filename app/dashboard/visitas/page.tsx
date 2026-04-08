@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
 
@@ -19,31 +20,51 @@ export default async function VisitasPage() {
     return <div>No autenticado</div>
   }
 
-  // Get user profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('condo_id, role')
-    .eq('id', user.id)
+  // Get condo_id from houses (for owners) or user_condos (for admins)
+  let condo_id: string | null = null
+
+  // Try to get from houses first (for owners)
+  const { data: house } = await supabase
+    .from("houses")
+    .select("condo_id")
+    .eq("owner_id", user.id)
+    .limit(1)
     .single()
 
-  if (!profile?.condo_id) {
+  if (house?.condo_id) {
+    condo_id = house.condo_id
+  } else {
+    // Try to get from user_condos (for admin/super_admin)
+    const { data: userCondos } = await supabase
+      .from("user_condos")
+      .select("condo_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+
+    if (userCondos?.condo_id) {
+      condo_id = userCondos.condo_id
+    }
+  }
+
+  if (!condo_id) {
     return <div>No tienes condominio asignado</div>
   }
 
   // Get user's houses
   const { data: houses } = await supabase
-    .from('houses')
-    .select('id, house_number')
-    .eq('condo_id', profile.condo_id)
-    .order('house_number', { ascending: true })
+    .from("houses")
+    .select("id, house_number")
+    .eq("condo_id", condo_id)
+    .order("house_number", { ascending: true })
 
   // Get visits
   const { data: visits } = await supabase
-    .from('visits')
-    .select('*, house:houses(house_number)')
-    .eq('created_by', user.id)
-    .eq('condo_id', profile.condo_id)
-    .order('visit_date', { ascending: false })
+    .from("visits")
+    .select("*, house:houses(house_number)")
+    .eq("created_by", user.id)
+    .eq("condo_id", condo_id)
+    .order("visit_date", { ascending: false })
 
   return (
     <div className="flex flex-col h-full">

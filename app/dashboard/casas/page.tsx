@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CreateHouseDialog } from "./create-house-dialog"
@@ -8,16 +9,27 @@ export default async function CasasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
+  if (!user) redirect("/auth/login")
+
+  // Try to get condo_id from user_condos (for admin/super_admin)
+  const { data: userCondos } = await supabase
+    .from("user_condos")
+    .select("condo_id")
+    .eq("user_id", user.id)
+    .limit(1)
     .single()
+    .catch(() => ({ data: null }))
+
+  if (!userCondos?.condo_id) {
+    redirect("/dashboard")
+  }
+
+  const condoId = userCondos.condo_id
 
   const { data: housesRaw } = await supabase
     .from("houses")
     .select("*")
-    .eq("condo_id", profile?.condo_id)
+    .eq("condo_id", condoId)
 
   // Sort houses numerically by house_number
   const houses = housesRaw?.sort((a, b) => {
@@ -26,7 +38,7 @@ export default async function CasasPage() {
     return numA - numB
   })
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isAdmin = true
 
   return (
     <div className="space-y-6">

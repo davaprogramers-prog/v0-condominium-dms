@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { FileCheck, Download, Calendar } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,22 +11,17 @@ export default async function CartolasPage() {
 
   if (!user) redirect("/auth/login")
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role, house_id")
-    .eq("id", user.id)
-    .single()
+  // Get condo and house using utility functions to avoid RLS issues
+  const condoId = await getUserCondoId(supabase, user.id)
+  const houseId = await getUserHouseId(supabase, user.id)
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  if (!profile?.house_id && !isAdmin) {
-    redirect("/dashboard/mi-casa")
-  }
+  if (!houseId || !condoId) redirect("/dashboard/mi-casa")
 
   // Get cartolas (account statements) for this house/owner
   const { data: cartolas } = await supabase
     .from("condo_income")
     .select("*")
-    .eq("house_id", profile?.house_id)
+    .eq("house_id", houseId)
     .order("period_year", { ascending: false })
     .order("period_month", { ascending: false })
     .limit(12)
@@ -34,7 +30,7 @@ export default async function CartolasPage() {
   const { data: condo } = await supabase
     .from("condominiums")
     .select("currency_symbol")
-    .eq("id", profile?.condo_id)
+    .eq("id", condoId)
     .single()
 
   const monthNames = [

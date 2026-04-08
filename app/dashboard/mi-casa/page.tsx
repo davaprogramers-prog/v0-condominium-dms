@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { DollarSign, FileText, TrendingUp } from "lucide-react"
 import { PaymentUploadDialog } from "./payment-upload-dialog"
 import { AvatarUpload } from "./avatar-upload"
@@ -10,39 +11,33 @@ export default async function MiCasaPage() {
 
   if (!user) redirect("/auth/login")
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role, house_id, first_name, last_name, avatar_url")
-    .eq("id", user.id)
-    .single()
+  // Get condo and house using utility functions to avoid RLS issues
+  const condoId = await getUserCondoId(supabase, user.id)
+  const houseId = await getUserHouseId(supabase, user.id)
 
-  // Propietarios deben tener house_id (cualquier usuario que no sea admin/super_admin)
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  if (!profile?.house_id && !isAdmin) {
-    redirect("/dashboard")
-  }
-  
-  // Si es admin sin house_id, mostrar mensaje
-  if (!profile?.house_id) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Mi Casa</h1>
-        <p className="text-muted-foreground">Esta página es para propietarios con una casa asignada.</p>
-      </div>
-    )
-  }
+  if (!houseId) redirect("/dashboard")
 
   const { data: house } = await supabase
     .from("houses")
     .select("*")
-    .eq("id", profile.house_id)
+    .eq("id", houseId)
     .single()
+
+  // Get profile for display (using catch to handle potential RLS failures)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, avatar_url")
+    .eq("id", user.id)
+    .limit(1)
+    .single()
+    .catch(() => ({ data: null }))
 
   const { data: parameters } = await supabase
     .from("parameters")
     .select("current_month, current_year, payment_deadline_day")
-    .eq("condo_id", profile.condo_id)
+    .eq("condo_id", condoId)
     .single()
+    .catch(() => ({ data: null }))
 
   // Get incomes without the problematic join (payment_proofs has two FK to condo_income)
   const { data: incomes } = await supabase

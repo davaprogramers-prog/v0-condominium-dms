@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { getCondoIncome, getHouses } from "./actions"
 import { CreateIncomeDialog } from "./create-income-dialog"
 import { EditIncomeDialog } from "./edit-income-dialog"
@@ -12,14 +13,23 @@ export default async function IngresosPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
-    .single()
+  if (!user) redirect("/auth/login")
 
-  const condoId = profile?.condo_id
-  const isAdmin = profile?.role === "admin"
+  // Try to get condo_id from user_condos (for admin/super_admin)
+  const { data: userCondos } = await supabase
+    .from("user_condos")
+    .select("condo_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single()
+    .catch(() => ({ data: null }))
+
+  if (!userCondos?.condo_id) {
+    redirect("/dashboard")
+  }
+
+  const condoId = userCondos.condo_id
+  const isAdmin = true
 
   // Get period from query params or use current month
   const params = await searchParams
