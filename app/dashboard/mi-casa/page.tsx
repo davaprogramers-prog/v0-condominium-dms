@@ -60,19 +60,19 @@ export default async function MiCasaPage() {
   const { data: incomes } = await supabase
     .from("condo_income")
     .select("*")
-    .eq("house_id", profile.house_id)
+    .eq("house_id", houseId)
     .order("income_date", { ascending: false })
 
   // Get payment proofs separately
   const { data: paymentProofs } = await supabase
     .from("payment_proofs")
     .select("*")
-    .eq("house_id", profile.house_id)
+    .eq("house_id", houseId)
 
   const { data: condo } = await supabase
     .from("condominiums")
     .select("currency_symbol, currency_name")
-    .eq("id", profile.condo_id)
+    .eq("id", condoId)
     .single()
 
   // Calcular información de deuda - filtrar por mes/año actual

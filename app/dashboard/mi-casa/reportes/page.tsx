@@ -19,13 +19,21 @@ export default async function ReportesPage() {
   if (!houseId || !condoId) redirect("/dashboard/mi-casa")
 
   // Get user profile for name display
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("first_name, last_name")
-    .eq("id", user.id)
-    .limit(1)
-    .single()
-    .catch(() => ({ data: null }))
+  let profile: any = null
+  try {
+    const { data: profileData, error: pError } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", user.id)
+      .limit(1)
+      .single()
+
+    if (profileData && !pError) {
+      profile = profileData
+    }
+  } catch (e) {
+    console.log("[v0] Could not fetch profile in reportes")
+  }
 
   // Get house details
   const { data: house } = await supabase
