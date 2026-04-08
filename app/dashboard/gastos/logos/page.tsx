@@ -295,7 +295,7 @@ export default function ExpenseLogosPage() {
                     alt={logo.name}
                     width={80}
                     height={80}
-                    className="w-full h-full object-contain p-2"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <button

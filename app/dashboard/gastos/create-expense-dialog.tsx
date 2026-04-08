@@ -232,7 +232,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                           alt=""
                           width={20}
                           height={20}
-                          className="h-5 w-5 object-contain"
+                          className="h-5 w-5 object-cover rounded-full"
                         />
                         <span>{expenseLogos.find(l => l.id === selectedLogoId)?.name}</span>
                       </div>
@@ -254,7 +254,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                           alt={logo.name}
                           width={20}
                           height={20}
-                          className="h-5 w-5 object-contain"
+                          className="h-5 w-5 object-cover rounded-full"
                         />
                         <span>{logo.name}</span>
                       </div>
