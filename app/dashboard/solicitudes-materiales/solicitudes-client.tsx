@@ -26,13 +26,9 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     request_title: '',
-    requested_by_id: '',
-    requested_by_name: '',
-    date: new Date().toISOString().split('T')[0],
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showCustomStaff, setShowCustomStaff] = useState(false)
 
   // Initialize staff list from props
   useEffect(() => {
@@ -76,12 +72,8 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
       }
       setFormData({
         request_title: '',
-        requested_by_id: '',
-        requested_by_name: '',
-        date: new Date().toISOString().split('T')[0],
         items: [{ quantity: '', description: '' }],
       })
-      setShowCustomStaff(false)
       setOpenCreate(false)
     } catch (error) {
       console.error('[v0] Error submitting form:', error)
@@ -91,14 +83,19 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
   }
 
   const handleEdit = (request: any) => {
+    // Parse items from request_description
+    const itemsText = request.request_description?.split('\n') || []
+    const items = itemsText
+      .filter((line: string) => line.trim())
+      .map((line: string) => {
+        const [qty, desc] = line.split(' - ')
+        return { quantity: qty?.trim() || '', description: desc?.trim() || '' }
+      })
+    
     setFormData({
       request_title: request.request_title,
-      requested_by_id: request.requested_by_id || '',
-      requested_by_name: request.requested_by_name || '',
-      date: request.date || new Date().toISOString().split('T')[0],
-      items: request.items || [{ quantity: '', description: '' }],
+      items: items.length > 0 ? items : [{ quantity: '', description: '' }],
     })
-    setShowCustomStaff(!request.requested_by_id)
     setEditingId(request.id)
     setOpenCreate(true)
   }
@@ -169,63 +166,6 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       placeholder="Ej: Compras supermercado"
                       required
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="staff">Solicitado por</Label>
-                      {showCustomStaff || staff.length === 0 ? (
-                        <Input
-                          id="staff"
-                          value={formData.requested_by_name}
-                          onChange={(e) => {
-                            setFormData({ ...formData, requested_by_name: e.target.value, requested_by_id: '' })
-                          }}
-                          placeholder="Escribir nombre"
-                        />
-                      ) : (
-                        <div className="space-y-2">
-                          <Select value={formData.requested_by_id} onValueChange={(val) => {
-                            const selectedStaff = staff.find(s => s.id === val)
-                            setFormData({ 
-                              ...formData, 
-                              requested_by_id: val,
-                              requested_by_name: selectedStaff?.name || ''
-                            })
-                          }}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {staff.map(member => (
-                                <SelectItem key={member.id} value={member.id}>
-                                  {member.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Button 
-                            type="button" 
-                            size="sm" 
-                            variant="ghost"
-                            className="text-xs"
-                            onClick={() => setShowCustomStaff(true)}
-                          >
-                            Escribir nombre
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <Label htmlFor="date">Fecha</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        required
-                      />
-                    </div>
                   </div>
 
                   <div>
@@ -310,7 +250,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       <div className="flex-1">
                         <CardTitle className="text-lg">{request.request_title}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {new Date(request.date).toLocaleDateString('es-CL')}
+                          {new Date(request.created_at).toLocaleDateString('es-CL')}
                         </p>
                       </div>
                       <Badge className={getStatusColor(request.status)}>
@@ -324,8 +264,6 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <p className="font-medium text-muted-foreground text-sm mb-3">Solicitado por: {request.requested_by_name || request.requested_by_profile?.name || 'N/A'}</p>
-                        
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
@@ -335,12 +273,16 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                               </tr>
                             </thead>
                             <tbody>
-                              {request.items?.map((item: any, idx: number) => (
-                                <tr key={idx} className="border-b last:border-b-0">
-                                  <td className="py-2 px-3">{item.quantity}</td>
-                                  <td className="py-2 px-3">{item.description}</td>
-                                </tr>
-                              ))}
+                              {request.request_description?.split('\n').map((line: string, idx: number) => {
+                                if (!line.trim()) return null
+                                const [qty, desc] = line.split(' - ')
+                                return (
+                                  <tr key={idx} className="border-b last:border-b-0">
+                                    <td className="py-2 px-3">{qty?.trim()}</td>
+                                    <td className="py-2 px-3">{desc?.trim()}</td>
+                                  </tr>
+                                )
+                              })}
                             </tbody>
                           </table>
                         </div>
