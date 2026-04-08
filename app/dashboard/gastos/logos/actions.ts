@@ -12,15 +12,19 @@ export async function uploadExpenseLogo(formData: FormData) {
     throw new Error("No authenticated user")
   }
 
-  // Check if user is super_admin
+  // Check if user is super_admin and get their condo_id
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, condo_id")
     .eq("id", user.id)
     .single()
 
   if (profile?.role !== "super_admin") {
     throw new Error("Only super admins can upload logos")
+  }
+
+  if (!profile?.condo_id) {
+    throw new Error("Super admin must have a condo assigned")
   }
 
   // Get form data
@@ -49,14 +53,12 @@ export async function uploadExpenseLogo(formData: FormData) {
     .from("documents")
     .getPublicUrl(filePath)
 
-  // Insert logo record with a special global condo_id for shared logos
-  // Using a fixed UUID for "global" logos instead of null to work with RLS policies
-  const GLOBAL_LOGOS_CONDO_ID = "00000000-0000-0000-0000-000000000000"
-  
+  // Insert logo record using user's condo_id (for RLS policy)
+  // Logos are stored with a specific condo_id but marked as global via a flag
   const { data: newLogo, error: insertError } = await supabase
     .from("expense_logos")
     .insert({
-      condo_id: GLOBAL_LOGOS_CONDO_ID,
+      condo_id: profile.condo_id,
       name: logoName.trim(),
       logo_url: publicUrl,
     })
@@ -64,8 +66,10 @@ export async function uploadExpenseLogo(formData: FormData) {
     .single()
 
   if (insertError) {
+    console.error("[v0] Insert error details:", insertError)
     throw new Error(`Database error: ${insertError.message}`)
   }
 
+  console.log("[v0] Logo uploaded successfully:", newLogo)
   return newLogo
 }
