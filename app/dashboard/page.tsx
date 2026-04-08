@@ -14,14 +14,20 @@ export default async function DashboardPage() {
     .select("role, condo_id, first_name, house_id")
     .eq("id", user?.id)
     .single()
+    .catch(() => ({ data: null }))
 
-  // If admin without condo_id, show admin setup message
-  if (profile?.role === "admin" && !profile?.condo_id) {
+  // If no profile found, try to get role from auth metadata
+  const role = profile?.role || user?.user_metadata?.role || "propietario"
+  const condoId = profile?.condo_id
+  const houseId = profile?.house_id
+
+  // If admin/super_admin without condo_id, show admin setup message
+  if ((role === "admin" || role === "super_admin") && !condoId) {
     return (
       <div className="space-y-6">
         <div className="rounded-lg border bg-card p-6">
-          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name}</h1>
-          <p className="text-muted-foreground mb-4">Administrador</p>
+          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name || "Administrador"}</h1>
+          <p className="text-muted-foreground mb-4">{role === "super_admin" ? "Super Administrador" : "Administrador"}</p>
           <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
         </div>
       </div>
@@ -30,21 +36,22 @@ export default async function DashboardPage() {
 
   // For other roles, fetch condo data
   let condo = null
-  if (profile?.condo_id) {
+  if (condoId) {
     const { data } = await supabase
       .from("condominiums")
       .select("name")
-      .eq("id", profile.condo_id)
+      .eq("id", condoId)
       .single()
+      .catch(() => ({ data: null }))
     condo = data
   }
 
-  // If propietario without condo_id, show message
-  if (profile?.role === "propietario" && !profile?.condo_id) {
+  // If propietario/owner without condo_id, show message
+  if ((role === "propietario" || role === "owner") && !condoId) {
     return (
       <div className="space-y-6">
         <div className="rounded-lg border bg-card p-6">
-          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name}</h1>
+          <h1 className="text-3xl font-bold mb-2">Bienvenido, {profile?.first_name || "Propietario"}</h1>
           <p className="text-muted-foreground mb-4">Propietario</p>
           <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
         </div>
@@ -54,12 +61,13 @@ export default async function DashboardPage() {
 
   // For propietarios with condo_id, get their houses
   let ownerHouses: any[] = []
-  if (profile?.role === "propietario" && profile?.condo_id) {
+  if ((role === "propietario" || role === "owner") && condoId) {
     const { data: houses } = await supabase
       .from("houses")
       .select("*")
-      .eq("condo_id", profile.condo_id)
-      .in("id", [profile.house_id])
+      .eq("condo_id", condoId)
+      .eq("owner_id", user?.id)
+      .catch(() => ({ data: [] }))
 
     ownerHouses = houses || []
   }
@@ -76,19 +84,14 @@ export default async function DashboardPage() {
   ]
 
   const ownerMenuItems = [
-    { href: "/dashboard/mi-casa/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo" },
-    { href: "/dashboard/mi-casa/encuestas", icon: Newspaper, label: "Encuestas", desc: "Participar en encuestas" },
-    { href: "/dashboard/mi-casa/proyectos", icon: LayoutGrid, label: "Proyectos", desc: "Proyectos activos" },
-    { href: "/dashboard/mi-casa/documentos", icon: FileText, label: "Documentos", desc: "Tus documentos" },
-    { href: "/dashboard/mi-casa/infracciones", icon: AlertCircle, label: "Infracciones", desc: "Historial de infracciones" },
-    { href: "/dashboard/mi-casa/cartolas", icon: FileCheck, label: "Cartolas", desc: "Tus cartolas" },
-    { href: "/dashboard/mi-casa/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes" },
-    { href: "/dashboard/mi-casa/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos" },
-    { href: "/dashboard/mi-casa/areas-comunes", icon: Trees, label: "Áreas Comunes", desc: "Información de áreas" },
+    { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo" },
+    { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes" },
+    { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos" },
+    { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones" },
   ]
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  const isOwner = profile?.role === "propietario"
+  const isAdmin = role === "admin" || role === "super_admin"
+  const isOwner = role === "propietario" || role === "owner"
 
   return (
     <div className="space-y-6">
