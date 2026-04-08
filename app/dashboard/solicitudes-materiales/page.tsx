@@ -38,7 +38,7 @@ export default async function AdminSolicitudesPage() {
 
   // Get material requests
   const { data: requests } = await supabase
-    .from("material_requests")
+    .from("supply_requests")
     .select("*")
     .eq("condo_id", condoId)
     .order("created_at", { ascending: false })

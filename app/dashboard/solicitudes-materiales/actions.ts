@@ -13,7 +13,7 @@ export async function createMaterialRequest(condoId: string, data: any) {
     }
 
     const { error } = await supabase
-      .from("material_requests")
+      .from("supply_requests")
       .insert([
         {
           condo_id: condoId,
@@ -50,7 +50,7 @@ export async function updateMaterialRequest(id: string, data: any) {
     }
 
     const { error } = await supabase
-      .from("material_requests")
+      .from("supply_requests")
       .update({
         request_title: data.request_title,
         requested_by_id: data.requested_by_id || null,
@@ -83,7 +83,7 @@ export async function deleteMaterialRequest(id: string) {
     }
 
     const { error } = await supabase
-      .from("material_requests")
+      .from("supply_requests")
       .delete()
       .eq("id", id)
 
@@ -110,7 +110,7 @@ export async function updateMaterialRequestStatus(id: string, status: string) {
     }
 
     const { error } = await supabase
-      .from("material_requests")
+      .from("supply_requests")
       .update({ status })
       .eq("id", id)
 
