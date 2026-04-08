@@ -65,11 +65,10 @@ export default function ExpenseLogosPage() {
       return
     }
 
-    // Get logos without condo_id filter - all logos across all condos
+    // Get all logos regardless of condo_id
     const { data: logosData } = await supabase
       .from("expense_logos")
       .select("*")
-      .is("condo_id", null)
       .order("name")
 
     setLogos(logosData || [])
