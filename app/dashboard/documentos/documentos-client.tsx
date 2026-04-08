@@ -34,6 +34,25 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
   const [editFileUrl, setEditFileUrl] = useState("")
   const [editTypeOpen, setEditTypeOpen] = useState<string | null>(null)
   const [isCreatingType, setIsCreatingType] = useState(false)
+  const [typeName, setTypeName] = useState("")
+  const [typeDescription, setTypeDescription] = useState("")
+
+  const handleCreateType = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsCreatingType(true)
+    try {
+      await createDocumentType(condoId, typeName, typeDescription)
+      setTypeName("")
+      setTypeDescription("")
+      setOpenType(false)
+      // Optionally refresh page or re-fetch data
+      window.location.reload()
+    } catch (error) {
+      console.error("[v0] Error creating document type:", error)
+    } finally {
+      setIsCreatingType(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,21 +69,25 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader><DialogTitle>Nuevo Tipo de Documento</DialogTitle></DialogHeader>
-                <form action={async (fd) => { 
-                  setIsCreatingType(true)
-                  const name = fd.get("name") as string
-                  const description = fd.get("description") as string
-                  await createDocumentType(condoId, name, description)
-                  setOpenType(false)
-                  setIsCreatingType(false)
-                }} className="flex flex-col gap-4">
+                <form onSubmit={handleCreateType} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="doc_type_name">Nombre</Label>
-                    <Input id="doc_type_name" name="name" placeholder="Ej: Reglamento, Sancion, Parte..." required />
+                    <Input 
+                      id="doc_type_name" 
+                      value={typeName}
+                      onChange={(e) => setTypeName(e.target.value)}
+                      placeholder="Ej: Reglamento, Sancion, Parte..." 
+                      required 
+                    />
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="doc_type_desc">Descripcion</Label>
-                    <Textarea id="doc_type_desc" name="description" placeholder="Descripcion del tipo..." />
+                    <Textarea 
+                      id="doc_type_desc" 
+                      value={typeDescription}
+                      onChange={(e) => setTypeDescription(e.target.value)}
+                      placeholder="Descripcion del tipo..." 
+                    />
                   </div>
                   <Button type="submit" disabled={isCreatingType}>{isCreatingType ? "Guardando..." : "Guardar Tipo"}</Button>
                 </form>
