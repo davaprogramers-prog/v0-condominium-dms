@@ -99,14 +99,19 @@ export default function ExpenseLogosPage() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
       const filePath = `expense-logos/${fileName}`
 
-      console.log("[v0] Uploading logo to storage:", filePath)
-      const { error: uploadError } = await supabase.storage
+      console.log("[v0] Starting upload. File:", logoFile.name, "Size:", logoFile.size)
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("documents")
-        .upload(filePath, logoFile)
+        .upload(filePath, logoFile, { upsert: false })
+
+      console.log("[v0] Upload response - Data:", uploadData, "Error:", uploadError)
 
       if (uploadError) {
-        console.error("[v0] Storage upload error:", uploadError)
-        throw uploadError
+        console.error("[v0] Storage upload error:", JSON.stringify(uploadError))
+        alert("Error al subir archivo a almacenamiento: " + (uploadError?.message || "Unknown error"))
+        setUploading(false)
+        return
       }
 
       console.log("[v0] Logo uploaded successfully, getting public URL")
@@ -128,8 +133,10 @@ export default function ExpenseLogosPage() {
         .single()
 
       if (insertError) {
-        console.error("[v0] Insert error:", insertError)
-        throw insertError
+        console.error("[v0] Insert error:", JSON.stringify(insertError))
+        alert("Error al guardar logo en base de datos: " + (insertError?.message || "Unknown error"))
+        setUploading(false)
+        return
       }
 
       console.log("[v0] Logo created successfully:", newLogo)
@@ -139,8 +146,8 @@ export default function ExpenseLogosPage() {
       setLogoFile(null)
       setLogoPreview(null)
     } catch (error) {
-      console.error("[v0] Error uploading logo:", error)
-      alert("Error al subir el logo")
+      console.error("[v0] Unexpected error uploading logo:", error)
+      alert("Error inesperado al subir el logo")
     } finally {
       setUploading(false)
     }
