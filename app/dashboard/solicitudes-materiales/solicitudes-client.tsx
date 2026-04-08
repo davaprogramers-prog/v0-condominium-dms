@@ -27,10 +27,12 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
   const [formData, setFormData] = useState({
     request_title: '',
     requested_by_id: '',
+    requested_by_name: '',
     date: new Date().toISOString().split('T')[0],
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCustomStaff, setShowCustomStaff] = useState(false)
 
   // Initialize staff list from props
   useEffect(() => {
@@ -75,9 +77,11 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
       setFormData({
         request_title: '',
         requested_by_id: '',
+        requested_by_name: '',
         date: new Date().toISOString().split('T')[0],
         items: [{ quantity: '', description: '' }],
       })
+      setShowCustomStaff(false)
       setOpenCreate(false)
     } catch (error) {
       console.error('[v0] Error submitting form:', error)
@@ -90,9 +94,11 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     setFormData({
       request_title: request.request_title,
       requested_by_id: request.requested_by_id || '',
+      requested_by_name: request.requested_by_name || '',
       date: request.date || new Date().toISOString().split('T')[0],
       items: request.items || [{ quantity: '', description: '' }],
     })
+    setShowCustomStaff(!request.requested_by_id)
     setEditingId(request.id)
     setOpenCreate(true)
   }
@@ -168,18 +174,47 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="staff">Solicitado por</Label>
-                      <Select value={formData.requested_by_id} onValueChange={(val) => setFormData({ ...formData, requested_by_id: val })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {staff.map(member => (
-                            <SelectItem key={member.id} value={member.id}>
-                              {member.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {showCustomStaff || staff.length === 0 ? (
+                        <Input
+                          id="staff"
+                          value={formData.requested_by_name}
+                          onChange={(e) => {
+                            setFormData({ ...formData, requested_by_name: e.target.value, requested_by_id: '' })
+                          }}
+                          placeholder="Escribir nombre"
+                        />
+                      ) : (
+                        <div className="space-y-2">
+                          <Select value={formData.requested_by_id} onValueChange={(val) => {
+                            const selectedStaff = staff.find(s => s.id === val)
+                            setFormData({ 
+                              ...formData, 
+                              requested_by_id: val,
+                              requested_by_name: selectedStaff?.name || ''
+                            })
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {staff.map(member => (
+                                <SelectItem key={member.id} value={member.id}>
+                                  {member.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            type="button" 
+                            size="sm" 
+                            variant="ghost"
+                            className="text-xs"
+                            onClick={() => setShowCustomStaff(true)}
+                          >
+                            Escribir nombre
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="date">Fecha</Label>
@@ -289,7 +324,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <p className="font-medium text-muted-foreground text-sm mb-3">Solicitado por: {request.requested_by_profile?.name || 'N/A'}</p>
+                        <p className="font-medium text-muted-foreground text-sm mb-3">Solicitado por: {request.requested_by_name || request.requested_by_profile?.name || 'N/A'}</p>
                         
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
