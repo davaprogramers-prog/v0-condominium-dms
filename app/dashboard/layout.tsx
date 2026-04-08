@@ -86,30 +86,36 @@ export default async function DashboardLayout({
   let allCondos: { id: string; name: string }[] = []
 
   if (profile.condo_id) {
-    const { data } = await supabase
-      .from("condominiums")
-      .select("id, name, currency_symbol, logo_url")
-      .eq("id", profile.condo_id)
-      .single()
-      .catch(() => ({ data: null }))
-    condo = data
+    try {
+      const { data } = await supabase
+        .from("condominiums")
+        .select("id, name, currency_symbol, logo_url")
+        .eq("id", profile.condo_id)
+        .single()
+      condo = data
+    } catch (e) {
+      console.log("[v0] Error fetching condo:", e)
+    }
   }
 
   // For admin/super_admin, fetch their condos via user_condos
   if (profile.role === "super_admin" || profile.role === "admin") {
-    const { data: userCondos } = await supabase
-      .from("user_condos")
-      .select("condo_id, condominiums(id, name)")
-      .eq("user_id", user.id)
-      .catch(() => ({ data: null }))
-    
-    if (userCondos) {
-      allCondos = userCondos
-        .filter(uc => uc.condominiums)
-        .map(uc => ({
-          id: (uc.condominiums as any).id,
-          name: (uc.condominiums as any).name
-        }))
+    try {
+      const { data: userCondos } = await supabase
+        .from("user_condos")
+        .select("condo_id, condominiums(id, name)")
+        .eq("user_id", user.id)
+      
+      if (userCondos) {
+        allCondos = userCondos
+          .filter(uc => uc.condominiums)
+          .map(uc => ({
+            id: (uc.condominiums as any).id,
+            name: (uc.condominiums as any).name
+          }))
+      }
+    } catch (e) {
+      console.log("[v0] Error fetching user condos:", e)
     }
   }
 
