@@ -45,8 +45,6 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
       setTypeName("")
       setTypeDescription("")
       setOpenType(false)
-      // Optionally refresh page or re-fetch data
-      window.location.reload()
     } catch (error) {
       console.error("[v0] Error creating document type:", error)
     } finally {

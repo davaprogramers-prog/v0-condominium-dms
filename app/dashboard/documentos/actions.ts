@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { revalidatePath } from "next/cache"
 
 export async function createDocumentType(
   condoId: string,
@@ -35,6 +36,9 @@ export async function createDocumentType(
       return { error: error.message }
     }
 
+    // Revalidate to refresh the page data
+    revalidatePath("/dashboard/documentos")
+
     return { data, error: null }
   } catch (e) {
     console.error("[v0] Exception creating document type:", e)
@@ -63,6 +67,9 @@ export async function deleteDocumentType(typeId: string) {
       console.error("[v0] Error deleting document type:", error)
       return { error: error.message }
     }
+
+    // Revalidate to refresh the page data
+    revalidatePath("/dashboard/documentos")
 
     return { error: null }
   } catch (e) {
