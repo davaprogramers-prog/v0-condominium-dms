@@ -26,7 +26,6 @@ export async function createDocumentType(
           condo_id: condoId,
           name,
           description: description || null,
-          created_by: user.id,
         },
       ])
       .select()
