@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { uploadExpenseLogo } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -92,62 +93,21 @@ export default function ExpenseLogosPage() {
 
     setUploading(true)
     try {
-      const supabase = createClient()
+      const formData = new FormData()
+      formData.append("logoFile", logoFile)
+      formData.append("logoName", newLogoName.trim())
 
-      // Upload logo to storage
-      const fileExt = logoFile.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `expense-logos/${fileName}`
-
-      console.log("[v0] Starting upload. File:", logoFile.name, "Size:", logoFile.size)
+      const newLogo = await uploadExpenseLogo(formData)
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(filePath, logoFile, { upsert: false })
-
-      console.log("[v0] Upload response - Data:", uploadData, "Error:", uploadError)
-
-      if (uploadError) {
-        console.error("[v0] Storage upload error:", JSON.stringify(uploadError))
-        alert("Error al subir archivo a almacenamiento: " + (uploadError?.message || "Unknown error"))
-        setUploading(false)
-        return
-      }
-
-      console.log("[v0] Logo uploaded successfully, getting public URL")
-      const { data: { publicUrl } } = supabase.storage
-        .from("documents")
-        .getPublicUrl(filePath)
-
-      console.log("[v0] Public URL:", publicUrl)
-
-      // Create expense_logo record (global, not tied to condo)
-      const { data: newLogo, error: insertError } = await supabase
-        .from("expense_logos")
-        .insert({
-          condo_id: null,
-          name: newLogoName.trim(),
-          logo_url: publicUrl
-        })
-        .select()
-        .single()
-
-      if (insertError) {
-        console.error("[v0] Insert error:", JSON.stringify(insertError))
-        alert("Error al guardar logo en base de datos: " + (insertError?.message || "Unknown error"))
-        setUploading(false)
-        return
-      }
-
-      console.log("[v0] Logo created successfully:", newLogo)
       setLogos([...logos, newLogo].sort((a, b) => a.name.localeCompare(b.name)))
       setDialogOpen(false)
       setNewLogoName("")
       setLogoFile(null)
       setLogoPreview(null)
     } catch (error) {
-      console.error("[v0] Unexpected error uploading logo:", error)
-      alert("Error inesperado al subir el logo")
+      console.error("[v0] Error uploading logo:", error)
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
+      alert("Error al subir el logo: " + errorMessage)
     } finally {
       setUploading(false)
     }
