@@ -34,6 +34,7 @@ export default async function DocumentosPage() {
 
   return (
     <DocumentosClient
+      condoId={condoId}
       documents={documents || []}
       documentTypes={documentTypes || []}
       isAdmin={profile?.role === "admin" || profile?.role === "super_admin"}

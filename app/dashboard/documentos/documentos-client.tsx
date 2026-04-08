@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { uploadDocument, createDocumentType, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
+import { uploadDocument, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
+import { createDocumentType } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,12 +19,13 @@ import { FileUpload } from "@/components/file-upload"
 import { Plus, FileText, ExternalLink, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
 
 interface DocumentosClientProps {
+  condoId: string
   documents: Record<string, unknown>[]
   documentTypes: Record<string, unknown>[]
   isAdmin: boolean
 }
 
-export function DocumentosClient({ documents, documentTypes, isAdmin }: DocumentosClientProps) {
+export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }: DocumentosClientProps) {
   const [openDoc, setOpenDoc] = useState(false)
   const [openType, setOpenType] = useState(false)
   const [selectedType, setSelectedType] = useState("")
@@ -31,6 +33,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [editFileUrl, setEditFileUrl] = useState("")
   const [editTypeOpen, setEditTypeOpen] = useState<string | null>(null)
+  const [isCreatingType, setIsCreatingType] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,7 +50,14 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader><DialogTitle>Nuevo Tipo de Documento</DialogTitle></DialogHeader>
-                <form action={async (fd) => { await createDocumentType(fd); setOpenType(false) }} className="flex flex-col gap-4">
+                <form action={async (fd) => { 
+                  setIsCreatingType(true)
+                  const name = fd.get("name") as string
+                  const description = fd.get("description") as string
+                  await createDocumentType(condoId, name, description)
+                  setOpenType(false)
+                  setIsCreatingType(false)
+                }} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="doc_type_name">Nombre</Label>
                     <Input id="doc_type_name" name="name" placeholder="Ej: Reglamento, Sancion, Parte..." required />
@@ -56,7 +66,7 @@ export function DocumentosClient({ documents, documentTypes, isAdmin }: Document
                     <Label htmlFor="doc_type_desc">Descripcion</Label>
                     <Textarea id="doc_type_desc" name="description" placeholder="Descripcion del tipo..." />
                   </div>
-                  <Button type="submit">Guardar Tipo</Button>
+                  <Button type="submit" disabled={isCreatingType}>{isCreatingType ? "Guardando..." : "Guardar Tipo"}</Button>
                 </form>
               </DialogContent>
             </Dialog>
