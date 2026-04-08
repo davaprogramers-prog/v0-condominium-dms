@@ -122,8 +122,8 @@ export default async function MiCasaPage() {
           </div>
         </div>
         <PaymentUploadDialog 
-          condoId={profile.condo_id} 
-          houseId={profile.house_id}
+          condoId={condoId} 
+          houseId={houseId}
           currencySymbol={condo?.currency_symbol}
         />
       </div>
