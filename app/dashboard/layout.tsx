@@ -49,10 +49,11 @@ export default async function DashboardLayout({
       role: user.user_metadata?.role || "propietario",
       condo_id: null,
       house_id: null,
-      first_name: user.user_metadata?.first_name || "Usuario",
-      last_name: user.user_metadata?.last_name || "Sin Apellido",
+      first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
+      last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
     }
+    console.log("[v0] Created fallback profile from metadata:", profile)
   }
 
   // Allow super_admin and admins without condo_id
@@ -70,6 +71,7 @@ export default async function DashboardLayout({
   
   // If owner without house_id, try to find house by email
   if (isOwner && !profile.house_id) {
+    console.log("[v0] Owner without house_id, searching by email:", user.email)
     const { data: houseByEmail } = await supabase
       .from("houses")
       .select("id, condo_id")
@@ -77,8 +79,9 @@ export default async function DashboardLayout({
       .single()
     
     if (houseByEmail) {
+      console.log("[v0] Found house by email:", houseByEmail)
       // Update profile with house_id and condo_id
-      await supabase
+      const { error: updateError } = await supabase
         .from("profiles")
         .update({ 
           house_id: houseByEmail.id,
@@ -86,8 +89,41 @@ export default async function DashboardLayout({
         })
         .eq("id", user.id)
       
-      profile.house_id = houseByEmail.id
-      profile.condo_id = houseByEmail.condo_id
+      if (!updateError) {
+        profile.house_id = houseByEmail.id
+        profile.condo_id = houseByEmail.condo_id
+        console.log("[v0] Profile updated with house and condo info")
+      } else {
+        console.log("[v0] Error updating profile:", updateError)
+      }
+    } else {
+      console.log("[v0] No house found with email:", user.email)
+      // Try searching by first name + last name
+      const nameSearchTerms = `${profile.first_name}%${profile.last_name}%`
+      const { data: houseByName } = await supabase
+        .from("houses")
+        .select("id, condo_id, owner_name")
+        .ilike("owner_name", nameSearchTerms)
+        .limit(1)
+        .single()
+        .catch(() => ({ data: null }))
+      
+      if (houseByName) {
+        console.log("[v0] Found house by name:", houseByName)
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ 
+            house_id: houseByName.id,
+            condo_id: houseByName.condo_id 
+          })
+          .eq("id", user.id)
+        
+        if (!updateError) {
+          profile.house_id = houseByName.id
+          profile.condo_id = houseByName.condo_id
+          console.log("[v0] Profile updated with house (matched by name)")
+        }
+      }
     }
   }
   

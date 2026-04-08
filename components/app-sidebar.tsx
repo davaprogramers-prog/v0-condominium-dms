@@ -117,8 +117,8 @@ const ownerMenuItems = [
   {
     section: "Dashboard",
     items: [
-      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
-      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+      { title: "Reportes", href: "/dashboard/mi-casa/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/mi-casa/balance", icon: Landmark },
     ]
   },
   {
@@ -130,12 +130,12 @@ const ownerMenuItems = [
   {
     section: "Condominio",
     items: [
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+      { title: "Áreas Comunes", href: "/dashboard/mi-casa/areas-comunes", icon: MapPin },
       { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
-      { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
-      { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
-      { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+      { title: "Cartolas", href: "/dashboard/mi-casa/cartolas", icon: Landmark },
+      { title: "Encuestas", href: "/dashboard/mi-casa/encuestas", icon: Vote },
+      { title: "Proyectos", href: "/dashboard/mi-casa/proyectos", icon: Hammer },
+      { title: "Documentos", href: "/dashboard/mi-casa/documentos", icon: FileText },
       { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
