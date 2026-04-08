@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -16,21 +16,50 @@ import { createMaterialRequest, updateMaterialRequest, deleteMaterialRequest, up
 interface SolicitudesClientProps {
   condoId: string
   solicitudes: any[]
+  staff: any[]
   isAdmin: boolean
   userRole: string
 }
 
-export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: SolicitudesClientProps) {
+export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRole }: SolicitudesClientProps) {
   const [openCreate, setOpenCreate] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     request_title: '',
-    invoice_type: '',
-    quantity: '',
-    product_detail: '',
-    notes: '',
+    requested_by_id: '',
+    date: new Date().toISOString().split('T')[0],
+    items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Initialize staff list from props
+  useEffect(() => {
+    // Staff is already passed as prop, no need to fetch
+  }, [])
+
+  const handleAddLine = () => {
+    setFormData({
+      ...formData,
+      items: [...formData.items, { quantity: '', description: '' }]
+    })
+  }
+
+  const handleRemoveLine = (index: number) => {
+    const newItems = formData.items.filter((_, i) => i !== index)
+    setFormData({
+      ...formData,
+      items: newItems.length > 0 ? newItems : [{ quantity: '', description: '' }]
+    })
+  }
+
+  const handleItemChange = (index: number, field: 'quantity' | 'description', value: string) => {
+    const newItems = [...formData.items]
+    newItems[index][field] = value
+    setFormData({
+      ...formData,
+      items: newItems
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,10 +74,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
       }
       setFormData({
         request_title: '',
-        invoice_type: '',
-        quantity: '',
-        product_detail: '',
-        notes: '',
+        requested_by_id: '',
+        date: new Date().toISOString().split('T')[0],
+        items: [{ quantity: '', description: '' }],
       })
       setOpenCreate(false)
     } catch (error) {
@@ -61,10 +89,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
   const handleEdit = (request: any) => {
     setFormData({
       request_title: request.request_title,
-      invoice_type: request.invoice_type || '',
-      quantity: request.quantity?.toString() || '',
-      product_detail: request.product_detail || '',
-      notes: request.notes || '',
+      requested_by_id: request.requested_by_id || '',
+      date: request.date || new Date().toISOString().split('T')[0],
+      items: request.items || [{ quantity: '', description: '' }],
     })
     setEditingId(request.id)
     setOpenCreate(true)
@@ -126,56 +153,99 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                 <DialogHeader>
                   <DialogTitle>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="title">Título</Label>
                     <Input
                       id="title"
                       value={formData.request_title}
                       onChange={(e) => setFormData({ ...formData, request_title: e.target.value })}
-                      placeholder="Ej: Materiales aseo"
+                      placeholder="Ej: Compras supermercado"
                       required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="invoice">Tipo de Factura</Label>
-                    <Input
-                      id="invoice"
-                      value={formData.invoice_type}
-                      onChange={(e) => setFormData({ ...formData, invoice_type: e.target.value })}
-                      placeholder="Ej: Factura, Boleta, Recibo"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="staff">Solicitado por</Label>
+                      <Select value={formData.requested_by_id} onValueChange={(val) => setFormData({ ...formData, requested_by_id: val })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {staff.map(member => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="date">Fecha</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <Label htmlFor="qty">Cantidad</Label>
-                    <Input
-                      id="qty"
-                      type="number"
-                      value={formData.quantity}
-                      onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                      placeholder="0"
-                      required
-                    />
+                    <div className="flex justify-between items-center mb-4">
+                      <Label>Detalle de Productos</Label>
+                      <Button 
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={handleAddLine}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar línea
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-4">
+                      {formData.items.map((item, index) => (
+                        <div key={index} className="flex gap-3 items-end">
+                          <div className="w-24">
+                            <Label className="text-xs">Cantidad</Label>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                              placeholder="1"
+                              required
+                              min="1"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label className="text-xs">Descripción</Label>
+                            <Input
+                              value={item.description}
+                              onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                              placeholder="Producto o material"
+                              required
+                            />
+                          </div>
+                          {formData.items.length > 1 && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive"
+                              onClick={() => handleRemoveLine(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="product">Producto (Detalle)</Label>
-                    <Textarea
-                      id="product"
-                      value={formData.product_detail}
-                      onChange={(e) => setFormData({ ...formData, product_detail: e.target.value })}
-                      placeholder="Detalle de los productos o materiales"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="notes">Notas</Label>
-                    <Textarea
-                      id="notes"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Notas adicionales"
-                    />
-                  </div>
+
                   <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
                   </Button>
@@ -204,7 +274,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                     <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{request.request_title}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">Tipo: {request.invoice_type}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {new Date(request.date).toLocaleDateString('es-CL')}
+                        </p>
                       </div>
                       <Badge className={getStatusColor(request.status)}>
                         {request.status === 'pending' && 'Pendiente'}
@@ -216,28 +288,28 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="font-medium text-muted-foreground">Cantidad</p>
-                          <p>{request.quantity}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-muted-foreground">Tipo Factura</p>
-                          <p>{request.invoice_type || '-'}</p>
-                        </div>
-                      </div>
-
                       <div>
-                        <p className="font-medium text-muted-foreground text-sm">Producto/Detalle</p>
-                        <p className="text-sm">{request.product_detail}</p>
-                      </div>
-
-                      {request.notes && (
-                        <div>
-                          <p className="font-medium text-muted-foreground text-sm">Notas</p>
-                          <p className="text-sm">{request.notes}</p>
+                        <p className="font-medium text-muted-foreground text-sm mb-3">Solicitado por: {request.requested_by_profile?.name || 'N/A'}</p>
+                        
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-2 px-3 font-medium">Cantidad</th>
+                                <th className="text-left py-2 px-3 font-medium">Descripción</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {request.items?.map((item: any, idx: number) => (
+                                <tr key={idx} className="border-b last:border-b-0">
+                                  <td className="py-2 px-3">{item.quantity}</td>
+                                  <td className="py-2 px-3">{item.description}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
-                      )}
+                      </div>
 
                       <div className="flex gap-2 pt-4 border-t flex-wrap">
                         {request.status === 'pending' && (

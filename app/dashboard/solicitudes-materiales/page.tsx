@@ -43,10 +43,25 @@ export default async function AdminSolicitudesPage() {
     .eq("condo_id", condoId)
     .order("created_at", { ascending: false })
 
+  // Get staff (admins and conserjes) from user_condos
+  const { data: staffRelations } = await supabase
+    .from("user_condos")
+    .select("user_id, profiles(id, name, role)")
+    .eq("condo_id", condoId)
+
+  const staff = staffRelations
+    ?.filter((rel: any) => rel.profiles && ['admin', 'super_admin', 'conserje'].includes(rel.profiles.role))
+    .map((rel: any) => ({
+      id: rel.profiles.id,
+      name: rel.profiles.name,
+      role: rel.profiles.role
+    })) || []
+
   return (
     <SolicitudesClient
       condoId={condoId}
       solicitudes={requests || []}
+      staff={staff}
       isAdmin={["admin", "super_admin"].includes(profile.role as string)}
       userRole={profile.role as string}
     />
