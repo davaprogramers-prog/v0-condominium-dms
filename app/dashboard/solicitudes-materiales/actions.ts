@@ -19,11 +19,9 @@ export async function createMaterialRequest(condoId: string, data: any) {
           condo_id: condoId,
           created_by: user.id,
           request_title: data.request_title,
-          request_description: data.request_description,
-          request_category: data.request_category,
-          priority: data.priority || "normal",
-          quantity: data.quantity || null,
-          estimated_cost: data.estimated_cost || null,
+          invoice_type: data.invoice_type || null,
+          quantity: data.quantity,
+          product_detail: data.product_detail,
           notes: data.notes || null,
           status: "pending",
         },
@@ -55,11 +53,9 @@ export async function updateMaterialRequest(id: string, data: any) {
       .from("material_requests")
       .update({
         request_title: data.request_title,
-        request_description: data.request_description,
-        request_category: data.request_category,
-        priority: data.priority,
+        invoice_type: data.invoice_type,
         quantity: data.quantity,
-        estimated_cost: data.estimated_cost,
+        product_detail: data.product_detail,
         notes: data.notes,
       })
       .eq("id", id)

@@ -25,11 +25,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     request_title: '',
-    request_description: '',
-    request_category: 'supplies',
-    priority: 'normal',
+    invoice_type: '',
     quantity: '',
-    estimated_cost: '',
+    product_detail: '',
     notes: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -47,11 +45,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
       }
       setFormData({
         request_title: '',
-        request_description: '',
-        request_category: 'supplies',
-        priority: 'normal',
+        invoice_type: '',
         quantity: '',
-        estimated_cost: '',
+        product_detail: '',
         notes: '',
       })
       setOpenCreate(false)
@@ -65,11 +61,9 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
   const handleEdit = (request: any) => {
     setFormData({
       request_title: request.request_title,
-      request_description: request.request_description,
-      request_category: request.request_category,
-      priority: request.priority,
+      invoice_type: request.invoice_type || '',
       quantity: request.quantity?.toString() || '',
-      estimated_cost: request.estimated_cost?.toString() || '',
+      product_detail: request.product_detail || '',
       notes: request.notes || '',
     })
     setEditingId(request.id)
@@ -94,29 +88,12 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
     }
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 text-red-800'
-      case 'high':
-        return 'bg-orange-100 text-orange-800'
-      case 'normal':
-        return 'bg-blue-100 text-blue-800'
-      case 'low':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800'
       case 'approved':
         return 'bg-blue-100 text-blue-800'
-      case 'purchased':
-        return 'bg-green-100 text-green-800'
       case 'completed':
         return 'bg-green-100 text-green-800'
       case 'rejected':
@@ -124,17 +101,6 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
       default:
         return 'bg-gray-100 text-gray-800'
     }
-  }
-
-  const getCategoryLabel = (category: string) => {
-    const labels: Record<string, string> = {
-      'cleaning': 'Limpieza',
-      'materials': 'Materiales',
-      'supplies': 'Suministros',
-      'maintenance': 'Mantenimiento',
-      'other': 'Otro',
-    }
-    return labels[category] || category
   }
 
   return (
@@ -167,72 +133,39 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                       id="title"
                       value={formData.request_title}
                       onChange={(e) => setFormData({ ...formData, request_title: e.target.value })}
-                      placeholder="Título de la solicitud"
+                      placeholder="Ej: Materiales aseo"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="desc">Descripción</Label>
-                    <Textarea
-                      id="desc"
-                      value={formData.request_description}
-                      onChange={(e) => setFormData({ ...formData, request_description: e.target.value })}
-                      placeholder="Descripción detallada"
+                    <Label htmlFor="invoice">Tipo de Factura</Label>
+                    <Input
+                      id="invoice"
+                      value={formData.invoice_type}
+                      onChange={(e) => setFormData({ ...formData, invoice_type: e.target.value })}
+                      placeholder="Ej: Factura, Boleta, Recibo"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="qty">Cantidad</Label>
+                    <Input
+                      id="qty"
+                      type="number"
+                      value={formData.quantity}
+                      onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                      placeholder="0"
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="category">Categoría</Label>
-                      <Select value={formData.request_category} onValueChange={(val) => setFormData({ ...formData, request_category: val })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="cleaning">Limpieza</SelectItem>
-                          <SelectItem value="materials">Materiales</SelectItem>
-                          <SelectItem value="supplies">Suministros</SelectItem>
-                          <SelectItem value="maintenance">Mantenimiento</SelectItem>
-                          <SelectItem value="other">Otro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="priority">Prioridad</Label>
-                      <Select value={formData.priority} onValueChange={(val) => setFormData({ ...formData, priority: val })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Baja</SelectItem>
-                          <SelectItem value="normal">Normal</SelectItem>
-                          <SelectItem value="high">Alta</SelectItem>
-                          <SelectItem value="urgent">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="qty">Cantidad</Label>
-                      <Input
-                        id="qty"
-                        type="number"
-                        value={formData.quantity}
-                        onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cost">Costo Estimado ($)</Label>
-                      <Input
-                        id="cost"
-                        type="number"
-                        value={formData.estimated_cost}
-                        onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })}
-                        placeholder="0"
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="product">Producto (Detalle)</Label>
+                    <Textarea
+                      id="product"
+                      value={formData.product_detail}
+                      onChange={(e) => setFormData({ ...formData, product_detail: e.target.value })}
+                      placeholder="Detalle de los productos o materiales"
+                      required
+                    />
                   </div>
                   <div>
                     <Label htmlFor="notes">Notas</Label>
@@ -271,47 +204,32 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                     <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{request.request_title}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">Tipo: {request.invoice_type}</p>
                       </div>
-                      <div className="flex gap-2 flex-wrap">
-                        <Badge className={getPriorityColor(request.priority)}>
-                          {request.priority === 'urgent' && 'Urgente'}
-                          {request.priority === 'high' && 'Alta'}
-                          {request.priority === 'normal' && 'Normal'}
-                          {request.priority === 'low' && 'Baja'}
-                        </Badge>
-                        <Badge className={getStatusColor(request.status)}>
-                          {request.status === 'pending' && 'Pendiente'}
-                          {request.status === 'approved' && 'Aprobada'}
-                          {request.status === 'purchased' && 'Comprada'}
-                          {request.status === 'completed' && 'Completada'}
-                          {request.status === 'rejected' && 'Rechazada'}
-                        </Badge>
-                      </div>
+                      <Badge className={getStatusColor(request.status)}>
+                        {request.status === 'pending' && 'Pendiente'}
+                        {request.status === 'approved' && 'Aprobada'}
+                        {request.status === 'completed' && 'Completada'}
+                        {request.status === 'rejected' && 'Rechazada'}
+                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="font-medium text-muted-foreground">Categoría</p>
-                          <p>{getCategoryLabel(request.request_category)}</p>
+                          <p className="font-medium text-muted-foreground">Cantidad</p>
+                          <p>{request.quantity}</p>
                         </div>
                         <div>
-                          <p className="font-medium text-muted-foreground">Descripción</p>
-                          <p>{request.request_description}</p>
+                          <p className="font-medium text-muted-foreground">Tipo Factura</p>
+                          <p>{request.invoice_type || '-'}</p>
                         </div>
-                        {request.quantity && (
-                          <div>
-                            <p className="font-medium text-muted-foreground">Cantidad</p>
-                            <p>{request.quantity}</p>
-                          </div>
-                        )}
-                        {request.estimated_cost && (
-                          <div>
-                            <p className="font-medium text-muted-foreground">Costo Estimado</p>
-                            <p>${request.estimated_cost.toLocaleString('es-CL')}</p>
-                          </div>
-                        )}
+                      </div>
+
+                      <div>
+                        <p className="font-medium text-muted-foreground text-sm">Producto/Detalle</p>
+                        <p className="text-sm">{request.product_detail}</p>
                       </div>
 
                       {request.notes && (
@@ -364,6 +282,17 @@ export function SolicitudesClient({ condoId, solicitudes, isAdmin, userRole }: S
                               Eliminar
                             </Button>
                           </>
+                        )}
+
+                        {request.status === 'approved' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleStatusChange(request.id, 'completed')}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Marcar Completada
+                          </Button>
                         )}
                       </div>
                     </div>
