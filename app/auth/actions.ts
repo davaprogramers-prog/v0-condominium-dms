@@ -81,44 +81,48 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Wait a moment for the trigger to create the profile
-  await new Promise(resolve => setTimeout(resolve, 500))
+  // Wait for the user to be fully created in the users table
+  // Retry up to 5 times with increasing delays
+  let lastError = null
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, attempt * 500))
 
-  // Try to update profile, if it fails try upsert
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({
-      id: authData.user.id,
-      email,
-      first_name: firstName,
-      last_name: lastName,
-      house_id: houseId,
-      condo_id: house.condo_id,
-      role: "owner",
-    }, { onConflict: "id" })
-
-  if (profileError) {
-    console.error("[v0] Profile upsert error:", profileError)
-    // Retry with update after another delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    await supabase
+    const { error: profileError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: authData.user.id,
         email,
         first_name: firstName,
         last_name: lastName,
         house_id: houseId,
         condo_id: house.condo_id,
         role: "owner",
-      })
-      .eq("id", authData.user.id)
+      }, { onConflict: "id" })
+
+    if (!profileError) {
+      // Success - profile created
+      break
+    }
+
+    lastError = profileError
+    console.error(`[v0] Profile upsert attempt ${attempt} failed:`, profileError)
+  }
+
+  // If all retries failed, throw the error
+  if (lastError && lastError.code === '23503') {
+    throw new Error("Error al crear el perfil. Por favor, intenta de nuevo.")
   }
 
   // Also update the house with the owner's user_id
-  await supabase
+  const { error: houseUpdateError } = await supabase
     .from("houses")
     .update({ owner_id: authData.user.id })
     .eq("id", houseId)
+
+  if (houseUpdateError) {
+    console.error("[v0] House update error:", houseUpdateError)
+    // Don't throw - the profile was created, this is just metadata
+  }
 
   return authData.user
 }
