@@ -40,7 +40,7 @@ export default async function CasasPage() {
           <h1 className="text-3xl font-bold">Casas</h1>
           <p className="text-muted-foreground">Gestión de propiedades del condominio</p>
         </div>
-        {isAdmin && <CreateHouseDialog condoId={profile?.condo_id} />}
+        {isAdmin && <CreateHouseDialog condoId={condoId} />}
       </div>
 
       <div className="rounded-lg border">
