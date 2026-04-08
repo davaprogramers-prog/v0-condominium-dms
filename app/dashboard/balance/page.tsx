@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getCondoExpenses, getPaidCondoIncome } from "../gastos/actions"
 import { Banknote, TrendingDown, TrendingUp, BarChart3, Wallet } from "lucide-react"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 
 export default async function BalancePage({
   searchParams,
@@ -13,23 +14,8 @@ export default async function BalancePage({
 
   if (!user) redirect("/auth/login")
 
-  // Try to get condo_id from user_condos (for admin/super_admin)
-  let condoId: string | null = null
-
-  try {
-    const { data: userCondos, error: ucError } = await supabase
-      .from("user_condos")
-      .select("condo_id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single()
-
-    if (userCondos?.condo_id && !ucError) {
-      condoId = userCondos.condo_id
-    }
-  } catch (e) {
-    console.log("[v0] Error getting user_condos in balance:", e)
-  }
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
 
   if (!condoId) {
     redirect("/dashboard")

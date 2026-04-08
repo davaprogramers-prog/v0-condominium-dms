@@ -7,6 +7,7 @@ import { GastosChart } from "./gastos-chart"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 
 export default async function GastosPage({
   searchParams,
@@ -18,23 +19,8 @@ export default async function GastosPage({
 
   if (!user) redirect("/auth/login")
 
-  // Try to get condo_id from user_condos (for admin/super_admin)
-  let condoId: string | null = null
-
-  try {
-    const { data: userCondos, error: ucError } = await supabase
-      .from("user_condos")
-      .select("condo_id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single()
-
-    if (userCondos?.condo_id && !ucError) {
-      condoId = userCondos.condo_id
-    }
-  } catch (e) {
-    console.log("[v0] Error getting user_condos in gastos:", e)
-  }
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
 
   if (!condoId) {
     redirect("/dashboard")
