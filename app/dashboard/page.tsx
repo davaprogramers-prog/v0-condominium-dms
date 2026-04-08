@@ -8,16 +8,26 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Get profile to check role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id, first_name, house_id")
-    .eq("id", user?.id)
-    .single()
-    .catch(() => ({ data: null }))
+  if (!user) return null
 
-  // If no profile found, try to get role from auth metadata
-  const role = profile?.role || user?.user_metadata?.role || "propietario"
+  // Get profile to check role - with proper error handling
+  let profile: any = null
+  try {
+    const { data: profileData, error } = await supabase
+      .from("profiles")
+      .select("role, condo_id, first_name, house_id")
+      .eq("id", user.id)
+      .single()
+
+    if (profileData && !error) {
+      profile = profileData
+    }
+  } catch (e) {
+    console.log("[v0] No profile found for user")
+  }
+
+  // Determine role
+  const role = profile?.role || "propietario"
   const condoId = profile?.condo_id
   const houseId = profile?.house_id
 
@@ -37,13 +47,19 @@ export default async function DashboardPage() {
   // For other roles, fetch condo data
   let condo = null
   if (condoId) {
-    const { data } = await supabase
-      .from("condominiums")
-      .select("name")
-      .eq("id", condoId)
-      .single()
-      .catch(() => ({ data: null }))
-    condo = data
+    try {
+      const { data: condoData, error } = await supabase
+        .from("condominiums")
+        .select("name")
+        .eq("id", condoId)
+        .single()
+      
+      if (condoData && !error) {
+        condo = condoData
+      }
+    } catch (e) {
+      console.log("[v0] Error fetching condo")
+    }
   }
 
   // If propietario/owner without condo_id, show message
@@ -62,14 +78,19 @@ export default async function DashboardPage() {
   // For propietarios with condo_id, get their houses
   let ownerHouses: any[] = []
   if ((role === "propietario" || role === "owner") && condoId) {
-    const { data: houses } = await supabase
-      .from("houses")
-      .select("*")
-      .eq("condo_id", condoId)
-      .eq("owner_id", user?.id)
-      .catch(() => ({ data: [] }))
-
-    ownerHouses = houses || []
+    try {
+      const { data: houses, error } = await supabase
+        .from("houses")
+        .select("*")
+        .eq("condo_id", condoId)
+        .eq("owner_id", user.id)
+      
+      if (houses && !error) {
+        ownerHouses = houses
+      }
+    } catch (e) {
+      console.log("[v0] Error fetching owner houses")
+    }
   }
 
   const adminMenuItems = [
