@@ -88,7 +88,7 @@ export default function ExpenseLogosPage() {
   }
 
   async function handleUpload() {
-    if (!logoFile || !newLogoName.trim() || !condoId) return
+    if (!logoFile || !newLogoName.trim()) return
 
     setUploading(true)
     try {
@@ -99,15 +99,22 @@ export default function ExpenseLogosPage() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
       const filePath = `expense-logos/${fileName}`
 
+      console.log("[v0] Uploading logo to storage:", filePath)
       const { error: uploadError } = await supabase.storage
         .from("documents")
         .upload(filePath, logoFile)
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        console.error("[v0] Storage upload error:", uploadError)
+        throw uploadError
+      }
 
+      console.log("[v0] Logo uploaded successfully, getting public URL")
       const { data: { publicUrl } } = supabase.storage
         .from("documents")
         .getPublicUrl(filePath)
+
+      console.log("[v0] Public URL:", publicUrl)
 
       // Create expense_logo record (global, not tied to condo)
       const { data: newLogo, error: insertError } = await supabase
@@ -120,15 +127,19 @@ export default function ExpenseLogosPage() {
         .select()
         .single()
 
-      if (insertError) throw insertError
+      if (insertError) {
+        console.error("[v0] Insert error:", insertError)
+        throw insertError
+      }
 
+      console.log("[v0] Logo created successfully:", newLogo)
       setLogos([...logos, newLogo].sort((a, b) => a.name.localeCompare(b.name)))
       setDialogOpen(false)
       setNewLogoName("")
       setLogoFile(null)
       setLogoPreview(null)
     } catch (error) {
-      console.error("Error uploading logo:", error)
+      console.error("[v0] Error uploading logo:", error)
       alert("Error al subir el logo")
     } finally {
       setUploading(false)
