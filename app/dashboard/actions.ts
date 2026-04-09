@@ -350,6 +350,11 @@ export async function createExemption(formData: FormData) {
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   try {
+    // Construct absolute URL for server action
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL || 'localhost:3000'
+    const baseUrl = `${protocol}://${host}`
+    
     const body = {
       name: formData.get("name"),
       improvement_type: formData.get("improvement_type"),
@@ -360,7 +365,7 @@ export async function createProject(formData: FormData) {
       start_date: formData.get("start_date"),
     }
 
-    const response = await fetch("/api/proyectos/create", {
+    const response = await fetch(`${baseUrl}/api/proyectos/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
