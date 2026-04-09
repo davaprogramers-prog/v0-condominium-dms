@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { UserPlus, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createUserWithRole } from "./actions"
@@ -35,9 +36,10 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
     password: "",
     first_name: "",
     last_name: "",
-    role: "propietario",
+    role: "admin",
     condo_id: "",
     house_id: "",
+    is_owner: false,
   })
 
   const handleCondoChange = async (condoId: string) => {
@@ -84,6 +86,12 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
       return
     }
 
+    if (formData.is_owner && !formData.house_id) {
+      setError("Debes seleccionar una propiedad si es propietario")
+      setLoading(false)
+      return
+    }
+
     try {
       const result = await createUserWithRole({
         email: formData.email,
@@ -93,6 +101,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
         role: formData.role,
         condoId: formData.condo_id,
         houseId: formData.house_id || null,
+        isOwner: formData.is_owner,
       })
 
       if (!result.success) {
@@ -107,9 +116,10 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
         password: "",
         first_name: "",
         last_name: "",
-        role: "propietario",
+        role: "admin",
         condo_id: "",
         house_id: "",
+        is_owner: false,
       })
       router.refresh()
     } catch (err) {
@@ -211,17 +221,26 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="propietario">Propietario</SelectItem>
-                <SelectItem value="arrendatario">Arrendatario</SelectItem>
+                <SelectItem value="admin">Administrador</SelectItem>
                 <SelectItem value="conserje">Conserje</SelectItem>
-                {isSuperAdmin && <SelectItem value="admin">Administrador</SelectItem>}
               </SelectContent>
             </Select>
           </div>
 
-          {(formData.role === "propietario" || formData.role === "conserje") && houses.length > 0 && (
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is_owner"
+              checked={formData.is_owner}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
+            />
+            <Label htmlFor="is_owner" className="font-normal">
+              También es Propietario
+            </Label>
+          </div>
+
+          {formData.is_owner && houses.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="house_id">Propiedad {formData.role === "propietario" ? "*" : "(opcional)"}</Label>
+              <Label htmlFor="house_id">Propiedad *</Label>
               <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
                 <SelectTrigger id="house_id" disabled={loadingHouses}>
                   <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
@@ -234,8 +253,8 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                   ))}
                 </SelectContent>
               </Select>
-              {formData.role === "propietario" && !formData.house_id && (
-                <p className="text-xs text-destructive">La propiedad es requerida para propietarios</p>
+              {formData.is_owner && !formData.house_id && (
+                <p className="text-xs text-destructive">La propiedad es requerida si es propietario</p>
               )}
             </div>
           )}

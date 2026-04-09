@@ -10,6 +10,7 @@ interface CreateUserParams {
   role: string
   condoId: string
   houseId: string | null
+  isOwner: boolean
 }
 
 export async function createUserWithRole(params: CreateUserParams) {
@@ -62,6 +63,7 @@ export async function createUserWithRole(params: CreateUserParams) {
         last_name: params.lastName,
         role: params.role,
         condo_id: condoId,
+        is_owner: params.isOwner,
       })
 
     if (profileError) {
@@ -70,8 +72,8 @@ export async function createUserWithRole(params: CreateUserParams) {
       return { success: false, error: "Error al crear perfil de usuario" }
     }
 
-    // Assign house if provided
-    if (params.houseId) {
+    // Assign house if provided and is_owner is true
+    if (params.isOwner && params.houseId) {
       const { error: houseError } = await supabase
         .from("house_owners")
         .insert({
@@ -120,6 +122,7 @@ export async function updateUser(userId: string, data: any) {
         last_name: data.last_name,
         role: data.role,
         condo_id: data.condo_id,
+        is_owner: data.is_owner,
       })
       .eq("id", userId)
 
@@ -128,7 +131,7 @@ export async function updateUser(userId: string, data: any) {
     }
 
     // Update or create house assignment if needed
-    if (data.house_id) {
+    if (data.is_owner && data.house_id) {
       // First check if assignment exists
       const { data: existing } = await supabase
         .from("house_owners")
@@ -151,8 +154,8 @@ export async function updateUser(userId: string, data: any) {
             user_id: userId,
           })
       }
-    } else if (data.role !== "propietario") {
-      // Remove house assignment if role is not propietario
+    } else if (!data.is_owner) {
+      // Remove house assignment if no longer owner
       await supabase
         .from("house_owners")
         .delete()
