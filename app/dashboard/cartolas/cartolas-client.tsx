@@ -31,10 +31,12 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Subir Cartola</Button>
+              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Subir Cartola</Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Subir Cartola Bancaria</DialogTitle></DialogHeader>
+            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+              <DialogHeader>
+                <DialogTitle className="text-slate-900 dark:text-white">Subir Cartola Bancaria</DialogTitle>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("file_url", fileUrl)
@@ -45,22 +47,22 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stmt_title">Titulo</Label>
-                  <Input id="stmt_title" name="title" placeholder="Ej: Cartola Enero 2026" required />
+                  <Label htmlFor="stmt_title" className="text-slate-900 dark:text-slate-200">Titulo</Label>
+                  <Input id="stmt_title" name="title" placeholder="Ej: Cartola Enero 2026" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="statement_date">Fecha de la Cartola</Label>
-                  <Input id="statement_date" name="statement_date" type="date" required />
+                  <Label htmlFor="statement_date" className="text-slate-900 dark:text-slate-200">Fecha de la Cartola</Label>
+                  <Input id="statement_date" name="statement_date" type="date" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Archivo PDF</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Archivo PDF</Label>
                   <FileUpload bucket="statements" onUpload={setFileUrl} accept="application/pdf,image/*" label="Subir cartola (PDF)" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stmt_notes">Notas</Label>
-                  <Textarea id="stmt_notes" name="notes" placeholder="Notas opcionales..." />
+                  <Label htmlFor="stmt_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                  <Textarea id="stmt_notes" name="notes" placeholder="Notas opcionales..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
-                <Button type="submit" disabled={!fileUrl}>Guardar Cartola</Button>
+                <Button type="submit" disabled={!fileUrl} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cartola</Button>
               </form>
             </DialogContent>
           </Dialog>
