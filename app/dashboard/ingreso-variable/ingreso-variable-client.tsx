@@ -210,29 +210,29 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
       {/* Image Modal */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-          <DialogHeader className="p-4 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg text-slate-900 dark:text-white">Comprobante - {selectedImage?.title}</DialogTitle>
+          <div className="relative flex flex-col">
+            <div className="flex items-center justify-between gap-2 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+              <DialogTitle className="text-lg text-slate-900 dark:text-white flex-1">Comprobante - {selectedImage?.title}</DialogTitle>
               <a
                 href={selectedImage?.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0"
                 title="Abrir en nueva pestaña"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-5 w-5" />
               </a>
             </div>
-          </DialogHeader>
-          <div className="px-4 pb-4">
-            {selectedImage && (
-              <img
-                src={selectedImage.url}
-                alt={`Comprobante de ${selectedImage.title}`}
-                className="w-full h-auto max-h-[70vh] object-contain rounded-lg border-2 border-slate-300 dark:border-slate-600"
-                crossOrigin="anonymous"
-              />
-            )}
+            <div className="px-4 py-4">
+              {selectedImage && (
+                <img
+                  src={selectedImage.url}
+                  alt={`Comprobante de ${selectedImage.title}`}
+                  className="w-full h-auto max-h-[70vh] object-contain rounded-lg border-2 border-slate-300 dark:border-slate-600"
+                  crossOrigin="anonymous"
+                />
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
