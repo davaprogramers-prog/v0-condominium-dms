@@ -44,45 +44,63 @@ export default async function CasasPage() {
       </div>
 
       <div className="rounded-lg border">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-6 py-3 text-left font-semibold"># Casa</th>
-                <th className="px-6 py-3 text-left font-semibold">Propietario</th>
-                <th className="px-6 py-3 text-left font-semibold">Email</th>
-                <th className="px-6 py-3 text-left font-semibold">Estado</th>
-                {isAdmin && <th className="px-6 py-3 text-left font-semibold">Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {houses?.map((house) => (
-                <tr key={house.id} className="border-b hover:bg-muted/50">
-                  <td className="px-6 py-3 font-semibold">#{house.house_number}</td>
-                  <td className="px-6 py-3">{house.owner_name || "-"}</td>
-                  <td className="px-6 py-3 text-muted-foreground text-xs">{house.owner_email || "-"}</td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                      Activo
-                    </span>
-                  </td>
-                  {isAdmin && (
-                    <td className="px-6 py-3">
-                      <EditHouseDialog
-                        houseId={house.id}
-                        ownerName={house.owner_name || ""}
-                        ownerEmail={house.owner_email || ""}
-                      />
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {!houses?.length && (
+        {!houses?.length ? (
           <div className="p-6 text-center text-muted-foreground">
             {isAdmin ? "No hay casas registradas. Crea la primera haciendo clic en el botón arriba." : "No hay casas en este condominio"}
+          </div>
+        ) : (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {houses?.map((house, index) => {
+                const colors = [
+                  { bg: "from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30", border: "border-blue-400", title: "text-blue-900 dark:text-blue-200", text: "text-blue-700 dark:text-blue-300", label: "text-blue-600 dark:text-blue-300" },
+                  { bg: "from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30", border: "border-purple-400", title: "text-purple-900 dark:text-purple-200", text: "text-purple-700 dark:text-purple-300", label: "text-purple-600 dark:text-purple-300" },
+                  { bg: "from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/30", border: "border-green-400", title: "text-green-900 dark:text-green-200", text: "text-green-700 dark:text-green-300", label: "text-green-600 dark:text-green-300" },
+                  { bg: "from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/30", border: "border-orange-400", title: "text-orange-900 dark:text-orange-200", text: "text-orange-700 dark:text-orange-300", label: "text-orange-600 dark:text-orange-300" },
+                  { bg: "from-cyan-50 to-cyan-100 dark:from-cyan-950/30 dark:to-cyan-900/30", border: "border-cyan-400", title: "text-cyan-900 dark:text-cyan-200", text: "text-cyan-700 dark:text-cyan-300", label: "text-cyan-600 dark:text-cyan-300" },
+                  { bg: "from-pink-50 to-pink-100 dark:from-pink-950/30 dark:to-pink-900/30", border: "border-pink-400", title: "text-pink-900 dark:text-pink-200", text: "text-pink-700 dark:text-pink-300", label: "text-pink-600 dark:text-pink-300" },
+                ]
+                const color = colors[index % colors.length]
+                
+                return (
+                  <div key={house.id} className={`rounded-lg border-2 bg-gradient-to-br ${color.bg} ${color.border} p-4 hover:shadow-md transition-shadow`}>
+                    <div className="flex flex-col gap-4">
+                      {/* Header with number and status */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className={`text-xs font-medium uppercase ${color.label}`}>Casa</p>
+                          <h3 className={`text-2xl font-bold ${color.title}`}>#{house.house_number}</h3>
+                        </div>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-green-200 dark:bg-green-900 text-green-900 dark:text-green-200`}>
+                          Activo
+                        </span>
+                      </div>
+
+                      {/* Owner information */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.label}`}>Propietario</p>
+                        <p className={`font-semibold ${color.title}`}>{house.owner_name || "-"}</p>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.label}`}>Email</p>
+                        <p className={`text-sm truncate ${color.text}`}>{house.owner_email || "-"}</p>
+                      </div>
+
+                      {/* Actions */}
+                      {isAdmin && (
+                        <EditHouseDialog
+                          houseId={house.id}
+                          ownerName={house.owner_name || ""}
+                          ownerEmail={house.owner_email || ""}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
