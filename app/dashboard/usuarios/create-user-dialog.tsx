@@ -86,8 +86,16 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
       return
     }
 
+    // Propietarios requieren una propiedad
+    if (formData.role === "propietario" && !formData.house_id) {
+      setError("Debes seleccionar una propiedad para un propietario")
+      setLoading(false)
+      return
+    }
+
+    // Otros roles que también son propietarios requieren una propiedad
     if (formData.is_owner && !formData.house_id) {
-      setError("Debes seleccionar una propiedad si es propietario")
+      setError("Debes seleccionar una propiedad si también es propietario")
       setLoading(false)
       return
     }
@@ -216,29 +224,39 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
 
           <div className="space-y-2">
             <Label htmlFor="role">Rol *</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+            <Select value={formData.role} onValueChange={(value) => {
+              // Si cambia a propietario, auto-activar is_owner y limpiar
+              if (value === "propietario") {
+                setFormData({ ...formData, role: value, is_owner: true })
+              } else {
+                setFormData({ ...formData, role: value })
+              }
+            }}>
               <SelectTrigger id="role">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="admin">Administrador</SelectItem>
                 <SelectItem value="conserje">Conserje</SelectItem>
+                <SelectItem value="propietario">Propietario</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="is_owner"
-              checked={formData.is_owner}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
-            />
-            <Label htmlFor="is_owner" className="font-normal">
-              También es Propietario
-            </Label>
-          </div>
+          {formData.role !== "propietario" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="is_owner"
+                checked={formData.is_owner}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
+              />
+              <Label htmlFor="is_owner" className="font-normal">
+                También es Propietario
+              </Label>
+            </div>
+          )}
 
-          {formData.is_owner && houses.length > 0 && (
+          {(formData.is_owner || formData.role === "propietario") && houses.length > 0 && (
             <div className="space-y-2">
               <Label htmlFor="house_id">Propiedad *</Label>
               <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
@@ -253,8 +271,8 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                   ))}
                 </SelectContent>
               </Select>
-              {formData.is_owner && !formData.house_id && (
-                <p className="text-xs text-destructive">La propiedad es requerida si es propietario</p>
+              {(formData.is_owner || formData.role === "propietario") && !formData.house_id && (
+                <p className="text-xs text-destructive">La propiedad es requerida</p>
               )}
             </div>
           )}

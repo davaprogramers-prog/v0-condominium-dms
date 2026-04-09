@@ -56,8 +56,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Error al crear perfil" }, { status: 400 })
     }
 
-    // Assign house if is owner
-    if (isOwner && houseId) {
+    // Assign house if needed
+    // If role is propietario OR if isOwner flag is set
+    const shouldAssignHouse = (role === "propietario" || isOwner) && houseId
+    
+    if (shouldAssignHouse) {
       const { error: houseError } = await supabase
         .from("house_owners")
         .insert({
