@@ -5,23 +5,23 @@ import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
 const adminMenuItems = [
-  { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades" },
-  { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes" },
-  { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes" },
-  { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos" },
-  { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios" },
-  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas" },
-  { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante" },
-  { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas" },
+  { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades", color: "bg-blue-500" },
+  { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes", color: "bg-purple-500" },
+  { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes", color: "bg-orange-500" },
+  { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos", color: "bg-green-500" },
+  { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios", color: "bg-pink-500" },
+  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas", color: "bg-cyan-500" },
+  { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante", color: "bg-amber-500" },
+  { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas", color: "bg-indigo-500" },
 ]
 
 const ownerMenuItems = [
-  { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo" },
-  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes" },
-  { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos" },
-  { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones" },
-  { href: "/dashboard/areas-comunes", icon: Home, label: "Instalaciones", desc: "Reservar espacios" },
-  { href: "/dashboard/encomiendas", icon: Package, label: "Encomiendas", desc: "Recibir paquetes" },
+  { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo", color: "bg-emerald-500" },
+  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes", color: "bg-cyan-500" },
+  { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos", color: "bg-orange-500" },
+  { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones", color: "bg-red-500" },
+  { href: "/dashboard/areas-comunes", icon: Home, label: "Instalaciones", desc: "Reservar espacios", color: "bg-purple-500" },
+  { href: "/dashboard/encomiendas", icon: Package, label: "Encomiendas", desc: "Recibir paquetes", color: "bg-blue-600" },
 ]
 
 export default async function DashboardPage() {
@@ -139,8 +139,10 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {adminMenuItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full">
-                  <item.icon className="h-8 w-8 text-primary" />
+                <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full hover:shadow-md hover:border-primary/50">
+                  <div className={`h-10 w-10 ${item.color} rounded-lg flex items-center justify-center shadow-lg`}>
+                    <item.icon className="h-6 w-6 text-white" />
+                  </div>
                   <div>
                     <h2 className="font-semibold">{item.label}</h2>
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
@@ -170,9 +172,9 @@ export default async function DashboardPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {ownerMenuItems.map((item) => (
                   <Link key={item.href} href={item.href}>
-                    <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer h-full text-center group">
-                      <div className="h-8 w-8 mx-auto flex items-center justify-center group-hover:bg-primary/10 rounded-lg transition">
-                        <item.icon className="h-6 w-6 text-primary" />
+                    <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer h-full text-center group hover:shadow-md hover:border-primary/50">
+                      <div className={`h-10 w-10 mx-auto ${item.color} rounded-lg flex items-center justify-center shadow-lg transition`}>
+                        <item.icon className="h-6 w-6 text-white" />
                       </div>
                       <div>
                         <h3 className="text-sm font-medium leading-tight">{item.label}</h3>
