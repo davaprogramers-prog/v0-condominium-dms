@@ -90,9 +90,14 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                   <Label className="text-slate-900 dark:text-slate-200">Foto</Label>
                   <FileUpload bucket="projects" folder="areas" onUpload={setPhotoUrl} label="Subir foto" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
-                  <Label htmlFor="is_paid_area" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
+                    <Label htmlFor="is_paid_area" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
+                  </div>
+                  <Badge className="bg-green-600 text-white dark:bg-green-700 dark:text-white">
+                    {isPaid ? "Pagado" : "Gratis"}
+                  </Badge>
                 </div>
                 {isPaid && (
                   <div className="flex flex-col gap-2">
@@ -215,13 +220,18 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               label="Cambiar foto"
                             />
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Switch
-                              id="edit_is_paid"
-                              checked={editIsPaid}
-                              onCheckedChange={setEditIsPaid}
-                            />
-                            <Label htmlFor="edit_is_paid" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Switch
+                                id="edit_is_paid"
+                                checked={editIsPaid}
+                                onCheckedChange={setEditIsPaid}
+                              />
+                              <Label htmlFor="edit_is_paid" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
+                            </div>
+                            <Badge className="bg-green-600 text-white dark:bg-green-700 dark:text-white">
+                              {editIsPaid ? "Pagado" : "Gratis"}
+                            </Badge>
                           </div>
                           {editIsPaid && (
                             <div className="flex flex-col gap-2">
