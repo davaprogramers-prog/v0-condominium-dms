@@ -88,21 +88,21 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Editar Ingreso</DialogTitle>
-          <DialogDescription>Actualiza los detalles del ingreso y el comprobante</DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Editar Ingreso</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">Actualiza los detalles del ingreso y el comprobante</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto (CLP) *</Label>
+              <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -111,60 +111,65 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                 defaultValue={income.amount}
                 placeholder="0.00"
                 required
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label>Tipo de Ingreso</Label>
+              <Label className="text-slate-900 dark:text-slate-200">Tipo de Ingreso</Label>
               <Input
                 type="text"
                 value={income.income_type === "cuota" ? "Cuota Común" : "Ingreso Variable"}
                 disabled
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Casa Asignada</Label>
+              <Label className="text-slate-900 dark:text-slate-200">Casa Asignada</Label>
               <Input
                 type="text"
                 value={house ? `Casa #${house.house_number}` : "Sin asignar"}
                 disabled
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="incomeDate">Fecha del Ingreso</Label>
+              <Label htmlFor="incomeDate" className="text-slate-900 dark:text-slate-200">Fecha del Ingreso</Label>
               <Input
                 id="incomeDate"
                 name="incomeDate"
                 type="date"
                 defaultValue={new Date(income.income_date).toISOString().split("T")[0]}
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
+            <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripción</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Detalles adicionales del ingreso..."
               defaultValue={income.description}
               rows={3}
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label>Comprobante (Transferencia/Depósito)</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+            <Label className="text-slate-900 dark:text-slate-200">Comprobante (Transferencia/Depósito)</Label>
+            <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center bg-slate-50 dark:bg-slate-900">
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="max-h-40 max-w-full rounded"
+                      className="max-h-40 max-w-full rounded border-2 border-slate-300 dark:border-slate-600"
                     />
                     <button
                       type="button"
@@ -174,13 +179,13 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  {selectedFile && <p className="text-sm text-muted-foreground">{selectedFile.name}</p>}
+                  {selectedFile && <p className="text-sm text-slate-600 dark:text-slate-400">{selectedFile.name}</p>}
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
+                    <Upload className="h-6 w-6 text-slate-400" />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -193,12 +198,12 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                 </label>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios
           </Button>
