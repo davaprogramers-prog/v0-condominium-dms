@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { FileUpload } from "@/components/file-upload"
 import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2 } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
@@ -92,7 +92,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
+                    <Checkbox id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} className="w-5 h-5 border-2 border-slate-400 dark:border-slate-500" />
                     <Label htmlFor="is_paid_area" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                   </div>
                   <Badge className="bg-white text-slate-900 border border-slate-300 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-200 font-semibold">
@@ -222,10 +222,11 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <Switch
+                              <Checkbox
                                 id="edit_is_paid"
                                 checked={editIsPaid}
                                 onCheckedChange={setEditIsPaid}
+                                className="w-5 h-5 border-2 border-slate-400 dark:border-slate-500"
                               />
                               <Label htmlFor="edit_is_paid" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                             </div>
