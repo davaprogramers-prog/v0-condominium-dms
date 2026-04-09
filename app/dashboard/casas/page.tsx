@@ -82,6 +82,7 @@ export default async function CasasPage() {
                       {isAdmin && (
                         <EditHouseDialog
                           houseId={house.id}
+                          houseNumber={house.house_number}
                           ownerName={house.owner_name || ""}
                           ownerEmail={house.owner_email || ""}
                         />

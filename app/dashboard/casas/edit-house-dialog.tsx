@@ -11,12 +11,13 @@ import { updateHouse } from "./actions"
 
 interface EditHouseDialogProps {
   houseId: string
+  houseNumber: string | number
   ownerName: string
   ownerEmail: string
   paymentDueDay?: number
 }
 
-export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay = 5 }: EditHouseDialogProps) {
+export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, paymentDueDay = 5 }: EditHouseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -55,7 +56,7 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
       </DialogTrigger>
       <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">Editar Casa</DialogTitle>
+          <DialogTitle className="text-slate-900 dark:text-white">Editar Casa #{houseNumber}</DialogTitle>
           <DialogDescription className="text-slate-600 dark:text-slate-400">Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
