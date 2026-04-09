@@ -63,7 +63,6 @@ export async function createUserWithRole(params: CreateUserParams) {
         last_name: params.lastName,
         role: params.role,
         condo_id: condoId,
-        is_owner: params.isOwner,
       })
 
     if (profileError) {
@@ -122,7 +121,6 @@ export async function updateUser(userId: string, data: any) {
         last_name: data.last_name,
         role: data.role,
         condo_id: data.condo_id,
-        is_owner: data.is_owner,
       })
       .eq("id", userId)
 

@@ -239,7 +239,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     }
   }
 
-  // If admin has is_owner flag, use the menu with "Mi casa", otherwise use regular admin menu
+  // If admin has property assigned, use the menu with "Mi casa", otherwise use regular admin menu
   const menuSections = !hasCondo && isAdmin
     ? [
         {
@@ -250,7 +250,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
           ]
         }
       ]
-    : isAdmin && profile?.is_owner ? adminWithPropertyMenuItems
+    : isAdmin && hasProperty ? adminWithPropertyMenuItems
     : isAdmin ? adminMenuItems 
     : ownerMenuItems
 
