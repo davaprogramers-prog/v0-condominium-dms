@@ -4,24 +4,40 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
+const colorMap: Record<string, string> = {
+  "bg-blue-500": "bg-blue-500",
+  "bg-purple-500": "bg-purple-500",
+  "bg-orange-500": "bg-orange-500",
+  "bg-green-500": "bg-green-500",
+  "bg-pink-500": "bg-pink-500",
+  "bg-cyan-500": "bg-cyan-500",
+  "bg-amber-500": "bg-amber-500",
+  "bg-indigo-500": "bg-indigo-500",
+  "bg-emerald-500": "bg-emerald-500",
+  "bg-red-500": "bg-red-500",
+  "bg-blue-600": "bg-blue-600",
+}
+
+const getColorClass = (colorKey: string) => colorMap[colorKey] || "bg-primary"
+
 const adminMenuItems = [
-  { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades", color: "bg-blue-500" },
-  { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes", color: "bg-purple-500" },
-  { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes", color: "bg-orange-500" },
-  { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos", color: "bg-green-500" },
-  { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios", color: "bg-pink-500" },
-  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas", color: "bg-cyan-500" },
-  { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante", color: "bg-amber-500" },
-  { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas", color: "bg-indigo-500" },
+  { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades", colorKey: "bg-blue-500" },
+  { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes", colorKey: "bg-purple-500" },
+  { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes", colorKey: "bg-orange-500" },
+  { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos", colorKey: "bg-green-500" },
+  { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios", colorKey: "bg-pink-500" },
+  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas", colorKey: "bg-cyan-500" },
+  { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante", colorKey: "bg-amber-500" },
+  { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas", colorKey: "bg-indigo-500" },
 ]
 
 const ownerMenuItems = [
-  { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo", color: "bg-emerald-500" },
-  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes", color: "bg-cyan-500" },
-  { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos", color: "bg-orange-500" },
-  { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones", color: "bg-red-500" },
-  { href: "/dashboard/areas-comunes", icon: Home, label: "Instalaciones", desc: "Reservar espacios", color: "bg-purple-500" },
-  { href: "/dashboard/encomiendas", icon: Package, label: "Encomiendas", desc: "Recibir paquetes", color: "bg-blue-600" },
+  { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo", colorKey: "bg-emerald-500" },
+  { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes", colorKey: "bg-cyan-500" },
+  { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos", colorKey: "bg-orange-500" },
+  { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones", colorKey: "bg-red-500" },
+  { href: "/dashboard/areas-comunes", icon: Home, label: "Instalaciones", desc: "Reservar espacios", colorKey: "bg-purple-500" },
+  { href: "/dashboard/encomiendas", icon: Package, label: "Encomiendas", desc: "Recibir paquetes", colorKey: "bg-blue-600" },
 ]
 
 export default async function DashboardPage() {
@@ -140,7 +156,7 @@ export default async function DashboardPage() {
             {adminMenuItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full hover:shadow-md hover:border-primary/50">
-                  <div className={`h-10 w-10 ${item.color} rounded-lg flex items-center justify-center shadow-lg`}>
+                  <div className={`h-10 w-10 ${getColorClass(item.colorKey)} rounded-lg flex items-center justify-center shadow-lg`}>
                     <item.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -173,7 +189,7 @@ export default async function DashboardPage() {
                 {ownerMenuItems.map((item) => (
                   <Link key={item.href} href={item.href}>
                     <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer h-full text-center group hover:shadow-md hover:border-primary/50">
-                      <div className={`h-10 w-10 mx-auto ${item.color} rounded-lg flex items-center justify-center shadow-lg transition`}>
+                      <div className={`h-10 w-10 mx-auto ${getColorClass(item.colorKey)} rounded-lg flex items-center justify-center shadow-lg transition`}>
                         <item.icon className="h-6 w-6 text-white" />
                       </div>
                       <div>
