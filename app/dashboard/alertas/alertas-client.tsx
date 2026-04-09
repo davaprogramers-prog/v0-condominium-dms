@@ -59,7 +59,7 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" />Nueva Alerta</Button>
             </DialogTrigger>
-            <DialogContent className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <DialogContent>
               <DialogHeader><DialogTitle>Crear Alerta</DialogTitle></DialogHeader>
               <form
                 action={async (fd) => {
@@ -178,7 +178,7 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
 
                   {/* Edit Dialog */}
                   <Dialog open={editOpen === alert.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                    <DialogContent className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                    <DialogContent>
                       <DialogHeader><DialogTitle>Editar Alerta</DialogTitle></DialogHeader>
                       <form
                         action={async (fd) => {
