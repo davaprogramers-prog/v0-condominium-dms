@@ -179,16 +179,16 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
           Subir Comprobante
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Subir Comprobante de Pago</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Subir Comprobante de Pago</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">
             Sube una foto o captura del comprobante de transferencia, depósito o cheque
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="receipt">Archivo (Imagen o PDF) *</Label>
+            <Label htmlFor="receipt" className="text-slate-900 dark:text-slate-200">Archivo (Imagen o PDF) *</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="receipt"
@@ -197,21 +197,22 @@ export function PaymentUploadDialog({ condoId, houseId, currencySymbol }: Paymen
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 required
                 disabled={loading}
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Formatos: JPG, PNG, PDF | Máximo 10MB
             </p>
           </div>
 
           {file && (
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">Archivo seleccionado: {file.name}</p>
-              <p className="text-xs text-blue-700">Tamaño: {(file.size / 1024).toFixed(2)} KB</p>
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-300">Archivo seleccionado: {file.name}</p>
+              <p className="text-xs text-blue-700 dark:text-blue-400">Tamaño: {(file.size / 1024).toFixed(2)} KB</p>
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={!file || loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={!file || loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Subir Comprobante
           </Button>
