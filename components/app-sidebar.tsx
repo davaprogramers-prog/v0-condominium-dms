@@ -52,22 +52,22 @@ import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
 const iconColorMap: Record<string, string> = {
-  "dashboard": "#3B82F6",      // Azul
-  "usuarios": "#A855F7",       // Púrpura  
-  "gastos": "#F97316",         // Naranja
-  "ingresos": "#22C55E",       // Verde
-  "propietarios": "#EC4899",   // Rosa
-  "reportes": "#06B6D4",       // Cyan
-  "documentos": "#F59E0B",     // Ámbar
-  "encuestas": "#6366F1",      // Índigo
-  "balance": "#10B981",        // Esmeralda
-  "alertas": "#EF4444",        // Rojo
-  "areas-comunes": "#A855F7",  // Púrpura
-  "mi-casa": "#3B82F6",        // Azul
-  "cartolas": "#06B6D4",       // Cyan
-  "proyectos": "#F59E0B",      // Ámbar
-  "configuracion": "#6B7280",  // Gris
-  "visitas": "#EC4899",        // Rosa
+  "dashboard": "#60A5FA",      // Azul brillante
+  "usuarios": "#D946EF",       // Púrpura vibrante  
+  "gastos": "#FF8C42",         // Naranja fuerte
+  "ingresos": "#34D399",       // Verde brillante
+  "propietarios": "#F472B6",   // Rosa vibrante
+  "reportes": "#22D3EE",       // Cyan brillante
+  "documentos": "#FBBF24",     // Ámbar brillante
+  "encuestas": "#818CF8",      // Índigo brillante
+  "balance": "#1ECB7F",        // Esmeralda vibrante
+  "alertas": "#F87171",        // Rojo brillante
+  "areas-comunes": "#D946EF",  // Púrpura vibrante
+  "mi-casa": "#60A5FA",        // Azul brillante
+  "cartolas": "#22D3EE",       // Cyan brillante
+  "proyectos": "#FBBF24",      // Ámbar brillante
+  "configuracion": "#A78BFA",  // Púrpura claro
+  "visitas": "#F472B6",        // Rosa vibrante
 }
 
 const adminMenuItems = [
@@ -263,7 +263,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarContent>
         {menuSections.map((section) => (
           <SidebarGroup key={section.section}>
-            <SidebarGroupLabel className="text-slate-700 dark:text-slate-300">{section.section}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-slate-400 dark:text-slate-100 font-semibold">{section.section}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
@@ -275,7 +275,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                       <SidebarMenuButton 
                         asChild 
                         isActive={pathname === item.href}
-                        className="hover:bg-white/50 dark:hover:bg-slate-700/50"
+                        className="text-slate-300 dark:text-slate-100 hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
                       >
                         <Link href={item.href} onClick={handleNavClick}>
                           <IconComponent className="h-4 w-4" style={{ color: iconColor }} />
