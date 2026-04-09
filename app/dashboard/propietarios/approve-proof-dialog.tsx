@@ -210,9 +210,9 @@ export function ApproveProofDialog({
           Revisar Comprobante
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
             Revisar Comprobante de Pago
             {!isGastosComunes && (
               <Badge variant="destructive" className="text-xs">
@@ -221,83 +221,84 @@ export function ApproveProofDialog({
               </Badge>
             )}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">
             Casa #{house.house_number} - {house.owner_name}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
 
           {/* Payment Type Badge */}
-          <div className={`p-2 rounded-lg text-center text-sm font-medium ${isGastosComunes ? "bg-blue-50 text-blue-700" : "bg-red-50 text-red-700"}`}>
+          <div className={`p-2 rounded-lg text-center text-sm font-medium ${isGastosComunes ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"}`}>
             {isGastosComunes ? "Comprobante de Gastos Comunes" : "Comprobante de Pago de Multas"}
           </div>
 
           {/* Receipt Image */}
           <div className="space-y-2">
-            <Label>Comprobante Enviado</Label>
+            <Label className="text-slate-900 dark:text-slate-200">Comprobante Enviado</Label>
             {proof.receipt_url && (
               <div className="relative">
                 <img
                   src={proof.receipt_url}
                   alt="Comprobante"
-                  className="w-full max-h-48 object-contain rounded-lg border bg-muted"
+                  className="w-full max-h-48 object-contain rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800"
+                  crossOrigin="anonymous"
                 />
                 <a
                   href={proof.receipt_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute top-2 right-2 p-2 rounded-lg bg-background/80 hover:bg-background transition-colors"
+                  className="absolute top-2 right-2 p-2 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                   title="Ver en pantalla completa"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                 </a>
               </div>
             )}
             {proof.notes && (
-              <p className="text-sm text-muted-foreground">Nota: {proof.notes}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Nota: {proof.notes}</p>
             )}
           </div>
 
           {/* Amount Summary */}
-          <div className={`p-3 rounded-lg space-y-1 ${isGastosComunes ? "bg-muted/50" : "bg-red-50"}`}>
+          <div className={`p-3 rounded-lg space-y-1 ${isGastosComunes ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100" : "bg-red-50 dark:bg-red-900/20 text-slate-900 dark:text-slate-100"}`}>
             {isGastosComunes ? (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gasto Fijo</span>
-                  <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Gasto Fijo</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gasto Variable</span>
-                  <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Gasto Variable</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-sm font-medium text-red-700 mb-2">Multas Incluidas:</p>
+                <p className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">Multas Incluidas:</p>
                 {infractions.length > 0 ? (
                   infractions.map((inf: any) => (
                     <div key={inf.id} className="flex justify-between text-sm">
-                      <span className="text-red-600">{inf.description || inf.infraction_type}</span>
-                      <span className="text-red-700">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
+                      <span className="text-red-600 dark:text-red-400">{inf.description || inf.infraction_type}</span>
+                      <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
                     </div>
                   ))
                 ) : (
                   <div className="flex justify-between text-sm">
-                    <span className="text-red-600">Multas</span>
-                    <span className="text-red-700">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
+                    <span className="text-red-600 dark:text-red-400">Multas</span>
+                    <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
                   </div>
                 )}
               </>
             )}
-            <div className="flex justify-between font-medium pt-1 border-t">
-              <span>Total</span>
-              <span className={isGastosComunes ? "text-primary" : "text-red-700"}>
+            <div className="flex justify-between font-medium pt-1 border-t border-slate-300 dark:border-slate-600">
+              <span className="text-slate-900 dark:text-white">Total</span>
+              <span className={isGastosComunes ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
               </span>
             </div>
@@ -306,7 +307,7 @@ export function ApproveProofDialog({
           {/* Approve Button */}
           <Button
             onClick={handleApprove}
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
             disabled={loading}
           >
             {loading && action === "approve" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -315,20 +316,19 @@ export function ApproveProofDialog({
           </Button>
 
           {/* Reject Form */}
-          <div className="pt-3 border-t">
+          <div className="pt-3 border-t border-slate-300 dark:border-slate-600">
             <form onSubmit={handleReject} className="space-y-2">
-              <Label htmlFor="rejection_reason" className="text-sm">Motivo de Rechazo (opcional)</Label>
+              <Label htmlFor="rejection_reason" className="text-sm text-slate-900 dark:text-slate-200">Motivo de Rechazo (opcional)</Label>
               <Textarea
                 id="rejection_reason"
                 name="rejection_reason"
                 placeholder="Ej: Monto no coincide, imagen ilegible..."
                 rows={2}
-                className="text-sm"
+                className="text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
               <Button
                 type="submit"
-                variant="destructive"
-                className="w-full"
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
                 disabled={loading}
               >
                 {loading && action === "reject" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
