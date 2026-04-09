@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
 const colorMap: Record<string, { bg: string; }> = {
-  "bg-blue-500": { bg: "rgb(59, 130, 246)" },
-  "bg-purple-500": { bg: "rgb(168, 85, 247)" },
-  "bg-orange-500": { bg: "rgb(249, 115, 22)" },
-  "bg-green-500": { bg: "rgb(34, 197, 94)" },
-  "bg-pink-500": { bg: "rgb(236, 72, 153)" },
-  "bg-cyan-500": { bg: "rgb(6, 182, 212)" },
-  "bg-amber-500": { bg: "rgb(245, 158, 11)" },
-  "bg-indigo-500": { bg: "rgb(99, 102, 241)" },
-  "bg-emerald-500": { bg: "rgb(16, 185, 129)" },
-  "bg-red-500": { bg: "rgb(239, 68, 68)" },
-  "bg-blue-600": { bg: "rgb(37, 99, 235)" },
+  "bg-blue-500": { bg: "#3B82F6" },
+  "bg-purple-500": { bg: "#A855F7" },
+  "bg-orange-500": { bg: "#F97316" },
+  "bg-green-500": { bg: "#22C55E" },
+  "bg-pink-500": { bg: "#EC4899" },
+  "bg-cyan-500": { bg: "#06B6D4" },
+  "bg-amber-500": { bg: "#F59E0B" },
+  "bg-indigo-500": { bg: "#6366F1" },
+  "bg-emerald-500": { bg: "#10B981" },
+  "bg-red-500": { bg: "#EF4444" },
+  "bg-blue-600": { bg: "#2563EB" },
 }
 
 const getColorStyle = (colorKey: string) => colorMap[colorKey] || { bg: "rgb(59, 130, 246)" }
