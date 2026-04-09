@@ -4,21 +4,21 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
 
-const colorMap: Record<string, string> = {
-  "bg-blue-500": "bg-blue-500",
-  "bg-purple-500": "bg-purple-500",
-  "bg-orange-500": "bg-orange-500",
-  "bg-green-500": "bg-green-500",
-  "bg-pink-500": "bg-pink-500",
-  "bg-cyan-500": "bg-cyan-500",
-  "bg-amber-500": "bg-amber-500",
-  "bg-indigo-500": "bg-indigo-500",
-  "bg-emerald-500": "bg-emerald-500",
-  "bg-red-500": "bg-red-500",
-  "bg-blue-600": "bg-blue-600",
+const colorMap: Record<string, { bg: string; }> = {
+  "bg-blue-500": { bg: "rgb(59, 130, 246)" },
+  "bg-purple-500": { bg: "rgb(168, 85, 247)" },
+  "bg-orange-500": { bg: "rgb(249, 115, 22)" },
+  "bg-green-500": { bg: "rgb(34, 197, 94)" },
+  "bg-pink-500": { bg: "rgb(236, 72, 153)" },
+  "bg-cyan-500": { bg: "rgb(6, 182, 212)" },
+  "bg-amber-500": { bg: "rgb(245, 158, 11)" },
+  "bg-indigo-500": { bg: "rgb(99, 102, 241)" },
+  "bg-emerald-500": { bg: "rgb(16, 185, 129)" },
+  "bg-red-500": { bg: "rgb(239, 68, 68)" },
+  "bg-blue-600": { bg: "rgb(37, 99, 235)" },
 }
 
-const getColorClass = (colorKey: string) => colorMap[colorKey] || "bg-primary"
+const getColorStyle = (colorKey: string) => colorMap[colorKey] || { bg: "rgb(59, 130, 246)" }
 
 const adminMenuItems = [
   { href: "/dashboard/casas", icon: Home, label: "Casas", desc: "Gestión de propiedades", colorKey: "bg-blue-500" },
@@ -165,7 +165,10 @@ export default async function DashboardPage() {
             {adminMenuItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full hover:shadow-md hover:border-primary/50">
-                  <div className={`h-10 w-10 ${getColorClass(item.colorKey)} rounded-lg flex items-center justify-center shadow-lg`}>
+                  <div 
+                    className="h-10 w-10 rounded-lg flex items-center justify-center shadow-lg"
+                    style={{ backgroundColor: getColorStyle(item.colorKey).bg }}
+                  >
                     <item.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -198,7 +201,10 @@ export default async function DashboardPage() {
                 {ownerMenuItems.map((item) => (
                   <Link key={item.href} href={item.href}>
                     <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer h-full text-center group hover:shadow-md hover:border-primary/50">
-                      <div className={`h-10 w-10 mx-auto ${getColorClass(item.colorKey)} rounded-lg flex items-center justify-center shadow-lg transition`}>
+                      <div 
+                        className="h-10 w-10 mx-auto rounded-lg flex items-center justify-center shadow-lg transition"
+                        style={{ backgroundColor: getColorStyle(item.colorKey).bg }}
+                      >
                         <item.icon className="h-6 w-6 text-white" />
                       </div>
                       <div>
