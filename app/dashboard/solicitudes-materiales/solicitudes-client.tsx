@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react'
+import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ interface SolicitudesClientProps {
 export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRole }: SolicitudesClientProps) {
   const [openCreate, setOpenCreate] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [expandedRequest, setExpandedRequest] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     request_title: '',
     requested_by_name: '',
@@ -275,11 +276,21 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
               </Card>
             ) : (
               solicitudes.map((request) => (
-                <Card key={request.id} className="overflow-hidden">
-                  <CardHeader className="pb-3">
+                <Card key={request.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
+                  <CardHeader 
+                    className="pb-3 hover:bg-muted/50 transition-colors"
+                    onClick={() => setExpandedRequest(expandedRequest === request.id ? null : request.id)}
+                  >
                     <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{request.request_title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{request.request_title}</CardTitle>
+                          {expandedRequest === request.id ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground mt-1">
                           {new Date(request.created_at).toLocaleDateString('es-CL')}
                         </p>
@@ -292,8 +303,10 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+
+                  {expandedRequest === request.id && (
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
                       <div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
@@ -392,6 +405,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       </div>
                     </div>
                   </CardContent>
+                  )}
                 </Card>
               ))
             )}
