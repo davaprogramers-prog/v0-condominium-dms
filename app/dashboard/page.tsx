@@ -43,9 +43,18 @@ const ownerMenuItems = [
 export default async function DashboardPage() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    if (!user) return null
+    if (userError || !user) {
+      return (
+        <div className="space-y-6">
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
+            <h1 className="text-xl font-bold text-destructive mb-2">Error de Autenticación</h1>
+            <p className="text-muted-foreground">No se pudo verificar tu sesión. Por favor, inicia sesión nuevamente.</p>
+          </div>
+        </div>
+      )
+    }
 
     // Get profile to check role - with proper error handling
     let profile: any = null
@@ -210,7 +219,7 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
           <h1 className="text-xl font-bold text-destructive mb-2">Error</h1>
-          <p className="text-muted-foreground">Ocurrió un error al cargar el dashboard. Por favor, intenta nuevamente.</p>
+          <p className="text-muted-foreground">Ocurrió un error al cargar el dashboard. Por favor, intenta nuevamente más tarde.</p>
         </div>
       </div>
     )
