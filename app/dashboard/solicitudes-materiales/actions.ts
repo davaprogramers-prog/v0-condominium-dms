@@ -12,10 +12,12 @@ export async function createMaterialRequest(condoId: string, data: any) {
       return { error: "No autenticado" }
     }
 
-    // Format items as description
-    const itemsDescription = data.items
-      .map((item: any) => `${item.quantity} - ${item.description}`)
-      .join('\n')
+    // Format items as description with requested_by_name at the top
+    const itemsDescription = `Solicitado por: ${data.requested_by_name}\n\n${
+      data.items
+        .map((item: any) => `${item.quantity} - ${item.description}`)
+        .join('\n')
+    }`
 
     const { error } = await supabase
       .from("supply_requests")
@@ -56,9 +58,11 @@ export async function updateMaterialRequest(id: string, data: any) {
       return { error: "No autenticado" }
     }
 
-    const itemsDescription = data.items
-      .map((item: any) => `${item.quantity} - ${item.description}`)
-      .join('\n')
+    const itemsDescription = `Solicitado por: ${data.requested_by_name}\n\n${
+      data.items
+        .map((item: any) => `${item.quantity} - ${item.description}`)
+        .join('\n')
+    }`
 
     const { error } = await supabase
       .from("supply_requests")

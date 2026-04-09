@@ -26,6 +26,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     request_title: '',
+    requested_by_name: '',
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -72,6 +73,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
       }
       setFormData({
         request_title: '',
+        requested_by_name: '',
         items: [{ quantity: '', description: '' }],
       })
       setOpenCreate(false)
@@ -84,9 +86,21 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
 
   const handleEdit = (request: any) => {
     // Parse items from request_description
-    const itemsText = request.request_description?.split('\n') || []
+    const lines = request.request_description?.split('\n') || []
+    
+    // Extract requested_by_name from first line
+    let requested_by_name = ''
+    let itemsText = []
+    
+    lines.forEach((line: string) => {
+      if (line.includes('Solicitado por:')) {
+        requested_by_name = line.replace('Solicitado por: ', '').trim()
+      } else if (line.trim() !== '') {
+        itemsText.push(line)
+      }
+    })
+    
     const items = itemsText
-      .filter((line: string) => line.trim())
       .map((line: string) => {
         const [qty, desc] = line.split(' - ')
         return { quantity: qty?.trim() || '', description: desc?.trim() || '' }
@@ -94,6 +108,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     
     setFormData({
       request_title: request.request_title,
+      requested_by_name,
       items: items.length > 0 ? items : [{ quantity: '', description: '' }],
     })
     setEditingId(request.id)
@@ -166,6 +181,32 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       placeholder="Ej: Compras supermercado"
                       required
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="requested_by">Solicitado por *</Label>
+                    <div className="flex gap-2">
+                      <Select value={formData.requested_by_name} onValueChange={(val) => setFormData({ ...formData, requested_by_name: val })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar persona..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {staff.map(member => (
+                            <SelectItem key={member.id} value={member.name}>
+                              {member.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="requested_by"
+                        value={formData.requested_by_name}
+                        onChange={(e) => setFormData({ ...formData, requested_by_name: e.target.value })}
+                        placeholder="Escribir nombre"
+                        required
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -275,6 +316,8 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                             <tbody>
                               {request.request_description?.split('\n').map((line: string, idx: number) => {
                                 if (!line.trim()) return null
+                                // Skip the "Solicitado por:" line
+                                if (line.includes('Solicitado por:')) return null
                                 const [qty, desc] = line.split(' - ')
                                 return (
                                   <tr key={idx} className="border-b last:border-b-0">
@@ -286,6 +329,19 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                             </tbody>
                           </table>
                         </div>
+                      </div>
+
+                      <div className="pt-2 pb-4 border-b">
+                        <p className="text-sm text-muted-foreground">
+                          {request.request_description
+                            ?.split('\n')[0]
+                            ?.replace('Solicitado por: ', '') && (
+                            <>
+                              <span className="font-medium">Solicitado por: </span>
+                              {request.request_description?.split('\n')[0]?.replace('Solicitado por: ', '')}
+                            </>
+                          )}
+                        </p>
                       </div>
 
                       <div className="flex gap-2 pt-4 border-t flex-wrap">
