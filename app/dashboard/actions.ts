@@ -366,8 +366,12 @@ export async function createProject(formData: FormData) {
     })
     
     if (error) {
-      console.error("Supabase error:", error)
-      // RLS issue - just proceed anyway, may be disabled
+      console.error("Error creating project:", error)
+      // Handle specific error codes
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para crear proyectos. Contacta al administrador del sistema.")
+      }
+      throw new Error(error.message || "Error al crear el proyecto")
     }
     
     revalidatePath("/dashboard/proyectos")
