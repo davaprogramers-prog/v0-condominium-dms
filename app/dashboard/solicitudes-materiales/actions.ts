@@ -27,6 +27,8 @@ export async function createMaterialRequest(condoId: string, data: any) {
           request_description: itemsDescription,
           request_category: "supplies",
           quantity: data.items.length,
+          unit_price: 0,
+          estimated_cost: 0,
           priority: "normal",
           status: "pending",
         },
