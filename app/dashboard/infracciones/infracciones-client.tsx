@@ -177,23 +177,23 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="outline" size="sm" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="dark:bg-slate-800 dark:text-white">
                               {!inf.is_paid && (
-                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)}>
+                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <CheckCircle className="h-4 w-4 mr-2" />Marcar pagada
                                 </DropdownMenuItem>
                               )}
                               {!inf.is_paid && (
-                                <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)}>
+                                <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <Edit2 className="h-4 w-4 mr-2" />Editar
                                 </DropdownMenuItem>
                               )}
                               {!inf.is_paid ? (
-                                <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive">
+                                <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive dark:focus:bg-slate-700">
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               ) : null}
