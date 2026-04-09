@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { createCommonArea, updateCommonArea, deleteCommonArea } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -64,10 +63,10 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Area</Button>
+              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Área</Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Registrar Area Comun</DialogTitle></DialogHeader>
+            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+              <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Registrar Área Común</DialogTitle></DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("photo_url", photoUrl)
@@ -80,32 +79,32 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="area_name">Nombre</Label>
-                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required />
+                  <Label htmlFor="area_name" className="text-slate-900 dark:text-slate-200">Nombre</Label>
+                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="area_desc">Descripcion</Label>
-                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." />
+                  <Label htmlFor="area_desc" className="text-slate-900 dark:text-slate-200">Descripción</Label>
+                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Foto</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Foto</Label>
                   <FileUpload bucket="projects" folder="areas" onUpload={setPhotoUrl} label="Subir foto" />
                 </div>
                 <div className="flex items-center gap-3">
                   <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
-                  <Label htmlFor="is_paid_area">Uso pagado</Label>
+                  <Label htmlFor="is_paid_area" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                 </div>
                 {isPaid && (
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="usage_fee">Tarifa de uso ({currencySymbol})</Label>
-                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" />
+                    <Label htmlFor="usage_fee" className="text-slate-900 dark:text-slate-200">Tarifa de uso ({currencySymbol})</Label>
+                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                   </div>
                 )}
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="maintenance_responsible">Responsable de mantenimiento</Label>
-                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" />
+                  <Label htmlFor="maintenance_responsible" className="text-slate-900 dark:text-slate-200">Responsable de mantenimiento</Label>
+                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
-                <Button type="submit">Guardar Area</Button>
+                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Área</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -113,65 +112,75 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       </div>
 
       {areas.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
-            <MapPin className="h-10 w-10" />
-            <p>No hay areas comunes registradas</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-12 text-center text-slate-300">
+          <MapPin className="h-10 w-10 mx-auto mb-2" />
+          <p>No hay areas comunes registradas</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {areas.map((area) => (
-            <Card key={area.id as string}>
-              {area.photo_url ? (
-                <div className="aspect-video overflow-hidden rounded-t-lg">
-                  <img
-                    src={area.photo_url as string}
-                    alt={area.name as string}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </div>
-              ) : null}
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{area.name as string}</CardTitle>
-                  <Badge variant={area.is_paid ? "default" : "secondary"}>
-                    {area.is_paid ? "Pagado" : "Gratis"}
-                  </Badge>
-                </div>
-                {area.description ? <CardDescription>{area.description as string}</CardDescription> : null}
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 text-sm">
-                {area.is_paid && area.usage_fee ? (
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span>Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
-                  </div>
-                ) : null}
-                {area.maintenance_responsible ? (
-                  <div className="flex items-center gap-2">
-                    <Wrench className="h-4 w-4 text-muted-foreground" />
-                    <span>Mantenimiento: {area.maintenance_responsible as string}</span>
+            <div key={area.id as string} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col gap-4">
+                {/* Foto del área */}
+                {area.photo_url ? (
+                  <div className="aspect-video overflow-hidden rounded-lg">
+                    <img
+                      src={area.photo_url as string}
+                      alt={area.name as string}
+                      className="h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                    />
                   </div>
                 ) : null}
 
+                {/* Nombre y estado */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase text-slate-300">Área</p>
+                    <h3 className="text-xl font-bold text-white">{area.name as string}</h3>
+                  </div>
+                  <Badge variant={area.is_paid ? "default" : "secondary"} className="text-xs">
+                    {area.is_paid ? "Pagado" : "Gratis"}
+                  </Badge>
+                </div>
+
+                {/* Descripción */}
+                {area.description ? 
+                  <p className="text-sm text-slate-200">{area.description as string}</p> 
+                : null}
+
+                {/* Información de tarifa */}
+                {area.is_paid && area.usage_fee ? (
+                  <div className="flex items-center gap-2 text-slate-200">
+                    <DollarSign className="h-4 w-4" />
+                    <span className="text-sm">Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
+                  </div>
+                ) : null}
+
+                {/* Responsable de mantenimiento */}
+                {area.maintenance_responsible ? (
+                  <div className="flex items-center gap-2 text-slate-200">
+                    <Wrench className="h-4 w-4" />
+                    <span className="text-sm">Mant.: {area.maintenance_responsible as string}</span>
+                  </div>
+                ) : null}
+
+                {/* Botones de acciones */}
                 {isAdmin && (
-                  <div className="mt-3 flex gap-2 pt-3 border-t">
+                  <div className="flex gap-2 pt-3 border-t border-slate-600">
                     <Dialog open={openEdit === area.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                       <DialogTrigger asChild>
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="flex-1"
+                          className="flex-1 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300"
                           onClick={() => handleEditClick(area)}
                         >
-                          <Edit2 className="h-4 w-4 mr-1" />
+                          <Edit2 className="h-4 w-4 mr-1" style={{ color: "#64748b" }} />
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader><DialogTitle>Editar Area Comun</DialogTitle></DialogHeader>
+                      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                        <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Editar Área Común</DialogTitle></DialogHeader>
                         <form
                           action={async (fd) => {
                             await handleEditSubmit(fd, area.id as string)
@@ -179,24 +188,26 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           className="flex flex-col gap-4"
                         >
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_name">Nombre</Label>
+                            <Label htmlFor="edit_name" className="text-slate-900 dark:text-slate-200">Nombre</Label>
                             <Input
                               id="edit_name"
                               name="name"
                               defaultValue={area.name as string}
                               required
+                              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_desc">Descripcion</Label>
+                            <Label htmlFor="edit_desc" className="text-slate-900 dark:text-slate-200">Descripción</Label>
                             <Textarea
                               id="edit_desc"
                               name="description"
                               defaultValue={(area.description as string) || ""}
+                              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label>Foto</Label>
+                            <Label className="text-slate-900 dark:text-slate-200">Foto</Label>
                             <FileUpload
                               bucket="projects"
                               folder="areas"
@@ -210,49 +221,51 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               checked={editIsPaid}
                               onCheckedChange={setEditIsPaid}
                             />
-                            <Label htmlFor="edit_is_paid">Uso pagado</Label>
+                            <Label htmlFor="edit_is_paid" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                           </div>
                           {editIsPaid && (
                             <div className="flex flex-col gap-2">
-                              <Label htmlFor="edit_usage_fee">Tarifa de uso ({currencySymbol})</Label>
+                              <Label htmlFor="edit_usage_fee" className="text-slate-900 dark:text-slate-200">Tarifa de uso ({currencySymbol})</Label>
                               <Input
                                 id="edit_usage_fee"
                                 name="usage_fee"
                                 type="number"
                                 step="0.01"
                                 defaultValue={(area.usage_fee as number) || 0}
+                                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                               />
                             </div>
                           )}
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_maintenance">Responsable de mantenimiento</Label>
+                            <Label htmlFor="edit_maintenance" className="text-slate-900 dark:text-slate-200">Responsable de mantenimiento</Label>
                             <Input
                               id="edit_maintenance"
                               name="maintenance_responsible"
                               defaultValue={(area.maintenance_responsible as string) || ""}
+                              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                             />
                           </div>
-                          <Button type="submit">Guardar Cambios</Button>
+                          <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                         </form>
                       </DialogContent>
                     </Dialog>
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" className="flex-1">
+                        <Button size="sm" className="flex-1 bg-destructive hover:bg-destructive/90 text-white">
                           <Trash2 className="h-4 w-4 mr-1" />
                           Eliminar
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Eliminar Area Comun</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar Área Común</AlertDialogTitle>
+                          <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
                             {"¿Estás seguro de que deseas eliminar \"" + (area.name as string) + "\"? Esta acción no puede deshacerse."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 justify-end">
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogCancel className="text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteClick(area.id as string)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -264,8 +277,8 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     </AlertDialog>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
