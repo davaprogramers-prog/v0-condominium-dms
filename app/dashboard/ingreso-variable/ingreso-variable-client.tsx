@@ -78,11 +78,11 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nuevo Ingreso</Button>
+              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Ingreso</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
-                <DialogTitle>Registrar Ingreso Variable</DialogTitle>
+                <DialogTitle className="text-slate-900 dark:text-white">Registrar Ingreso Variable</DialogTitle>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -94,28 +94,28 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripcion</Label>
-                  <Input id="description" name="description" placeholder="Descripcion del ingreso" required />
+                  <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
+                  <Input id="description" name="description" placeholder="Descripcion del ingreso" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="amount">Monto</Label>
-                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required />
+                    <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto</Label>
+                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="income_date">Fecha</Label>
-                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                    <Label htmlFor="income_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="source">Fuente / Origen</Label>
-                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." />
+                  <Label htmlFor="source" className="text-slate-900 dark:text-slate-200">Fuente / Origen</Label>
+                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Respaldo</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Respaldo</Label>
                   <FileUpload bucket="receipts" onUpload={setReceiptUrl} label="Subir comprobante" />
                 </div>
-                <Button type="submit">Guardar Ingreso</Button>
+                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Ingreso</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -209,15 +209,15 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
 
       {/* Image Modal */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden">
-          <DialogHeader className="p-4 pb-2">
+        <DialogContent className="max-w-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+          <DialogHeader className="p-4 pb-2 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg">Comprobante - {selectedImage?.title}</DialogTitle>
+              <DialogTitle className="text-lg text-slate-900 dark:text-white">Comprobante - {selectedImage?.title}</DialogTitle>
               <a
                 href={selectedImage?.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                 title="Abrir en nueva pestaña"
               >
                 <ExternalLink className="h-4 w-4" />
@@ -229,7 +229,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
               <img
                 src={selectedImage.url}
                 alt={`Comprobante de ${selectedImage.title}`}
-                className="w-full h-auto max-h-[70vh] object-contain rounded-lg border"
+                className="w-full h-auto max-h-[70vh] object-contain rounded-lg border-2 border-slate-300 dark:border-slate-600"
                 crossOrigin="anonymous"
               />
             )}
