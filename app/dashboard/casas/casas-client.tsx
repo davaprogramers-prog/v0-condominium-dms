@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Home, Pencil } from "lucide-react"
 
@@ -115,47 +114,65 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               <p>No hay casas registradas</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Numero</TableHead>
-                    <TableHead>Propietario</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Vencimiento</TableHead>
-                    <TableHead>Estado</TableHead>
-                    {isAdmin && <TableHead className="w-12" />}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {houses.map((house) => (
-                    <TableRow key={house.id as string}>
-                      <TableCell className="font-medium">{house.house_number as string}</TableCell>
-                      <TableCell>{(house.owner_name as string) || "-"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{(house.owner_email as string) || "-"}</TableCell>
-                      <TableCell>
-                        {house.payment_deadline_day ? `Día ${house.payment_deadline_day}` : "Día 5"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={house.is_active !== false ? "default" : "secondary"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {houses.map((house, index) => {
+                const colors = [
+                  { bg: "from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30", border: "border-blue-400", title: "text-blue-900 dark:text-blue-200", text: "text-blue-700 dark:text-blue-300", badge: "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" },
+                  { bg: "from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30", border: "border-purple-400", title: "text-purple-900 dark:text-purple-200", text: "text-purple-700 dark:text-purple-300", badge: "bg-purple-200 dark:bg-purple-900 text-purple-900 dark:text-purple-200" },
+                  { bg: "from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/30", border: "border-green-400", title: "text-green-900 dark:text-green-200", text: "text-green-700 dark:text-green-300", badge: "bg-green-200 dark:bg-green-900 text-green-900 dark:text-green-200" },
+                  { bg: "from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/30", border: "border-orange-400", title: "text-orange-900 dark:text-orange-200", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-200 dark:bg-orange-900 text-orange-900 dark:text-orange-200" },
+                  { bg: "from-cyan-50 to-cyan-100 dark:from-cyan-950/30 dark:to-cyan-900/30", border: "border-cyan-400", title: "text-cyan-900 dark:text-cyan-200", text: "text-cyan-700 dark:text-cyan-300", badge: "bg-cyan-200 dark:bg-cyan-900 text-cyan-900 dark:text-cyan-200" },
+                  { bg: "from-pink-50 to-pink-100 dark:from-pink-950/30 dark:to-pink-900/30", border: "border-pink-400", title: "text-pink-900 dark:text-pink-200", text: "text-pink-700 dark:text-pink-300", badge: "bg-pink-200 dark:bg-pink-900 text-pink-900 dark:text-pink-200" },
+                ]
+                const color = colors[index % colors.length]
+                
+                return (
+                  <div key={house.id as string} className={`rounded-lg border-2 bg-gradient-to-br ${color.bg} ${color.border} p-4 hover:shadow-md transition-shadow`}>
+                    <div className="flex flex-col gap-4">
+                      {/* Header with number and status */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className={`text-sm font-semibold ${color.text}`}>Casa</p>
+                          <h3 className={`text-2xl font-bold ${color.title}`}>#{house.house_number as string}</h3>
+                        </div>
+                        <Badge className={`${color.badge} border-0`}>
                           {house.is_active !== false ? "Activa" : "Inactiva"}
                         </Badge>
-                      </TableCell>
+                      </div>
+
+                      {/* Owner information */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Propietario</p>
+                        <p className={`font-semibold ${color.title}`}>{(house.owner_name as string) || "-"}</p>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Email</p>
+                        <p className={`text-sm truncate ${color.title}`}>{(house.owner_email as string) || "-"}</p>
+                      </div>
+
+                      {/* Payment deadline */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Vencimiento</p>
+                        <p className={`font-semibold ${color.title}`}>Día {house.payment_deadline_day as number || 5}</p>
+                      </div>
+
+                      {/* Actions */}
                       {isAdmin && (
-                        <TableCell>
-                          <button
-                            type="button"
-                            onClick={() => setEditHouse(house)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                        </TableCell>
+                        <button
+                          type="button"
+                          onClick={() => setEditHouse(house)}
+                          className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${color.badge} hover:opacity-80 transition-opacity`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Editar
+                        </button>
                       )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </CardContent>
