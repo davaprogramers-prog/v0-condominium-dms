@@ -129,30 +129,31 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           Agregar Gasto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Registrar Nuevo Gasto</DialogTitle>
-          <DialogDescription>Agrega un gasto del condominio con la boleta/factura</DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Registrar Nuevo Gasto</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">Agrega un gasto del condominio con la boleta/factura</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Título del Gasto *</Label>
+              <Label htmlFor="title" className="text-slate-900 dark:text-slate-200">Título del Gasto *</Label>
               <Input
                 id="title"
                 name="title"
                 placeholder="Ej: Limpieza áreas comunes"
                 required
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto (CLP) *</Label>
+              <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -160,29 +161,31 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 step="0.01"
                 placeholder="0.00"
                 required
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción/Detalles</Label>
+            <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripción/Detalles</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Ej: Limpieza febrero - Rusbel"
               rows={2}
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Tipo de Gasto *</Label>
+              <Label htmlFor="category" className="text-slate-900 dark:text-slate-200">Tipo de Gasto *</Label>
               {expenseTypes.length > 0 ? (
                 <Select name="category" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                     <SelectValue placeholder="Seleccionar tipo..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="dark:bg-slate-800 dark:text-white">
                     {expenseTypes.map((type) => (
                       <SelectItem key={type.id} value={type.name}>
                         {type.name}
@@ -191,18 +194,19 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
-                  No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-primary underline">Crear tipos de gastos</a>
+                <div className="text-sm text-slate-600 dark:text-slate-400 p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800">
+                  No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-blue-600 dark:text-blue-400 underline">Crear tipos de gastos</a>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expenseDate">Fecha del Gasto</Label>
+              <Label htmlFor="expenseDate" className="text-slate-900 dark:text-slate-200">Fecha del Gasto</Label>
               <Input
                 id="expenseDate"
                 name="expenseDate"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
@@ -210,11 +214,11 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           {/* Logo Selector */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Logo del Proveedor</Label>
+              <Label className="text-slate-900 dark:text-slate-200">Logo del Proveedor</Label>
               {isSuperAdmin && (
                 <Link 
                   href="/dashboard/gastos/logos" 
-                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                 >
                   <Settings className="h-3 w-3" />
                   Gestionar logos
@@ -223,7 +227,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             </div>
             {expenseLogos.length > 0 ? (
               <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
-                <SelectTrigger>
+                <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                   <SelectValue placeholder="Seleccionar logo (opcional)">
                     {selectedLogoId && (
                       <div className="flex items-center gap-2">
@@ -239,10 +243,10 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-slate-800 dark:text-white">
                   <SelectItem value="none">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                      <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                       <span>Sin logo</span>
                     </div>
                   </SelectItem>
@@ -263,23 +267,23 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 </SelectContent>
               </Select>
             ) : (
-              <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
-                No hay logos. <Link href="/dashboard/gastos/logos" className="text-primary underline">Agregar logos</Link>
+              <div className="text-sm text-slate-600 dark:text-slate-400 p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800">
+                No hay logos. <Link href="/dashboard/gastos/logos" className="text-blue-600 dark:text-blue-400 underline">Agregar logos</Link>
               </div>
             )}
           </div>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label>Imagen de Boleta/Factura</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+            <Label className="text-slate-900 dark:text-slate-200">Imagen de Boleta/Factura</Label>
+            <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center bg-slate-50 dark:bg-slate-900">
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="max-h-40 max-w-full rounded"
+                      className="max-h-40 max-w-full rounded border-2 border-slate-300 dark:border-slate-600"
                     />
                     <button
                       type="button"
@@ -289,13 +293,13 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedFile?.name}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedFile?.name}</p>
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
+                    <Upload className="h-6 w-6 text-slate-400" />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -308,12 +312,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 </label>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Registrar Gasto
           </Button>
