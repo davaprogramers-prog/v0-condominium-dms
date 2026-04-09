@@ -1,22 +1,27 @@
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg">InteliCon</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="InteliCon Logo" 
+              width={150} 
+              height={50}
+              className="h-14 w-auto"
+              priority
+            />
           </div>
           <div className="flex items-center gap-3">
-            <a href="/auth/login" className="px-4 py-2 text-sm text-foreground hover:text-primary transition">
+            <a href="/auth/login" className="px-6 py-2.5 text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200">
               Iniciar Sesión
             </a>
-            <a href="/auth/registro" className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition">
+            <a href="/auth/registro" className="px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-lg shadow-md hover:shadow-lg hover:bg-primary/90 transition-all duration-200 transform hover:-translate-y-0.5">
               Registrarse
             </a>
           </div>
@@ -39,11 +44,11 @@ export default function Page() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a href="/auth/registro" className="group px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition flex items-center gap-2 font-medium">
+            <a href="/auth/registro" className="group px-8 py-3 bg-primary text-primary-foreground rounded-lg shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all duration-200 transform hover:-translate-y-1 flex items-center gap-2 font-semibold text-base">
               Comenzar ahora
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
             </a>
-            <a href="/auth/login" className="px-6 py-3 border border-border rounded-lg text-foreground hover:bg-secondary transition font-medium">
+            <a href="/auth/login" className="px-8 py-3 border-2 border-border text-foreground rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base">
               Ya tengo cuenta
             </a>
           </div>
@@ -108,7 +113,7 @@ export default function Page() {
         <div className="max-w-4xl mx-auto text-center space-y-8 bg-primary/5 border border-primary/20 rounded-2xl p-12">
           <h2 className="text-3xl font-bold text-foreground">¿Listo para transformar tu administración?</h2>
           <p className="text-lg text-muted-foreground">Únete a cientos de condominios que ya confían en InteliCon</p>
-          <a href="/auth/registro" className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition font-semibold">
+          <a href="/auth/registro" className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-base transform hover:-translate-y-1">
             Comenzar prueba gratuita
           </a>
         </div>
