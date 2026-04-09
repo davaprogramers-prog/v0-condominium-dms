@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { condoId: string } }
+  { params }: { params: Promise<{ condoId: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: "No autenticado" }, { status: 401 })
     }
 
-    const condoId = params.condoId
+    const { condoId } = await params
 
     const { data: houses, error } = await supabase
       .from("houses")
