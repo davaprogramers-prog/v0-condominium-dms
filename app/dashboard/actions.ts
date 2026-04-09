@@ -361,30 +361,6 @@ export async function updateExemption(id: string, formData: FormData) {
   revalidatePath("/dashboard/exoneraciones")
 }
 
-export async function updateExemptionType(id: string, formData: FormData) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("exemption_types").update({
-    name: formData.get("name") as string,
-    description: formData.get("description") as string || null,
-  }).eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/exoneraciones")
-}
-
-export async function deleteExemption(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("exemptions").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/exoneraciones")
-}
-
-export async function deleteExemptionType(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("exemption_types").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/exoneraciones")
-}
-
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
