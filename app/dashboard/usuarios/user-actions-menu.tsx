@@ -53,19 +53,19 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button size="sm" className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300">
+            <MoreHorizontal className="h-4 w-4" style={{ color: "#64748b" }} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+        <DropdownMenuContent align="end" className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)} className="dark:text-white">
             <Edit2 className="h-4 w-4 mr-2" />
             Editar
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowDeleteAlert(true)}
-            className="text-destructive"
+            className="text-destructive dark:text-red-400"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Eliminar
@@ -81,14 +81,14 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
       />
 
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar usuario</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
               ¿Estás seguro que deseas eliminar a {user.first_name} {user.last_name}? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleting}
