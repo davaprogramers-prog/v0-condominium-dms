@@ -51,7 +51,24 @@ import { signOut } from "@/app/auth/actions"
 import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
-const adminMenuItems = [
+const iconColorMap: Record<string, string> = {
+  "dashboard": "#3B82F6",      // Azul
+  "usuarios": "#A855F7",       // Púrpura  
+  "gastos": "#F97316",         // Naranja
+  "ingresos": "#22C55E",       // Verde
+  "propietarios": "#EC4899",   // Rosa
+  "reportes": "#06B6D4",       // Cyan
+  "documentos": "#F59E0B",     // Ámbar
+  "encuestas": "#6366F1",      // Índigo
+  "balance": "#10B981",        // Esmeralda
+  "alertas": "#EF4444",        // Rojo
+  "areas-comunes": "#A855F7",  // Púrpura
+  "mi-casa": "#3B82F6",        // Azul
+  "cartolas": "#06B6D4",       // Cyan
+  "proyectos": "#F59E0B",      // Ámbar
+  "configuracion": "#6B7280",  // Gris
+  "visitas": "#EC4899",        // Rosa
+}
   { 
     section: "Dashboard",
     items: [
@@ -255,8 +272,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     : ownerMenuItems
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b p-4">
+    <Sidebar className="bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+      <SidebarHeader className="border-b border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-4">
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
           {condo?.logo_url ? (
             <Image
@@ -306,19 +323,22 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarContent>
         {menuSections.map((section) => (
           <SidebarGroup key={section.section}>
-            <SidebarGroupLabel>{section.section}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-slate-700 dark:text-slate-300">{section.section}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
                   const IconComponent = item.icon
+                  const iconKey = item.href.split("/").pop() || "dashboard"
+                  const iconColor = iconColorMap[iconKey] || "#6B7280"
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton 
                         asChild 
                         isActive={pathname === item.href}
+                        className="hover:bg-white/50 dark:hover:bg-slate-700/50"
                       >
                         <Link href={item.href} onClick={handleNavClick}>
-                          <IconComponent className="h-4 w-4" />
+                          <IconComponent className="h-4 w-4" style={{ color: iconColor }} />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -333,16 +353,17 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         {/* Super Admin Section */}
         {isSuperAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Super Admin</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-slate-700 dark:text-slate-300">Super Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
                     isActive={pathname === "/admin"}
+                    className="hover:bg-white/50 dark:hover:bg-slate-700/50"
                   >
                     <Link href="/admin" onClick={handleNavClick}>
-                      <Key className="h-4 w-4" />
+                      <Key className="h-4 w-4" style={{ color: "#6366F1" }} />
                       <span>Panel de Admin</span>
                     </Link>
                   </SidebarMenuButton>
@@ -352,9 +373,10 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                     <SidebarMenuButton 
                       asChild 
                       isActive={pathname === "/dashboard/administradores"}
+                      className="hover:bg-white/50 dark:hover:bg-slate-700/50"
                     >
                       <Link href="/dashboard/administradores" onClick={handleNavClick}>
-                        <Users className="h-4 w-4" />
+                        <Users className="h-4 w-4" style={{ color: "#A855F7" }} />
                         <span>Administradores</span>
                       </Link>
                     </SidebarMenuButton>
@@ -366,7 +388,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
             {profile?.avatar_url ? (
@@ -376,7 +398,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white">
                 {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
               </div>
             )}
@@ -391,17 +413,17 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
           </div>
           <Link
             href="/dashboard/mi-cuenta"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-blue-100 hover:text-blue-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-blue-400"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-4 w-4" style={{ color: "#6B7280" }} />
             Mi Cuenta
           </Link>
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-red-100 hover:text-red-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-red-400"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" style={{ color: "#EF4444" }} />
               Cerrar sesión
             </button>
           </form>
