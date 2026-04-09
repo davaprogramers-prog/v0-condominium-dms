@@ -72,43 +72,47 @@ export default async function UsuariosPage() {
 
       {/* Lista de Usuarios */}
       <div className="rounded-lg border">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-6 py-3 text-left font-semibold">Nombre</th>
-                <th className="px-6 py-3 text-left font-semibold">Email</th>
-                <th className="px-6 py-3 text-left font-semibold">Rol</th>
-                <th className="px-6 py-3 text-left font-semibold">Fecha Registro</th>
-                {isSuperAdmin && (
-                  <th className="px-6 py-3 text-left font-semibold">Acciones</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {users?.map((u) => (
-                <tr key={u.id} className="border-b hover:bg-muted/50">
-                  <td className="px-6 py-3 font-medium">{u.first_name} {u.last_name || ""}</td>
-                  <td className="px-6 py-3 text-muted-foreground text-xs">{u.email || "-"}</td>
-                  <td className="px-6 py-3">
-                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${roleColors[u.role] || "bg-gray-100 text-gray-700"}`}>
-                      {u.role?.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-muted-foreground text-sm">{new Date(u.created_at).toLocaleDateString()}</td>
-                  {isSuperAdmin && (
-                    <td className="px-6 py-3">
-                      <UserActionsMenu user={u} condos={condos} />
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {!users?.length && (
+        {!users?.length ? (
           <div className="p-6 text-center text-muted-foreground">
             No hay usuarios registrados aún
+          </div>
+        ) : (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {users?.map((u) => (
+                <div key={u.id} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col gap-4">
+                    {/* Header with name and role */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium uppercase text-slate-300">Usuario</p>
+                        <h3 className="text-xl font-bold text-white">{u.first_name} {u.last_name || ""}</h3>
+                      </div>
+                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${roleColors[u.role] || "bg-gray-100 text-gray-700"}`}>
+                        {u.role?.replace("_", " ")}
+                      </span>
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <p className="text-xs font-medium uppercase text-slate-300">Email</p>
+                      <p className="text-sm truncate text-slate-200">{u.email || "-"}</p>
+                    </div>
+
+                    {/* Fecha de Registro */}
+                    <div>
+                      <p className="text-xs font-medium uppercase text-slate-300">Fecha Registro</p>
+                      <p className="font-semibold text-white">{new Date(u.created_at).toLocaleDateString()}</p>
+                    </div>
+
+                    {/* Actions */}
+                    {isSuperAdmin && (
+                      <UserActionsMenu user={u} condos={condos} />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
