@@ -1,7 +1,15 @@
+import { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MailCheck } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: 'Registro Exitoso | InteliCon',
+  description: 'Tu registro ha sido completado exitosamente. Por favor confirma tu email.',
+}
+
+export const revalidate = 3600 // Static page, revalidate every hour
 
 export default function RegistroExitosoPage() {
   return (
@@ -13,13 +21,13 @@ export default function RegistroExitosoPage() {
           </div>
           <CardTitle className="text-2xl font-bold text-balance">Registro Exitoso</CardTitle>
           <CardDescription className="text-pretty">
-            Hemos enviado un correo de confirmaci&oacute;n a tu direcci&oacute;n de email. 
+            Hemos enviado un correo de confirmación a tu dirección de email. 
             Por favor revisa tu bandeja de entrada y confirma tu cuenta.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">
-            <Link href="/auth/login">Ir a Iniciar Sesi&oacute;n</Link>
+            <Link href="/auth/login">Ir a Iniciar Sesión</Link>
           </Button>
         </CardContent>
       </Card>
