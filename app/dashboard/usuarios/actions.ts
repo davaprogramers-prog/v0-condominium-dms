@@ -15,12 +15,27 @@ interface CreateUserParams {
 
 export async function createUserWithRole(params: CreateUserParams) {
   try {
-    const supabase = await createClient()
-    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    // Call the API endpoint that has access to service role
+    const response = await fetch("/api/usuarios/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    })
 
-    if (!currentUser) {
-      return { success: false, error: "No autenticado" }
+    const data = await response.json()
+
+    if (!response.ok) {
+      return { success: false, error: data.error || "Error al crear usuario" }
     }
+
+    return { success: true }
+  } catch (err) {
+    console.error("Error creating user:", err)
+    return { success: false, error: "Error inesperado al crear el usuario" }
+  }
+}
 
     // Verify current user is admin or super_admin
     const { data: currentProfile } = await supabase
