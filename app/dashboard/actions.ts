@@ -350,7 +350,14 @@ export async function createExemption(formData: FormData) {
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}`
+    // Construct base URL ensuring proper protocol
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
+    
+    if (!baseUrl) {
+      baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+    } else if (!baseUrl.startsWith('http')) {
+      baseUrl = `https://${baseUrl}`
+    }
     
     const body = {
       name: formData.get("name"),
