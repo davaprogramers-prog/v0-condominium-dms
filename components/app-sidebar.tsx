@@ -232,7 +232,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               className="h-9 w-9 rounded-lg object-contain"
             />
           )}
-          <span className="text-sm font-semibold truncate max-w-[140px]">
+          <span className="text-sm font-semibold truncate max-w-[140px] text-white">
             {condo ? String(condo.name) : "Sin condominio"}
           </span>
         </Link>
