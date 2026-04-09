@@ -347,6 +347,44 @@ export async function createExemption(formData: FormData) {
   revalidatePath("/dashboard/exoneraciones")
 }
 
+export async function updateExemption(id: string, formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemptions").update({
+    exemption_type_id: formData.get("exemption_type_id") as string,
+    is_permanent: formData.get("is_permanent") === "true",
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string || null,
+    percentage: Number(formData.get("percentage")) || 100,
+    reason: formData.get("reason") as string || null,
+  }).eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
+export async function updateExemptionType(id: string, formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemption_types").update({
+    name: formData.get("name") as string,
+    description: formData.get("description") as string || null,
+  }).eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
+export async function deleteExemption(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemptions").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
+export async function deleteExemptionType(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemption_types").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
