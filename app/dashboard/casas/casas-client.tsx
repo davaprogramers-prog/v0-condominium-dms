@@ -34,9 +34,10 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" />Nueva Casa</Button>
             </DialogTrigger>
-            <DialogContent className="bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
-                <DialogTitle className="text-blue-900 dark:text-blue-200">Registrar Nueva Casa</DialogTitle>
+                <DialogTitle className="text-slate-900 dark:text-white">Registrar Nueva Casa</DialogTitle>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Agrega una nueva propiedad al condominio</p>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -46,23 +47,23 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="house_number" className="text-slate-700 dark:text-slate-200">Numero de Casa</Label>
-                  <Input id="house_number" name="house_number" placeholder="Ej: A-101, Casa 5..." required className="border-blue-300 dark:border-blue-600 focus:border-blue-500 focus:ring-blue-500" />
+                  <Label htmlFor="house_number" className="text-slate-900 dark:text-slate-200">Numero de Casa</Label>
+                  <Input id="house_number" name="house_number" placeholder="Ej: A-101, Casa 5..." required className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_name" className="text-slate-700 dark:text-slate-200">Nombre del Propietario</Label>
-                  <Input id="owner_name" name="owner_name" placeholder="Nombre completo" className="border-blue-300 dark:border-blue-600 focus:border-blue-500 focus:ring-blue-500" />
+                  <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                  <Input id="owner_name" name="owner_name" placeholder="Nombre completo" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_email" className="text-slate-700 dark:text-slate-200">Email del Propietario</Label>
-                  <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" className="border-blue-300 dark:border-blue-600 focus:border-blue-500 focus:ring-blue-500" />
+                  <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                  <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="payment_deadline_day" className="text-slate-700 dark:text-slate-200">Día de vencimiento de pago</Label>
-                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} className="border-blue-300 dark:border-blue-600 focus:border-blue-500 focus:ring-blue-500" />
+                  <Label htmlFor="payment_deadline_day" className="text-slate-900 dark:text-slate-200">Día de vencimiento de pago</Label>
+                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                   <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento (1-28)</p>
                 </div>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Casa</Button>
+                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Casa</Button>
               </form>
             </DialogContent>
           </Dialog>
