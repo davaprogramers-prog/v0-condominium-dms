@@ -139,7 +139,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     <p className="text-xs font-medium uppercase text-slate-300">Área</p>
                     <h3 className="text-xl font-bold text-white">{area.name as string}</h3>
                   </div>
-                  <Badge variant={area.is_paid ? "default" : "secondary"} className="text-xs">
+                  <Badge variant={area.is_paid ? "default" : "secondary"} className="text-xs bg-green-600 text-white dark:bg-green-700 dark:text-white">
                     {area.is_paid ? "Pagado" : "Gratis"}
                   </Badge>
                 </div>
