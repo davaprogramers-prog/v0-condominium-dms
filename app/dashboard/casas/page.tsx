@@ -51,41 +51,31 @@ export default async function CasasPage() {
         ) : (
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {houses?.map((house, index) => {
-                const colors = [
-                  { bg: "from-blue-600 to-blue-700", border: "border-blue-500", title: "text-white", text: "text-white", label: "text-blue-100" },
-                  { bg: "from-purple-600 to-purple-700", border: "border-purple-500", title: "text-white", text: "text-white", label: "text-purple-100" },
-                  { bg: "from-green-600 to-green-700", border: "border-green-500", title: "text-white", text: "text-white", label: "text-green-100" },
-                  { bg: "from-orange-600 to-orange-700", border: "border-orange-500", title: "text-white", text: "text-white", label: "text-orange-100" },
-                  { bg: "from-cyan-600 to-cyan-700", border: "border-cyan-500", title: "text-white", text: "text-white", label: "text-cyan-100" },
-                  { bg: "from-pink-600 to-pink-700", border: "border-pink-500", title: "text-white", text: "text-white", label: "text-pink-100" },
-                ]
-                const color = colors[index % colors.length]
-                
+              {houses?.map((house) => {
                 return (
-                  <div key={house.id} className={`rounded-lg border-2 bg-gradient-to-br ${color.bg} ${color.border} p-4 hover:shadow-md transition-shadow`}>
+                  <div key={house.id} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
                     <div className="flex flex-col gap-4">
                       {/* Header with number and status */}
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className={`text-xs font-medium uppercase ${color.label}`}>Casa</p>
-                          <h3 className={`text-2xl font-bold ${color.title}`}>#{house.house_number}</h3>
+                          <p className="text-xs font-medium uppercase text-slate-300">Casa</p>
+                          <h3 className="text-2xl font-bold text-white">#{house.house_number}</h3>
                         </div>
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-white text-green-700`}>
+                        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-white text-green-700">
                           Activo
                         </span>
                       </div>
 
                       {/* Owner information */}
                       <div>
-                        <p className={`text-xs font-medium uppercase ${color.label}`}>Propietario</p>
-                        <p className={`font-semibold ${color.title}`}>{house.owner_name || "-"}</p>
+                        <p className="text-xs font-medium uppercase text-slate-300">Propietario</p>
+                        <p className="font-semibold text-white">{house.owner_name || "-"}</p>
                       </div>
 
                       {/* Email */}
                       <div>
-                        <p className={`text-xs font-medium uppercase ${color.label}`}>Email</p>
-                        <p className={`text-sm truncate ${color.text}`}>{house.owner_email || "-"}</p>
+                        <p className="text-xs font-medium uppercase text-slate-300">Email</p>
+                        <p className="text-sm truncate text-slate-200">{house.owner_email || "-"}</p>
                       </div>
 
                       {/* Actions */}
