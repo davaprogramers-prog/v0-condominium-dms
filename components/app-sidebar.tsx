@@ -293,14 +293,14 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         {/* Super Admin Section */}
         {isSuperAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-slate-700 dark:text-slate-300">Super Admin</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-slate-400 dark:text-white font-semibold">Super Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
                     isActive={pathname === "/admin"}
-                    className="hover:bg-white/50 dark:hover:bg-slate-700/50"
+                    className="text-slate-300 dark:text-white hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
                   >
                     <Link href="/admin" onClick={handleNavClick}>
                       <Key className="h-4 w-4" style={{ color: "#6366F1" }} />
@@ -313,7 +313,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                     <SidebarMenuButton 
                       asChild 
                       isActive={pathname === "/dashboard/administradores"}
-                      className="hover:bg-white/50 dark:hover:bg-slate-700/50"
+                      className="text-slate-300 dark:text-white hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
                     >
                       <Link href="/dashboard/administradores" onClick={handleNavClick}>
                         <Users className="h-4 w-4" style={{ color: "#A855F7" }} />
@@ -343,27 +343,27 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               </div>
             )}
             <div className="flex flex-col">
-              <span className="text-xs font-medium">
+              <span className="text-xs font-medium text-white">
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-white">
                 {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
               </span>
             </div>
           </div>
           <Link
             href="/dashboard/mi-cuenta"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-blue-100 hover:text-blue-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-blue-400"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white hover:bg-blue-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
           >
-            <Settings className="h-4 w-4" style={{ color: "#6B7280" }} />
+            <Settings className="h-4 w-4" style={{ color: "#A78BFA" }} />
             Mi Cuenta
           </Link>
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-red-100 hover:text-red-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-red-400"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white hover:bg-red-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-red-400"
             >
-              <LogOut className="h-4 w-4" style={{ color: "#EF4444" }} />
+              <LogOut className="h-4 w-4" style={{ color: "#F87171" }} />
               Cerrar sesión
             </button>
           </form>
