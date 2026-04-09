@@ -56,9 +56,9 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Registrar Pago</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
-              <DialogTitle>Registrar Pago</DialogTitle>
+              <DialogTitle className="text-slate-900 dark:text-white">Registrar Pago</DialogTitle>
             </DialogHeader>
             <form
               action={async (fd) => {
@@ -75,12 +75,12 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label>Casa</Label>
+                <Label className="text-slate-900 dark:text-slate-200">Casa</Label>
                 <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                     <SelectValue placeholder="Seleccionar casa" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="dark:bg-slate-800 dark:text-white">
                     {houses.map((h) => (
                       <SelectItem key={h.id as string} value={h.id as string}>
                         {h.house_number as string}
@@ -91,10 +91,10 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label>Mes</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Mes</Label>
                   <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {MONTHS_ES.map((m, i) => (
                         <SelectItem key={i} value={(i + 1).toString()}>{m}</SelectItem>
                       ))}
@@ -102,10 +102,10 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Ano</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Año</Label>
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {[2024, 2025, 2026].map((y) => (
                         <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
                       ))}
@@ -115,21 +115,21 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="amount">Monto</Label>
-                  <Input id="amount" name="amount" type="number" step="0.01" defaultValue={commonExpenseAmount} required />
+                  <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto</Label>
+                  <Input id="amount" name="amount" type="number" step="0.01" defaultValue={commonExpenseAmount} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="payment_date">Fecha de Pago</Label>
-                  <Input id="payment_date" name="payment_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                  <Label htmlFor="payment_date" className="text-slate-900 dark:text-slate-200">Fecha de Pago</Label>
+                  <Input id="payment_date" name="payment_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Metodo de Pago</Label>
+                <Label className="text-slate-900 dark:text-slate-200">Método de Pago</Label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                  <SelectContent className="dark:bg-slate-800 dark:text-white">
                     <SelectItem value="transferencia">Transferencia</SelectItem>
-                    <SelectItem value="deposito">Deposito</SelectItem>
+                    <SelectItem value="deposito">Depósito</SelectItem>
                     <SelectItem value="cheque">Cheque</SelectItem>
                     <SelectItem value="efectivo">Efectivo</SelectItem>
                     <SelectItem value="otro">Otro</SelectItem>
@@ -137,14 +137,14 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Comprobante</Label>
+                <Label className="text-slate-900 dark:text-slate-200">Comprobante</Label>
                 <FileUpload bucket="receipts" onUpload={setReceiptUrl} label="Subir comprobante" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="notes">Notas</Label>
-                <Textarea id="notes" name="notes" placeholder="Notas adicionales..." />
+                <Label htmlFor="notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                <Textarea id="notes" name="notes" placeholder="Notas adicionales..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
               </div>
-              <Button type="submit" disabled={!selectedHouse}>Guardar Pago</Button>
+              <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Pago</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -173,8 +173,10 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
 
       {previewImg && (
         <Dialog open={!!previewImg} onOpenChange={() => setPreviewImg(null)}>
-          <DialogContent className="max-w-2xl">
-            <img src={previewImg} alt="Comprobante" className="w-full rounded-lg" />
+          <DialogContent className="max-w-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+            <div className="p-4">
+              <img src={previewImg} alt="Comprobante" className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600" />
+            </div>
           </DialogContent>
         </Dialog>
       )}
