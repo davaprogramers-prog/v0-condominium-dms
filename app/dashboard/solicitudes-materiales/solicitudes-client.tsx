@@ -185,28 +185,18 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
 
                   <div>
                     <Label htmlFor="requested_by">Solicitado por *</Label>
-                    <div className="flex gap-2">
-                      <Select value={formData.requested_by_name} onValueChange={(val) => setFormData({ ...formData, requested_by_name: val })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar persona..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {staff.map(member => (
-                            <SelectItem key={member.id} value={member.name}>
-                              {member.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        id="requested_by"
-                        value={formData.requested_by_name}
-                        onChange={(e) => setFormData({ ...formData, requested_by_name: e.target.value })}
-                        placeholder="Escribir nombre"
-                        required
-                        className="flex-1"
-                      />
-                    </div>
+                    <Input
+                      id="requested_by"
+                      value={formData.requested_by_name}
+                      onChange={(e) => setFormData({ ...formData, requested_by_name: e.target.value })}
+                      placeholder="Escribir nombre"
+                      required
+                    />
+                    {staff && staff.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Disponibles: {staff.map(s => s.name).join(", ")}
+                      </p>
+                    )}
                   </div>
 
                   <div>
