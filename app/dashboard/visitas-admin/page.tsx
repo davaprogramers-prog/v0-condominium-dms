@@ -1,18 +1,30 @@
 import { Metadata } from 'next'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Edit2, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { getAdminVisits } from './actions'
+import { VisitActionsClient } from './visit-actions-client'
 
 export const metadata: Metadata = {
-  title: 'Visitas | Admin | Condominio',
+  title: 'Gestión de Visitas | Admin | Condominio',
   description: 'Gestión de visitas del condominio',
 }
 
 export default async function AdminVisitasPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user?.id || '')
+    .single()
+
   const visits = await getAdminVisits()
+  const userRole = profile?.role
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -26,6 +38,21 @@ export default async function AdminVisitasPage() {
         return 'bg-gray-100 text-gray-800'
     }
   }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return 'Programada'
+      case 'completed':
+        return 'Completada'
+      case 'cancelled':
+        return 'Cancelada'
+      default:
+        return status
+    }
+  }
+
+  const canManageVisits = userRole === 'admin' || userRole === 'super_admin'
 
   return (
     <div className="flex flex-col h-full">
@@ -61,14 +88,12 @@ export default async function AdminVisitasPage() {
                         </p>
                       </div>
                       <Badge className={getStatusColor(visit.status)}>
-                        {visit.status === 'scheduled' && 'Programada'}
-                        {visit.status === 'completed' && 'Completada'}
-                        {visit.status === 'cancelled' && 'Cancelada'}
+                        {getStatusLabel(visit.status)}
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                       <div>
                         <p className="font-medium text-muted-foreground">Tipo de Visita</p>
                         <p>{visit.visit_title}</p>
@@ -94,9 +119,29 @@ export default async function AdminVisitasPage() {
                       )}
                     </div>
                     {visit.description && (
-                      <div className="mt-4">
+                      <div className="mb-4">
                         <p className="font-medium text-muted-foreground text-sm">Descripción</p>
                         <p className="text-sm">{visit.description}</p>
+                      </div>
+                    )}
+                    
+                    {/* Action Buttons */}
+                    {canManageVisits && (
+                      <div className="flex gap-2 pt-4 border-t">
+                        <VisitActionsClient 
+                          visitId={visit.id}
+                          visitorName={visit.visitor_name}
+                          visitData={{
+                            visitor_name: visit.visitor_name,
+                            visit_title: visit.visit_title,
+                            visit_date: visit.visit_date,
+                            visit_time: visit.visit_time,
+                            visitor_email: visit.visitor_email,
+                            visitor_phone: visit.visitor_phone,
+                            description: visit.description,
+                            status: visit.status
+                          }}
+                        />
                       </div>
                     )}
                   </CardContent>
