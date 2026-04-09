@@ -349,20 +349,37 @@ export async function createExemption(formData: FormData) {
 
 // ===== Projects =====
 export async function createProject(formData: FormData) {
-  const { supabase, userId, condoId } = await getCondoId()
-  const { error } = await supabase.from("projects").insert({
-    condo_id: condoId,
-    name: formData.get("name") as string,
-    description: formData.get("description") as string,
-    improvement_type: formData.get("improvement_type") as string,
-    location_description: formData.get("location_description") as string || null,
-    location_photo_url: formData.get("location_photo_url") as string || null,
-    estimated_cost: Number(formData.get("estimated_cost")) || null,
-    start_date: formData.get("start_date") as string || null,
-    created_by: userId,
-  })
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}`
+    
+    const body = {
+      name: formData.get("name"),
+      improvement_type: formData.get("improvement_type"),
+      description: formData.get("description"),
+      location_description: formData.get("location_description"),
+      location_photo_url: formData.get("location_photo_url"),
+      estimated_cost: formData.get("estimated_cost"),
+      start_date: formData.get("start_date"),
+    }
+
+    const response = await fetch(`${baseUrl}/api/proyectos/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || "Error creating project")
+    }
+
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in createProject:", err)
+    throw err
+  }
 }
 
 export async function updateProjectStatus(id: string, status: string) {
