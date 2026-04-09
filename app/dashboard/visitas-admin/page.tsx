@@ -1,12 +1,10 @@
 import { Metadata } from 'next'
-import { ChevronLeft, Edit2, Trash2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { getAdminVisits } from './actions'
-import { VisitActionsClient } from './visit-actions-client'
 
 export const metadata: Metadata = {
   title: 'Gestión de Visitas | Admin | Condominio',
@@ -24,7 +22,6 @@ export default async function AdminVisitasPage() {
     .single()
 
   const visits = await getAdminVisits()
-  const userRole = profile?.role
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,26 +119,6 @@ export default async function AdminVisitasPage() {
                       <div className="mb-4">
                         <p className="font-medium text-muted-foreground text-sm">Descripción</p>
                         <p className="text-sm">{visit.description}</p>
-                      </div>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    {canManageVisits && (
-                      <div className="flex gap-2 pt-4 border-t">
-                        <VisitActionsClient 
-                          visitId={visit.id}
-                          visitorName={visit.visitor_name}
-                          visitData={{
-                            visitor_name: visit.visitor_name,
-                            visit_title: visit.visit_title,
-                            visit_date: visit.visit_date,
-                            visit_time: visit.visit_time,
-                            visitor_email: visit.visitor_email,
-                            visitor_phone: visit.visitor_phone,
-                            description: visit.description,
-                            status: visit.status
-                          }}
-                        />
                       </div>
                     )}
                   </CardContent>
