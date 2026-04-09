@@ -15,8 +15,11 @@ interface CreateUserParams {
 
 export async function createUserWithRole(params: CreateUserParams) {
   try {
+    // Get the base URL for the API call
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}`
+    
     // Call the API endpoint that has access to service role
-    const response = await fetch("/api/usuarios/create", {
+    const response = await fetch(`${baseUrl}/api/usuarios/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
