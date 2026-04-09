@@ -1,21 +1,17 @@
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
-import { SiteLogo } from "@/components/site-logo"
-import { CompanyLogo } from "@/components/company-logo"
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-col items-center justify-center gap-6 border-b px-4 py-6 sm:px-6 sm:py-8">
-        {/* Logos centrados */}
-        <div className="flex items-center justify-center gap-8 flex-wrap">
-          <SiteLogo />
-          <div className="hidden sm:block">
-            <CompanyLogo />
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+            <Building2 className="h-6 w-6 text-white" />
           </div>
+          <span className="font-bold text-lg">InteliCon</span>
         </div>
         
-        {/* Botones centrados */}
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
           <Link href="/auth/login" className="px-6 py-2 text-sm sm:text-base border rounded-md hover:bg-gray-100 whitespace-nowrap text-center">
             Iniciar Sesión
@@ -23,11 +19,6 @@ export default function LandingPage() {
           <Link href="/auth/registro" className="px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap text-center">
             Registrarse
           </Link>
-        </div>
-        
-        {/* Logo empresa en móvil centrado */}
-        <div className="sm:hidden">
-          <CompanyLogo />
         </div>
       </header>
 
