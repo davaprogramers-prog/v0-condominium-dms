@@ -122,7 +122,7 @@ export default async function BalancePage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600 dark:text-slate-300">Saldo Anterior</p>
-              <p className={`text-2xl font-bold ${saldoAnterior >= 0 ? "text-slate-700 dark:text-slate-200" : "text-red-600"}`}>
+              <p className={`text-lg md:text-xl font-bold ${saldoAnterior >= 0 ? "text-slate-700 dark:text-slate-200" : "text-red-600"}`}>
                 ${saldoAnterior.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -138,7 +138,7 @@ export default async function BalancePage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-green-100">Ingresos Recaudados</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-lg md:text-xl font-bold text-white">
                 ${totalPaidIncome.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -154,7 +154,7 @@ export default async function BalancePage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-red-100">Gastos (DEBE)</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-lg md:text-xl font-bold text-white">
                 ${totalExpenses.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -170,7 +170,7 @@ export default async function BalancePage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Balance del Mes</p>
-              <p className={`text-2xl font-bold ${balanceDelMes >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <p className={`text-lg md:text-xl font-bold ${balanceDelMes >= 0 ? "text-green-600" : "text-red-600"}`}>
                 ${balanceDelMes.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -186,7 +186,7 @@ export default async function BalancePage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Saldo Final</p>
-              <p className={`text-2xl font-bold ${saldoFinal >= 0 ? "text-blue-600" : "text-red-600"}`}>
+              <p className={`text-lg md:text-xl font-bold ${saldoFinal >= 0 ? "text-blue-600" : "text-red-600"}`}>
                 ${saldoFinal.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -199,9 +199,9 @@ export default async function BalancePage({
       </div>
 
       {/* Formula Box */}
-      <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-        <p className="text-sm text-blue-900 dark:text-blue-200">
-          <strong>Formula del Balance:</strong> Saldo Anterior (${saldoAnterior.toLocaleString("es-CL")}) + Ingresos Recaudados (${totalPaidIncome.toLocaleString("es-CL")}) - Gastos (${totalExpenses.toLocaleString("es-CL")}) = <strong>Saldo Final (${saldoFinal.toLocaleString("es-CL")})</strong>
+      <div className="rounded-lg border-2 border-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/40 dark:to-blue-900/40 p-4">
+        <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-100">
+          <strong>Fórmula del Balance:</strong> Saldo Anterior (${saldoAnterior.toLocaleString("es-CL")}) + Ingresos Recaudados (${totalPaidIncome.toLocaleString("es-CL")}) - Gastos (${totalExpenses.toLocaleString("es-CL")}) = <strong className="text-cyan-950 dark:text-cyan-50">Saldo Final (${saldoFinal.toLocaleString("es-CL")})</strong>
         </p>
       </div>
 
