@@ -113,17 +113,6 @@ export async function registerOwner(
     throw new Error("Error al crear el perfil. Por favor, intenta de nuevo.")
   }
 
-  // Also update the house with the owner's user_id
-  const { error: houseUpdateError } = await supabase
-    .from("houses")
-    .update({ owner_id: authData.user.id })
-    .eq("id", houseId)
-
-  if (houseUpdateError) {
-    console.error("[v0] House update error:", houseUpdateError)
-    // Don't throw - the profile was created, this is just metadata
-  }
-
   return authData.user
 }
 
