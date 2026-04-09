@@ -1,5 +1,3 @@
-'use client'
-
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { SiteLogo } from "@/components/site-logo"
