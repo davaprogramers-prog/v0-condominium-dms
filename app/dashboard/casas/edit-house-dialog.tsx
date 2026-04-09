@@ -49,14 +49,14 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Edit2 className="h-4 w-4" />
+        <Button size="sm" className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300">
+          <Edit2 className="h-4 w-4" style={{ color: "#FCD34D" }} />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Editar Casa</DialogTitle>
-          <DialogDescription>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Editar Casa</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -65,16 +65,17 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="owner_name">Nombre del Propietario</Label>
+            <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
             <Input
               id="owner_name"
               name="owner_name"
               placeholder="Nombre completo"
               defaultValue={ownerName}
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email">Email del Propietario</Label>
+            <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
             <Input
               id="owner_email"
               name="owner_email"
@@ -82,10 +83,11 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
               placeholder="correo@ejemplo.com"
               defaultValue={ownerEmail}
               required
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="payment_due_day">Día de Vencimiento de Pago</Label>
+            <Label htmlFor="payment_due_day" className="text-slate-900 dark:text-slate-200">Día de Vencimiento de Pago</Label>
             <Input 
               id="payment_due_day" 
               name="payment_due_day" 
@@ -94,10 +96,11 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
               max={28} 
               placeholder="5" 
               defaultValue={paymentDueDay}
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
-            <p className="text-xs text-muted-foreground">Día del mes para vencimiento del pago (1-28)</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento del pago (1-28)</p>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios
           </Button>

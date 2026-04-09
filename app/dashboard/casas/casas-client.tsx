@@ -71,9 +71,9 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
 
       {editHouse && (
         <Dialog open={!!editHouse} onOpenChange={() => setEditHouse(null)}>
-          <DialogContent className="bg-gradient-to-br from-purple-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+          <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
-              <DialogTitle className="text-purple-900 dark:text-purple-200">Editar Casa #{editHouse.house_number as string}</DialogTitle>
+              <DialogTitle className="text-slate-900 dark:text-white">Editar Casa #{editHouse.house_number as string}</DialogTitle>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Actualiza los datos del propietario (no puedes cambiar el número de casa)</p>
             </DialogHeader>
             <form
@@ -85,19 +85,19 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_name" className="text-slate-700 dark:text-slate-200">Nombre del Propietario</Label>
-                <Input id="edit_owner_name" name="owner_name" defaultValue={(editHouse.owner_name as string) || ""} className="border-purple-300 dark:border-purple-600 focus:border-purple-500 focus:ring-purple-500" />
+                <Label htmlFor="edit_owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                <Input id="edit_owner_name" name="owner_name" defaultValue={(editHouse.owner_name as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_email" className="text-slate-700 dark:text-slate-200">Email del Propietario</Label>
-                <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} className="border-purple-300 dark:border-purple-600 focus:border-purple-500 focus:ring-purple-500" />
+                <Label htmlFor="edit_owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_due_day" className="text-slate-700 dark:text-slate-200">Día de vencimiento</Label>
-                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} className="border-purple-300 dark:border-purple-600 focus:border-purple-500 focus:ring-purple-500" />
+                <Label htmlFor="edit_due_day" className="text-slate-900 dark:text-slate-200">Día de vencimiento</Label>
+                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento (1-28)</p>
               </div>
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">Guardar Cambios</Button>
+              <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
             </form>
           </DialogContent>
         </Dialog>
