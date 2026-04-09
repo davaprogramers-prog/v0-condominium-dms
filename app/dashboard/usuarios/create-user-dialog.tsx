@@ -146,10 +146,10 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
           Crear Usuario
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg">
         <DialogHeader>
-          <DialogTitle>Crear Usuario</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Crear Usuario</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">
             Crea un nuevo usuario con rol específico
           </DialogDescription>
         </DialogHeader>
@@ -162,14 +162,14 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
 
           {isSuperAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="condo_id">Condominio *</Label>
+              <Label htmlFor="condo_id" className="text-slate-900 dark:text-slate-200">Condominio *</Label>
               <Select value={formData.condo_id} onValueChange={handleCondoChange}>
-                <SelectTrigger id="condo_id">
+                <SelectTrigger id="condo_id" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                   <SelectValue placeholder="Seleccionar condominio..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
                   {condos?.map((condo) => (
-                    <SelectItem key={condo.id} value={condo.id}>
+                    <SelectItem key={condo.id} value={condo.id} className="dark:text-white">
                       {condo.name}
                     </SelectItem>
                   ))}
@@ -180,37 +180,40 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="first_name">Nombre *</Label>
+              <Label htmlFor="first_name" className="text-slate-900 dark:text-slate-200">Nombre *</Label>
               <Input 
                 id="first_name" 
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 required 
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name">Apellido</Label>
+              <Label htmlFor="last_name" className="text-slate-900 dark:text-slate-200">Apellido</Label>
               <Input 
                 id="last_name" 
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico *</Label>
+            <Label htmlFor="email" className="text-slate-900 dark:text-slate-200">Correo electrónico *</Label>
             <Input 
               id="email" 
               type="email" 
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required 
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña *</Label>
+            <Label htmlFor="password" className="text-slate-900 dark:text-slate-200">Contraseña *</Label>
             <Input 
               id="password" 
               type="password" 
@@ -218,12 +221,13 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required 
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
-            <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Mínimo 6 caracteres</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Rol *</Label>
+            <Label htmlFor="role" className="text-slate-900 dark:text-slate-200">Rol *</Label>
             <Select value={formData.role} onValueChange={(value) => {
               // Si cambia a propietario, auto-activar is_owner y limpiar
               if (value === "propietario") {
@@ -232,13 +236,13 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 setFormData({ ...formData, role: value })
               }
             }}>
-              <SelectTrigger id="role">
+              <SelectTrigger id="role" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">Administrador</SelectItem>
-                <SelectItem value="conserje">Conserje</SelectItem>
-                <SelectItem value="propietario">Propietario</SelectItem>
+              <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
+                <SelectItem value="admin" className="dark:text-white">Administrador</SelectItem>
+                <SelectItem value="conserje" className="dark:text-white">Conserje</SelectItem>
+                <SelectItem value="propietario" className="dark:text-white">Propietario</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -250,7 +254,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 checked={formData.is_owner}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
               />
-              <Label htmlFor="is_owner" className="font-normal">
+              <Label htmlFor="is_owner" className="font-normal text-slate-900 dark:text-slate-200">
                 También es Propietario
               </Label>
             </div>
@@ -258,14 +262,14 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
 
           {(formData.is_owner || formData.role === "propietario") && houses.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="house_id">Propiedad *</Label>
+              <Label htmlFor="house_id" className="text-slate-900 dark:text-slate-200">Propiedad *</Label>
               <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
-                <SelectTrigger id="house_id" disabled={loadingHouses}>
+                <SelectTrigger id="house_id" disabled={loadingHouses} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                   <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
                   {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id}>
+                    <SelectItem key={house.id} value={house.id} className="dark:text-white">
                       Casa {house.house_number}
                     </SelectItem>
                   ))}
@@ -277,7 +281,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Crear Usuario
           </Button>
