@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Users, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { CreateUserDialog } from "./create-user-dialog"
 
 export default async function UsuariosPage() {
   const supabase = await createClient()
@@ -19,9 +20,22 @@ export default async function UsuariosPage() {
     .order("created_at", { ascending: false })
 
   const isAdmin = profile?.role === "admin"
+  const isSuperAdmin = profile?.role === "super_admin"
+  
+  // Get condos for super_admin selector
+  let condos = []
+  if (isSuperAdmin) {
+    const { data: condosData } = await supabase
+      .from("condominiums")
+      .select("id, name")
+      .order("name")
+    condos = condosData || []
+  }
+
   const roleColors: Record<string, string> = {
     super_admin: "bg-red-100 text-red-700",
     admin: "bg-blue-100 text-blue-700",
+    conserje: "bg-purple-100 text-purple-700",
     propietario: "bg-green-100 text-green-700",
     arrendatario: "bg-amber-100 text-amber-700",
   }
@@ -33,11 +47,8 @@ export default async function UsuariosPage() {
           <h1 className="text-3xl font-bold">Usuarios</h1>
           <p className="text-muted-foreground">Gestión de administradores, propietarios y arrendatarios</p>
         </div>
-        {isAdmin && (
-          <Button size="sm" disabled>
-            <Plus className="h-4 w-4 mr-2" />
-            Invitar Usuario
-          </Button>
+        {(isAdmin || isSuperAdmin) && (
+          <CreateUserDialog condos={condos} isSuperAdmin={isSuperAdmin} />
         )}
       </div>
 
@@ -45,6 +56,7 @@ export default async function UsuariosPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { role: "admin", label: "Administrador", desc: "Gestión completa" },
+          { role: "conserje", label: "Conserje", desc: "Gestión de solicitudes" },
           { role: "propietario", label: "Propietario", desc: "Subir comprobantes" },
           { role: "arrendatario", label: "Arrendatario", desc: "Acceso limitado" },
         ].map((item) => (
