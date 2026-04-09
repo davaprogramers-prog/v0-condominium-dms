@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Users, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CreateUserDialog } from "./create-user-dialog"
+import { UserActionsMenu } from "./user-actions-menu"
 
 export default async function UsuariosPage() {
   const supabase = await createClient()
@@ -79,6 +80,9 @@ export default async function UsuariosPage() {
                 <th className="px-6 py-3 text-left font-semibold">Email</th>
                 <th className="px-6 py-3 text-left font-semibold">Rol</th>
                 <th className="px-6 py-3 text-left font-semibold">Fecha Registro</th>
+                {isSuperAdmin && (
+                  <th className="px-6 py-3 text-left font-semibold">Acciones</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -92,6 +96,11 @@ export default async function UsuariosPage() {
                     </span>
                   </td>
                   <td className="px-6 py-3 text-muted-foreground text-sm">{new Date(u.created_at).toLocaleDateString()}</td>
+                  {isSuperAdmin && (
+                    <td className="px-6 py-3">
+                      <UserActionsMenu user={u} condos={condos} />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
