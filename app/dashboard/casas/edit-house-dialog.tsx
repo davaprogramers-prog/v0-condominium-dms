@@ -50,7 +50,7 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300">
-          <Edit2 className="h-4 w-4" style={{ color: "#FCD34D" }} />
+          <Edit2 className="h-4 w-4" style={{ color: "#64748b" }} />
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
