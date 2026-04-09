@@ -83,3 +83,18 @@ body {
   background-color: var(--background);
   color: var(--foreground);
 }
+
+/* Dialog close button styling for visibility */
+[role="dialog"] [role="button"][aria-label*="Close"],
+.dialog-close-button {
+  color: #64748b;
+  opacity: 1 !important;
+  hover: #1e293b;
+}
+
+.dark [role="dialog"] [role="button"][aria-label*="Close"],
+.dark .dialog-close-button {
+  color: #cbd5e1;
+  opacity: 1 !important;
+  hover: #e2e8f0;
+}
