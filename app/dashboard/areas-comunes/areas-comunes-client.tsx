@@ -95,7 +95,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
                     <Label htmlFor="is_paid_area" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                   </div>
-                  <Badge className="bg-green-600 text-white dark:bg-green-700 dark:text-white">
+                  <Badge className="bg-white text-slate-900 border border-slate-300 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-200 font-semibold">
                     {isPaid ? "Pagado" : "Gratis"}
                   </Badge>
                 </div>
@@ -229,7 +229,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               />
                               <Label htmlFor="edit_is_paid" className="text-slate-900 dark:text-slate-200">Uso pagado</Label>
                             </div>
-                            <Badge className="bg-green-600 text-white dark:bg-green-700 dark:text-white">
+                            <Badge className="bg-white text-slate-900 border border-slate-300 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-200 font-semibold">
                               {editIsPaid ? "Pagado" : "Gratis"}
                             </Badge>
                           </div>
