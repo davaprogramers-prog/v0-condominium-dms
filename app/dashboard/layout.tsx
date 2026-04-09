@@ -41,6 +41,17 @@ export default async function DashboardLayout({
 
   // Check if super_admin from profiles table
   const isSuperAdmin = profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin"
+
+  // If admin, try to get house_id if not already set
+  if (isAdmin && !profile?.house_id) {
+    console.log("[v0] Admin without house_id, searching for assigned property")
+    const houseId = await getUserHouseId(supabase, user.id)
+    if (houseId) {
+      profile.house_id = houseId
+      console.log("[v0] Found house_id for admin:", houseId)
+    }
+  }
 
   // If no profile, create fallback from metadata
   if (!profile) {

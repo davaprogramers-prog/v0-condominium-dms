@@ -50,8 +50,6 @@ export default async function AdminSolicitudesPage() {
     .eq("condo_id", condoId)
     .in("role", ["admin", "super_admin", "conserje"])
 
-  console.log("[v0] Staff profiles fetched:", staffProfiles)
-
   const staff = staffProfiles || []
 
   return (

@@ -113,6 +113,74 @@ const adminMenuItems = [
   }
 ]
 
+const adminWithPropertyMenuItems = [
+  { 
+    section: "Dashboard",
+    items: [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+    ]
+  },
+  {
+    section: "Mi Propiedad",
+    items: [
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    ]
+  },
+  {
+    section: "Gestión",
+    items: [
+      { title: "Casas", href: "/dashboard/casas", icon: Home },
+      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    ]
+  },
+  {
+    section: "Configuraciones",
+    items: [
+      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
+      { title: "Tipos de Exoneraciones", href: "/dashboard/tipos-exoneraciones", icon: ShieldOff },
+    ]
+  },
+  {
+    section: "Finanzas",
+    items: [
+      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
+      { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
+      { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
+      { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
+      { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
+    ]
+  },
+  {
+    section: "Regulaciones",
+    items: [
+      { title: "Infracciones", href: "/dashboard/infracciones", icon: AlertTriangle },
+      { title: "Exoneraciones", href: "/dashboard/exoneraciones", icon: ShieldOff },
+    ]
+  },
+  {
+    section: "Administración",
+    items: [
+      { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
+      { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
+      { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
+      { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+    ]
+  },
+  {
+    section: "Sistema",
+    items: [
+      { title: "Configuración", href: "/dashboard/configuracion", icon: Settings },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
+    ]
+  }
+]
+
 const ownerMenuItems = [
   {
     section: "Dashboard",
@@ -151,6 +219,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const isSuperAdmin = profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
   const hasCondo = !!profile?.condo_id
+  const hasProperty = !!profile?.house_id
   const canSwitchCondo = allCondos.length > 1
 
   const handleNavClick = () => {
@@ -170,6 +239,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     }
   }
 
+  // If admin has a property assigned, use the menu with "Mi casa", otherwise use regular admin menu
   const menuSections = !hasCondo && isAdmin
     ? [
         {
@@ -180,7 +250,9 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
           ]
         }
       ]
-    : isAdmin ? adminMenuItems : ownerMenuItems
+    : isAdmin && hasProperty ? adminWithPropertyMenuItems
+    : isAdmin ? adminMenuItems 
+    : ownerMenuItems
 
   return (
     <Sidebar>
