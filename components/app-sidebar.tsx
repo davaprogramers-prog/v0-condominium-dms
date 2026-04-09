@@ -69,6 +69,8 @@ const iconColorMap: Record<string, string> = {
   "configuracion": "#6B7280",  // Gris
   "visitas": "#EC4899",        // Rosa
 }
+
+const menuSections = [
   { 
     section: "Dashboard",
     items: [
