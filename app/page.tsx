@@ -18,11 +18,14 @@ export default function Page() {
             />
           </div>
           <div className="flex items-center gap-3">
-            <a href="/auth/login" className="px-6 py-2.5 text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200">
+            <a href="/auth/login" className="px-6 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors duration-200">
               Iniciar Sesión
             </a>
-            <a href="/auth/registro" className="px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-lg shadow-md hover:shadow-lg hover:bg-primary/90 transition-all duration-200 transform hover:-translate-y-0.5">
-              Registrarse
+            <a href="/auth/registro" className="relative px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl overflow-hidden group transition-all duration-300 hover:scale-105">
+              <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+              <span className="relative flex items-center gap-2">
+                Registrarse
+              </span>
             </a>
           </div>
         </div>
@@ -44,12 +47,16 @@ export default function Page() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a href="/auth/registro" className="group px-8 py-3 bg-primary text-primary-foreground rounded-lg shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all duration-200 transform hover:-translate-y-1 flex items-center gap-2 font-semibold text-base">
-              Comenzar ahora
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+            <a href="/auth/registro" className="relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative flex items-center gap-2">
+                Comenzar ahora
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
             </a>
-            <a href="/auth/login" className="px-8 py-3 border-2 border-border text-foreground rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base">
-              Ya tengo cuenta
+            <a href="/auth/login" className="relative px-8 py-3.5 border-2 border-primary/30 text-foreground rounded-full font-semibold text-base group transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-105">
+              <span className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative">Ya tengo cuenta</span>
             </a>
           </div>
         </div>
@@ -110,11 +117,12 @@ export default function Page() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-8 bg-primary/5 border border-primary/20 rounded-2xl p-12">
+        <div className="max-w-4xl mx-auto text-center space-y-8 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 rounded-3xl p-12 backdrop-blur-sm">
           <h2 className="text-3xl font-bold text-foreground">¿Listo para transformar tu administración?</h2>
           <p className="text-lg text-muted-foreground">Únete a cientos de condominios que ya confían en InteliCon</p>
-          <a href="/auth/registro" className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-base transform hover:-translate-y-1">
-            Comenzar prueba gratuita
+          <a href="/auth/registro" className="inline-block relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105">
+            <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative">Comenzar prueba gratuita</span>
           </a>
         </div>
       </section>
