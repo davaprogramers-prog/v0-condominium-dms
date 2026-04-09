@@ -350,42 +350,23 @@ export async function createExemption(formData: FormData) {
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   try {
-    // Construct base URL ensuring proper protocol
-    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || ''
-    
-    // Ensure URL has protocol
-    if (baseUrl && !baseUrl.startsWith('http')) {
-      baseUrl = `https://${baseUrl}`
-    }
-    
-    // Fallback to localhost if still no URL
-    if (!baseUrl) {
-      baseUrl = 'http://localhost:3000'
-    }
-    
-    const body = {
-      name: formData.get("name"),
-      improvement_type: formData.get("improvement_type"),
-      description: formData.get("description"),
-      location_description: formData.get("location_description"),
-      location_photo_url: formData.get("location_photo_url"),
-      estimated_cost: formData.get("estimated_cost"),
-      start_date: formData.get("start_date"),
-    }
-
-    const response = await fetch(`${baseUrl}/api/proyectos/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+    const { supabase, userId, condoId } = await getCondoId()
+    const { error } = await supabase.from("projects").insert({
+      condo_id: condoId,
+      name: formData.get("name") as string,
+      improvement_type: formData.get("improvement_type") as string || null,
+      description: formData.get("description") as string || null,
+      location_description: formData.get("location_description") as string || null,
+      location_photo_url: formData.get("location_photo_url") as string || null,
+      estimated_cost: Number(formData.get("estimated_cost")) || 0,
+      start_date: formData.get("start_date") as string || null,
+      status: "propuesto",
+      created_by: userId,
     })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || "Error creating project")
+    if (error) {
+      console.error("Error creating project:", error)
+      throw error
     }
-
     revalidatePath("/dashboard/proyectos")
   } catch (err) {
     console.error("Error in createProject:", err)

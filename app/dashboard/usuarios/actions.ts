@@ -15,32 +15,74 @@ interface CreateUserParams {
 
 export async function createUserWithRole(params: CreateUserParams) {
   try {
-    // Construct base URL ensuring proper protocol
-    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || ''
-    
-    // Ensure URL has protocol
-    if (baseUrl && !baseUrl.startsWith('http')) {
-      baseUrl = `https://${baseUrl}`
+    const supabase = await createClient()
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+
+    if (!currentUser) {
+      return { success: false, error: "No autenticado" }
     }
-    
-    // Fallback to localhost if still no URL
-    if (!baseUrl) {
-      baseUrl = 'http://localhost:3000'
+
+    // Verify current user is admin or super_admin
+    const { data: currentProfile } = await supabase
+      .from("profiles")
+      .select("role, condo_id")
+      .eq("id", currentUser.id)
+      .single()
+
+    if (!currentProfile || !["admin", "super_admin"].includes(currentProfile.role)) {
+      return { success: false, error: "No tienes permisos para crear usuarios" }
     }
-    
-    // Call the API endpoint that has access to service role
-    const response = await fetch(`${baseUrl}/api/usuarios/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
+
+    const condoId = params.condoId || currentProfile.condo_id
+
+    if (!condoId) {
+      return { success: false, error: "Condominio no especificado" }
+    }
+
+    // Create auth user using service role
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: params.email,
+      password: params.password,
+      email_confirm: true,
     })
 
-    const data = await response.json()
+    if (authError || !authData.user) {
+      return { 
+        success: false, 
+        error: authError?.message || "Error al crear usuario en autenticación" 
+      }
+    }
 
-    if (!response.ok) {
-      return { success: false, error: data.error || "Error al crear usuario" }
+    // Create profile
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: authData.user.id,
+        email: params.email,
+        first_name: params.firstName,
+        last_name: params.lastName,
+        role: params.role,
+        condo_id: condoId,
+      })
+
+    if (profileError) {
+      console.error("Error creating profile:", profileError)
+      await supabase.auth.admin.deleteUser(authData.user.id)
+      return { success: false, error: "Error al crear perfil de usuario" }
+    }
+
+    // Assign house if needed
+    if ((params.role === "propietario" || params.isOwner) && params.houseId) {
+      const { error: houseError } = await supabase
+        .from("house_owners")
+        .insert({
+          house_id: params.houseId,
+          user_id: authData.user.id,
+        })
+
+      if (houseError) {
+        console.error("Error assigning house:", houseError)
+      }
     }
 
     return { success: true }
