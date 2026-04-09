@@ -154,7 +154,10 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                                 </AlertDialogHeader>
                                 <div className="flex gap-3 justify-end">
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deleteAlert(alert.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  <AlertDialogAction 
+                                    onClick={() => deleteAlert(alert.id)} 
+                                    className="bg-destructive text-white hover:bg-destructive/90"
+                                  >
                                     Eliminar
                                   </AlertDialogAction>
                                 </div>
