@@ -49,10 +49,12 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Infraccion</Button>
+              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Infraccion</Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Registrar Infraccion</DialogTitle></DialogHeader>
+            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+              <DialogHeader>
+                <DialogTitle className="text-slate-900 dark:text-white">Registrar Infraccion</DialogTitle>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("house_id", selectedHouse)
@@ -63,10 +65,10 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label>Casa</Label>
+                  <Label className="text-slate-900 dark:text-slate-200">Casa</Label>
                   <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                    <SelectTrigger><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
+                    <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {houses.map((h) => (
                         <SelectItem key={h.id as string} value={h.id as string}>{h.house_number as string}</SelectItem>
                       ))}
@@ -74,24 +76,24 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_desc">Descripcion</Label>
-                  <Textarea id="inf_desc" name="description" placeholder="Detalle de la infraccion..." required />
+                  <Label htmlFor="inf_desc" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
+                  <Textarea id="inf_desc" name="description" placeholder="Detalle de la infraccion..." required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="fine_amount">Multa ({currencySymbol})</Label>
-                    <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" />
+                    <Label htmlFor="fine_amount" className="text-slate-900 dark:text-slate-200">Multa ({currencySymbol})</Label>
+                    <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="inf_date">Fecha</Label>
-                    <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                    <Label htmlFor="inf_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                    <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_notes">Notas</Label>
-                  <Textarea id="inf_notes" name="notes" placeholder="Notas adicionales..." />
+                  <Label htmlFor="inf_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                  <Textarea id="inf_notes" name="notes" placeholder="Notas adicionales..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
-                <Button type="submit" disabled={!selectedHouse}>Registrar Infraccion</Button>
+                <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Registrar Infraccion</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -205,8 +207,10 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
                           {/* Edit Dialog */}
                           <Dialog open={editOpen === inf.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                            <DialogContent>
-                              <DialogHeader><DialogTitle>Editar Infraccion</DialogTitle></DialogHeader>
+                            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                              <DialogHeader>
+                                <DialogTitle className="text-slate-900 dark:text-white">Editar Infraccion</DialogTitle>
+                              </DialogHeader>
                               <form
                                 action={async (fd) => {
                                   fd.set("id", inf.id as string)
@@ -216,39 +220,39 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 className="flex flex-col gap-4"
                               >
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_desc">Descripcion</Label>
-                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required />
+                                  <Label htmlFor="edit_desc" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
+                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_fine">Multa ({currencySymbol})</Label>
-                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} />
+                                    <Label htmlFor="edit_fine" className="text-slate-900 dark:text-slate-200">Multa ({currencySymbol})</Label>
+                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                                   </div>
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_date">Fecha</Label>
-                                    <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required />
+                                    <Label htmlFor="edit_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                                    <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                                   </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_notes">Notas</Label>
-                                  <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} />
+                                  <Label htmlFor="edit_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                                  <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                                 </div>
-                                <Button type="submit">Guardar Cambios</Button>
+                                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
 
                           {/* Delete Dialog */}
                           <AlertDialog open={deleteOpen === inf.id} onOpenChange={(v) => !v && setDeleteOpen(null)}>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Eliminar Infraccion</AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar Infraccion</AlertDialogTitle>
+                                <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
                                   Esta accion no se puede deshacer. Se eliminara permanentemente esta infraccion.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="flex gap-3 justify-end">
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogCancel className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">Cancelar</AlertDialogCancel>
                                 <Button
                                   onClick={() => { deleteInfraction(inf.id as string); setDeleteOpen(null) }}
                                   className="bg-red-600 text-white hover:bg-red-700"
