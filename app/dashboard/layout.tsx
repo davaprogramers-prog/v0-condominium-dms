@@ -133,7 +133,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col h-screen">
         <DashboardHeader user={user} profile={profile} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
