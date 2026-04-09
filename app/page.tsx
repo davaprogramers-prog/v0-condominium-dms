@@ -1,11 +1,9 @@
 'use client'
 
-import { Suspense } from "react"
 import Link from "next/link"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { SiteLogo } from "@/components/site-logo"
 import { CompanyLogo } from "@/components/company-logo"
-import { SearchParamsHandler } from "@/components/search-params-handler"
 
 export default function LandingPage() {
   return (
@@ -74,10 +72,6 @@ export default function LandingPage() {
       <footer className="border-t px-4 py-6 text-center text-xs text-gray-600 sm:px-6 sm:text-sm">
         InteliCon - Sistema de Administración de Condominios
       </footer>
-
-      <Suspense fallback={null}>
-        <SearchParamsHandler />
-      </Suspense>
     </div>
   )
 }
