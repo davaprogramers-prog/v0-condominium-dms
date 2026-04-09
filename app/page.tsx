@@ -1,11 +1,26 @@
 'use client'
 
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
 import { SiteLogo } from "@/components/site-logo"
 import { CompanyLogo } from "@/components/company-logo"
-import { SearchParamsHandler } from "@/components/search-params-handler"
+
+function SearchParamsHandler() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // If there's a code parameter, redirect to auth callback
+    const code = searchParams.get("code")
+    if (code) {
+      router.replace(`/auth/callback?code=${code}&type=recovery`)
+    }
+  }, [searchParams, router])
+
+  return null
+}
 
 export default function LandingPage() {
   return (
@@ -75,9 +90,7 @@ export default function LandingPage() {
         InteliCon - Sistema de Administración de Condominios
       </footer>
 
-      <Suspense fallback={null}>
-        <SearchParamsHandler />
-      </Suspense>
+      <SearchParamsHandler />
     </div>
   )
 }
