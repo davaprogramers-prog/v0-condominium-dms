@@ -51,15 +51,15 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button size="sm" className="bg-slate-700 hover:bg-slate-800 text-white">
           <Plus className="h-4 w-4 mr-2" />
           Nueva Casa
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Crear Nueva Casa</DialogTitle>
-          <DialogDescription>Agrega una nueva propiedad al condominio</DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Crear Nueva Casa</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">Agrega una nueva propiedad al condominio</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -68,23 +68,23 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="house_number">Número de Casa *</Label>
-            <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" />
+            <Label htmlFor="house_number" className="text-slate-900 dark:text-slate-200">Número de Casa *</Label>
+            <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_name">Nombre del Propietario</Label>
-            <Input id="owner_name" name="owner_name" placeholder="Nombre completo" />
+            <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+            <Input id="owner_name" name="owner_name" placeholder="Nombre completo" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email">Email del Propietario *</Label>
-            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required />
+            <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario *</Label>
+            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_phone">Teléfono del Propietario</Label>
-            <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" />
+            <Label htmlFor="owner_phone" className="text-slate-900 dark:text-slate-200">Teléfono del Propietario</Label>
+            <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="payment_due_day">Día de Vencimiento de Pago</Label>
+            <Label htmlFor="payment_due_day" className="text-slate-900 dark:text-slate-200">Día de Vencimiento de Pago</Label>
             <Input 
               id="payment_due_day" 
               name="payment_due_day" 
@@ -93,10 +93,11 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
               max={28} 
               placeholder="5" 
               defaultValue={5}
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
-            <p className="text-xs text-muted-foreground">Día del mes para vencimiento del pago (1-28). Por defecto: día 5</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento del pago (1-28). Por defecto: día 5</p>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Crear Casa
           </Button>
