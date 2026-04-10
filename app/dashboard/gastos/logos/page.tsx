@@ -158,31 +158,32 @@ export default function ExpenseLogosPage() {
       <div className="flex justify-end">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-slate-700 hover:bg-slate-800 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Agregar Logo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
-              <DialogTitle>Agregar Logo de Proveedor</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-slate-900 dark:text-white">Agregar Logo de Proveedor</DialogTitle>
+              <DialogDescription className="text-slate-600 dark:text-slate-400">
                 Sube un logo y asígnale un nombre para identificar gastos
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="logo-name">Nombre del Proveedor</Label>
+                <Label htmlFor="logo-name" className="text-slate-900 dark:text-slate-200">Nombre del Proveedor</Label>
                 <Input
                   id="logo-name"
                   placeholder="Ej: CGE, Lipigas, Tottus..."
                   value={newLogoName}
                   onChange={(e) => setNewLogoName(e.target.value)}
+                  className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Logo</Label>
+                <Label className="text-slate-900 dark:text-slate-200">Logo</Label>
                 <div className="flex items-center gap-4">
                   {logoPreview ? (
                     <div className="relative">
@@ -191,7 +192,7 @@ export default function ExpenseLogosPage() {
                         alt="Preview"
                         width={80}
                         height={80}
-                        className="h-20 w-20 rounded-lg object-contain border bg-white"
+                        className="h-20 w-20 rounded-lg object-contain border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900"
                       />
                       <button
                         type="button"
@@ -200,7 +201,7 @@ export default function ExpenseLogosPage() {
                           setLogoPreview(null)
                           if (fileInputRef.current) fileInputRef.current.value = ""
                         }}
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -208,9 +209,9 @@ export default function ExpenseLogosPage() {
                   ) : (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-20 w-20 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                      className="h-20 w-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-colors bg-slate-50 dark:bg-slate-900"
                     >
-                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                     </div>
                   )}
                   <input
@@ -220,19 +221,20 @@ export default function ExpenseLogosPage() {
                     onChange={handleLogoChange}
                     className="hidden"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     PNG, JPG o GIF. Max 2MB
                   </p>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">
                   Cancelar
                 </Button>
                 <Button 
                   onClick={handleUpload} 
                   disabled={!logoFile || !newLogoName.trim() || uploading}
+                  className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white disabled:opacity-50"
                 >
                   {uploading ? (
                     <>
