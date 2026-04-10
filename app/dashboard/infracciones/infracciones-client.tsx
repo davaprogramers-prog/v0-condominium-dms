@@ -129,11 +129,11 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
               <CardDescription>{filtered.length} registros</CardDescription>
             </div>
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                <SelectItem value="pendientes">Pendientes</SelectItem>
-                <SelectItem value="pagadas">Pagadas</SelectItem>
+              <SelectTrigger className="w-36 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <SelectItem value="todas" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Todas</SelectItem>
+                <SelectItem value="pendientes" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Pendientes</SelectItem>
+                <SelectItem value="pagadas" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Pagadas</SelectItem>
               </SelectContent>
             </Select>
           </div>
