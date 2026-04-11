@@ -79,6 +79,17 @@
   --warning-foreground: oklch(0.25 0.06 75);
 }
 
+/* Condominium Theme Custom Variables */
+:root {
+  /* These will be overridden by CondoThemeApplier when custom theme is enabled */
+  --condo-sidebar-bg: var(--sidebar);
+  --condo-sidebar-text: var(--sidebar-foreground);
+  --condo-main-bg: var(--background);
+  --condo-main-text: var(--foreground);
+  --condo-card-bg: var(--card);
+  --condo-card-text: var(--card-foreground);
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

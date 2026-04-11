@@ -3,6 +3,9 @@ import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
+import { ThemeCustomizer } from "@/components/theme-customizer"
+import { updateCondoTheme } from "@/app/actions/theme-actions"
+import { type CondoTheme } from "@/lib/theme-utils"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -26,6 +29,12 @@ export default async function ConfiguracionPage() {
 
   const { data: parameters } = await supabase
     .from("parameters")
+    .select("*")
+    .eq("condo_id", profile?.condo_id)
+    .single()
+
+  const { data: theme } = await supabase
+    .from("condominium_themes")
     .select("*")
     .eq("condo_id", profile?.condo_id)
     .single()
@@ -96,6 +105,19 @@ export default async function ConfiguracionPage() {
         <ParametersForm 
           condoId={profile?.condo_id} 
           currentParams={parameters}
+        />
+      )}
+
+      {/* Personalización de Colores - Solo Admin */}
+      {isAdmin && condo && (
+        <ThemeCustomizer 
+          condoId={condo.id} 
+          currentTheme={theme as CondoTheme | null} 
+          isAdmin={isAdmin}
+          onSave={async (themeData) => {
+            "use server"
+            await updateCondoTheme(condo.id, themeData)
+          }}
         />
       )}
 
