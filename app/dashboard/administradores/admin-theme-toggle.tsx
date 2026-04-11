@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Switch } from '@/components/ui/switch'
-import { updateAdminThemePermission } from './actions'
 
 interface AdminThemeToggleProps {
   adminId: string
@@ -17,7 +16,15 @@ export function AdminThemeToggle({ adminId, canChangeTheme }: AdminThemeTogglePr
     setEnabled(checked)
     setSaving(true)
     try {
-      await updateAdminThemePermission(adminId, checked)
+      const response = await fetch('/api/admin/theme-permission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId, canChangeTheme: checked })
+      })
+      const data = await response.json()
+      if (!data.success) {
+        setEnabled(!checked)
+      }
     } catch (error) {
       console.error('Error updating permission:', error)
       setEnabled(!checked)
