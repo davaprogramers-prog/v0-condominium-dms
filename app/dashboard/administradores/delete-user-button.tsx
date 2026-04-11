@@ -55,20 +55,21 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
           Eliminar
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar Administrador</AlertDialogTitle>
-          <AlertDialogDescription>
-            ¿Estás seguro de eliminar a <strong>{userEmail}</strong>? 
+          <AlertDialogTitle className="text-lg">Eliminar Administrador</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm pt-2">
+            ¿Estás seguro de eliminar a <strong className="text-foreground">{userEmail}</strong>? 
             Esta acción no se puede deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogFooter className="gap-2 pt-4">
+          <AlertDialogCancel className="bg-slate-200 text-slate-900 hover:bg-slate-300 border-0">
+            Cancelar
+          </AlertDialogCancel>
           <Button
             onClick={handleDelete}
             disabled={loading}
-            variant="destructive"
             className="bg-red-600 text-white hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
