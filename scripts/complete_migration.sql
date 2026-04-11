@@ -466,17 +466,3 @@ CREATE TABLE IF NOT EXISTS public.condominium_themes (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
-ALTER TABLE public.condominium_themes ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "themes_select" ON public.condominium_themes FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid())
-);
-
-CREATE POLICY "themes_update_admin" ON public.condominium_themes FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.is_admin = true)
-);
-
-CREATE POLICY "themes_insert_admin" ON public.condominium_themes FOR INSERT WITH CHECK (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.is_admin = true)
-);
