@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { MoreHorizontal, Edit2, Trash2, Loader2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,14 +88,18 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
               ¿Estás seguro que deseas eliminar a {user.first_name} {user.last_name}? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogCancel className="text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={deleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {deleting ? "Eliminando..." : "Eliminar"}
-          </AlertDialogAction>
+          <div className="flex gap-2 pt-4 justify-end">
+            <AlertDialogCancel className="bg-slate-200 text-slate-900 hover:bg-slate-300 border-0">
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </>
