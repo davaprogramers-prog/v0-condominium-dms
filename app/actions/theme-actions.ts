@@ -33,28 +33,51 @@ export async function updateCondoTheme(
   theme: Partial<Omit<CondoTheme, 'id' | 'condo_id' | 'created_at' | 'updated_at'>>
 ): Promise<CondoTheme | null> {
   try {
-    // Try to upsert the theme
-    const { data, error } = await supabase
+    // First check if theme exists
+    const { data: existing } = await supabase
       .from("condominium_themes")
-      .upsert({
-        condo_id: condoId,
-        ...theme,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
+      .select("id")
+      .eq("condo_id", condoId)
       .single();
 
-    if (error) {
-      // If table doesn't exist, just return the theme data without persisting
-      // The client will store it locally
-      console.warn("Could not save theme to database:", error.message);
-      return { condo_id: condoId, ...theme } as CondoTheme;
-    }
+    // If exists, update it; otherwise insert
+    if (existing?.id) {
+      const { data, error } = await supabase
+        .from("condominium_themes")
+        .update({
+          ...theme,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("condo_id", condoId)
+        .select()
+        .single();
 
-    return data as CondoTheme;
+      if (error) {
+        console.warn("Could not update theme in database:", error.message);
+        return { condo_id: condoId, ...theme } as CondoTheme;
+      }
+
+      return data as CondoTheme;
+    } else {
+      // Insert new theme
+      const { data, error } = await supabase
+        .from("condominium_themes")
+        .insert({
+          condo_id: condoId,
+          ...theme,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.warn("Could not save theme to database:", error.message);
+        return { condo_id: condoId, ...theme } as CondoTheme;
+      }
+
+      return data as CondoTheme;
+    }
   } catch (error) {
     console.error("Error updating condo theme:", error);
-    // Return the theme data even if save failed, so client can use it
     return { condo_id: condoId, ...theme } as CondoTheme;
   }
 }
