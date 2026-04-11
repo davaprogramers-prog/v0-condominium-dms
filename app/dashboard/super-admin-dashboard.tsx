@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus, Building2, MoreVertical, Trash2, Edit, LogIn, Eye } from "lucide-react"
+import { Plus, Building2, MoreVertical, Trash2, Edit, LogIn, Eye, Users } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -232,6 +232,13 @@ export function SuperAdminDashboard({ userEmail }: { userEmail: string }) {
                       >
                         <LogIn className="h-4 w-4" />
                         Entrar
+                      </button>
+                      <button
+                        onClick={() => router.push(`/dashboard/administradores?condo=${condo.id}`)}
+                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Users className="h-4 w-4" />
+                        Admins
                       </button>
                       <button
                         onClick={() => router.push(`/dashboard?condo=${condo.id}&mode=view`)}

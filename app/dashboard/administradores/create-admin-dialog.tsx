@@ -82,8 +82,8 @@ export function CreateAdminDialog({ condoId, condoName }: CreateAdminDialogProps
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <UserPlus className="h-4 w-4 mr-2" />
+        <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <UserPlus className="h-5 w-5 mr-2" />
           Crear Administrador
         </Button>
       </DialogTrigger>
