@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Users } from "lucide-react"
 import { CreateAdminDialog } from "./create-admin-dialog"
 import { DeleteUserButton } from "./delete-user-button"
+import { AdminThemeToggle } from "./admin-theme-toggle"
 
 export default async function AdministradoresPage() {
   const supabase = await createClient()
@@ -40,7 +41,7 @@ export default async function AdministradoresPage() {
   // Get admins for this condo
   const { data: admins } = await supabase
     .from("profiles")
-    .select("id, email, first_name, last_name, created_at")
+    .select("id, email, first_name, last_name, created_at, can_change_theme")
     .eq("condo_id", condoId)
     .eq("role", "admin")
     .order("created_at", { ascending: false })
@@ -70,6 +71,7 @@ export default async function AdministradoresPage() {
                 <th className="px-4 py-3 text-left font-semibold">Nombre</th>
                 <th className="px-4 py-3 text-left font-semibold">Email</th>
                 <th className="px-4 py-3 text-left font-semibold">Fecha de Creación</th>
+                <th className="px-4 py-3 text-left font-semibold">Cambiar Tema</th>
                 <th className="px-4 py-3 text-left font-semibold">Acciones</th>
               </tr>
             </thead>
@@ -86,6 +88,9 @@ export default async function AdministradoresPage() {
                     {new Date(admin.created_at).toLocaleDateString("es-CL")}
                   </td>
                   <td className="px-4 py-3">
+                    <AdminThemeToggle adminId={admin.id} canChangeTheme={admin.can_change_theme || false} />
+                  </td>
+                  <td className="px-4 py-3">
                     {admin.id && admin.email ? (
                       <DeleteUserButton userId={admin.id} userEmail={admin.email} />
                     ) : (
@@ -96,7 +101,7 @@ export default async function AdministradoresPage() {
               ))}
               {(!admins || admins.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
                     No hay administradores registrados para este condominio
                   </td>
                 </tr>

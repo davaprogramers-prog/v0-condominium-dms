@@ -38,7 +38,39 @@ export async function deleteAdmin(userId: string) {
   return { success: true }
 }
 
-export async function createAdmin(data: {
+export async function updateAdminThemePermission(adminId: string, canChangeTheme: boolean) {
+  const supabase = await createClient()
+  
+  // Verify the current user is super_admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "No autenticado" }
+  }
+  
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+  
+  if (currentProfile?.role !== "super_admin") {
+    return { success: false, error: "No tienes permisos para esta acción" }
+  }
+  
+  // Update admin theme permission
+  const { error } = await supabase
+    .from("profiles")
+    .update({ can_change_theme: canChangeTheme })
+    .eq("id", adminId)
+
+  if (error) {
+    console.error("[v0] Error updating admin theme permission:", error)
+    return { success: false, error: error.message }
+  }
+  
+  revalidatePath("/dashboard/administradores")
+  return { success: true }
+}
   email: string
   password: string
   firstName: string
