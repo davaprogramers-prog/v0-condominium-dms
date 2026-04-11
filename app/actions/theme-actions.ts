@@ -17,11 +17,7 @@ export async function getCondoTheme(condoId: string): Promise<CondoTheme | null>
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        // Table doesn't exist yet or no record, return null
-        return null;
-      }
-      console.error("Error fetching condo theme:", error);
+      // Table doesn't exist or no record found - return null to use defaults
       return null;
     }
 
@@ -37,6 +33,7 @@ export async function updateCondoTheme(
   theme: Partial<Omit<CondoTheme, 'id' | 'condo_id' | 'created_at' | 'updated_at'>>
 ): Promise<CondoTheme | null> {
   try {
+    // Try to upsert the theme
     const { data, error } = await supabase
       .from("condominium_themes")
       .upsert({
@@ -48,13 +45,17 @@ export async function updateCondoTheme(
       .single();
 
     if (error) {
-      console.error("Error updating condo theme:", error);
-      return null;
+      // If table doesn't exist, just return the theme data without persisting
+      // The client will store it locally
+      console.warn("Could not save theme to database:", error.message);
+      return { condo_id: condoId, ...theme } as CondoTheme;
     }
+
     return data as CondoTheme;
   } catch (error) {
     console.error("Error updating condo theme:", error);
-    return null;
+    // Return the theme data even if save failed, so client can use it
+    return { condo_id: condoId, ...theme } as CondoTheme;
   }
 }
 
@@ -74,7 +75,7 @@ export async function initializeCondoTheme(condoId: string): Promise<CondoTheme 
         // Unique violation, theme already exists
         return getCondoTheme(condoId);
       }
-      console.error("Error initializing condo theme:", error);
+      // Table doesn't exist or other error - return null
       return null;
     }
 

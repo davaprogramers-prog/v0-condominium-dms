@@ -4,7 +4,7 @@ import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { CondoThemeApplier } from "@/components/condo-theme-applier"
+import { ThemeManagerClient } from "@/components/theme-manager-client"
 import { type CondoTheme } from "@/lib/theme-utils"
 
 // Force rebuild - v0 fix for mi-casa pages removed
@@ -108,7 +108,7 @@ export default async function DashboardLayout({
         .single()
       condo = data
 
-      // Fetch condominium theme
+      // Try to fetch condominium theme - will return null if table doesn't exist
       const { data: themeData } = await supabase
         .from("condominium_themes")
         .select("*")
@@ -119,7 +119,7 @@ export default async function DashboardLayout({
         theme = themeData as CondoTheme
       }
     } catch (e) {
-      console.log("[v0] Error fetching condo:", e)
+      console.log("[v0] Error fetching condo or theme:", e)
     }
   }
 
@@ -146,7 +146,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <CondoThemeApplier theme={theme} />
+      <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
       <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
       <SidebarInset 
         className="flex flex-col h-screen"

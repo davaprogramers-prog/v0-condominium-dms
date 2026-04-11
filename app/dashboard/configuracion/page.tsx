@@ -3,8 +3,7 @@ import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
-import { ThemeCustomizer } from "@/components/theme-customizer"
-import { updateCondoTheme } from "@/app/actions/theme-actions"
+import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
 import { type CondoTheme } from "@/lib/theme-utils"
 
 export default async function ConfiguracionPage() {
@@ -110,14 +109,9 @@ export default async function ConfiguracionPage() {
 
       {/* Personalización de Colores - Solo Admin */}
       {isAdmin && condo && (
-        <ThemeCustomizer 
+        <ThemeCustomizerWrapper 
           condoId={condo.id} 
           currentTheme={theme as CondoTheme | null} 
-          isAdmin={isAdmin}
-          onSave={async (themeData) => {
-            "use server"
-            await updateCondoTheme(condo.id, themeData)
-          }}
         />
       )}
 
