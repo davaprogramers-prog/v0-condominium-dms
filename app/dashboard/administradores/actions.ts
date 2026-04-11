@@ -22,8 +22,16 @@ export async function deleteAdmin(userId: string) {
   if (currentProfile?.role !== "super_admin") {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
-  
-  // Delete from profiles table
+
+  try {
+    // Delete from auth first
+    await supabase.auth.admin.deleteUser(userId)
+  } catch (authError) {
+    console.error("[v0] Error deleting from auth:", authError)
+    // Continue to delete profile even if auth delete fails
+  }
+
+  // Delete from profiles table (cascades will handle related records)
   const { error: profileError } = await supabase
     .from("profiles")
     .delete()
@@ -34,7 +42,7 @@ export async function deleteAdmin(userId: string) {
     return { success: false, error: profileError.message }
   }
   
-  revalidatePath("/admin")
+  revalidatePath("/dashboard/administradores")
   return { success: true }
 }
 
