@@ -71,6 +71,8 @@ export async function updateAdminThemePermission(adminId: string, canChangeTheme
   revalidatePath("/dashboard/administradores")
   return { success: true }
 }
+
+export async function createAdmin(data: {
   email: string
   password: string
   firstName: string
