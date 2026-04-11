@@ -474,9 +474,9 @@ CREATE POLICY "themes_select" ON public.condominium_themes FOR SELECT USING (
 );
 
 CREATE POLICY "themes_update_admin" ON public.condominium_themes FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.role = 'admin')
+  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.is_admin = true)
 );
 
 CREATE POLICY "themes_insert_admin" ON public.condominium_themes FOR INSERT WITH CHECK (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.role = 'admin')
+  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.condo_id = condominium_themes.condo_id AND profiles.id = auth.uid() AND profiles.is_admin = true)
 );
