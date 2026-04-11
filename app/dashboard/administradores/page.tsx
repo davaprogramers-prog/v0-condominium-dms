@@ -86,7 +86,11 @@ export default async function AdministradoresPage() {
                     {new Date(admin.created_at).toLocaleDateString("es-CL")}
                   </td>
                   <td className="px-4 py-3">
-                    <DeleteUserButton userId={admin.id} userEmail={admin.email} />
+                    {admin.id && admin.email ? (
+                      <DeleteUserButton userId={admin.id} userEmail={admin.email} />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">N/A</span>
+                    )}
                   </td>
                 </tr>
               ))}
