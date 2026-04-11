@@ -50,7 +50,10 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="text-white hover:bg-red-700">
+        <Button 
+          size="sm" 
+          className="bg-red-600 text-white hover:bg-red-700 border-0"
+        >
           <Trash2 className="h-4 w-4 mr-2" />
           Eliminar
         </Button>
