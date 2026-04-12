@@ -177,14 +177,14 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
           <TabsTrigger value="types">Tipos ({documentTypes.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="documents">
-          <Card>
+          <Card style={{ backgroundColor: cardBgColor || undefined }}>
             <CardHeader>
-              <CardTitle className="text-base">Documentos del Condominio</CardTitle>
-              <CardDescription>Reglamentos, partes, sanciones y otros documentos</CardDescription>
+              <CardTitle style={{ color: cardTextColor }} className="text-base">Documentos del Condominio</CardTitle>
+              <CardDescription style={{ color: cardTextColor }}>Reglamentos, partes, sanciones y otros documentos</CardDescription>
             </CardHeader>
             <CardContent>
               {documents.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground" style={{ color: cardTextColor }}>
                   <FileText className="h-10 w-10" />
                   <p>No hay documentos subidos</p>
                 </div>
@@ -232,7 +232,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                                   <DropdownMenuItem onClick={() => { setEditFileUrl(doc.file_url as string); setEditOpen(doc.id as string) }}>
                                     <Edit2 className="h-4 w-4 mr-2" />Editar
                                   </DropdownMenuItem>
@@ -325,7 +325,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                               <DropdownMenuItem onClick={() => setEditTypeOpen(t.id as string)}>
                                 <Edit2 className="h-4 w-4 mr-2" />Editar
                               </DropdownMenuItem>
@@ -335,10 +335,10 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                     <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                   </DropdownMenuItem>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent>
+                                <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Eliminar Tipo de Documento</AlertDialogTitle>
-                                    <AlertDialogDescription>
+                                    <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Tipo de Documento</AlertDialogTitle>
+                                    <AlertDialogDescription style={{ color: dialogTextColor }}>
                                       Esta accion no se puede deshacer. Los documentos de este tipo quedaran sin categoria.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
@@ -355,8 +355,11 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
 
                           {/* Edit Type Dialog */}
                           <Dialog open={editTypeOpen === t.id} onOpenChange={(v) => !v && setEditTypeOpen(null)}>
-                            <DialogContent>
-                              <DialogHeader><DialogTitle>Editar Tipo de Documento</DialogTitle></DialogHeader>
+                            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                              <DialogHeader>
+                                <DialogTitle style={{ color: dialogTextColor }}>Editar Tipo de Documento</DialogTitle>
+                                <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles del tipo</DialogDescription>
+                              </DialogHeader>
                               <form
                                 action={async (fd) => {
                                   fd.set("id", t.id as string)
@@ -366,14 +369,14 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                 className="flex flex-col gap-4"
                               >
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_type_name">Nombre</Label>
-                                  <Input id="edit_type_name" name="name" defaultValue={t.name as string} required />
+                                  <Label htmlFor="edit_type_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                                  <Input id="edit_type_name" name="name" defaultValue={t.name as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_type_desc">Descripcion</Label>
-                                  <Textarea id="edit_type_desc" name="description" defaultValue={(t.description as string) || ""} />
+                                  <Label htmlFor="edit_type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                                  <Textarea id="edit_type_desc" name="description" defaultValue={(t.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                 </div>
-                                <Button type="submit">Guardar Cambios</Button>
+                                <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
