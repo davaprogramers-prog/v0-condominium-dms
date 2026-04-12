@@ -180,7 +180,9 @@ export async function ensureUserProfile(userId: string, email: string) {
 
   return { success: true, message: "Profile verificado" }
 }
+
+export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  return redirect("/auth/login")
+  redirect("/auth/login")
 }
