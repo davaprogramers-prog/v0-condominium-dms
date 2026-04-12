@@ -164,7 +164,6 @@ export default async function DashboardPage() {
     }
 
     const isAdmin = role === "admin" || role === "super_admin"
-    const isOwner = role === "propietario" || role === "owner"
 
     return (
       <div className="space-y-6">
