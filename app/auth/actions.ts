@@ -158,18 +158,13 @@ export async function ensureUserProfile(userId: string, email: string) {
       return { success: false, message: "No hay casa asignada para este email" }
     }
 
-    const user = await supabase.auth.admin.getUserById(userId)
-    if (!user.data.user) {
-      return { success: false, message: "Usuario no encontrado en auth" }
-    }
-
     const { error: insertError } = await supabase
       .from("profiles")
       .insert({
         id: userId,
         email,
-        first_name: user.data.user.user_metadata?.first_name || email.split("@")[0],
-        last_name: user.data.user.user_metadata?.last_name || "",
+        first_name: email.split("@")[0],
+        last_name: "",
         house_id: houseOwner.houses.id,
         condo_id: houseOwner.houses.condo_id,
         role: "owner",
