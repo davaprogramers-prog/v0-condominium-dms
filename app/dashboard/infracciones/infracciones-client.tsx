@@ -30,7 +30,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [filter, setFilter] = useState("todas")
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
-  const { inputBgColor, inputTextColor } = useTheme()
+  const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   const pendingCount = infractions.filter((i) => !i.is_paid).length
   const paidCount = infractions.filter((i) => i.is_paid).length
@@ -74,9 +74,9 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
               </Button>
 
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-slate-900 dark:text-white">Registrar Infraccion</DialogTitle>
+                <DialogTitle style={{ color: dialogTextColor }}>Registrar Infraccion</DialogTitle>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -88,7 +88,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label className="text-slate-900 dark:text-slate-200">Casa</Label>
+                  <Label style={{ color: dialogTextColor }}>Casa</Label>
                   <Select value={selectedHouse} onValueChange={setSelectedHouse}>
                     <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
                     <SelectContent className="dark:bg-slate-800 dark:text-white">
@@ -99,21 +99,21 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_desc" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
+                  <Label htmlFor="inf_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
                   <Textarea id="inf_desc" name="description" placeholder="Detalle de la infraccion..." required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="fine_amount" className="text-slate-900 dark:text-slate-200">Multa ({currencySymbol})</Label>
+                    <Label htmlFor="fine_amount" style={{ color: dialogTextColor }}>Multa ({currencySymbol})</Label>
                     <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="inf_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                    <Label htmlFor="inf_date" style={{ color: dialogTextColor }}>Fecha</Label>
                     <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                  <Label htmlFor="inf_notes" style={{ color: dialogTextColor }}>Notas</Label>
                   <Textarea id="inf_notes" name="notes" placeholder="Notas adicionales..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Registrar Infraccion</Button>
