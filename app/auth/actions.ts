@@ -114,7 +114,77 @@ export async function registerOwner(
   return authData.user
 }
 
-export async function signOut() {
+export async function ensureUserProfile(userId: string, email: string) {
+  const supabase = await createClient()
+
+  // Check if profile exists
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, condo_id")
+    .eq("id", userId)
+    .single()
+
+  // If profile exists and has condo_id, we're done
+  if (profile?.condo_id) {
+    return { success: true, message: "Profile ya completo" }
+  }
+
+  // If profile exists but no condo_id, get it from house_owners
+  if (profile && !profile.condo_id) {
+    const { data: houseOwner } = await supabase
+      .from("house_owners")
+      .select("houses(condo_id)")
+      .eq("user_email", email)
+      .single()
+
+    if (houseOwner?.houses?.condo_id) {
+      await supabase
+        .from("profiles")
+        .update({ condo_id: houseOwner.houses.condo_id })
+        .eq("id", userId)
+      return { success: true, message: "Profile actualizado con condo_id" }
+    }
+  }
+
+  // If profile doesn't exist, create it from house_owners
+  if (!profile) {
+    const { data: houseOwner } = await supabase
+      .from("house_owners")
+      .select("houses(id, condo_id)")
+      .eq("user_email", email)
+      .single()
+
+    if (!houseOwner) {
+      return { success: false, message: "No hay casa asignada para este email" }
+    }
+
+    const user = await supabase.auth.admin.getUserById(userId)
+    if (!user.data.user) {
+      return { success: false, message: "Usuario no encontrado en auth" }
+    }
+
+    const { error: insertError } = await supabase
+      .from("profiles")
+      .insert({
+        id: userId,
+        email,
+        first_name: user.data.user.user_metadata?.first_name || email.split("@")[0],
+        last_name: user.data.user.user_metadata?.last_name || "",
+        house_id: houseOwner.houses.id,
+        condo_id: houseOwner.houses.condo_id,
+        role: "owner",
+      })
+
+    if (insertError) {
+      console.error("[v0] Error creating profile on login:", insertError)
+      return { success: false, message: "Error al crear perfil" }
+    }
+
+    return { success: true, message: "Profile creado desde house_owners" }
+  }
+
+  return { success: true, message: "Profile verificado" }
+}
   const supabase = await createClient()
   await supabase.auth.signOut()
   return redirect("/auth/login")
