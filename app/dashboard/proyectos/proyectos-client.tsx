@@ -216,10 +216,10 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
-                              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                              <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Eliminar Proyecto: {project.name as string}</AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Proyecto: {project.name as string}</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: dialogTextColor }}>
                                     Esta accion eliminara el proyecto y todas sus cotizaciones. No se puede deshacer.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
@@ -247,8 +247,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                 {/* Edit Project Dialog */}
                 {isAdmin && (
                   <Dialog open={editProject === project.id} onOpenChange={(v) => !v && setEditProject(null)}>
-                    <DialogContent onClick={(e) => e.stopPropagation()}>
-                      <DialogHeader><DialogTitle>Editar Proyecto</DialogTitle></DialogHeader>
+                    <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} onClick={(e) => e.stopPropagation()}>
+                      <DialogHeader>
+                        <DialogTitle style={{ color: dialogTextColor }}>Editar Proyecto</DialogTitle>
+                        <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles del proyecto</DialogDescription>
+                      </DialogHeader>
                       <form
                         action={async (fd) => {
                           fd.set("id", project.id as string)
@@ -258,21 +261,21 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                         className="flex flex-col gap-4"
                       >
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_name">Nombre</Label>
-                          <Input id="edit_name" name="name" defaultValue={project.name as string} required />
+                          <Label htmlFor="edit_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                          <Input id="edit_name" name="name" defaultValue={project.name as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_type">Tipo de Mejora</Label>
-                          <Input id="edit_type" name="improvement_type" defaultValue={(project.improvement_type as string) || ""} />
+                          <Label htmlFor="edit_type" style={{ color: dialogTextColor }}>Tipo de Mejora</Label>
+                          <Input id="edit_type" name="improvement_type" defaultValue={(project.improvement_type as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_desc">Descripcion</Label>
-                          <Textarea id="edit_desc" name="description" defaultValue={(project.description as string) || ""} />
+                          <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                          <Textarea id="edit_desc" name="description" defaultValue={(project.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_location">Ubicacion / Area</Label>
+                          <Label htmlFor="edit_location" style={{ color: dialogTextColor }}>Ubicacion / Area</Label>
                           <Select name="location_description" defaultValue={(project.location_description as string) || ""}>
-                            <SelectTrigger>
+                            <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -285,10 +288,10 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                           </Select>
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_cost">Costo Estimado</Label>
-                          <Input id="edit_cost" name="estimated_cost" type="number" defaultValue={(project.estimated_cost as number) || ""} />
+                          <Label htmlFor="edit_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
+                          <Input id="edit_cost" name="estimated_cost" type="number" defaultValue={(project.estimated_cost as number) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
-                        <Button type="submit">Guardar Cambios</Button>
+                        <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                       </form>
                     </DialogContent>
                   </Dialog>
