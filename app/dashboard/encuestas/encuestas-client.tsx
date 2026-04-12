@@ -142,7 +142,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                       ) : null}
                     </div>
                     {isAdmin ? (
-                      <div className="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-md">
+                      <div style={{ backgroundColor: cardBgColor }} className="flex items-center gap-2 px-3 py-2 rounded-md border" style={{ borderColor: cardTextColor }}>
                         {isActive && (
                           <Button
                             variant="outline"
@@ -208,7 +208,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                                 <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
                                 <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                               </div>
-                              <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                              <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                             </form>
                           </DialogContent>
                         </Dialog>
