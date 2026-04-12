@@ -390,10 +390,10 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                               <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                             </DropdownMenuItem>
                                           </AlertDialogTrigger>
-                                          <AlertDialogContent>
+                                          <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                                             <AlertDialogHeader>
-                                              <AlertDialogTitle>Eliminar Cotizacion: {q.vendor_name as string}</AlertDialogTitle>
-                                              <AlertDialogDescription>
+                                              <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Cotizacion: {q.vendor_name as string}</AlertDialogTitle>
+                                              <AlertDialogDescription style={{ color: dialogTextColor }}>
                                                 Esta accion eliminara la cotizacion. No se puede deshacer.
                                               </AlertDialogDescription>
                                             </AlertDialogHeader>
@@ -412,8 +412,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
 
                                     {/* Edit Quote Dialog */}
                                     <Dialog open={editQuote === q.id} onOpenChange={(v) => !v && setEditQuote(null)}>
-                                      <DialogContent>
-                                        <DialogHeader><DialogTitle>Editar Cotizacion</DialogTitle></DialogHeader>
+                                      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                                        <DialogHeader>
+                                          <DialogTitle style={{ color: dialogTextColor }}>Editar Cotizacion</DialogTitle>
+                                          <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la cotización</DialogDescription>
+                                        </DialogHeader>
                                         <form
                                           action={async (fd) => {
                                             fd.set("id", q.id as string)
@@ -423,18 +426,18 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                           className="flex flex-col gap-4"
                                         >
                                           <div className="flex flex-col gap-2">
-                                            <Label htmlFor="edit_vendor">Proveedor</Label>
-                                            <Input id="edit_vendor" name="vendor_name" defaultValue={q.vendor_name as string} required />
+                                            <Label htmlFor="edit_vendor" style={{ color: dialogTextColor }}>Proveedor</Label>
+                                            <Input id="edit_vendor" name="vendor_name" defaultValue={q.vendor_name as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                           </div>
                                           <div className="flex flex-col gap-2">
-                                            <Label htmlFor="edit_amount">Monto</Label>
-                                            <Input id="edit_amount" name="amount" type="number" defaultValue={q.amount as number} required />
+                                            <Label htmlFor="edit_amount" style={{ color: dialogTextColor }}>Monto</Label>
+                                            <Input id="edit_amount" name="amount" type="number" defaultValue={q.amount as number} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                           </div>
                                           <div className="flex flex-col gap-2">
-                                            <Label htmlFor="edit_quote_desc">Descripcion</Label>
-                                            <Textarea id="edit_quote_desc" name="description" defaultValue={(q.description as string) || ""} />
+                                            <Label htmlFor="edit_quote_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                                            <Textarea id="edit_quote_desc" name="description" defaultValue={(q.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                           </div>
-                                          <Button type="submit">Guardar Cambios</Button>
+                                          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                                         </form>
                                       </DialogContent>
                                     </Dialog>
