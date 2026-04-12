@@ -113,10 +113,39 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
       })
 
       if (!result.success) {
-        setError(result.error || "Error al crear el usuario")
+        // Handle specific Supabase errors with user-friendly messages
+        let errorMessage = result.error || "Error al crear el usuario"
+        
+        if (errorMessage.includes("User not allowed")) {
+          errorMessage = "Este correo fue eliminado recientemente. Por favor, espera 24 horas o usa un correo diferente."
+        } else if (errorMessage.includes("already registered")) {
+          errorMessage = "Este correo ya está registrado en el sistema"
+        }
+        
+        setError(errorMessage)
         setLoading(false)
         return
       }
+
+      setOpen(false)
+      setError("")
+      setFormData({
+        email: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        role: "admin",
+        condo_id: formData.condo_id,
+        house_id: "",
+        is_owner: false,
+      })
+      router.refresh()
+    } catch (err) {
+      console.error(err)
+      setError("Error al crear el usuario")
+    } finally {
+      setLoading(false)
+    }
 
       setOpen(false)
       setFormData({
@@ -155,7 +184,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-600 p-4 text-sm text-white border border-red-700 font-semibold">
               {error}
             </div>
           )}
