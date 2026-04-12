@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, ShieldOff, Edit2, Trash2 } from "lucide-react"
+import { Plus, ShieldOff, Edit2, Trash2, EyeOff } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface TiposExoneracionesClientProps {
@@ -31,7 +31,27 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Tipo</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <EyeOff className="h-5 w-5" />
+                Nuevo Tipo de Exoneraciones
+              </Button>
+
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
               <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Tipo de Exoneracion</DialogTitle></DialogHeader>

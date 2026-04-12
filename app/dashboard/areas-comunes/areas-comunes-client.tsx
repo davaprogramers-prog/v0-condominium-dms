@@ -10,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2 } from "lucide-react"
+import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2, AreaChart, Popsicle, PlusCircle, MapPlus } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useTheme } from "@/app/dashboard/theme-context"
+import { Area } from "recharts"
 
 interface AreasComunesClientProps {
   areas: Record<string, unknown>[]
@@ -65,9 +66,27 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Área</Button>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <MapPin className="h-5 w-5" />
+                Nueva Area
+              </Button>
             </DialogTrigger>
-            <DialogContent 
+            <DialogContent
               className="border-2"
               style={{
                 backgroundColor: dialogBgColor,
@@ -159,9 +178,9 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 </div>
 
                 {/* Descripción */}
-                {area.description ? 
-                  <p className="text-sm" style={{ color: cardTextColor, opacity: 0.8 }}>{area.description as string}</p> 
-                : null}
+                {area.description ?
+                  <p className="text-sm" style={{ color: cardTextColor, opacity: 0.8 }}>{area.description as string}</p>
+                  : null}
 
                 {/* Información de tarifa */}
                 {area.is_paid && area.usage_fee ? (
@@ -194,7 +213,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent 
+                      <DialogContent
                         className="border-2"
                         style={{
                           backgroundColor: dialogBgColor,
@@ -285,7 +304,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           Eliminar
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent 
+                      <AlertDialogContent
                         className="border-2"
                         style={{
                           backgroundColor: dialogBgColor,

@@ -25,7 +25,26 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Tipo</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <Tag className="h-5 w-5" />
+                Nueva Tipo de Gasto
+              </Button>
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
               <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Tipo de Gasto</DialogTitle></DialogHeader>

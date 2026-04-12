@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Trash2, Receipt, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, Receipt, Image as ImageIcon, DollarSign } from "lucide-react"
 
 interface GastosClientProps {
   expenses: Record<string, unknown>[]
@@ -59,7 +59,7 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
                 fontWeight: "600"
               }}
             >
-              <Plus className="h-5 w-5" />
+              <DollarSign className="h-5 w-5" />
               Agregar Gasto
             </Button>
 
