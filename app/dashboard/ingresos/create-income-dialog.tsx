@@ -90,19 +90,30 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+          style={{
+            padding: "12px 24px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+          }}
+        >
+          <Plus className="h-5 w-5" />
           Agregar Ingreso
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Ingreso</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega ingresos por cuotas o ingresos variables con comprobante</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
+            <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
               {error}
             </div>
           )}
