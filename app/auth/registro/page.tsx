@@ -1,27 +1,27 @@
 import Link from "next/link"
-import { Building2 } from "lucide-react"
 import { RegistroForm } from "./registro-form"
 
 export default function RegistroPage() {
   return (
-    <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
-      <div className="flex flex-col items-center justify-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-          <Building2 className="h-6 w-6 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md space-y-8 rounded-lg border bg-white p-6 shadow-lg">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <img 
+            src="/intelicon-logo.png" 
+            alt="InteliCon Logo" 
+            className="h-16 w-auto object-contain"
+          />
+          <p className="text-sm text-gray-600">Crea tu cuenta</p>
         </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">CondoAdmin</h1>
-          <p className="text-sm text-foreground">Crea tu cuenta</p>
-        </div>
-      </div>
-      
-      <RegistroForm />
+        
+        <RegistroForm />
 
-      <div className="text-center text-sm text-foreground">
-        ¿Ya tienes cuenta?{" "}
-        <Link href="/auth/login" className="font-semibold text-primary hover:underline">
-          Inicia sesión aquí
-        </Link>
+        <div className="text-center text-sm text-gray-600">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">
+            Inicia sesión aquí
+          </Link>
+        </div>
       </div>
     </div>
   )
