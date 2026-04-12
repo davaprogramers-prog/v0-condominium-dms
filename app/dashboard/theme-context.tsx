@@ -13,6 +13,8 @@ interface ThemeContextType {
   cardTextColor: string
   dialogBgColor: string
   dialogTextColor: string
+  inputBgColor: string
+  inputTextColor: string
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -36,6 +38,8 @@ export function ThemeProvider({ children, theme }: ThemeProviderProps) {
     cardTextColor: isCustom ? theme!.card_text_color : DEFAULT_THEME.card_text_color,
     dialogBgColor: isCustom ? theme!.dialog_bg_color : DEFAULT_THEME.dialog_bg_color,
     dialogTextColor: isCustom ? theme!.dialog_text_color : DEFAULT_THEME.dialog_text_color,
+    inputBgColor: isCustom ? theme!.input_bg_color : DEFAULT_THEME.input_bg_color,
+    inputTextColor: isCustom ? theme!.input_text_color : DEFAULT_THEME.input_text_color,
   }
 
   return (

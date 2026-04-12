@@ -31,7 +31,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
   const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
   const [loadingHouses, setLoadingHouses] = useState(false)
   const router = useRouter()
-  const { dialogBgColor, dialogTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const [formData, setFormData] = useState({
     email: "",
@@ -188,7 +188,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
             <div className="space-y-2">
               <Label htmlFor="condo_id" style={{ color: dialogTextColor }}>Condominio *</Label>
               <Select value={formData.condo_id} onValueChange={handleCondoChange}>
-                <SelectTrigger id="condo_id" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
+                <SelectTrigger id="condo_id" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar condominio..." />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
@@ -199,6 +199,108 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name" style={{ color: dialogTextColor }}>Nombre *</Label>
+              <Input 
+                id="first_name" 
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                required 
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last_name" style={{ color: dialogTextColor }}>Apellido</Label>
+              <Input 
+                id="last_name" 
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" style={{ color: dialogTextColor }}>Correo electrónico *</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required 
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password" style={{ color: dialogTextColor }}>Contraseña *</Label>
+            <Input 
+              id="password" 
+              type="password" 
+              minLength={6} 
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required 
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+            />
+            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Mínimo 6 caracteres</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role" style={{ color: dialogTextColor }}>Rol *</Label>
+            <Select value={formData.role} onValueChange={(value) => {
+              if (value === "propietario") {
+                setFormData({ ...formData, role: value, is_owner: true })
+              } else {
+                setFormData({ ...formData, role: value })
+              }
+            }}>
+              <SelectTrigger id="role" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
+                <SelectItem value="admin" className="dark:text-white">Administrador</SelectItem>
+                <SelectItem value="conserje" className="dark:text-white">Conserje</SelectItem>
+                <SelectItem value="propietario" className="dark:text-white">Propietario</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.role !== "propietario" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="is_owner"
+                checked={formData.is_owner}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
+              />
+              <Label htmlFor="is_owner" className="font-normal" style={{ color: dialogTextColor }}>
+                También es Propietario
+              </Label>
+            </div>
+          )}
+
+          {(formData.is_owner || formData.role === "propietario") && houses.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="house_id" style={{ color: dialogTextColor }}>Propiedad *</Label>
+              <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
+                <SelectTrigger id="house_id" disabled={loadingHouses} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+                  <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
+                  {houses.map((house) => (
+                    <SelectItem key={house.id} value={house.id} className="dark:text-white">
+                      Casa {house.house_number}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(formData.is_owner || formData.role === "propietario") && !formData.house_id && (
+                <p className="text-xs text-destructive">La propiedad es requerida</p>
+              )}
             </div>
           )}
 

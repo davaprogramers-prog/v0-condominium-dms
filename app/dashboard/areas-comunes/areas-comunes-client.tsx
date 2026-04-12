@@ -89,11 +89,11 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
               >
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="area_name" style={{ color: dialogTextColor }}>Nombre</Label>
-                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75" />
+                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="area_desc" style={{ color: dialogTextColor }}>Descripción</Label>
-                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75" />
+                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label style={{ color: dialogTextColor }}>Foto</Label>
@@ -111,12 +111,12 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 {isPaid && (
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="usage_fee" style={{ color: dialogTextColor }}>Tarifa de uso ({currencySymbol})</Label>
-                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75" />
+                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="maintenance_responsible" style={{ color: dialogTextColor }}>Responsable de mantenimiento</Label>
-                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75" />
+                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Área</Button>
               </form>
@@ -215,8 +215,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               name="name"
                               defaultValue={area.name as string}
                               required
-                              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                              className="opacity-75"
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
                           <div className="flex flex-col gap-2">
@@ -225,8 +224,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               id="edit_desc"
                               name="description"
                               defaultValue={(area.description as string) || ""}
-                              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                              className="opacity-75"
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
                           <div className="flex flex-col gap-2">
@@ -261,8 +259,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                                 type="number"
                                 step="0.01"
                                 defaultValue={(area.usage_fee as number) || 0}
-                                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                                className="opacity-75"
+                                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                               />
                             </div>
                           )}
@@ -272,8 +269,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               id="edit_maintenance"
                               name="maintenance_responsible"
                               defaultValue={(area.maintenance_responsible as string) || ""}
-                              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                              className="opacity-75"
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
                           <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Cambios</Button>

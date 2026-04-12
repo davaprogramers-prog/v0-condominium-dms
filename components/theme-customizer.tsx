@@ -19,6 +19,7 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   const [mainBg, setMainBg] = useState('#f1f5f9')
   const [cardBg, setCardBg] = useState('#ffffff')
   const [dialogBg, setDialogBg] = useState('#1e293b')
+  const [inputBg, setInputBg] = useState('#ffffff')
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -30,6 +31,7 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
       setMainBg(currentTheme.main_bg_color ?? '#f1f5f9')
       setCardBg(currentTheme.card_bg_color ?? '#ffffff')
       setDialogBg(currentTheme.dialog_bg_color ?? '#1e293b')
+      setInputBg(currentTheme.input_bg_color ?? '#ffffff')
     }
   }, [currentTheme])
 
@@ -37,6 +39,7 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   const mainText = getContrastTextColor(mainBg)
   const cardText = getContrastTextColor(cardBg)
   const dialogText = getContrastTextColor(dialogBg)
+  const inputText = getContrastTextColor(inputBg)
 
   const handleSave = async () => {
     try {
@@ -51,6 +54,8 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         card_text_color: cardText,
         dialog_bg_color: dialogBg,
         dialog_text_color: dialogText,
+        input_bg_color: inputBg,
+        input_text_color: inputText,
       })
     } catch (error) {
       console.error('[v0] Error saving theme:', error)
@@ -184,6 +189,28 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
                     </span>
                   </div>
                   <p className="text-xs text-slate-400">{dialogBg}</p>
+                </div>
+              </div>
+
+              {/* Input Color */}
+              <div className="space-y-3">
+                <Label className="text-white font-medium text-sm">Campos de Entrada</Label>
+                <div className="space-y-2">
+                  <input
+                    type="color"
+                    value={inputBg}
+                    onChange={(e) => setInputBg(e.target.value)}
+                    className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                  />
+                  <div
+                    className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: inputBg }}
+                  >
+                    <span style={{ color: inputText }} className="text-xs font-medium">
+                      Texto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{inputBg}</p>
                 </div>
               </div>
             </div>

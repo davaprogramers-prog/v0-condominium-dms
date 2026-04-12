@@ -135,11 +135,18 @@ export default async function ConfiguracionPage() {
       )}
 
       {/* Sesión */}
-      <div className="rounded-lg border-2 border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/20 p-6">
+      <div 
+        className="rounded-lg border-2 p-6"
+        style={{
+          backgroundColor: cardBgColor,
+          color: cardTextColor,
+          borderColor: cardBgColor
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-red-100">Cerrar Sesión</h2>
-            <p className="text-sm text-slate-700 dark:text-red-300">Termina tu sesión actual</p>
+            <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Cerrar Sesión</h2>
+            <p className="text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>Termina tu sesión actual</p>
           </div>
           <LogoutButton />
         </div>

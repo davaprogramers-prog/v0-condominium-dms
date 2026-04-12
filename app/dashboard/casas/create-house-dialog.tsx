@@ -15,7 +15,7 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { dialogBgColor, dialogTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -78,7 +78,33 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
           )}
           <div className="space-y-2">
             <Label htmlFor="house_number" style={{ color: dialogTextColor }}>Número de Casa *</Label>
-            <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75" />
+            <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
+            <Input id="owner_name" name="owner_name" placeholder="Nombre completo" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario *</Label>
+            <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="owner_phone" style={{ color: dialogTextColor }}>Teléfono del Propietario</Label>
+            <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="payment_due_day" style={{ color: dialogTextColor }}>Día de Vencimiento de Pago</Label>
+            <Input 
+              id="payment_due_day" 
+              name="payment_due_day" 
+              type="number" 
+              min={1} 
+              max={28} 
+              placeholder="5" 
+              defaultValue={5}
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+            />
+            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Día del mes para vencimiento del pago (1-28). Por defecto: día 5</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
