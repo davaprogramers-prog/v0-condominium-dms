@@ -120,7 +120,7 @@ export async function ensureUserProfile(userId: string, email: string) {
   // Buscar en public.houses por owner_email
   const { data: house } = await supabase
     .from("houses")
-    .select("id, condo_id")
+    .select("id, condo_id, owner_name")
     .eq("owner_email", email)
     .single()
 
@@ -128,23 +128,37 @@ export async function ensureUserProfile(userId: string, email: string) {
     return { success: false }
   }
 
-  // UPDATE profiles: llenar condo_id y house_id si faltan
-  const { error: profileError } = await supabase
+  // Intentar INSERT en profiles (si no existe)
+  const { error: insertError } = await supabase
     .from("profiles")
-    .upsert({
+    .insert({
       id: userId,
       email,
+      first_name: house.owner_name || email.split("@")[0],
+      last_name: "",
       house_id: house.id,
       condo_id: house.condo_id,
-    }, { onConflict: "id" })
+      role: "owner",
+    })
+
+  // Si ya existe, hacer UPDATE
+  if (insertError) {
+    await supabase
+      .from("profiles")
+      .update({
+        house_id: house.id,
+        condo_id: house.condo_id,
+      })
+      .eq("id", userId)
+  }
 
   // UPDATE houses: llenar owner_user_id
-  const { error: houseError } = await supabase
+  await supabase
     .from("houses")
     .update({ owner_user_id: userId })
     .eq("id", house.id)
 
-  return { success: !profileError && !houseError }
+  return { success: true }
 }
 
 export async function signOut() {
