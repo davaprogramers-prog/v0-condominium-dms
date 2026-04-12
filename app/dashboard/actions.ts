@@ -361,6 +361,13 @@ export async function updateExemption(id: string, formData: FormData) {
   revalidatePath("/dashboard/exoneraciones")
 }
 
+export async function deleteExemption(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemptions").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
