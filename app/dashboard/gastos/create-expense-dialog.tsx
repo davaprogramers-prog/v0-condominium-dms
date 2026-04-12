@@ -12,7 +12,7 @@ import { Plus, Loader2, Upload, X, Settings, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoExpense } from "./actions"
 import { createClient } from "@/lib/supabase/client"
-import { useTheme } from "@/lib/theme-context"
+import { useTheme } from "../theme-context"
 import {
   Select,
   SelectContent,

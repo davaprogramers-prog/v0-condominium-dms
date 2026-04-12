@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Pencil, X, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { updateExpense } from "./actions"
-import { useTheme } from "@/lib/theme-context"
+import { useTheme } from "../theme-context"
 import {
   Select,
   SelectContent,
