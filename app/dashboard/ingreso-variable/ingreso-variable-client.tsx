@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { FileUpload } from "@/components/file-upload"
 import { Plus, TrendingUp, Trash2, ExternalLink } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface IngresoVariableClientProps {
   incomes: Record<string, unknown>[]
@@ -48,6 +49,7 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
 export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
   const [open, setOpen] = useState(false)
   const [receiptUrl, setReceiptUrl] = useState("")
+  const { inputBgColor, inputTextColor } = useTheme()
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   const total = incomes.reduce((a, i) => a + Number(i.amount || 0), 0)
@@ -95,21 +97,21 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
               >
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
-                  <Input id="description" name="description" placeholder="Descripcion del ingreso" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Input id="description" name="description" placeholder="Descripcion del ingreso" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto</Label>
-                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="income_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
-                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="source" className="text-slate-900 dark:text-slate-200">Fuente / Origen</Label>
-                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label className="text-slate-900 dark:text-slate-200">Respaldo</Label>

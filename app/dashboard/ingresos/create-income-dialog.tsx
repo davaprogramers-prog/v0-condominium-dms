@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Plus, Loader2, Upload, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoIncome } from "./actions"
+import { useTheme } from "@/app/dashboard/theme-context"
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [incomeType, setIncomeType] = useState<"cuota" | "variable">("cuota")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -95,8 +97,8 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">Registrar Nuevo Ingreso</DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">Agrega ingresos por cuotas o ingresos variables con comprobante</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Ingreso</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega ingresos por cuotas o ingresos variables con comprobante</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -107,7 +109,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto (CLP) *</Label>
+              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -115,13 +117,13 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                 step="0.01"
                 placeholder="0.00"
                 required
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="incomeType" className="text-slate-900 dark:text-slate-200">Tipo de Ingreso *</Label>
+              <Label htmlFor="incomeType" style={{ color: dialogTextColor }}>Tipo de Ingreso *</Label>
               <Select value={incomeType} onValueChange={(val) => setIncomeType(val as "cuota" | "variable")}>
-                <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-slate-800 dark:text-white">
@@ -134,9 +136,9 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="houseId" className="text-slate-900 dark:text-slate-200">Casa (Opcional)</Label>
+              <Label htmlFor="houseId" style={{ color: dialogTextColor }}>Casa (Opcional)</Label>
               <Select name="houseId" defaultValue="none">
-                <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar casa..." />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-slate-800 dark:text-white">
@@ -150,39 +152,40 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="incomeDate" className="text-slate-900 dark:text-slate-200">Fecha del Ingreso</Label>
+              <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso</Label>
               <Input
                 id="incomeDate"
                 name="incomeDate"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripción</Label>
+            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Detalles adicionales del ingreso..."
               rows={3}
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label className="text-slate-900 dark:text-slate-200">Comprobante (Transferencia/Depósito)</Label>
-            <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center bg-slate-50 dark:bg-slate-900">
+            <Label style={{ color: dialogTextColor }}>Comprobante (Transferencia/Depósito)</Label>
+            <div className="border-2 border-dashed rounded-lg p-4 text-center" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="max-h-40 max-w-full rounded border-2 border-slate-300 dark:border-slate-600"
+                      className="max-h-40 max-w-full rounded"
+                      style={{ border: `2px solid ${inputTextColor}` }}
                     />
                     <button
                       type="button"
@@ -192,13 +195,13 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedFile?.name}</p>
+                  <p className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>{selectedFile?.name}</p>
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-slate-400" />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
+                    <span className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -211,12 +214,12 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                 </label>
               )}
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs" style={{ color: inputTextColor, opacity: 0.6 }}>
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Registrar Ingreso
           </Button>

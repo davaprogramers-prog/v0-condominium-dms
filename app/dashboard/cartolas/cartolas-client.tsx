@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
 import { Plus, Landmark, ExternalLink } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface CartolasClientProps {
   statements: Record<string, unknown>[]
@@ -20,6 +21,7 @@ interface CartolasClientProps {
 export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
+  const { inputBgColor, inputTextColor } = useTheme()
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,7 +33,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Subir Cartola</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Subir Cartola</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
@@ -47,12 +49,12 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stmt_title" className="text-slate-900 dark:text-slate-200">Titulo</Label>
-                  <Input id="stmt_title" name="title" placeholder="Ej: Cartola Enero 2026" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Label htmlFor="stmt_title" style={{ color: "#1e293b" }}>Titulo</Label>
+                  <Input id="stmt_title" name="title" placeholder="Ej: Cartola Enero 2026" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="statement_date" className="text-slate-900 dark:text-slate-200">Fecha de la Cartola</Label>
-                  <Input id="statement_date" name="statement_date" type="date" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Input id="statement_date" name="statement_date" type="date" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label className="text-slate-900 dark:text-slate-200">Archivo PDF</Label>
@@ -60,7 +62,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="stmt_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
-                  <Textarea id="stmt_notes" name="notes" placeholder="Notas opcionales..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Textarea id="stmt_notes" name="notes" placeholder="Notas opcionales..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <Button type="submit" disabled={!fileUrl} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cartola</Button>
               </form>

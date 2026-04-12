@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
 import { Plus, DollarSign, Check, X, Image as ImageIcon } from "lucide-react"
 import { MONTHS_ES } from "@/lib/constants"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface IngresosClientProps {
   payments: Record<string, unknown>[]
@@ -32,6 +33,7 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
   const [receiptUrl, setReceiptUrl] = useState("")
   const [previewImg, setPreviewImg] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState("todos")
+  const { inputBgColor, inputTextColor } = useTheme()
 
   const totalVerified = payments
     .filter((p) => p.status === "verificado")
@@ -77,7 +79,7 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               <div className="flex flex-col gap-2">
                 <Label className="text-slate-900 dark:text-slate-200">Casa</Label>
                 <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                     <SelectValue placeholder="Seleccionar casa" />
                   </SelectTrigger>
                   <SelectContent className="dark:bg-slate-800 dark:text-white">
@@ -93,7 +95,7 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
                 <div className="flex flex-col gap-2">
                   <Label className="text-slate-900 dark:text-slate-200">Mes</Label>
                   <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                    <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                    <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue /></SelectTrigger>
                     <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {MONTHS_ES.map((m, i) => (
                         <SelectItem key={i} value={(i + 1).toString()}>{m}</SelectItem>
@@ -104,7 +106,7 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
                 <div className="flex flex-col gap-2">
                   <Label className="text-slate-900 dark:text-slate-200">Año</Label>
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                    <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue /></SelectTrigger>
                     <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {[2024, 2025, 2026].map((y) => (
                         <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
@@ -116,17 +118,17 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto</Label>
-                  <Input id="amount" name="amount" type="number" step="0.01" defaultValue={commonExpenseAmount} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Input id="amount" name="amount" type="number" step="0.01" defaultValue={commonExpenseAmount} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="payment_date" className="text-slate-900 dark:text-slate-200">Fecha de Pago</Label>
-                  <Input id="payment_date" name="payment_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                  <Input id="payment_date" name="payment_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <Label className="text-slate-900 dark:text-slate-200">Método de Pago</Label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue /></SelectTrigger>
                   <SelectContent className="dark:bg-slate-800 dark:text-white">
                     <SelectItem value="transferencia">Transferencia</SelectItem>
                     <SelectItem value="deposito">Depósito</SelectItem>
@@ -142,9 +144,9 @@ export function IngresosClient({ payments, houses, currencySymbol, commonExpense
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
-                <Textarea id="notes" name="notes" placeholder="Notas adicionales..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                <Textarea id="notes" name="notes" placeholder="Notas adicionales..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
               </div>
-              <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Pago</Button>
+              <Button type="submit" disabled={!selectedHouse} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white">Guardar Pago</Button>
             </form>
           </DialogContent>
         </Dialog>
