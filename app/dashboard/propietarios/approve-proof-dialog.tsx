@@ -35,7 +35,7 @@ export function ApproveProofDialog({
   const [action, setAction] = useState<"approve" | "reject" | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const { cardBgColor, cardTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const paymentType = proof.payment_type || "gastos_comunes"
   const isGastosComunes = paymentType === "gastos_comunes"
@@ -212,9 +212,9 @@ export function ApproveProofDialog({
           Revisar Comprobante
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+          <DialogTitle style={{ color: dialogTextColor }} className="flex items-center gap-2">
             Revisar Comprobante de Pago
             {!isGastosComunes && (
               <Badge variant="destructive" className="text-xs">
@@ -223,7 +223,7 @@ export function ApproveProofDialog({
               </Badge>
             )}
           </DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
             Casa #{house.house_number} - {house.owner_name}
           </DialogDescription>
         </DialogHeader>
@@ -242,7 +242,7 @@ export function ApproveProofDialog({
 
           {/* Receipt Image */}
           <div className="space-y-2">
-            <Label className="text-slate-900 dark:text-slate-200">Comprobante Enviado</Label>
+            <Label style={{ color: dialogTextColor }}>Comprobante Enviado</Label>
             {proof.receipt_url && (
               <div className="relative">
                 <img
@@ -263,7 +263,7 @@ export function ApproveProofDialog({
               </div>
             )}
             {proof.notes && (
-              <p className="text-sm text-slate-600 dark:text-slate-400">Nota: {proof.notes}</p>
+              <p style={{ color: dialogTextColor, opacity: 0.7 }} className="text-sm">Nota: {proof.notes}</p>
             )}
           </div>
 
@@ -318,15 +318,15 @@ export function ApproveProofDialog({
           </Button>
 
           {/* Reject Form */}
-          <div className="pt-3 border-t border-slate-300 dark:border-slate-600">
+          <div style={{ borderColor: dialogTextColor, borderTop: `1px solid ${dialogTextColor}`, opacity: 0.3 }} className="pt-3">
             <form onSubmit={handleReject} className="space-y-2">
-              <Label htmlFor="rejection_reason" className="text-sm text-slate-900 dark:text-slate-200">Motivo de Rechazo (opcional)</Label>
+              <Label htmlFor="rejection_reason" style={{ color: dialogTextColor }} className="text-sm">Motivo de Rechazo (opcional)</Label>
               <Textarea
                 id="rejection_reason"
                 name="rejection_reason"
                 placeholder="Ej: Monto no coincide, imagen ilegible..."
                 rows={2}
-                className="text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor === "#1e293b" ? "#0f172a" : "#f8fafc", color: dialogTextColor }}
               />
               <Button
                 type="submit"

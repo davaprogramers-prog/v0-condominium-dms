@@ -45,7 +45,7 @@ export function UploadProofDialog({
   const [notes, setNotes] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const { cardBgColor, cardTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const totalAmount = paymentType === "gastos_comunes" 
     ? fixedAmount + variableAmount 
@@ -154,10 +154,10 @@ export function UploadProofDialog({
           {buttonLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">{dialogTitle}</DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">
+          <DialogTitle style={{ color: dialogTextColor }}>{dialogTitle}</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
             Sube la imagen del comprobante de transferencia o deposito
           </DialogDescription>
         </DialogHeader>
@@ -203,7 +203,7 @@ export function UploadProofDialog({
 
           {/* File Upload */}
           <div className="space-y-2">
-            <Label className="text-slate-900 dark:text-slate-200">Imagen del Comprobante *</Label>
+            <Label style={{ color: dialogTextColor }}>Imagen del Comprobante *</Label>
             <input
               ref={fileInputRef}
               type="file"
@@ -246,7 +246,7 @@ export function UploadProofDialog({
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-slate-900 dark:text-slate-200">Notas (opcional)</Label>
+            <Label htmlFor="notes" style={{ color: dialogTextColor }}>Notas (opcional)</Label>
             <Textarea
               id="notes"
               name="notes"
@@ -254,7 +254,7 @@ export function UploadProofDialog({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ej: Transferencia desde Banco Estado"
               rows={2}
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor === "#1e293b" ? "#0f172a" : "#f8fafc", color: dialogTextColor }}
             />
           </div>
 
