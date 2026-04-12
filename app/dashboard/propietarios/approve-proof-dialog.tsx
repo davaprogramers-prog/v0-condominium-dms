@@ -230,7 +230,7 @@ export function ApproveProofDialog({
 
         <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
+            <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
               {error}
             </div>
           )}
