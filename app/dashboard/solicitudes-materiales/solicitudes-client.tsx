@@ -162,25 +162,27 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
           </div>
           {(isAdmin || userRole === 'conserje') && (
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <LayoutGrid className="h-5 w-5" />
-                Nueva Solicitud
-              </Button>
+              <DialogTrigger asChild>
+                <Button
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    padding: "12px 24px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "2px solid #1d4ed8",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                    cursor: "pointer",
+                    fontWeight: "600"
+                  }}
+                >
+                  <LayoutGrid className="h-5 w-5" />
+                  Nueva Solicitud
+                </Button>
+              </DialogTrigger>
               <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>

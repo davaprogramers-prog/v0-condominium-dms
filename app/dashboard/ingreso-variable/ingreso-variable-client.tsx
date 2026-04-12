@@ -49,7 +49,7 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
 export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
   const [open, setOpen] = useState(false)
   const [receiptUrl, setReceiptUrl] = useState("")
-  const { inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   const total = incomes.reduce((a, i) => a + Number(i.amount || 0), 0)
@@ -100,9 +100,9 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                 Nuevo Ingreso Variable
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-slate-900 dark:text-white">Registrar Ingreso Variable</DialogTitle>
+                <DialogTitle style={{ color: dialogTextColor }}>Registrar Ingreso Variable</DialogTitle>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -114,25 +114,25 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
+                  <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripcion</Label>
                   <Input id="description" name="description" placeholder="Descripcion del ingreso" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto</Label>
+                    <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto</Label>
                     <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="income_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                    <Label htmlFor="income_date" style={{ color: dialogTextColor }}>Fecha</Label>
                     <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="source" className="text-slate-900 dark:text-slate-200">Fuente / Origen</Label>
+                  <Label htmlFor="source" style={{ color: dialogTextColor }}>Fuente / Origen</Label>
                   <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label className="text-slate-900 dark:text-slate-200">Respaldo</Label>
+                  <Label style={{ color: dialogTextColor }}>Respaldo</Label>
                   <FileUpload bucket="receipts" onUpload={setReceiptUrl} label="Subir comprobante" />
                 </div>
                 <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Ingreso</Button>
