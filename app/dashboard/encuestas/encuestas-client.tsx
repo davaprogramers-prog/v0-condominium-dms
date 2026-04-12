@@ -41,8 +41,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Encuestas</h1>
-          <p className="text-sm text-muted-foreground">{surveys.length} encuestas en total</p>
+          <h1 className="text-2xl font-bold" style={{ color: cardTextColor }}>Encuestas</h1>
+          <p className="text-sm text-muted-foreground" style={{ color: cardTextColor }}>{surveys.length} encuestas en total</p>
         </div>
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={(v) => { setOpenNew(v); if (!v) setOptions(["", ""]) }}>
@@ -145,7 +145,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                 backgroundColor: isActive ? "#22c55e" : "#ef4444",
                 width: "100%"
               }}></div>
-              <CardHeader className="cursor-pointer" onClick={() => setExpandedProject !== undefined && setExpandedProject(survey.id as string)}>
+              <CardHeader className="pb-3">
                 <div className="flex justify-between items-start gap-4 flex-wrap">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -159,7 +159,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                     ) : null}
                   </div>
                   {isAdmin ? (
-                    <div style={{ backgroundColor: cardBgColor }} className="flex items-center gap-2 px-3 py-2 rounded-md border" style={{ borderColor: cardTextColor }}>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-md border" style={{ backgroundColor: cardBgColor, borderColor: cardTextColor }}>
                       {isActive && (
                         <Button
                           variant="outline"
@@ -175,7 +175,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                           <DropdownMenuItem onClick={() => setEditOpen(survey.id as string)}>
                             <Edit2 className="h-4 w-4 mr-2" />Editar
                           </DropdownMenuItem>
@@ -286,8 +286,5 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
           )
         })}
     </div>
-  )
-}
-    </div >
   )
 }
