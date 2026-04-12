@@ -240,6 +240,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                   .map((opt) => {
                     const optVotes = (opt.survey_votes as Record<string, unknown>[])?.length || 0
                     const percentage = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0
+                    console.log("[v0] Option:", opt.option_text, "Votes:", optVotes, "Total:", totalVotes, "Percentage:", percentage)
                     const isUserVote = (opt.survey_votes as Record<string, unknown>[])?.some(
                       (v) => v.voter_id === userId
                     )
@@ -272,13 +273,14 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                             {optVotes} voto{optVotes !== 1 ? "s" : ""} ({percentage}%)
                           </span>
                         </div>
-                        <Progress 
-                          value={percentage} 
-                          className="h-2" 
-                          style={{
-                            backgroundColor: cardBgColor === '#ffffff' || cardBgColor === 'rgb(255, 255, 255)' ? '#e5e7eb' : '#2d3748'
-                          }} 
-                        />
+                        <div className="w-full bg-gray-300 rounded-full h-2 overflow-hidden" style={{
+                          backgroundColor: cardBgColor === '#ffffff' || cardBgColor === 'rgb(255, 255, 255)' ? '#e5e7eb' : '#2d3748'
+                        }}>
+                          <div 
+                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
                       </div>
                     )
                   })}
