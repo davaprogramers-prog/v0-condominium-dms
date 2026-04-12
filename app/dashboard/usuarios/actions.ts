@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 interface CreateUserParams {
   email: string
@@ -39,8 +40,9 @@ export async function createUserWithRole(params: CreateUserParams) {
       return { success: false, error: "Condominio no especificado" }
     }
 
-    // Create auth user using service role
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // Create auth user using ADMIN client with service role key
+    const adminClient = createAdminClient()
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: params.email,
       password: params.password,
       email_confirm: true,
