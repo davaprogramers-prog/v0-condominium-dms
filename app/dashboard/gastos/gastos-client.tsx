@@ -41,30 +41,30 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
         </div>
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <Plus className="h-5 w-5" />
-                Agregar Gasto
-              </Button>
 
 
-            </DialogTrigger>
+            <Button
+              style={{
+                backgroundColor: "#2563eb",
+                color: "white",
+                padding: "12px 24px",
+                fontSize: "16px",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #1d4ed8",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                cursor: "pointer",
+                fontWeight: "600"
+              }}
+            >
+              <Plus className="h-5 w-5" />
+              Agregar Gasto
+            </Button>
+
+
+
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Registrar Gasto</DialogTitle>

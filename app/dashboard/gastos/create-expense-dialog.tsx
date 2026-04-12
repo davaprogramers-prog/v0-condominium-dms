@@ -126,8 +126,23 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button
+          style={{
+            backgroundColor: "#2563eb",
+            color: "white",
+            padding: "12px 24px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "2px solid #1d4ed8",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+            cursor: "pointer",
+            fontWeight: "600"
+          }}
+        >
+          <Plus className="h-5 w-5" />
           Agregar Gasto
         </Button>
       </DialogTrigger>
@@ -218,8 +233,8 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             <div className="flex items-center justify-between">
               <Label style={{ color: dialogTextColor }}>Logo del Proveedor</Label>
               {isSuperAdmin && (
-                <Link 
-                  href="/dashboard/gastos/logos" 
+                <Link
+                  href="/dashboard/gastos/logos"
                   className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                 >
                   <Settings className="h-3 w-3" />
