@@ -116,10 +116,15 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
         // Handle specific Supabase errors with user-friendly messages
         let errorMessage = result.error || "Error al crear el usuario"
         
-        if (errorMessage.includes("User not allowed")) {
+        // Only show "recently deleted" message if it specifically mentions a recently deleted user
+        // "User not allowed" can mean different things, so we need to be more specific
+        if (errorMessage.includes("recently deleted") || errorMessage.includes("still being processed")) {
           errorMessage = "Este correo fue eliminado recientemente. Por favor, espera 24 horas o usa un correo diferente."
         } else if (errorMessage.includes("already registered")) {
           errorMessage = "Este correo ya está registrado en el sistema"
+        } else if (errorMessage.includes("User not allowed")) {
+          // Generic "User not allowed" - could be various reasons
+          errorMessage = "No se pudo crear este usuario. Por favor, verifica los datos e intenta de nuevo."
         }
         
         setError(errorMessage)
@@ -156,7 +161,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
           Crear Usuario
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg max-h-[90vh] flex flex-col [&_button[aria-label='Close']]:text-white [&_button[aria-label='Close']]:hover:bg-slate-700/50">
         <DialogHeader>
           <DialogTitle className="text-slate-900 dark:text-white">Crear Usuario</DialogTitle>
           <DialogDescription className="text-slate-600 dark:text-slate-400">
