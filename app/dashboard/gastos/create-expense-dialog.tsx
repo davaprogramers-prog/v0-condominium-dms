@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Loader2, Upload, X, Settings, Building2 } from "lucide-react"
+import { Plus, Loader2, Upload, X, Settings, Building2, DollarSign, CreditCard, DollarSignIcon, BadgeDollarSign } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoExpense } from "./actions"
 import { createClient } from "@/lib/supabase/client"
@@ -142,7 +142,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             fontWeight: "600"
           }}
         >
-          <Plus className="h-5 w-5" />
+          <BadgeDollarSign className="h-5 w-5" />
           Agregar Gasto
         </Button>
       </DialogTrigger>
