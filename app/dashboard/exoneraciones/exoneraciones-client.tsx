@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { Plus, ShieldOff, Edit2, Trash2 } from "lucide-react"
+import { Plus, ShieldOff, Edit2, Trash2, Shield } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface ExoneracionesClientProps {
@@ -88,9 +88,25 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
               </DialogContent>
             </Dialog>
             <Dialog open={openExemption} onOpenChange={setOpenExemption}>
-              <DialogTrigger asChild>
-                <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Exoneracion</Button>
-              </DialogTrigger>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <ShieldOff className="h-5 w-5" />
+                Nueva Exoneracion
+              </Button>
               <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
                 <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Crear Exoneracion</DialogTitle></DialogHeader>
                 <form

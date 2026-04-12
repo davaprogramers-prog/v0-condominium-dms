@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Loader2, CheckCircle2 } from "lucide-react"
+import { Plus, Loader2, CheckCircle2, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createConcierge } from "./actions"
 
@@ -42,12 +42,12 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
       })
 
       // Show success message
-      const message = result.alreadyExists 
+      const message = result.alreadyExists
         ? `${firstName} ${lastName} ya estaba asignado`
         : result.wasReassigned
-        ? `${firstName} ${lastName} ha sido reasignado`
-        : `${firstName} ${lastName} ha sido creado`
-      
+          ? `${firstName} ${lastName} ha sido reasignado`
+          : `${firstName} ${lastName} ha sido creado`
+
       setSuccessMessage(message)
       setSuccess(true)
 
@@ -68,18 +68,31 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Conserje
-        </Button>
-      </DialogTrigger>
+      <Button
+        style={{
+          backgroundColor: "#2563eb",
+          color: "white",
+          padding: "12px 24px",
+          fontSize: "16px",
+          borderRadius: "8px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          border: "2px solid #1d4ed8",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+          cursor: "pointer",
+          fontWeight: "600"
+        }}
+      >
+        <Users className="h-5 w-5" />
+        Agregar Conserje
+      </Button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Crear Nuevo Conserje</DialogTitle>
           <DialogDescription>Agrega un nuevo conserje para el condominio</DialogDescription>
         </DialogHeader>
-        
+
         {success && (
           <div className="animate-in fade-in duration-300 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
