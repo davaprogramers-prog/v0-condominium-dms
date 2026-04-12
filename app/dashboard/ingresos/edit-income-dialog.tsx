@@ -90,7 +90,7 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Editar Ingreso</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los detalles del ingreso y el comprobante</DialogDescription>
