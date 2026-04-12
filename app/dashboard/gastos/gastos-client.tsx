@@ -43,15 +43,19 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                 style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
                   padding: "12px 24px",
                   fontSize: "16px",
                   borderRadius: "8px",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
                 }}
               >
                 <Plus className="h-5 w-5" />
