@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { createExemption, createExemptionType, updateExemption, updateExemptionType, deleteExemption, deleteExemptionType } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,6 +35,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
   const [editingType, setEditingType] = useState<string | null>(null)
   const [deletingExemption, setDeletingExemption] = useState<string | null>(null)
   const [deletingType, setDeletingType] = useState<string | null>(null)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleDeleteExemption = async (id: string) => {
     setDeletingExemption(id)
@@ -72,43 +74,45 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-                <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Nuevo Tipo de Exoneracion</DialogTitle></DialogHeader>
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Nuevo Tipo de Exoneracion</DialogTitle></DialogHeader>
                 <form action={async (fd) => { await createExemptionType(fd); setOpenType(false) }} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="type_name" className="text-slate-900 dark:text-slate-200">Nombre</Label>
-                    <Input id="type_name" name="name" placeholder="Ej: Servicio de vigilancia" required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Label htmlFor="type_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                    <Input id="type_name" name="name" placeholder="Ej: Servicio de vigilancia" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="type_desc" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
-                    <Textarea id="type_desc" name="description" placeholder="Descripcion del tipo..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Label htmlFor="type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                    <Textarea id="type_desc" name="description" placeholder="Descripcion del tipo..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Tipo</Button>
                 </form>
               </DialogContent>
             </Dialog>
             <Dialog open={openExemption} onOpenChange={setOpenExemption}>
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <ShieldOff className="h-5 w-5" />
-                Nueva Exoneracion
-              </Button>
-              <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-                <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Crear Exoneracion</DialogTitle></DialogHeader>
+              <DialogTrigger asChild>
+                <Button
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    padding: "12px 24px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "2px solid #1d4ed8",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                    cursor: "pointer",
+                    fontWeight: "600"
+                  }}
+                >
+                  <ShieldOff className="h-5 w-5" />
+                  Nueva Exoneracion
+                </Button>
+              </DialogTrigger>
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Exoneracion</DialogTitle></DialogHeader>
                 <form
                   action={async (fd) => {
                     fd.set("house_id", selectedHouse)
@@ -123,10 +127,10 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                   className="flex flex-col gap-4"
                 >
                   <div className="flex flex-col gap-2">
-                    <Label className="text-slate-900 dark:text-slate-200">Casa</Label>
+                    <Label style={{ color: dialogTextColor }}>Casa</Label>
                     <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                      <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-slate-800">
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
+                      <SelectContent className="dark:bg-slate-800">
                         {houses.map((h) => (
                           <SelectItem key={h.id as string} value={h.id as string}>
                             {h.house_number as string}
@@ -136,10 +140,10 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                     </Select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label className="text-slate-900 dark:text-slate-200">Tipo de Exoneracion</Label>
+                    <Label style={{ color: dialogTextColor }}>Tipo de Exoneracion</Label>
                     <Select value={selectedType} onValueChange={setSelectedType}>
-                      <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-slate-800">
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
+                      <SelectContent className="dark:bg-slate-800">
                         {exemptionTypes.map((t) => (
                           <SelectItem key={t.id as string} value={t.id as string}>
                             {t.name as string}
@@ -149,28 +153,28 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                     </Select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="percentage" className="text-slate-900 dark:text-slate-200">Porcentaje de exoneracion (%)</Label>
-                    <Input id="percentage" name="percentage" type="number" min={1} max={100} defaultValue={100} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Label htmlFor="percentage" style={{ color: dialogTextColor }}>Porcentaje de exoneracion (%)</Label>
+                    <Input id="percentage" name="percentage" type="number" min={1} max={100} defaultValue={100} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <div className="flex items-center gap-3">
                     <Switch id="is_permanent" checked={isPermanent} onCheckedChange={setIsPermanent} />
-                    <Label htmlFor="is_permanent" className="text-slate-900 dark:text-slate-200">Exoneracion permanente</Label>
+                    <Label htmlFor="is_permanent" style={{ color: dialogTextColor }}>Exoneracion permanente</Label>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
-                      <Label htmlFor="start_date" className="text-slate-900 dark:text-slate-200">Desde</Label>
-                      <Input id="start_date" name="start_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                      <Label htmlFor="start_date" style={{ color: dialogTextColor }}>Desde</Label>
+                      <Input id="start_date" name="start_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                     </div>
                     {!isPermanent && (
                       <div className="flex flex-col gap-2">
-                        <Label htmlFor="end_date" className="text-slate-900 dark:text-slate-200">Hasta</Label>
-                        <Input id="end_date" name="end_date" type="date" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                        <Label htmlFor="end_date" style={{ color: dialogTextColor }}>Hasta</Label>
+                        <Input id="end_date" name="end_date" type="date" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="reason" className="text-slate-900 dark:text-slate-200">Razon</Label>
-                    <Textarea id="reason" name="reason" placeholder="Razon de la exoneracion..." className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <Label htmlFor="reason" style={{ color: dialogTextColor }}>Razon</Label>
+                    <Textarea id="reason" name="reason" placeholder="Razon de la exoneracion..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <Button type="submit" disabled={!selectedHouse || !selectedType} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Exoneracion</Button>
                 </form>
