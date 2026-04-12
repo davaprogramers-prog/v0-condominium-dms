@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { createSurvey, voteSurvey, closeSurvey, updateSurvey, deleteSurvey } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +27,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
   const [options, setOptions] = useState<string[]>(["", ""])
   const [voting, setVoting] = useState<string | null>(null)
   const [editOpen, setEditOpen] = useState<string | null>(null)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const addOption = () => setOptions([...options, ""])
   const removeOption = (i: number) => setOptions(options.filter((_, idx) => idx !== i))
@@ -65,8 +67,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                 Nueva Encuesta
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader><DialogTitle>Crear Encuesta</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Encuesta</DialogTitle></DialogHeader>
               <form
                 action={async (fd) => {
                   const validOptions = options.filter((o) => o.trim())
@@ -78,28 +80,29 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="title">Titulo</Label>
-                  <Input id="title" name="title" placeholder="Pregunta o tema de la encuesta" required />
+                  <Label htmlFor="title" style={{ color: dialogTextColor }}>Titulo</Label>
+                  <Input id="title" name="title" placeholder="Pregunta o tema de la encuesta" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripcion</Label>
-                  <Textarea id="description" name="description" placeholder="Detalle adicional..." />
+                  <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripcion</Label>
+                  <Textarea id="description" name="description" placeholder="Detalle adicional..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="closes_at">Cierre automatico (opcional)</Label>
-                  <Input id="closes_at" name="closes_at" type="datetime-local" />
+                  <Label htmlFor="closes_at" style={{ color: dialogTextColor }}>Cierre automatico (opcional)</Label>
+                  <Input id="closes_at" name="closes_at" type="datetime-local" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Opciones de voto</Label>
+                  <Label style={{ color: dialogTextColor }}>Opciones de voto</Label>
                   {options.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input
                         value={opt}
                         onChange={(e) => updateOption(i, e.target.value)}
                         placeholder={`Opcion ${i + 1}`}
+                        style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                       />
                       {options.length > 2 && (
-                        <button type="button" onClick={() => removeOption(i)} className="text-muted-foreground hover:text-destructive">
+                        <button type="button" onClick={() => removeOption(i)} style={{ color: inputTextColor }} className="hover:text-destructive">
                           <X className="h-4 w-4" />
                         </button>
                       )}
