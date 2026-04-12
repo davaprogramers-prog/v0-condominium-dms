@@ -327,7 +327,7 @@ function HouseCard({
 
                 {/* Fines Badge */}
                 {house.totalFines > 0 && (
-                  <Badge variant="destructive">
+                  <Badge className="bg-red-600 hover:bg-red-700 text-white">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Multa: {currencySymbol}{house.totalFines.toLocaleString("es-CL")}
                   </Badge>
