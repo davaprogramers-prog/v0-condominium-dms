@@ -171,7 +171,12 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                         {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString()}` : "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={inf.is_paid ? "default" : "destructive"}>
+                        <Badge 
+                          className={inf.is_paid 
+                            ? "bg-green-600 text-white border-green-600 hover:bg-green-700" 
+                            : "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
+                          }
+                        >
                           {inf.is_paid ? "Pagada" : "Pendiente"}
                         </Badge>
                       </TableCell>
