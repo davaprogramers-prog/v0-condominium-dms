@@ -115,65 +115,73 @@ export async function registerOwner(
 }
 
 export async function ensureUserProfile(userId: string, email: string) {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  console.log("[v0] ensureUserProfile start:", userId, email)
+    console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
 
-  // Buscar en public.houses por owner_email
-  const { data: house, error: houseErr } = await supabase
-    .from("houses")
-    .select("id, condo_id, owner_name")
-    .eq("owner_email", email)
-    .single()
+    // Buscar en public.houses por owner_email
+    const { data: house, error: houseErr } = await supabase
+      .from("houses")
+      .select("id, condo_id, owner_name")
+      .eq("owner_email", email)
+      .single()
 
-  console.log("[v0] house query:", house, houseErr)
+    console.log("[v0] House query - found:", !!house, "error:", houseErr?.message)
 
-  if (!house) {
-    console.log("[v0] No house found for email:", email)
-    return { success: false }
-  }
+    if (!house) {
+      console.log("[v0] No house found for email:", email)
+      return { success: false }
+    }
 
-  console.log("[v0] Attempting INSERT into profiles...")
+    console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
 
-  // Intentar INSERT en profiles (si no existe)
-  const { error: insertError, data: insertData } = await supabase
-    .from("profiles")
-    .insert({
-      id: userId,
-      email,
-      first_name: house.owner_name || email.split("@")[0],
-      last_name: "",
-      house_id: house.id,
-      condo_id: house.condo_id,
-      role: "owner",
-    })
-
-  console.log("[v0] INSERT result:", { insertData, insertError: insertError?.message })
-
-  // Si ya existe, hacer UPDATE
-  if (insertError) {
-    console.log("[v0] INSERT failed, attempting UPDATE...")
-    const { error: updateErr } = await supabase
+    // Intentar INSERT en profiles
+    console.log("[v0] Attempting INSERT into profiles...")
+    const { error: insertError, data: insertData } = await supabase
       .from("profiles")
-      .update({
+      .insert({
+        id: userId,
+        email,
+        first_name: house.owner_name || email.split("@")[0],
+        last_name: "",
         house_id: house.id,
         condo_id: house.condo_id,
+        role: "owner",
       })
-      .eq("id", userId)
-    console.log("[v0] UPDATE result:", updateErr?.message)
+
+    console.log("[v0] INSERT - error:", insertError?.message, "code:", insertError?.code, "data:", insertData)
+
+    // Si ya existe, hacer UPDATE
+    if (insertError) {
+      console.log("[v0] INSERT failed with code", insertError.code, "- attempting UPDATE...")
+      const { error: updateErr, data: updateData } = await supabase
+        .from("profiles")
+        .update({
+          house_id: house.id,
+          condo_id: house.condo_id,
+        })
+        .eq("id", userId)
+      console.log("[v0] UPDATE - error:", updateErr?.message, "data:", updateData)
+    } else {
+      console.log("[v0] INSERT SUCCESS - Profile created")
+    }
+
+    // UPDATE houses con owner_user_id
+    console.log("[v0] Updating houses table with owner_user_id:", userId)
+    const { error: houseUpdateErr } = await supabase
+      .from("houses")
+      .update({ owner_user_id: userId })
+      .eq("id", house.id)
+
+    console.log("[v0] House update - error:", houseUpdateErr?.message)
+    console.log("[v0] ensureUserProfile COMPLETE")
+
+    return { success: true }
+  } catch (err: any) {
+    console.error("[v0] ensureUserProfile EXCEPTION:", err?.message, err)
+    return { success: false, error: err?.message }
   }
-
-  // UPDATE houses: llenar owner_user_id
-  console.log("[v0] Updating houses with owner_user_id...")
-  const { error: houseUpdateErr } = await supabase
-    .from("houses")
-    .update({ owner_user_id: userId })
-    .eq("id", house.id)
-
-  console.log("[v0] House update result:", houseUpdateErr?.message)
-  console.log("[v0] ensureUserProfile complete")
-
-  return { success: true }
 }
 
 export async function signOut() {
