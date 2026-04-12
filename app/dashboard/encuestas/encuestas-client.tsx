@@ -27,7 +27,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
   const [options, setOptions] = useState<string[]>(["", ""])
   const [voting, setVoting] = useState<string | null>(null)
   const [editOpen, setEditOpen] = useState<string | null>(null)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const addOption = () => setOptions([...options, ""])
   const removeOption = (i: number) => setOptions(options.filter((_, idx) => idx !== i))
@@ -122,37 +122,23 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
       </div>
 
       {surveys.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
-            <Vote className="h-10 w-10" />
-            <p>No hay encuestas registradas</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {surveys.map((survey) => {
-            const surveyOptions = (survey.survey_options as Record<string, unknown>[]) || []
-            const totalVotes = surveyOptions.reduce(
-              (acc, opt) => acc + ((opt.survey_votes as Record<string, unknown>[])?.length || 0), 0
-            )
-            const userVoted = surveyOptions.some((opt) =>
-              (opt.survey_votes as Record<string, unknown>[])?.some((v) => v.voter_id === userId)
-            )
-            const isActive = survey.is_active as boolean
-
-            return (
-              <Card key={survey.id as string} className={!isActive ? "opacity-70" : ""}>
+              <Card style={{ backgroundColor: cardBgColor || undefined }} className="overflow-hidden">
+                <div style={{ 
+                  height: "4px", 
+                  backgroundColor: isActive ? "#22c55e" : "#ef4444",
+                  width: "100%"
+                }}></div>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">{survey.title as string}</CardTitle>
+                  <div className="flex justify-between items-start gap-4 flex-wrap">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle style={{ color: cardTextColor }}>{survey.title as string}</CardTitle>
                         <Badge variant={isActive ? "default" : "secondary"}>
                           {isActive ? "Activa" : "Cerrada"}
                         </Badge>
                       </div>
                       {survey.description ? (
-                        <CardDescription className="mt-1">{survey.description as string}</CardDescription>
+                        <CardDescription style={{ color: cardTextColor }} className="mt-1">{survey.description as string}</CardDescription>
                       ) : null}
                     </div>
                     {isAdmin ? (
@@ -182,10 +168,10 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: dialogTextColor }}>
                                     Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
@@ -204,8 +190,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
 
                         {/* Edit Dialog */}
                         <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                          <DialogContent>
-                            <DialogHeader><DialogTitle>Editar Encuesta</DialogTitle></DialogHeader>
+                          <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                            <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle></DialogHeader>
                             <form
                               action={async (fd) => {
                                 fd.set("id", survey.id as string)
@@ -215,14 +201,14 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                               className="flex flex-col gap-4"
                             >
                               <div className="flex flex-col gap-2">
-                                <Label htmlFor="edit_title">Titulo</Label>
-                                <Input id="edit_title" name="title" defaultValue={survey.title as string} required />
+                                <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                                <Input id="edit_title" name="title" defaultValue={survey.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                               </div>
                               <div className="flex flex-col gap-2">
-                                <Label htmlFor="edit_desc">Descripcion</Label>
-                                <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} />
+                                <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                                <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                               </div>
-                              <Button type="submit">Guardar Cambios</Button>
+                              <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                             </form>
                           </DialogContent>
                         </Dialog>
@@ -230,7 +216,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                     ) : null}
                   </div>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-3">
+                <CardContent style={{ color: cardTextColor }} className="flex flex-col gap-3">
                   {surveyOptions
                     .sort((a, b) => (a.display_order as number || 0) - (b.display_order as number || 0))
                     .map((opt) => {
