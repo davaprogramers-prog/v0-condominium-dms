@@ -179,29 +179,29 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           <DropdownMenuItem onClick={() => setEditOpen(survey.id as string)}>
                             <Edit2 className="h-4 w-4 mr-2" />Editar
                           </DropdownMenuItem>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                          <DropdownMenuItem asChild>
+                            <AlertDialog>
+                              <AlertDialogTrigger className="flex items-center w-full px-2 py-1.5 text-sm text-destructive cursor-pointer hover:bg-accent rounded">
                                 <Trash2 className="h-4 w-4 mr-2" />Eliminar
-                              </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
-                                <AlertDialogDescription style={{ color: dialogTextColor }}>
-                                  Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <div className="flex gap-3 justify-end">
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction asChild>
-                                  <Button variant="destructive" onClick={() => deleteSurvey(survey.id as string)}>
-                                    Eliminar
-                                  </Button>
-                                </AlertDialogAction>
-                              </div>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: dialogTextColor }}>
+                                    Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="flex gap-3 justify-end">
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction asChild>
+                                    <Button variant="destructive" onClick={() => deleteSurvey(survey.id as string)}>
+                                      Eliminar
+                                    </Button>
+                                  </AlertDialogAction>
+                                </div>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
 
