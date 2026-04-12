@@ -111,7 +111,8 @@ export default async function ConfiguracionPage() {
       {isAdmin && condo && (
         <ThemeCustomizerWrapper 
           condoId={condo.id} 
-          currentTheme={theme as CondoTheme | null} 
+          currentTheme={theme as CondoTheme | null}
+          isAdmin={isAdmin}
         />
       )}
 

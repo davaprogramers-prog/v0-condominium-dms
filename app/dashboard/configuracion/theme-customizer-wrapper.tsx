@@ -7,23 +7,28 @@ import type { CondoTheme } from '@/lib/theme-utils'
 interface ThemeCustomizerWrapperProps {
   condoId: string
   currentTheme: CondoTheme | null
+  isAdmin?: boolean
 }
 
-export function ThemeCustomizerWrapper({ condoId, currentTheme }: ThemeCustomizerWrapperProps) {
+export function ThemeCustomizerWrapper({ condoId, currentTheme, isAdmin = true }: ThemeCustomizerWrapperProps) {
   const handleSave = async (themeData: Partial<CondoTheme>) => {
     try {
+      console.log("[v0] Saving theme:", themeData)
       await updateCondoTheme(condoId, themeData)
+      console.log("[v0] Theme saved successfully")
     } catch (error) {
-      console.error('Error saving theme:', error)
+      console.error('[v0] Error saving theme:', error)
       throw error
     }
   }
+
+  console.log("[v0] ThemeCustomizer rendering with:", { condoId, currentTheme, isAdmin })
 
   return (
     <ThemeCustomizer 
       condoId={condoId} 
       currentTheme={currentTheme} 
-      isAdmin={true}
+      isAdmin={isAdmin}
       onSave={handleSave}
     />
   )
