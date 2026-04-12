@@ -117,19 +117,26 @@ export async function registerOwner(
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient()
 
+  console.log("[v0] ensureUserProfile start:", userId, email)
+
   // Buscar en public.houses por owner_email
-  const { data: house } = await supabase
+  const { data: house, error: houseErr } = await supabase
     .from("houses")
     .select("id, condo_id, owner_name")
     .eq("owner_email", email)
     .single()
 
+  console.log("[v0] house query:", house, houseErr)
+
   if (!house) {
+    console.log("[v0] No house found for email:", email)
     return { success: false }
   }
 
+  console.log("[v0] Attempting INSERT into profiles...")
+
   // Intentar INSERT en profiles (si no existe)
-  const { error: insertError } = await supabase
+  const { error: insertError, data: insertData } = await supabase
     .from("profiles")
     .insert({
       id: userId,
@@ -141,22 +148,30 @@ export async function ensureUserProfile(userId: string, email: string) {
       role: "owner",
     })
 
+  console.log("[v0] INSERT result:", { insertData, insertError: insertError?.message })
+
   // Si ya existe, hacer UPDATE
   if (insertError) {
-    await supabase
+    console.log("[v0] INSERT failed, attempting UPDATE...")
+    const { error: updateErr } = await supabase
       .from("profiles")
       .update({
         house_id: house.id,
         condo_id: house.condo_id,
       })
       .eq("id", userId)
+    console.log("[v0] UPDATE result:", updateErr?.message)
   }
 
   // UPDATE houses: llenar owner_user_id
-  await supabase
+  console.log("[v0] Updating houses with owner_user_id...")
+  const { error: houseUpdateErr } = await supabase
     .from("houses")
     .update({ owner_user_id: userId })
     .eq("id", house.id)
+
+  console.log("[v0] House update result:", houseUpdateErr?.message)
+  console.log("[v0] ensureUserProfile complete")
 
   return { success: true }
 }
