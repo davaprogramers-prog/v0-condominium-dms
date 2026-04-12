@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink, AlertTriangle } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface ApproveProofDialogProps {
   proof: any
@@ -34,6 +35,7 @@ export function ApproveProofDialog({
   const [action, setAction] = useState<"approve" | "reject" | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { cardBgColor, cardTextColor } = useTheme()
 
   const paymentType = proof.payment_type || "gastos_comunes"
   const isGastosComunes = paymentType === "gastos_comunes"
@@ -266,16 +268,16 @@ export function ApproveProofDialog({
           </div>
 
           {/* Amount Summary */}
-          <div className={`p-3 rounded-lg space-y-1 ${isGastosComunes ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100" : "bg-red-50 dark:bg-red-900/20 text-slate-900 dark:text-slate-100"}`}>
+          <div className="p-3 rounded-lg space-y-1" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
             {isGastosComunes ? (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Gasto Fijo</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Fijo</span>
+                  <span className="font-medium">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Gasto Variable</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Variable</span>
+                  <span className="font-medium">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
                 </div>
               </>
             ) : (
@@ -284,20 +286,20 @@ export function ApproveProofDialog({
                 {infractions.length > 0 ? (
                   infractions.map((inf: any) => (
                     <div key={inf.id} className="flex justify-between text-sm">
-                      <span className="text-red-600 dark:text-red-400">{inf.description || inf.infraction_type}</span>
+                      <span style={{ opacity: 0.7 }}>{inf.description || inf.infraction_type}</span>
                       <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
                     </div>
                   ))
                 ) : (
                   <div className="flex justify-between text-sm">
-                    <span className="text-red-600 dark:text-red-400">Multas</span>
+                    <span style={{ opacity: 0.7 }}>Multas</span>
                     <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
                   </div>
                 )}
               </>
             )}
-            <div className="flex justify-between font-medium pt-1 border-t border-slate-300 dark:border-slate-600">
-              <span className="text-slate-900 dark:text-white">Total</span>
+            <div className="flex justify-between font-medium pt-1" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+              <span>Total</span>
               <span className={isGastosComunes ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
               </span>

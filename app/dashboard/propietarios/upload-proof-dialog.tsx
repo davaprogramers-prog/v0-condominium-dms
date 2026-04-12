@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Upload, Loader2, Image as ImageIcon, X } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 type PaymentType = "gastos_comunes" | "multas"
 
@@ -44,6 +45,7 @@ export function UploadProofDialog({
   const [notes, setNotes] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const { cardBgColor, cardTextColor } = useTheme()
 
   const totalAmount = paymentType === "gastos_comunes" 
     ? fixedAmount + variableAmount 
@@ -168,16 +170,16 @@ export function UploadProofDialog({
           )}
 
           {/* Amount Summary */}
-          <div className="p-4 rounded-lg bg-slate-100 dark:bg-slate-800 space-y-2">
+          <div className="p-4 rounded-lg space-y-2" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
             {paymentType === "gastos_comunes" ? (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Gasto Comun Fijo</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Comun Fijo</span>
+                  <span className="font-medium">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Gasto Comun Variable</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Comun Variable</span>
+                  <span className="font-medium">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
                 </div>
               </>
             ) : (
@@ -185,14 +187,14 @@ export function UploadProofDialog({
                 <p className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">Multas a Pagar:</p>
                 {infractions.map((inf: any) => (
                   <div key={inf.id} className="flex justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">{inf.description}</span>
+                    <span style={{ opacity: 0.7 }}>{inf.description}</span>
                     <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{inf.fine_amount?.toLocaleString("es-CL")}</span>
                   </div>
                 ))}
               </>
             )}
-            <div className="flex justify-between font-medium pt-2 border-t border-slate-300 dark:border-slate-600">
-              <span className="text-slate-900 dark:text-white">Total a Pagar</span>
+            <div className="flex justify-between font-medium pt-2" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+              <span>Total a Pagar</span>
               <span className={paymentType === "multas" ? "text-red-700 dark:text-red-400" : "text-blue-700 dark:text-blue-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
               </span>
