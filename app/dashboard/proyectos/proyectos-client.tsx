@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { createProject, updateProjectStatus, addProjectQuote, updateProject, deleteProject, updateProjectQuote, deleteProjectQuote } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
@@ -40,6 +41,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
   const [statusUpdate, setStatusUpdate] = useState("")
   const [editProject, setEditProject] = useState<string | null>(null)
   const [editQuote, setEditQuote] = useState<string | null>(null)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,8 +55,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" />Nuevo Proyecto</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader><DialogTitle>Crear Proyecto de Mejora</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle style={{ color: dialogTextColor }}>Crear Proyecto de Mejora</DialogTitle>
+                <DialogDescription style={{ color: dialogTextColor }}>Ingresa los detalles del nuevo proyecto</DialogDescription>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("location_photo_url", locationUrl)
@@ -65,21 +70,21 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="name">Nombre del Proyecto</Label>
-                  <Input id="name" name="name" placeholder="Ej: Remodelacion piscina" required />
+                  <Label htmlFor="name" style={{ color: dialogTextColor }}>Nombre del Proyecto</Label>
+                  <Input id="name" name="name" placeholder="Ej: Remodelacion piscina" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="improvement_type">Tipo de Mejora</Label>
-                  <Input id="improvement_type" name="improvement_type" placeholder="Ej: Infraestructura, Jardineria..." />
+                  <Label htmlFor="improvement_type" style={{ color: dialogTextColor }}>Tipo de Mejora</Label>
+                  <Input id="improvement_type" name="improvement_type" placeholder="Ej: Infraestructura, Jardineria..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripcion</Label>
-                  <Textarea id="description" name="description" placeholder="Detalle del proyecto..." />
+                  <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripcion</Label>
+                  <Textarea id="description" name="description" placeholder="Detalle del proyecto..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="location_description">Ubicacion / Area</Label>
+                  <Label htmlFor="location_description" style={{ color: dialogTextColor }}>Ubicacion / Area</Label>
                   <Select name="location_description" required>
-                    <SelectTrigger>
+                    <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                       <SelectValue placeholder="Seleccionar área común" />
                     </SelectTrigger>
                     <SelectContent>
@@ -92,20 +97,20 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Foto del area</Label>
+                  <Label style={{ color: dialogTextColor }}>Foto del area</Label>
                   <FileUpload bucket="projects" onUpload={setLocationUrl} label="Subir foto del area" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="estimated_cost">Costo Estimado</Label>
-                    <Input id="estimated_cost" name="estimated_cost" type="number" step="0.01" placeholder="0.00" />
+                    <Label htmlFor="estimated_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
+                    <Input id="estimated_cost" name="estimated_cost" type="number" step="0.01" placeholder="0.00" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="start_date">Fecha Inicio</Label>
-                    <Input id="start_date" name="start_date" type="date" />
+                    <Label htmlFor="start_date" style={{ color: dialogTextColor }}>Fecha Inicio</Label>
+                    <Input id="start_date" name="start_date" type="date" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                 </div>
-                <Button type="submit">Crear Proyecto</Button>
+                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Crear Proyecto</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -114,8 +119,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
 
       {openQuote && (
         <Dialog open={!!openQuote} onOpenChange={() => { setOpenQuote(null); setDocUrl("") }}>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Agregar Cotizacion</DialogTitle></DialogHeader>
+          <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+            <DialogHeader>
+              <DialogTitle style={{ color: dialogTextColor }}>Agregar Cotizacion</DialogTitle>
+              <DialogDescription style={{ color: dialogTextColor }}>Ingresa los detalles de la cotización</DialogDescription>
+            </DialogHeader>
             <form
               action={async (fd) => {
                 fd.set("project_id", openQuote)
@@ -127,32 +135,32 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="vendor_name">Proveedor</Label>
-                <Input id="vendor_name" name="vendor_name" placeholder="Nombre del proveedor" required />
+                <Label htmlFor="vendor_name" style={{ color: dialogTextColor }}>Proveedor</Label>
+                <Input id="vendor_name" name="vendor_name" placeholder="Nombre del proveedor" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="quote_amount">Monto</Label>
-                <Input id="quote_amount" name="amount" type="number" step="0.01" required />
+                <Label htmlFor="quote_amount" style={{ color: dialogTextColor }}>Monto</Label>
+                <Input id="quote_amount" name="amount" type="number" step="0.01" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="quote_desc">Descripcion</Label>
-                <Textarea id="quote_desc" name="description" placeholder="Detalle de la cotizacion..." />
+                <Label htmlFor="quote_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                <Textarea id="quote_desc" name="description" placeholder="Detalle de la cotizacion..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Documento de cotizacion</Label>
+                <Label style={{ color: dialogTextColor }}>Documento de cotizacion</Label>
                 <FileUpload bucket="projects" folder="quotes" onUpload={setDocUrl} accept="image/*,application/pdf" label="Subir cotizacion" />
               </div>
-              <Button type="submit">Guardar Cotizacion</Button>
+              <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cotizacion</Button>
             </form>
           </DialogContent>
         </Dialog>
       )}
 
       {projects.length === 0 ? (
-        <Card>
+        <Card style={{ backgroundColor: cardBgColor || undefined }}>
           <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
             <Hammer className="h-10 w-10" />
-            <p>No hay proyectos registrados</p>
+            <p style={{ color: cardTextColor }}>No hay proyectos registrados</p>
           </CardContent>
         </Card>
       ) : (
@@ -163,14 +171,14 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
             const isExpanded = expandedProject === (project.id as string)
 
             return (
-              <Card key={project.id as string}>
+              <Card key={project.id as string} style={{ backgroundColor: cardBgColor || undefined }}>
                 <CardHeader className="cursor-pointer" onClick={() => setExpandedProject(isExpanded ? null : (project.id as string))}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}>
                         {status.label}
                       </div>
-                      <CardTitle className="text-base">{project.name as string}</CardTitle>
+                      <CardTitle style={{ color: cardTextColor }} className="text-base">{project.name as string}</CardTitle>
                     </div>
                     <div className="flex items-center gap-2">
                       {isAdmin && (
