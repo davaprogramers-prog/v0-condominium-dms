@@ -31,10 +31,10 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Tipo</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Tipo</Button>
             </DialogTrigger>
-            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-              <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Crear Tipo de Exoneracion</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Tipo de Exoneracion</DialogTitle></DialogHeader>
               <form
                 action={async (fd) => {
                   await createExemptionType(fd)
@@ -89,12 +89,12 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
                     <Dialog open={editOpen === type.id} onOpenChange={(v) => !v && setEditOpen(null)}>
                       <DialogTrigger asChild>
-                        <Button size="sm" className="flex-1 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300" onClick={() => setEditOpen(type.id as string)}>
-                          <Edit2 className="h-4 w-4 mr-1" style={{ color: "#64748b" }} />Editar
+                        <Button size="sm" className="flex-1" style={{ backgroundColor: cardBgColor === "#1e293b" ? "#f1f5f9" : "#1e293b", color: cardBgColor === "#1e293b" ? "#1e293b" : "#f1f5f9" }} onClick={() => setEditOpen(type.id as string)}>
+                          <Edit2 className="h-4 w-4 mr-1" />Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-                        <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Editar Tipo de Exoneracion</DialogTitle></DialogHeader>
+                      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                        <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Editar Tipo de Exoneracion</DialogTitle></DialogHeader>
                         <form
                           action={async (fd) => {
                             fd.set("id", type.id as string)
@@ -121,15 +121,15 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                           <Trash2 className="h-4 w-4 mr-1" />Eliminar
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                      <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                         <AlertDialogHeader>
-                          <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar Tipo de Exoneracion</AlertDialogTitle>
-                          <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+                          <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Tipo de Exoneracion</AlertDialogTitle>
+                          <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
                             Esta accion no se puede deshacer. Se eliminara permanentemente este tipo.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 justify-end">
-                          <AlertDialogCancel className="text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
+                          <AlertDialogCancel style={{ color: dialogTextColor }}>Cancelar</AlertDialogCancel>
                           <AlertDialogAction onClick={() => deleteExemptionType(type.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                             Eliminar
                           </AlertDialogAction>
