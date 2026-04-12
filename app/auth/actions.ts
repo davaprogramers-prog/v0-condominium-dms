@@ -117,46 +117,33 @@ export async function registerOwner(
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient()
 
-  // Check if profile exists and has condo_id
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id")
-    .eq("id", userId)
+  // Buscar en public.houses por owner_email
+  const { data: house } = await supabase
+    .from("houses")
+    .select("id, condo_id")
+    .eq("owner_email", email)
     .single()
 
-  // If profile exists and has condo_id, done
-  if (profile?.condo_id) {
-    return { success: true }
-  }
-
-  // If no profile or no condo_id, try to get from house_owners
-  const { data: houseOwner } = await supabase
-    .from("house_owners")
-    .select("houses(id, condo_id)")
-    .eq("user_email", email)
-    .single()
-
-  if (!houseOwner?.houses?.condo_id) {
+  // Si no existe casa con ese email, salir
+  if (!house) {
     return { success: false }
   }
 
-  // Update or insert profile with condo_id
-  if (profile) {
-    await supabase
-      .from("profiles")
-      .update({ condo_id: houseOwner.houses.condo_id, house_id: houseOwner.houses.id })
-      .eq("id", userId)
-  } else {
-    await supabase
-      .from("profiles")
-      .insert({
-        id: userId,
-        email,
-        condo_id: houseOwner.houses.condo_id,
-        house_id: houseOwner.houses.id,
-        role: "owner",
-      })
-  }
+  // UPDATE en profiles con condo_id y house_id
+  await supabase
+    .from("profiles")
+    .upsert({
+      id: userId,
+      email,
+      house_id: house.id,
+      condo_id: house.condo_id,
+    }, { onConflict: "id" })
+
+  // UPDATE en houses con owner_user_id
+  await supabase
+    .from("houses")
+    .update({ owner_user_id: userId })
+    .eq("id", house.id)
 
   return { success: true }
 }
