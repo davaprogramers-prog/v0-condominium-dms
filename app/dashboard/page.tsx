@@ -72,10 +72,34 @@ export default async function DashboardPage() {
       console.log("[v0] Error fetching profile:", e)
     }
 
+    // If no profile, create fallback from metadata (same as layout)
+    if (!profile) {
+      profile = {
+        role: user.user_metadata?.role || "propietario",
+        condo_id: user.user_metadata?.condo_id || null,
+        house_id: user.user_metadata?.house_id || null,
+        first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
+        last_name: user.user_metadata?.last_name || "",
+      }
+      console.log("[v0] Created fallback profile from metadata in dashboard page:", profile)
+    }
+
     // Determine role - default to propietario if not found
     const role = profile?.role || "propietario"
-    const condoId = profile?.condo_id
-    const firstName = profile?.first_name || "Usuario"
+    let condoId = profile?.condo_id
+    let firstName = profile?.first_name || "Usuario"
+
+    // If owner without condo_id, try to get it from house_owners table (same as layout)
+    const isOwner = role === "propietario" || role === "owner"
+    if (isOwner && !condoId) {
+      console.log("[v0] Owner without condo_id in dashboard page, searching via utility function")
+      const { getUserCondoId } = await import("@/lib/supabase/owner-utils")
+      const foundCondoId = await getUserCondoId(supabase, user.id, user.email)
+      if (foundCondoId) {
+        condoId = foundCondoId
+        console.log("[v0] Found condo_id via utility in dashboard page:", foundCondoId)
+      }
+    }
 
     // If admin/super_admin without condo_id, show admin setup message
     if ((role === "admin" || role === "super_admin") && !condoId) {
