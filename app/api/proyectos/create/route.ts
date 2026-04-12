@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
-import { createServiceRoleClient } from "@/lib/supabase/service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +23,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Create project using service role (has permissions to bypass RLS)
-    const serviceSupabase = createServiceRoleClient()
-    const { error } = await serviceSupabase
+    // Create project
+    const { error } = await supabase
       .from("projects")
       .insert({
         condo_id: profile.condo_id,

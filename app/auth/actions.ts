@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
 export async function login(formData: FormData) {
@@ -116,7 +116,8 @@ export async function registerOwner(
 
 export async function ensureUserProfile(userId: string, email: string) {
   try {
-    const supabase = await createClient()
+    // Use service client to bypass RLS for profile creation
+    const supabase = createServiceClient()
 
     console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
 
@@ -136,7 +137,7 @@ export async function ensureUserProfile(userId: string, email: string) {
 
     console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
 
-    // Intentar INSERT en profiles
+    // INSERT en profiles usando service client (bypasses RLS)
     console.log("[v0] Attempting INSERT into profiles...")
     const { error: insertError, data: insertData } = await supabase
       .from("profiles")
@@ -150,19 +151,19 @@ export async function ensureUserProfile(userId: string, email: string) {
         role: "owner",
       })
 
-    console.log("[v0] INSERT - error:", insertError?.message, "code:", insertError?.code, "data:", insertData)
+    console.log("[v0] INSERT - error:", insertError?.message, "code:", insertError?.code, "success:", !insertError)
 
     // Si ya existe, hacer UPDATE
     if (insertError) {
       console.log("[v0] INSERT failed with code", insertError.code, "- attempting UPDATE...")
-      const { error: updateErr, data: updateData } = await supabase
+      const { error: updateErr } = await supabase
         .from("profiles")
         .update({
           house_id: house.id,
           condo_id: house.condo_id,
         })
         .eq("id", userId)
-      console.log("[v0] UPDATE - error:", updateErr?.message, "data:", updateData)
+      console.log("[v0] UPDATE - error:", updateErr?.message)
     } else {
       console.log("[v0] INSERT SUCCESS - Profile created")
     }
