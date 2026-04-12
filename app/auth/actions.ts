@@ -122,7 +122,13 @@ export async function registerOwner(
 
   if (userTableError) {
     console.error("[v0] Error inserting into users table:", userTableError)
+    throw new Error("No se pudo crear el usuario en la base de datos")
   }
+
+  console.log("[v0] User row created in users table")
+  
+  // Wait for the user row to be committed before attempting to reference it
+  await new Promise(resolve => setTimeout(resolve, 2000))
 
   // Now create/update the profile
   // Retry up to 10 times with increasing delays
