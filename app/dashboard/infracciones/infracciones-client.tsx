@@ -231,9 +231,9 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
                           {/* Edit Dialog */}
                           <Dialog open={editOpen === inf.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
                               <DialogHeader>
-                                <DialogTitle className="text-slate-900 dark:text-white">Editar Infraccion</DialogTitle>
+                                <DialogTitle style={{ color: dialogTextColor }}>Editar Infraccion</DialogTitle>
                               </DialogHeader>
                               <form
                                 action={async (fd) => {
@@ -264,10 +264,10 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
                           {/* Delete Dialog */}
                           <AlertDialog open={deleteOpen === inf.id} onOpenChange={(v) => !v && setDeleteOpen(null)}>
-                            <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                            <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar Infraccion</AlertDialogTitle>
-                                <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+                                <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Infraccion</AlertDialogTitle>
+                                <AlertDialogDescription style={{ color: dialogTextColor }}>
                                   Esta accion no se puede deshacer. Se eliminara permanentemente esta infraccion.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
