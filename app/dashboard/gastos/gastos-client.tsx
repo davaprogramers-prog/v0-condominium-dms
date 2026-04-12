@@ -42,7 +42,7 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nuevo Gasto</Button>
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg font-semibold"><Plus className="mr-2 h-5 w-5" />Agregar Gasto</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
