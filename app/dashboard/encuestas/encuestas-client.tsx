@@ -115,7 +115,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                     <Plus className="mr-1 h-3 w-3" />Agregar opcion
                   </Button>
                 </div>
-                <Button type="submit" disabled={options.filter((o) => o.trim()).length < 2}>
+                <Button type="submit" disabled={options.filter((o) => o.trim()).length < 2} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
                   Crear Encuesta
                 </Button>
               </form>
