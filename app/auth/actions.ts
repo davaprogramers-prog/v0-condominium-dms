@@ -54,7 +54,7 @@ export async function registerOwner(
 ) {
   const supabase = await createClient()
 
-  // Get house details first
+  // Get house details first to validate
   const { data: house, error: houseError } = await supabase
     .from("houses")
     .select("id, condo_id")
@@ -63,11 +63,8 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Try to sign up the user
-  let authData
-  let isNewUser = false
-  
-  const { data: signupData, error: authError } = await supabase.auth.signUp({
+  // Sign up the user with house info in metadata
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -77,80 +74,25 @@ export async function registerOwner(
       data: {
         first_name: firstName,
         last_name: lastName,
+        house_id: houseId,
+        condo_id: house.condo_id,
+        role: "owner",
       },
     },
   })
 
-  // If email already exists in auth, that's ok - we just need the user to exist
-  // If it's a different error, throw it
+  // If email already exists, user needs to login
   if (authError && authError.message.includes("already registered")) {
-    console.log("[v0] Email already registered, attempting to link profile")
-    
-    // Try to get existing user ID via signIn with password
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    
-    if (signInError) {
-      // If sign in fails, the user exists but password might be different
-      // In this case, we'll create a profile but won't be able to auth yet
-      console.log("[v0] Sign in failed:", signInError.message)
-      throw new Error("El email ya existe. Intenta iniciar sesión con tu contraseña.")
-    }
-    
-    authData = signInData
-  } else if (authError) {
-    throw authError
-  } else {
-    authData = signupData
-    isNewUser = true
+    throw new Error("El email ya está registrado. Intenta iniciar sesión.")
   }
 
+  if (authError) throw authError
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
 
-  console.log("[v0] Auth user ready:", authData.user.id, "isNewUser:", isNewUser)
+  console.log("[v0] User registered successfully:", authData.user.id)
 
-  // Wait longer for auth.users to be fully replicated before referencing it
-  // The foreign key constraint in profiles references auth.users directly
-  await new Promise(resolve => setTimeout(resolve, 3000))
-
-  // Now create/update the profile
-  // Retry up to 10 times with increasing delays
-  let lastError = null
-  for (let attempt = 1; attempt <= 10; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, attempt * 1000))
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .upsert({
-        id: authData.user.id,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        house_id: houseId,
-        condo_id: house.condo_id,
-        role: "owner",
-      }, { onConflict: "id" })
-
-    if (!profileError) {
-      // Success - profile created
-      console.log("[v0] Profile created successfully on attempt", attempt)
-      break
-    }
-
-    lastError = profileError
-    console.error(`[v0] Profile upsert attempt ${attempt} failed:`, profileError)
-  }
-
-  // If all retries failed, throw the error
-  if (lastError) {
-    console.error("[v0] All profile creation attempts failed:", lastError)
-    if (lastError.code === '23503') {
-      throw new Error("Error al crear el perfil. Por favor, intenta de nuevo.")
-    }
-    throw lastError
-  }
+  // Profile will be created automatically on first login via dashboard layout
+  // The house_id and condo_id are stored in user.user_metadata for later retrieval
 
   return authData.user
 }
