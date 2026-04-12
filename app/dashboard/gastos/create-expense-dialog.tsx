@@ -12,6 +12,7 @@ import { Plus, Loader2, Upload, X, Settings, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoExpense } from "./actions"
 import { createClient } from "@/lib/supabase/client"
+import { useTheme } from "@/lib/theme-context"
 import {
   Select,
   SelectContent,
@@ -47,6 +48,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
   const [expenseLogos, setExpenseLogos] = useState<ExpenseLogo[]>([])
   const [selectedLogoId, setSelectedLogoId] = useState<string>("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   useEffect(() => {
     async function loadLogos() {
@@ -129,10 +131,10 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           Agregar Gasto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">Registrar Nuevo Gasto</DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">Agrega un gasto del condominio con la boleta/factura</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Gasto</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega un gasto del condominio con la boleta/factura</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -143,17 +145,17 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-slate-900 dark:text-slate-200">Título del Gasto *</Label>
+              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
               <Input
                 id="title"
                 name="title"
                 placeholder="Ej: Limpieza áreas comunes"
                 required
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-slate-900 dark:text-slate-200">Monto (CLP) *</Label>
+              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -161,31 +163,31 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 step="0.01"
                 placeholder="0.00"
                 required
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-slate-900 dark:text-slate-200">Descripción/Detalles</Label>
+            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción/Detalles</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Ej: Limpieza febrero - Rusbel"
               rows={2}
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-slate-900 dark:text-slate-200">Tipo de Gasto *</Label>
+              <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
               {expenseTypes.length > 0 ? (
                 <Select name="category" required>
-                  <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                     <SelectValue placeholder="Seleccionar tipo..." />
                   </SelectTrigger>
-                  <SelectContent className="dark:bg-slate-800 dark:text-white">
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                     {expenseTypes.map((type) => (
                       <SelectItem key={type.id} value={type.name}>
                         {type.name}
@@ -194,19 +196,19 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="text-sm text-slate-600 dark:text-slate-400 p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800">
+                <div style={{ color: inputTextColor, borderColor: inputTextColor }} className="text-sm p-2 border rounded-md bg-slate-50 dark:bg-slate-800">
                   No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-blue-600 dark:text-blue-400 underline">Crear tipos de gastos</a>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expenseDate" className="text-slate-900 dark:text-slate-200">Fecha del Gasto</Label>
+              <Label htmlFor="expenseDate" style={{ color: dialogTextColor }}>Fecha del Gasto</Label>
               <Input
                 id="expenseDate"
                 name="expenseDate"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
@@ -214,7 +216,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           {/* Logo Selector */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-slate-900 dark:text-slate-200">Logo del Proveedor</Label>
+              <Label style={{ color: dialogTextColor }}>Logo del Proveedor</Label>
               {isSuperAdmin && (
                 <Link 
                   href="/dashboard/gastos/logos" 
@@ -227,7 +229,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             </div>
             {expenseLogos.length > 0 ? (
               <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
-                <SelectTrigger className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar logo (opcional)">
                     {selectedLogoId && (
                       <div className="flex items-center gap-2">
@@ -243,7 +245,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="dark:bg-slate-800 dark:text-white">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectItem value="none">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
@@ -267,7 +269,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 </SelectContent>
               </Select>
             ) : (
-              <div className="text-sm text-slate-600 dark:text-slate-400 p-2 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800">
+              <div style={{ color: inputTextColor, borderColor: inputTextColor }} className="text-sm p-2 border rounded-md bg-slate-50 dark:bg-slate-800">
                 No hay logos. <Link href="/dashboard/gastos/logos" className="text-blue-600 dark:text-blue-400 underline">Agregar logos</Link>
               </div>
             )}
@@ -275,15 +277,16 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label className="text-slate-900 dark:text-slate-200">Imagen de Boleta/Factura</Label>
-            <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center bg-slate-50 dark:bg-slate-900">
+            <Label style={{ color: dialogTextColor }}>Imagen de Boleta/Factura</Label>
+            <div style={{ borderColor: inputTextColor, backgroundColor: inputBgColor === "#f8fafc" ? "#f1f5f9" : "#0f172a" }} className="border-2 border-dashed rounded-lg p-4 text-center">
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="max-h-40 max-w-full rounded border-2 border-slate-300 dark:border-slate-600"
+                      style={{ borderColor: inputTextColor }}
+                      className="max-h-40 max-w-full rounded border-2"
                     />
                     <button
                       type="button"
@@ -293,13 +296,13 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedFile?.name}</p>
+                  <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">{selectedFile?.name}</p>
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-slate-400" />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
+                    <span style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -312,12 +315,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 </label>
               )}
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-xs">
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Registrar Gasto
           </Button>
