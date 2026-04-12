@@ -21,7 +21,7 @@ interface CartolasClientProps {
 export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
-  const { inputBgColor, inputTextColor } = useTheme()
+  const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,9 +56,9 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
 
 
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-slate-900 dark:text-white">Subir Cartola Bancaria</DialogTitle>
+                <DialogTitle style={{ color: dialogTextColor }}>Subir Cartola Bancaria</DialogTitle>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -70,19 +70,19 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stmt_title" style={{ color: "#1e293b" }}>Titulo</Label>
+                  <Label htmlFor="stmt_title" style={{ color: dialogTextColor }}>Titulo</Label>
                   <Input id="stmt_title" name="title" placeholder="Ej: Cartola Enero 2026" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="statement_date" className="text-slate-900 dark:text-slate-200">Fecha de la Cartola</Label>
+                  <Label htmlFor="statement_date" style={{ color: dialogTextColor }}>Fecha de la Cartola</Label>
                   <Input id="statement_date" name="statement_date" type="date" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label className="text-slate-900 dark:text-slate-200">Archivo PDF</Label>
+                  <Label style={{ color: dialogTextColor }}>Archivo PDF</Label>
                   <FileUpload bucket="statements" onUpload={setFileUrl} accept="application/pdf,image/*" label="Subir cartola (PDF)" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stmt_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                  <Label htmlFor="stmt_notes" style={{ color: dialogTextColor }}>Notas</Label>
                   <Textarea id="stmt_notes" name="notes" placeholder="Notas opcionales..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <Button type="submit" disabled={!fileUrl} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cartola</Button>
