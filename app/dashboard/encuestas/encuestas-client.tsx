@@ -277,10 +277,12 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                       </div>
                     )
                   })}
-                <p className="text-xs text-muted-foreground">
-                  {totalVotes} voto{totalVotes !== 1 ? "s" : ""} en total
-                  {totalHouses > 0 && ` de ${totalHouses} casas`}
-                </p>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {totalVotes} voto{totalVotes !== 1 ? "s" : ""} en total
+                    {totalHouses > 0 && ` de ${totalHouses} casas`}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )
