@@ -112,10 +112,6 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                     <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_notes" style={{ color: dialogTextColor }}>Notas</Label>
-                  <Textarea id="inf_notes" name="notes" placeholder="Notas adicionales..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
-                </div>
                 <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Registrar Infraccion</Button>
               </form>
             </DialogContent>
@@ -260,10 +256,6 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                     <Label htmlFor="edit_date" style={{ color: dialogTextColor }}>Fecha</Label>
                                     <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_notes" style={{ color: dialogTextColor }}>Notas</Label>
-                                  <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                 </div>
                                 <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                               </form>

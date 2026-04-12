@@ -730,26 +730,28 @@ export async function markInfractionPaid(id: string) {
 
 export async function updateInfraction(formData: FormData) {
   const { supabase } = await getCondoId()
+  const id = formData.get("id") as string
   const description = formData.get("description") as string
   const infraction_date = formData.get("infraction_date") as string
-  
-  if (!description || description.trim() === "") {
-    throw new Error("La descripción es requerida")
-  }
-  if (!infraction_date) {
-    throw new Error("La fecha es requerida")
-  }
+  const fine_amount = formData.get("fine_amount") as string
+
+  if (!id) throw new Error("ID es requerido")
+  if (!description?.trim()) throw new Error("La descripción es requerida")
+  if (!infraction_date) throw new Error("La fecha es requerida")
 
   const { error } = await supabase
     .from("infractions")
     .update({
       description: description.trim(),
-      fine_amount: Number(formData.get("fine_amount")) || 0,
+      fine_amount: fine_amount ? Number(fine_amount) : 0,
       infraction_date: infraction_date,
-      notes: (formData.get("notes") as string) || null,
     })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
+    .eq("id", id)
+  
+  if (error) {
+    console.error("[v0] updateInfraction error:", error)
+    throw new Error(`Error actualizando infracción: ${error.message}`)
+  }
   revalidatePath("/dashboard/infracciones")
 }
 
