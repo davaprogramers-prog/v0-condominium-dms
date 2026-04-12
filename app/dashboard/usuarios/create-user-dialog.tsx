@@ -156,14 +156,14 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
           Crear Usuario
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg">
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-slate-900 dark:text-white">Crear Usuario</DialogTitle>
           <DialogDescription className="text-slate-600 dark:text-slate-400">
             Crea un nuevo usuario con rol específico
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-2 space-y-4">
           {error && (
             <div className="rounded-lg bg-red-600 p-4 text-sm text-white border border-red-700 font-semibold">
               {error}
@@ -291,7 +291,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
             </div>
           )}
 
-          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Crear Usuario
           </Button>
