@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { createAlert, updateAlert, deleteAlert } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,11 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Bell, AlertTriangle, Info, AlertCircle, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { Plus, Bell, AlertTriangle, Info, AlertCircle, MoreHorizontal, Edit2, Trash2, TriangleAlert } from "lucide-react"
 
 interface Alert {
   id: string
@@ -41,6 +42,7 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
   const [priority, setPriority] = useState<string>("media")
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [editPriority, setEditPriority] = useState<string>("media")
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const activeAlerts = alerts.filter((a) => a.is_active)
   const inactiveAlerts = alerts.filter((a) => !a.is_active)
@@ -57,10 +59,33 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={(v) => { setOpenNew(v); if (!v) setPriority("media") }}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Alerta</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <TriangleAlert className="h-5 w-5" />
+                Nueva Alerta
+              </Button>
+
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Crear Alerta</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: dialogTextColor }}>Crear Alerta</DialogTitle>
+                <DialogDescription style={{ color: dialogTextColor }}>Publica una nueva alerta para los residentes</DialogDescription>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("priority", priority)
@@ -71,18 +96,18 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="title">Titulo</Label>
-                  <Input id="title" name="title" placeholder="Ej: Corte de agua programado..." required />
+                  <Label htmlFor="title" style={{ color: dialogTextColor }}>Titulo</Label>
+                  <Input id="title" name="title" placeholder="Ej: Corte de agua programado..." required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="message">Mensaje</Label>
-                  <Textarea id="message" name="message" placeholder="Descripcion detallada del aviso..." rows={4} required />
+                  <Label htmlFor="message" style={{ color: dialogTextColor }}>Mensaje</Label>
+                  <Textarea id="message" name="message" placeholder="Descripcion detallada del aviso..." rows={4} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label>Prioridad</Label>
+                    <Label style={{ color: dialogTextColor }}>Prioridad</Label>
                     <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="baja">Baja</SelectItem>
                         <SelectItem value="media">Media</SelectItem>
@@ -92,11 +117,11 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                     </Select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="expires_at">Expira (opcional)</Label>
-                    <Input id="expires_at" name="expires_at" type="date" />
+                    <Label htmlFor="expires_at" style={{ color: dialogTextColor }}>Expira (opcional)</Label>
+                    <Input id="expires_at" name="expires_at" type="date" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                 </div>
-                <Button type="submit">Publicar Alerta</Button>
+                <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Publicar Alerta</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -107,8 +132,8 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Alertas Activas</h2>
         {activeAlerts.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
+          <Card style={{ backgroundColor: cardBgColor || undefined }}>
+            <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground" style={{ color: cardTextColor }}>
               <Bell className="h-10 w-10" />
               <p>No hay alertas activas</p>
             </CardContent>
@@ -120,12 +145,12 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
               const Icon = config.icon
 
               return (
-                <Card key={alert.id} className="overflow-hidden">
+                <Card key={alert.id} className="overflow-hidden" style={{ backgroundColor: cardBgColor || undefined }}>
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <Icon className="h-5 w-5" />
-                        <CardTitle className="text-base">{alert.title}</CardTitle>
+                        <CardTitle style={{ color: cardTextColor }} className="text-base">{alert.title}</CardTitle>
                         <Badge className={config.color}>{config.label}</Badge>
                       </div>
                       {isAdmin && (
@@ -135,7 +160,7 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                             <DropdownMenuItem onClick={() => { setEditPriority(alert.priority); setEditOpen(alert.id) }}>
                               <Edit2 className="h-4 w-4 mr-2" />Editar
                             </DropdownMenuItem>
@@ -145,17 +170,17 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Eliminar Alerta</AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Alerta</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: dialogTextColor }}>
                                     Esta accion no se puede deshacer. Se eliminara permanentemente esta alerta.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <div className="flex gap-3 justify-end">
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => deleteAlert(alert.id)} 
+                                  <AlertDialogAction
+                                    onClick={() => deleteAlert(alert.id)}
                                     className="bg-destructive text-white hover:bg-destructive/90"
                                   >
                                     Eliminar
@@ -167,19 +192,22 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                         </DropdownMenu>
                       )}
                     </div>
-                    <CardDescription className="text-xs">
+                    <CardDescription style={{ color: cardTextColor }} className="text-xs">
                       Publicada: {new Date(alert.created_at).toLocaleDateString("es-CL")}
                       {alert.expires_at && ` | Expira: ${new Date(alert.expires_at).toLocaleDateString("es-CL")}`}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent style={{ color: cardTextColor }}>
                     <p className="text-sm whitespace-pre-wrap">{alert.message}</p>
                   </CardContent>
 
                   {/* Edit Dialog */}
                   <Dialog open={editOpen === alert.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                    <DialogContent>
-                      <DialogHeader><DialogTitle>Editar Alerta</DialogTitle></DialogHeader>
+                    <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                      <DialogHeader>
+                        <DialogTitle style={{ color: dialogTextColor }}>Editar Alerta</DialogTitle>
+                        <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la alerta</DialogDescription>
+                      </DialogHeader>
                       <form
                         action={async (fd) => {
                           fd.set("id", alert.id)
@@ -190,18 +218,18 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                         className="flex flex-col gap-4"
                       >
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_title">Titulo</Label>
-                          <Input id="edit_title" name="title" defaultValue={alert.title} required />
+                          <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                          <Input id="edit_title" name="title" defaultValue={alert.title} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="edit_message">Mensaje</Label>
-                          <Textarea id="edit_message" name="message" defaultValue={alert.message} rows={4} required />
+                          <Label htmlFor="edit_message" style={{ color: dialogTextColor }}>Mensaje</Label>
+                          <Textarea id="edit_message" name="message" defaultValue={alert.message} rows={4} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col gap-2">
-                            <Label>Prioridad</Label>
+                            <Label style={{ color: dialogTextColor }}>Prioridad</Label>
                             <Select value={editPriority} onValueChange={setEditPriority}>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="baja">Baja</SelectItem>
                                 <SelectItem value="media">Media</SelectItem>
@@ -211,11 +239,11 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                             </Select>
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_expires">Expira (opcional)</Label>
-                            <Input id="edit_expires" name="expires_at" type="date" defaultValue={alert.expires_at?.split("T")[0] || ""} />
+                            <Label htmlFor="edit_expires" style={{ color: dialogTextColor }}>Expira (opcional)</Label>
+                            <Input id="edit_expires" name="expires_at" type="date" defaultValue={alert.expires_at?.split("T")[0] || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                           </div>
                         </div>
-                        <Button type="submit">Guardar Cambios</Button>
+                        <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                       </form>
                     </DialogContent>
                   </Dialog>

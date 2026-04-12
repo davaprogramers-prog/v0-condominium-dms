@@ -100,27 +100,27 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
             </Dialog>
             <Dialog open={openDoc} onOpenChange={setOpenDoc}>
               <DialogTrigger asChild>
-                <DialogTrigger asChild>
-                  <Button
-                    style={{
-                      backgroundColor: "#2563eb",
-                      color: "white",
-                      padding: "12px 24px",
-                      fontSize: "16px",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      border: "2px solid #1d4ed8",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                      fontWeight: "600"
-                    }}
-                  >
-                    <FileText className="h-5 w-5" />
-                    Subir Documento
-                  </Button>
-                </DialogTrigger>
+
+                <Button
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    padding: "12px 24px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "2px solid #1d4ed8",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                    cursor: "pointer",
+                    fontWeight: "600"
+                  }}
+                >
+                  <FileText className="h-5 w-5" />
+                  Subir Documento
+                </Button>
+
               </DialogTrigger>
               <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
                 <DialogHeader>
