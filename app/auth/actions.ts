@@ -117,47 +117,68 @@ export async function registerOwner(
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient()
 
-  console.log("[v0] ensureUserProfile: Buscando casa para email:", email)
+  try {
+    console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
 
-  // Buscar en public.houses por owner_email
-  const { data: house, error: houseError } = await supabase
-    .from("houses")
-    .select("id, condo_id")
-    .eq("owner_email", email)
-    .single()
+    // Buscar en public.houses por owner_email
+    const { data: house, error: houseError } = await supabase
+      .from("houses")
+      .select("id, condo_id, owner_email")
+      .eq("owner_email", email)
+      .single()
 
-  console.log("[v0] ensureUserProfile: house resultado:", house, houseError)
+    console.log("[v0] House query result:", { house, error: houseError?.message })
 
-  // Si no existe casa con ese email, salir
-  if (!house) {
-    console.log("[v0] ensureUserProfile: No se encontró casa para email:", email)
-    return { success: false }
+    // Si no existe casa, intentar por house_owners (tabla intermedia)
+    let finalHouse = house
+    if (!finalHouse) {
+      console.log("[v0] No house found by owner_email, trying house_owners table")
+      const { data: houseOwner } = await supabase
+        .from("house_owners")
+        .select("house_id, houses(id, condo_id, owner_email)")
+        .eq("user_email", email)
+        .single()
+
+      console.log("[v0] house_owners query result:", houseOwner)
+      
+      if (houseOwner?.houses) {
+        finalHouse = houseOwner.houses
+      }
+    }
+
+    if (!finalHouse) {
+      console.log("[v0] No house found for email:", email)
+      return { success: false, message: "No house found" }
+    }
+
+    console.log("[v0] Found house:", finalHouse)
+
+    // UPDATE en profiles con condo_id y house_id
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({
+        id: userId,
+        email,
+        house_id: finalHouse.id,
+        condo_id: finalHouse.condo_id,
+      }, { onConflict: "id" })
+
+    console.log("[v0] Profile upsert error:", profileError?.message)
+
+    // UPDATE en houses con owner_user_id
+    const { error: houseUpdateError } = await supabase
+      .from("houses")
+      .update({ owner_user_id: userId })
+      .eq("id", finalHouse.id)
+
+    console.log("[v0] House update error:", houseUpdateError?.message)
+    console.log("[v0] ensureUserProfile SUCCESS")
+
+    return { success: true }
+  } catch (err) {
+    console.error("[v0] ensureUserProfile ERROR:", err)
+    return { success: false, error: err }
   }
-
-  console.log("[v0] ensureUserProfile: Actualizando profiles con condo_id:", house.condo_id)
-
-  // UPDATE en profiles con condo_id y house_id
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({
-      id: userId,
-      email,
-      house_id: house.id,
-      condo_id: house.condo_id,
-    }, { onConflict: "id" })
-
-  console.log("[v0] ensureUserProfile: Profile update error:", profileError)
-
-  // UPDATE en houses con owner_user_id
-  const { error: houseUpdateError } = await supabase
-    .from("houses")
-    .update({ owner_user_id: userId })
-    .eq("id", house.id)
-
-  console.log("[v0] ensureUserProfile: House update error:", houseUpdateError)
-
-  console.log("[v0] ensureUserProfile: Completado exitosamente")
-  return { success: true }
 }
 
 export async function signOut() {
