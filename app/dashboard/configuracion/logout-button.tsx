@@ -14,7 +14,10 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="destructive" onClick={handleLogout}>
+    <Button 
+      onClick={handleLogout}
+      className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+    >
       Cerrar Sesión
     </Button>
   )
