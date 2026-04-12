@@ -45,6 +45,7 @@ export default async function DashboardLayout({
   // Check if super_admin from profiles table
   const isSuperAdmin = profile?.role === "super_admin"
   const isAdmin = profile?.role === "admin"
+  const isOwner = profile?.role === "propietario" || profile?.role === "owner"
 
   // If admin, try to get house_id if not already set
   if (isAdmin && !profile?.house_id) {
