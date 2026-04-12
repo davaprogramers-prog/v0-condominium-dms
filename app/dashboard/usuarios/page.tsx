@@ -1,37 +1,64 @@
-import { createClient } from "@/lib/supabase/server"
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Users, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CreateUserDialog } from "./create-user-dialog"
 import { UserActionsMenu } from "./user-actions-menu"
+import { useTheme } from "@/app/dashboard/theme-context"
 
-export default async function UsuariosPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+interface UserProfile {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  role: string
+  created_at: string
+  condo_id: string
+}
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
-    .single()
+export default function UsuariosPage() {
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [condos, setCondos] = useState<any[]>([])
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const { cardBgColor, cardTextColor } = useTheme()
 
-  const { data: users } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("condo_id", profile?.condo_id)
-    .order("created_at", { ascending: false })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch profile
+        const profileRes = await fetch('/api/profile')
+        if (!profileRes.ok) throw new Error('Failed to fetch profile')
+        const profile = await profileRes.json()
+        
+        setIsAdmin(profile.role === 'admin')
+        setIsSuperAdmin(profile.role === 'super_admin')
 
-  const isAdmin = profile?.role === "admin"
-  const isSuperAdmin = profile?.role === "super_admin"
-  
-  // Get condos for super_admin selector
-  let condos = []
-  if (isSuperAdmin) {
-    const { data: condosData } = await supabase
-      .from("condominiums")
-      .select("id, name")
-      .order("name")
-    condos = condosData || []
-  }
+        // Fetch users
+        const usersRes = await fetch(`/api/users?condo_id=${profile.condo_id}`)
+        if (!usersRes.ok) throw new Error('Failed to fetch users')
+        const usersData = await usersRes.json()
+        setUsers(usersData)
+
+        // Fetch condos if super_admin
+        if (profile.role === 'super_admin') {
+          const condosRes = await fetch('/api/condos')
+          if (condosRes.ok) {
+            const condosData = await condosRes.json()
+            setCondos(condosData)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const roleColors: Record<string, string> = {
     super_admin: "bg-red-100 text-red-700",
@@ -72,7 +99,11 @@ export default async function UsuariosPage() {
 
       {/* Lista de Usuarios */}
       <div className="rounded-lg border">
-        {!users?.length ? (
+        {loading ? (
+          <div className="p-6 text-center text-muted-foreground">
+            Cargando usuarios...
+          </div>
+        ) : !users?.length ? (
           <div className="p-6 text-center text-muted-foreground">
             No hay usuarios registrados aún
           </div>
@@ -80,13 +111,23 @@ export default async function UsuariosPage() {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {users?.map((u) => (
-                <div key={u.id} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+                <div 
+                  key={u.id} 
+                  className="rounded-lg border-2 p-4 hover:shadow-md transition-shadow"
+                  style={{
+                    backgroundColor: cardBgColor,
+                    borderColor: cardBgColor,
+                    color: cardTextColor
+                  }}
+                >
                   <div className="flex flex-col gap-4">
                     {/* Header with name and role */}
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-xs font-medium uppercase text-slate-300">Usuario</p>
-                        <h3 className="text-xl font-bold text-white">{u.first_name} {u.last_name || ""}</h3>
+                        <p className="text-xs font-medium uppercase opacity-75">Usuario</p>
+                        <h3 className="text-xl font-bold" style={{ color: cardTextColor }}>
+                          {u.first_name} {u.last_name || ""}
+                        </h3>
                       </div>
                       <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${roleColors[u.role] || "bg-gray-100 text-gray-700"}`}>
                         {u.role?.replace("_", " ")}
@@ -95,14 +136,18 @@ export default async function UsuariosPage() {
 
                     {/* Email */}
                     <div>
-                      <p className="text-xs font-medium uppercase text-slate-300">Email</p>
-                      <p className="text-sm truncate text-slate-200">{u.email || "-"}</p>
+                      <p className="text-xs font-medium uppercase opacity-75">Email</p>
+                      <p className="text-sm truncate" style={{ color: cardTextColor, opacity: 0.8 }}>
+                        {u.email || "-"}
+                      </p>
                     </div>
 
                     {/* Fecha de Registro */}
                     <div>
-                      <p className="text-xs font-medium uppercase text-slate-300">Fecha Registro</p>
-                      <p className="font-semibold text-white">{new Date(u.created_at).toLocaleDateString()}</p>
+                      <p className="text-xs font-medium uppercase opacity-75">Fecha Registro</p>
+                      <p className="font-semibold" style={{ color: cardTextColor }}>
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </p>
                     </div>
 
                     {/* Actions */}

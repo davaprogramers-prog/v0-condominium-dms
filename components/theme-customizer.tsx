@@ -18,6 +18,7 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   const [sidebarBg, setSidebarBg] = useState('#1e293b')
   const [mainBg, setMainBg] = useState('#f1f5f9')
   const [cardBg, setCardBg] = useState('#ffffff')
+  const [dialogBg, setDialogBg] = useState('#1e293b')
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -28,12 +29,14 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
       setSidebarBg(currentTheme.sidebar_bg_color ?? '#1e293b')
       setMainBg(currentTheme.main_bg_color ?? '#f1f5f9')
       setCardBg(currentTheme.card_bg_color ?? '#ffffff')
+      setDialogBg(currentTheme.dialog_bg_color ?? '#1e293b')
     }
   }, [currentTheme])
 
   const sidebarText = getContrastTextColor(sidebarBg)
   const mainText = getContrastTextColor(mainBg)
   const cardText = getContrastTextColor(cardBg)
+  const dialogText = getContrastTextColor(dialogBg)
 
   const handleSave = async () => {
     try {
@@ -46,6 +49,8 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         main_text_color: mainText,
         card_bg_color: cardBg,
         card_text_color: cardText,
+        dialog_bg_color: dialogBg,
+        dialog_text_color: dialogText,
       })
     } catch (error) {
       console.error('[v0] Error saving theme:', error)
@@ -93,7 +98,7 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         {enableCustom && (
           <>
             {/* Color Pickers */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Sidebar Color */}
               <div className="space-y-3">
                 <Label className="text-white font-medium text-sm">Barra Lateral</Label>
@@ -157,6 +162,28 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
                     </span>
                   </div>
                   <p className="text-xs text-slate-400">{cardBg}</p>
+                </div>
+              </div>
+
+              {/* Dialog Color */}
+              <div className="space-y-3">
+                <Label className="text-white font-medium text-sm">Diálogos</Label>
+                <div className="space-y-2">
+                  <input
+                    type="color"
+                    value={dialogBg}
+                    onChange={(e) => setDialogBg(e.target.value)}
+                    className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                  />
+                  <div
+                    className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: dialogBg }}
+                  >
+                    <span style={{ color: dialogText }} className="text-xs font-medium">
+                      Texto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{dialogBg}</p>
                 </div>
               </div>
             </div>

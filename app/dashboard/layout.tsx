@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { ThemeManagerClient } from "@/components/theme-manager-client"
+import { ThemeProvider } from "@/app/dashboard/theme-context"
 import { type CondoTheme } from "@/lib/theme-utils"
 
 // Force rebuild - v0 fix for mi-casa pages removed
@@ -145,28 +146,30 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
-      <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
-      <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
-      <SidebarInset 
-        className="flex flex-col h-screen"
-        style={theme?.enable_custom_theme ? {
-          backgroundColor: theme.main_bg_color,
-          color: theme.main_text_color,
-        } : undefined}
-      >
-        <DashboardHeader user={user} profile={profile} />
-        <main 
-          className="flex-1 overflow-y-auto p-4 md:p-6"
+    <ThemeProvider theme={theme}>
+      <SidebarProvider>
+        <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
+        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
+        <SidebarInset 
+          className="flex flex-col h-screen"
           style={theme?.enable_custom_theme ? {
             backgroundColor: theme.main_bg_color,
             color: theme.main_text_color,
           } : undefined}
         >
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+          <DashboardHeader user={user} profile={profile} />
+          <main 
+            className="flex-1 overflow-y-auto p-4 md:p-6"
+            style={theme?.enable_custom_theme ? {
+              backgroundColor: theme.main_bg_color,
+              color: theme.main_text_color,
+            } : undefined}
+          >
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </ThemeProvider>
   )
 }
 
