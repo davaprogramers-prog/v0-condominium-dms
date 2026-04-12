@@ -32,7 +32,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   // Initialize staff list from props
   useEffect(() => {
@@ -289,15 +289,15 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
         <div className="max-w-6xl mx-auto p-4">
           <div className="space-y-4">
             {solicitudes.length === 0 ? (
-              <Card>
+              <Card style={{ backgroundColor: cardBgColor || undefined, borderColor: cardBorderColor || undefined }}>
                 <CardContent className="text-center py-12">
                   <Plus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No hay solicitudes de materiales</p>
+                  <p style={{ color: dialogTextColor }} className="text-muted-foreground">No hay solicitudes de materiales</p>
                 </CardContent>
               </Card>
             ) : (
               solicitudes.map((request) => (
-                <Card key={request.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
+                <Card key={request.id} style={{ backgroundColor: cardBgColor || undefined, borderColor: cardBorderColor || undefined }} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
                   <CardHeader
                     className="pb-3 hover:bg-muted/50 transition-colors"
                     onClick={() => setExpandedRequest(expandedRequest === request.id ? null : request.id)}
@@ -305,14 +305,14 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                     <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <CardTitle className="text-lg">{request.request_title}</CardTitle>
+                          <CardTitle style={{ color: dialogTextColor }} className="text-lg">{request.request_title}</CardTitle>
                           {expandedRequest === request.id ? (
                             <ChevronUp className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <ChevronDown className="h-5 w-5 text-muted-foreground" />
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p style={{ color: dialogTextColor }} className="text-sm text-muted-foreground mt-1">
                           {new Date(request.created_at).toLocaleDateString('es-CL')}
                         </p>
                       </div>
@@ -326,15 +326,15 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   </CardHeader>
 
                   {expandedRequest === request.id && (
-                    <CardContent className="pt-0">
+                    <CardContent style={{ backgroundColor: cardBgColor || undefined, color: cardTextColor || undefined }} className="pt-0">
                       <div className="space-y-4">
                         <div>
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
-                                <tr className="border-b">
-                                  <th className="text-left py-2 px-3 font-medium">Cantidad</th>
-                                  <th className="text-left py-2 px-3 font-medium">Descripción</th>
+                                <tr className="border-b" style={{ borderColor: cardTextColor || undefined }}>
+                                  <th style={{ color: cardTextColor }} className="text-left py-2 px-3 font-medium">Cantidad</th>
+                                  <th style={{ color: cardTextColor }} className="text-left py-2 px-3 font-medium">Descripción</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -344,9 +344,9 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                                   if (line.includes('Solicitado por:')) return null
                                   const [qty, desc] = line.split(' - ')
                                   return (
-                                    <tr key={idx} className="border-b last:border-b-0">
-                                      <td className="py-2 px-3">{qty?.trim()}</td>
-                                      <td className="py-2 px-3">{desc?.trim()}</td>
+                                    <tr key={idx} className="border-b last:border-b-0" style={{ borderColor: cardTextColor || undefined }}>
+                                      <td style={{ color: cardTextColor }} className="py-2 px-3">{qty?.trim()}</td>
+                                      <td style={{ color: cardTextColor }} className="py-2 px-3">{desc?.trim()}</td>
                                     </tr>
                                   )
                                 })}
