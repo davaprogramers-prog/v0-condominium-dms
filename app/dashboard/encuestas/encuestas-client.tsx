@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
@@ -191,7 +191,10 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                         {/* Edit Dialog */}
                         <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
                           <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
-                            <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle></DialogHeader>
+                            <DialogHeader>
+                              <DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle>
+                              <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la encuesta</DialogDescription>
+                            </DialogHeader>
                             <form
                               action={async (fd) => {
                                 fd.set("id", survey.id as string)
