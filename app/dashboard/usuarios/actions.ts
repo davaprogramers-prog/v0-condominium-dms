@@ -47,6 +47,7 @@ export async function createUserWithRole(params: CreateUserParams) {
     })
 
     if (authError || !authData.user) {
+      console.error("[v0] Auth error creating user:", authError)
       return { 
         success: false, 
         error: authError?.message || "Error al crear usuario en autenticación" 

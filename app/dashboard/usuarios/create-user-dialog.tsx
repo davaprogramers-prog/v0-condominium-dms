@@ -161,7 +161,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
           Crear Usuario
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg max-h-[90vh] flex flex-col [&_button[aria-label='Close']]:text-white [&_button[aria-label='Close']]:hover:bg-slate-700/50">
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-slate-900 dark:text-white">Crear Usuario</DialogTitle>
           <DialogDescription className="text-slate-600 dark:text-slate-400">
