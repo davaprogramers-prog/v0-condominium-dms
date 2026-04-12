@@ -54,8 +54,20 @@ export async function registerOwner(
 ) {
   const supabase = await createClient()
 
-  // Create auth user
-  const { data: authData, error: authError } = await supabase.auth.signUp({
+  // Get house details first
+  const { data: house, error: houseError } = await supabase
+    .from("houses")
+    .select("id, condo_id")
+    .eq("id", houseId)
+    .single()
+
+  if (houseError || !house) throw new Error("Casa no válida")
+
+  // Try to sign up the user
+  let authData
+  let isNewUser = false
+  
+  const { data: signupData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -69,19 +81,37 @@ export async function registerOwner(
     },
   })
 
-  if (authError) throw authError
+  // If email already exists in auth, that's ok - we just need the user to exist
+  // If it's a different error, throw it
+  if (authError && authError.message.includes("already registered")) {
+    console.log("[v0] Email already registered, attempting to link profile")
+    
+    // Try to get existing user ID via signIn with password
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    
+    if (signInError) {
+      // If sign in fails, the user exists but password might be different
+      // In this case, we'll create a profile but won't be able to auth yet
+      console.log("[v0] Sign in failed:", signInError.message)
+      throw new Error("El email ya existe. Intenta iniciar sesión con tu contraseña.")
+    }
+    
+    authData = signInData
+  } else if (authError) {
+    throw authError
+  } else {
+    authData = signupData
+    isNewUser = true
+  }
+
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
 
-  // Get house details
-  const { data: house, error: houseError } = await supabase
-    .from("houses")
-    .select("id, condo_id")
-    .eq("id", houseId)
-    .single()
+  console.log("[v0] Auth user ready:", authData.user.id, "isNewUser:", isNewUser)
 
-  if (houseError || !house) throw new Error("Casa no válida")
-
-  // Wait for the user to be fully created in the users table
+  // Now create/update the profile
   // Retry up to 10 times with increasing delays
   let lastError = null
   for (let attempt = 1; attempt <= 10; attempt++) {
@@ -110,8 +140,12 @@ export async function registerOwner(
   }
 
   // If all retries failed, throw the error
-  if (lastError && lastError.code === '23503') {
-    throw new Error("Error al crear el perfil. Por favor, intenta de nuevo.")
+  if (lastError) {
+    console.error("[v0] All profile creation attempts failed:", lastError)
+    if (lastError.code === '23503') {
+      throw new Error("Error al crear el perfil. Por favor, intenta de nuevo.")
+    }
+    throw lastError
   }
 
   return authData.user
