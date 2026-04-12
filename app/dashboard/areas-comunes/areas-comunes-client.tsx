@@ -27,7 +27,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
   const [editPhotoUrl, setEditPhotoUrl] = useState("")
   const [isPaid, setIsPaid] = useState(false)
   const [editIsPaid, setEditIsPaid] = useState(false)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleEditClick = (area: Record<string, unknown>) => {
     setEditPhotoUrl((area.photo_url as string) || "")
@@ -65,7 +65,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Área</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Área</Button>
             </DialogTrigger>
             <DialogContent 
               className="border-2"
@@ -126,14 +126,14 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       </div>
 
       {areas.length === 0 ? (
-        <div className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-12 text-center text-slate-300">
+        <div className="rounded-lg border-2 p-12 text-center" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
           <MapPin className="h-10 w-10 mx-auto mb-2" />
           <p>No hay areas comunes registradas</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {areas.map((area) => (
-            <div key={area.id as string} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+            <div key={area.id as string} className="rounded-lg border-2 p-4 hover:shadow-md transition-shadow" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
               <div className="flex flex-col gap-4">
                 {/* Foto del área */}
                 {area.photo_url ? (
@@ -150,8 +150,8 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 {/* Nombre y estado */}
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-medium uppercase text-slate-300">Área</p>
-                    <h3 className="text-xl font-bold text-white">{area.name as string}</h3>
+                    <p className="text-xs font-medium uppercase" style={{ color: cardTextColor, opacity: 0.7 }}>Área</p>
+                    <h3 className="text-xl font-bold" style={{ color: cardTextColor }}>{area.name as string}</h3>
                   </div>
                   <Badge variant={area.is_paid ? "default" : "secondary"} className="text-xs bg-green-600 text-white dark:bg-green-700 dark:text-white">
                     {area.is_paid ? "Pagado" : "Gratis"}
@@ -160,12 +160,12 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
 
                 {/* Descripción */}
                 {area.description ? 
-                  <p className="text-sm text-slate-200">{area.description as string}</p> 
+                  <p className="text-sm" style={{ color: cardTextColor, opacity: 0.8 }}>{area.description as string}</p> 
                 : null}
 
                 {/* Información de tarifa */}
                 {area.is_paid && area.usage_fee ? (
-                  <div className="flex items-center gap-2 text-slate-200">
+                  <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.8 }}>
                     <DollarSign className="h-4 w-4" />
                     <span className="text-sm">Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
                   </div>
@@ -173,7 +173,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
 
                 {/* Responsable de mantenimiento */}
                 {area.maintenance_responsible ? (
-                  <div className="flex items-center gap-2 text-slate-200">
+                  <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.8 }}>
                     <Wrench className="h-4 w-4" />
                     <span className="text-sm">Mant.: {area.maintenance_responsible as string}</span>
                   </div>
@@ -181,15 +181,16 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
 
                 {/* Botones de acciones */}
                 {isAdmin && (
-                  <div className="flex gap-2 pt-3 border-t border-slate-600">
+                  <div className="flex gap-2 pt-3" style={{ borderTopColor: cardTextColor, borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
                     <Dialog open={openEdit === area.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                       <DialogTrigger asChild>
                         <Button
                           size="sm"
-                          className="flex-1 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300"
+                          className="flex-1"
+                          style={{ backgroundColor: cardBgColor === "#1e293b" ? "#f1f5f9" : "#1e293b", color: cardBgColor === "#1e293b" ? "#1e293b" : "#f1f5f9" }}
                           onClick={() => handleEditClick(area)}
                         >
-                          <Edit2 className="h-4 w-4 mr-1" style={{ color: "#64748b" }} />
+                          <Edit2 className="h-4 w-4 mr-1" style={{ color: cardBgColor === "#1e293b" ? "#64748b" : "#94a3b8" }} />
                           Editar
                         </Button>
                       </DialogTrigger>
