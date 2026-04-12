@@ -4,7 +4,7 @@ import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
 import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
-import { type CondoTheme } from "@/lib/theme-utils"
+import { type CondoTheme, getContrastTextColor, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -40,6 +40,10 @@ export default async function ConfiguracionPage() {
 
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
+  // Determine which colors to use - custom theme if enabled, otherwise defaults
+  const cardBgColor = (theme as CondoTheme | null)?.enable_custom_theme ? (theme as CondoTheme).card_bg_color : DEFAULT_THEME.card_bg_color
+  const cardTextColor = (theme as CondoTheme | null)?.enable_custom_theme ? (theme as CondoTheme).card_text_color : DEFAULT_THEME.card_text_color
+
   return (
     <div className="space-y-6">
       <div>
@@ -49,44 +53,58 @@ export default async function ConfiguracionPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Mi Perfil */}
-        <div className="rounded-lg border bg-card p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Mi Perfil</h2>
+        <div 
+          className="rounded-lg border p-6 space-y-4"
+          style={{
+            backgroundColor: cardBgColor,
+            color: cardTextColor,
+            borderColor: cardBgColor
+          }}
+        >
+          <h2 className="text-xl font-semibold" style={{ color: cardTextColor }}>Mi Perfil</h2>
           <div className="space-y-3 text-sm">
             <div>
-              <p className="text-muted-foreground">Nombre</p>
-              <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
+              <p style={{ color: cardTextColor, opacity: 0.7 }}>Nombre</p>
+              <p className="font-medium" style={{ color: cardTextColor }}>{profile?.first_name} {profile?.last_name}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Email</p>
-              <p className="font-medium text-xs">{user.email}</p>
+              <p style={{ color: cardTextColor, opacity: 0.7 }}>Email</p>
+              <p className="font-medium text-xs" style={{ color: cardTextColor }}>{user.email}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Rol</p>
-              <p className="font-medium capitalize">{profile?.role?.replace("_", " ")}</p>
+              <p style={{ color: cardTextColor, opacity: 0.7 }}>Rol</p>
+              <p className="font-medium capitalize" style={{ color: cardTextColor }}>{profile?.role?.replace("_", " ")}</p>
             </div>
           </div>
         </div>
 
         {/* Condominio */}
-        <div className="rounded-lg border bg-card p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Condominio</h2>
+        <div 
+          className="rounded-lg border p-6 space-y-4"
+          style={{
+            backgroundColor: cardBgColor,
+            color: cardTextColor,
+            borderColor: cardBgColor
+          }}
+        >
+          <h2 className="text-xl font-semibold" style={{ color: cardTextColor }}>Condominio</h2>
           {condo ? (
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-muted-foreground">Nombre</p>
-                <p className="font-medium">{condo.name}</p>
+                <p style={{ color: cardTextColor, opacity: 0.7 }}>Nombre</p>
+                <p className="font-medium" style={{ color: cardTextColor }}>{condo.name}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Moneda</p>
-                <p className="font-medium">{condo.currency_symbol}</p>
+                <p style={{ color: cardTextColor, opacity: 0.7 }}>Moneda</p>
+                <p className="font-medium" style={{ color: cardTextColor }}>{condo.currency_symbol}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Creado</p>
-                <p className="font-medium">{new Date(condo.created_at).toLocaleDateString()}</p>
+                <p style={{ color: cardTextColor, opacity: 0.7 }}>Creado</p>
+                <p className="font-medium" style={{ color: cardTextColor }}>{new Date(condo.created_at).toLocaleDateString()}</p>
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm">No tienes un condominio asociado</p>
+            <p style={{ color: cardTextColor, opacity: 0.7 }}>No tienes un condominio asociado</p>
           )}
         </div>
       </div>
