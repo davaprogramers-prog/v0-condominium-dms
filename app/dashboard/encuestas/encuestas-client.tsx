@@ -12,7 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Plus, Vote, X, MoreHorizontal, Edit2, Trash2, CheckCheck, CheckSquare } from "lucide-react"
 
 interface EncuestasClientProps {
@@ -240,7 +239,6 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                   .map((opt) => {
                     const optVotes = (opt.survey_votes as Record<string, unknown>[])?.length || 0
                     const percentage = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0
-                    console.log("[v0] Option:", opt.option_text, "Votes:", optVotes, "Total:", totalVotes, "Percentage:", percentage)
                     const isUserVote = (opt.survey_votes as Record<string, unknown>[])?.some(
                       (v) => v.voter_id === userId
                     )
