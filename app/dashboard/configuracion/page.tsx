@@ -116,11 +116,11 @@ export default async function ConfiguracionPage() {
       )}
 
       {/* Sesión */}
-      <div className="rounded-lg border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 p-6">
+      <div className="rounded-lg border-2 border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/20 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-red-900 dark:text-red-100">Cerrar Sesión</h2>
-            <p className="text-sm text-red-700 dark:text-red-300">Termina tu sesión actual</p>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-red-100">Cerrar Sesión</h2>
+            <p className="text-sm text-slate-700 dark:text-red-300">Termina tu sesión actual</p>
           </div>
           <LogoutButton />
         </div>
