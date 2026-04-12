@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -20,6 +21,7 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -68,29 +70,31 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button
-        style={{
-          backgroundColor: "#2563eb",
-          color: "white",
-          padding: "12px 24px",
-          fontSize: "16px",
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          border: "2px solid #1d4ed8",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-          cursor: "pointer",
-          fontWeight: "600"
-        }}
-      >
-        <Users className="h-5 w-5" />
-        Agregar Conserje
-      </Button>
-      <DialogContent>
+      <DialogTrigger asChild>
+        <Button
+          style={{
+            backgroundColor: "#2563eb",
+            color: "white",
+            padding: "12px 24px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "2px solid #1d4ed8",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+            cursor: "pointer",
+            fontWeight: "600"
+          }}
+        >
+          <Users className="h-5 w-5" />
+          Agregar Conserje
+        </Button>
+      </DialogTrigger>
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
         <DialogHeader>
-          <DialogTitle>Crear Nuevo Conserje</DialogTitle>
-          <DialogDescription>Agrega un nuevo conserje para el condominio</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Crear Nuevo Conserje</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor }}>Agrega un nuevo conserje para el condominio</DialogDescription>
         </DialogHeader>
 
         {success && (
@@ -110,23 +114,23 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
-                <Input id="firstName" name="firstName" required />
+                <Label htmlFor="firstName" style={{ color: dialogTextColor }}>Nombre</Label>
+                <Input id="firstName" name="firstName" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
-                <Input id="lastName" name="lastName" required />
+                <Label htmlFor="lastName" style={{ color: dialogTextColor }}>Apellido</Label>
+                <Input id="lastName" name="lastName" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input id="email" name="email" type="email" required />
+              <Label htmlFor="email" style={{ color: dialogTextColor }}>Correo Electrónico</Label>
+              <Input id="email" name="email" type="email" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" />
+              <Label htmlFor="password" style={{ color: dialogTextColor }}>Contraseña</Label>
+              <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
             </div>
 
             <div className="flex gap-2 justify-end">
