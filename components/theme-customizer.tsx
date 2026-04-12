@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getContrastTextColor, type CondoTheme } from '@/lib/theme-utils'
 import { AlertCircle, Save } from 'lucide-react'
@@ -87,12 +85,14 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
             <Label className="text-white font-medium">Habilitar Personalización</Label>
             <p className="text-xs text-slate-400 mt-1">Activa colores personalizados para tu condominio</p>
           </div>
-          <Switch 
+          <input 
+            type="checkbox"
             checked={enableCustom} 
-            onCheckedChange={(checked) => {
-              console.log('[v0] Toggle changed to:', checked)
-              setEnableCustom(checked)
-            }} 
+            onChange={(e) => {
+              console.log('[v0] Toggle changed to:', e.target.checked)
+              setEnableCustom(e.target.checked)
+            }}
+            className="w-6 h-6 cursor-pointer"
           />
         </div>
 
@@ -186,14 +186,14 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         )}
 
         {/* Save Button */}
-        <Button 
+        <button 
           onClick={handleSave} 
           disabled={loading || !enableCustom}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
         >
-          <Save className="mr-2 h-4 w-4" />
+          <Save className="h-4 w-4" />
           {loading ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
+        </button>
       </CardContent>
     </Card>
   )
