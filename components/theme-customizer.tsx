@@ -23,7 +23,6 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
 
   useEffect(() => {
     setMounted(true)
-    console.log('[v0] ThemeCustomizer mounted, currentTheme:', currentTheme)
     if (currentTheme) {
       setEnableCustom(currentTheme.enable_custom_theme ?? false)
       setSidebarBg(currentTheme.sidebar_bg_color ?? '#1e293b')
@@ -39,7 +38,6 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   const handleSave = async () => {
     try {
       setLoading(true)
-      console.log('[v0] Saving theme with:', { enableCustom, sidebarBg, mainBg, cardBg })
       await onSave({
         enable_custom_theme: enableCustom,
         sidebar_bg_color: sidebarBg,
@@ -49,7 +47,6 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         card_bg_color: cardBg,
         card_text_color: cardText,
       })
-      console.log('[v0] Theme saved successfully')
     } catch (error) {
       console.error('[v0] Error saving theme:', error)
     } finally {
@@ -88,101 +85,89 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
           <input 
             type="checkbox"
             checked={enableCustom} 
-            onChange={(e) => {
-              console.log('[v0] Toggle changed to:', e.target.checked)
-              setEnableCustom(e.target.checked)
-            }}
-            className="w-6 h-6 cursor-pointer"
+            onChange={(e) => setEnableCustom(e.target.checked)}
+            className="w-6 h-6 cursor-pointer accent-blue-600"
           />
         </div>
 
-        {/* Color Pickers - Always show when admin */}
-        <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity ${enableCustom ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-          {/* Sidebar Color */}
-          <div className="space-y-3">
-            <Label className="text-white font-medium text-sm">Barra Lateral</Label>
-            <div className="space-y-2">
-              <input
-                type="color"
-                value={sidebarBg}
-                onChange={(e) => {
-                  console.log('[v0] Sidebar color changed to:', e.target.value)
-                  setSidebarBg(e.target.value)
-                }}
-                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
-                disabled={!enableCustom}
-              />
-              <div
-                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
-                style={{ backgroundColor: sidebarBg }}
-              >
-                <span style={{ color: sidebarText }} className="text-xs font-medium">
-                  Texto
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">{sidebarBg}</p>
-            </div>
-          </div>
-
-          {/* Main Area Color */}
-          <div className="space-y-3">
-            <Label className="text-white font-medium text-sm">Fondo Principal</Label>
-            <div className="space-y-2">
-              <input
-                type="color"
-                value={mainBg}
-                onChange={(e) => {
-                  console.log('[v0] Main bg color changed to:', e.target.value)
-                  setMainBg(e.target.value)
-                }}
-                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
-                disabled={!enableCustom}
-              />
-              <div
-                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
-                style={{ backgroundColor: mainBg }}
-              >
-                <span style={{ color: mainText }} className="text-xs font-medium">
-                  Texto
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">{mainBg}</p>
-            </div>
-          </div>
-
-          {/* Card Color */}
-          <div className="space-y-3">
-            <Label className="text-white font-medium text-sm">Tarjetas</Label>
-            <div className="space-y-2">
-              <input
-                type="color"
-                value={cardBg}
-                onChange={(e) => {
-                  console.log('[v0] Card bg color changed to:', e.target.value)
-                  setCardBg(e.target.value)
-                }}
-                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
-                disabled={!enableCustom}
-              />
-              <div
-                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
-                style={{ backgroundColor: cardBg }}
-              >
-                <span style={{ color: cardText }} className="text-xs font-medium">
-                  Texto
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">{cardBg}</p>
-            </div>
-          </div>
-        </div>
-
         {enableCustom && (
-          <div className="bg-blue-950 border border-blue-700 rounded-lg p-3">
-            <p className="text-xs text-blue-300">
-              El color de texto se calcula automáticamente basado en el brillo del fondo.
-            </p>
-          </div>
+          <>
+            {/* Color Pickers */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Sidebar Color */}
+              <div className="space-y-3">
+                <Label className="text-white font-medium text-sm">Barra Lateral</Label>
+                <div className="space-y-2">
+                  <input
+                    type="color"
+                    value={sidebarBg}
+                    onChange={(e) => setSidebarBg(e.target.value)}
+                    className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                  />
+                  <div
+                    className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: sidebarBg }}
+                  >
+                    <span style={{ color: sidebarText }} className="text-xs font-medium">
+                      Texto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{sidebarBg}</p>
+                </div>
+              </div>
+
+              {/* Main Area Color */}
+              <div className="space-y-3">
+                <Label className="text-white font-medium text-sm">Fondo Principal</Label>
+                <div className="space-y-2">
+                  <input
+                    type="color"
+                    value={mainBg}
+                    onChange={(e) => setMainBg(e.target.value)}
+                    className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                  />
+                  <div
+                    className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: mainBg }}
+                  >
+                    <span style={{ color: mainText }} className="text-xs font-medium">
+                      Texto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{mainBg}</p>
+                </div>
+              </div>
+
+              {/* Card Color */}
+              <div className="space-y-3">
+                <Label className="text-white font-medium text-sm">Tarjetas</Label>
+                <div className="space-y-2">
+                  <input
+                    type="color"
+                    value={cardBg}
+                    onChange={(e) => setCardBg(e.target.value)}
+                    className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                  />
+                  <div
+                    className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: cardBg }}
+                  >
+                    <span style={{ color: cardText }} className="text-xs font-medium">
+                      Texto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{cardBg}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Message */}
+            <div className="bg-blue-950 border border-blue-700 rounded-lg p-3">
+              <p className="text-xs text-blue-300">
+                El color de texto se calcula automáticamente basado en el brillo del fondo.
+              </p>
+            </div>
+          </>
         )}
 
         {/* Save Button */}
