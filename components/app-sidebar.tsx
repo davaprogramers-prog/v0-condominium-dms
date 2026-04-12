@@ -138,12 +138,61 @@ const adminMenuItems = [
   }
 ]
 
+const adminWithPropertyMenuItems = [
+  { 
+    section: "Dashboard",
+    items: [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+    ]
+  },
+  {
+    section: "Mi Propiedad",
+    items: [
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    ]
+  },
+  {
+    section: "Gestión",
+    items: [
+      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    ]
+  },
+  {
+    section: "Finanzas",
+    items: [
+      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
+      { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
+      { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
+      { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
+    ]
+  },
+  {
+    section: "Administración",
+    items: [
+      { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
+      { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
+      { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
+    ]
+  }
+]
+
 const ownerMenuItems = [
   {
     section: "Dashboard",
     items: [
       { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
       { title: "Balance", href: "/dashboard/balance", icon: Landmark },
+    ]
+  },
+  {
+    section: "Mi Propiedad",
+    items: [
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
     ]
   },
   {

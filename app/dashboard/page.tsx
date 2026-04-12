@@ -153,7 +153,7 @@ export default async function DashboardPage() {
           .from("houses")
           .select("*")
           .eq("condo_id", condoId)
-          .eq("user_id", user.id)
+          .eq("owner_user_id", user.id)
         
         if (houses) {
           ownerHouses = houses
