@@ -10,14 +10,14 @@ export default function RegistroPage() {
           <Building2 className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold">CondoAdmin</h1>
-          <p className="text-sm text-muted-foreground">Crea tu cuenta</p>
+          <h1 className="text-2xl font-bold text-foreground">CondoAdmin</h1>
+          <p className="text-sm text-foreground">Crea tu cuenta</p>
         </div>
       </div>
       
       <RegistroForm />
 
-      <div className="text-center text-sm">
+      <div className="text-center text-sm text-foreground">
         ¿Ya tienes cuenta?{" "}
         <Link href="/auth/login" className="font-semibold text-primary hover:underline">
           Inicia sesión aquí
