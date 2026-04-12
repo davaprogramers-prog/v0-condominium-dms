@@ -49,7 +49,7 @@ export default async function AdminVisitasPage() {
     }
   }
 
-  const canManageVisits = userRole === 'admin' || userRole === 'super_admin'
+  const canManageVisits = profile?.role === 'admin' || profile?.role === 'super_admin'
 
   return (
     <div className="flex flex-col h-full">

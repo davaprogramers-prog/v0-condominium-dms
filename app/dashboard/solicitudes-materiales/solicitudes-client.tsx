@@ -289,7 +289,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
         <div className="max-w-6xl mx-auto p-4">
           <div className="space-y-4">
             {solicitudes.length === 0 ? (
-              <Card style={{ backgroundColor: cardBgColor || undefined, borderColor: cardBorderColor || undefined }}>
+              <Card style={{ backgroundColor: cardBgColor || undefined }}>
                 <CardContent className="text-center py-12">
                   <Plus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p style={{ color: dialogTextColor }} className="text-muted-foreground">No hay solicitudes de materiales</p>
@@ -297,7 +297,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
               </Card>
             ) : (
               solicitudes.map((request) => (
-                <Card key={request.id} style={{ backgroundColor: cardBgColor || undefined, borderColor: cardBorderColor || undefined }} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
+                <Card key={request.id} style={{ backgroundColor: cardBgColor || undefined }} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
                   <CardHeader
                     className="pb-3 hover:bg-muted/50 transition-colors"
                     onClick={() => setExpandedRequest(expandedRequest === request.id ? null : request.id)}
