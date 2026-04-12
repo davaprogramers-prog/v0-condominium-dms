@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Landmark, ExternalLink } from "lucide-react"
+import { Plus, Landmark, ExternalLink, ArrowUp, Building, Building2, Building2Icon } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface CartolasClientProps {
@@ -33,7 +33,28 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Subir Cartola</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <Building2Icon className="h-5 w-5" />
+                Subir Cartolas
+              </Button>
+
+
             </DialogTrigger>
             <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>

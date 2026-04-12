@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Loader2, Upload, X } from "lucide-react"
+import { Plus, Loader2, Upload, X, DollarSign } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoIncome } from "./actions"
 import { useTheme } from "@/app/dashboard/theme-context"
@@ -90,7 +90,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
+        <Button
           style={{
             backgroundColor: "#2563eb",
             color: "white",
@@ -106,7 +106,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
             fontWeight: "600"
           }}
         >
-          <Plus className="h-5 w-5" />
+          <DollarSign className="h-5 w-5" />
           Agregar Ingreso
         </Button>
       </DialogTrigger>

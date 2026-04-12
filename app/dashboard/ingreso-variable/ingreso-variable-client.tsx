@@ -24,24 +24,24 @@ type IncomeStatus = "pending" | "paid"
 function compareHouseNumbers(a: string | number, b: string | number): number {
   const aStr = String(a).toLowerCase()
   const bStr = String(b).toLowerCase()
-  
+
   const aMatch = aStr.match(/^(\d+)([a-z]?)$/)
   const bMatch = bStr.match(/^(\d+)([a-z]?)$/)
-  
+
   if (aMatch && bMatch) {
     const aNum = parseInt(aMatch[1], 10)
     const bNum = parseInt(bMatch[1], 10)
-    
+
     if (aNum !== bNum) return aNum - bNum
     return aMatch[2].localeCompare(bMatch[2])
   }
-  
+
   return aStr.localeCompare(bStr)
 }
 
 function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: string; textColor: string } {
   const hasReceipt = inc.receipt_url
-  return hasReceipt 
+  return hasReceipt
     ? { status: "paid", color: "bg-emerald-100", textColor: "text-emerald-700" }
     : { status: "pending", color: "bg-white border-2 border-amber-200", textColor: "text-amber-600" }
 }
@@ -80,7 +80,25 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Ingreso</Button>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <TrendingUp className="h-5 w-5" />
+                Nuevo Ingreso Variable
+              </Button>
             </DialogTrigger>
             <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
@@ -150,9 +168,8 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                         {new Date(income.income_date as string).toLocaleDateString("es-CL")}
                       </p>
                     </div>
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      status === "paid" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
-                    }`}>
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${status === "paid" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                      }`}>
                       {status === "paid" ? "Pagado" : "Pendiente"}
                     </span>
                   </div>
@@ -178,8 +195,8 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                   {/* Receipt Button */}
                   {income.receipt_url && (
                     <button
-                      onClick={() => setSelectedImage({ 
-                        url: income.receipt_url as string, 
+                      onClick={() => setSelectedImage({
+                        url: income.receipt_url as string,
                         title: income.description as string
                       })}
                       className="text-xs font-medium text-blue-600 hover:text-blue-800 underline"
