@@ -285,7 +285,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
               </CardContent>
             </Card>
           )
-        })}
+        })
+      )}
     </div>
   )
 }
