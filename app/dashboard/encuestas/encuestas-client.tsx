@@ -68,7 +68,10 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
               </Button>
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
-              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Encuesta</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle style={{ color: dialogTextColor }}>Crear Encuesta</DialogTitle>
+                <DialogDescription style={{ color: dialogTextColor }}>Crea una nueva encuesta para los residentes</DialogDescription>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   const validOptions = options.filter((o) => o.trim())
@@ -122,104 +125,117 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
       </div>
 
       {surveys.length === 0 ? (
-              <Card style={{ backgroundColor: cardBgColor || undefined }} className="overflow-hidden">
-                <div style={{ 
-                  height: "4px", 
-                  backgroundColor: isActive ? "#22c55e" : "#ef4444",
-                  width: "100%"
-                }}></div>
-                <CardHeader>
-                  <div className="flex justify-between items-start gap-4 flex-wrap">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle style={{ color: cardTextColor }}>{survey.title as string}</CardTitle>
-                        <Badge variant={isActive ? "default" : "secondary"}>
-                          {isActive ? "Activa" : "Cerrada"}
-                        </Badge>
-                      </div>
-                      {survey.description ? (
-                        <CardDescription style={{ color: cardTextColor }} className="mt-1">{survey.description as string}</CardDescription>
-                      ) : null}
-                    </div>
-                    {isAdmin ? (
-                      <div style={{ backgroundColor: cardBgColor }} className="flex items-center gap-2 px-3 py-2 rounded-md border" style={{ borderColor: cardTextColor }}>
-                        {isActive && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => closeSurvey(survey.id as string)}
-                          >
-                            Cerrar
-                          </Button>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditOpen(survey.id as string)}>
-                              <Edit2 className="h-4 w-4 mr-2" />Editar
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                  <Trash2 className="h-4 w-4 mr-2" />Eliminar
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
-                                  <AlertDialogDescription style={{ color: dialogTextColor }}>
-                                    Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <div className="flex gap-3 justify-end">
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction asChild>
-                                    <Button variant="destructive" onClick={() => deleteSurvey(survey.id as string)}>
-                                      Eliminar
-                                    </Button>
-                                  </AlertDialogAction>
-                                </div>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+        <Card style={{ backgroundColor: cardBgColor || undefined }}>
+          <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
+            <Vote className="h-10 w-10" />
+            <p style={{ color: cardTextColor }}>No hay encuestas registradas</p>
+          </CardContent>
+        </Card>
+      ) : (
+        surveys.map((survey) => {
+          const isActive = !(survey.closed_at as string)
+          const surveyOptions = (survey.survey_options as Record<string, unknown>[]) || []
+          const totalVotes = surveyOptions.reduce((sum, opt) => sum + ((opt.survey_votes as Record<string, unknown>[])?.length || 0), 0)
+          const userVoted = surveyOptions.some((opt) => (opt.survey_votes as Record<string, unknown>[])?.some((v) => v.voter_id === userId))
 
-                        {/* Edit Dialog */}
-                        <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                          <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
-                            <DialogHeader>
-                              <DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle>
-                              <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la encuesta</DialogDescription>
-                            </DialogHeader>
-                            <form
-                              action={async (fd) => {
-                                fd.set("id", survey.id as string)
-                                await updateSurvey(fd)
-                                setEditOpen(null)
-                              }}
-                              className="flex flex-col gap-4"
-                            >
-                              <div className="flex flex-col gap-2">
-                                <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
-                                <Input id="edit_title" name="title" defaultValue={survey.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
-                                <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                              </div>
-                              <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
-                            </form>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
+          return (
+            <Card key={survey.id as string} style={{ backgroundColor: cardBgColor || undefined }} className="overflow-hidden">
+              <div style={{ 
+                height: "4px", 
+                backgroundColor: isActive ? "#22c55e" : "#ef4444",
+                width: "100%"
+              }}></div>
+              <CardHeader className="cursor-pointer" onClick={() => setExpandedProject !== undefined && setExpandedProject(survey.id as string)}>
+                <div className="flex justify-between items-start gap-4 flex-wrap">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CardTitle style={{ color: cardTextColor }}>{survey.title as string}</CardTitle>
+                      <Badge variant={isActive ? "default" : "secondary"}>
+                        {isActive ? "Activa" : "Cerrada"}
+                      </Badge>
+                    </div>
+                    {survey.description ? (
+                      <CardDescription style={{ color: cardTextColor }} className="mt-1">{survey.description as string}</CardDescription>
                     ) : null}
                   </div>
-                </CardHeader>
-                <CardContent style={{ color: cardTextColor }} className="flex flex-col gap-3">
+                  {isAdmin ? (
+                    <div style={{ backgroundColor: cardBgColor }} className="flex items-center gap-2 px-3 py-2 rounded-md border" style={{ borderColor: cardTextColor }}>
+                      {isActive && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => closeSurvey(survey.id as string)}
+                        >
+                          Cerrar
+                        </Button>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditOpen(survey.id as string)}>
+                            <Edit2 className="h-4 w-4 mr-2" />Editar
+                          </DropdownMenuItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                <Trash2 className="h-4 w-4 mr-2" />Eliminar
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Encuesta: {survey.title as string}</AlertDialogTitle>
+                                <AlertDialogDescription style={{ color: dialogTextColor }}>
+                                  Esta accion eliminara la encuesta y todos sus votos. No se puede deshacer.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="flex gap-3 justify-end">
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction asChild>
+                                  <Button variant="destructive" onClick={() => deleteSurvey(survey.id as string)}>
+                                    Eliminar
+                                  </Button>
+                                </AlertDialogAction>
+                              </div>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                        <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                          <DialogHeader>
+                            <DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle>
+                            <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la encuesta</DialogDescription>
+                          </DialogHeader>
+                          <form
+                            action={async (fd) => {
+                              fd.set("id", survey.id as string)
+                              await updateSurvey(fd)
+                              setEditOpen(null)
+                            }}
+                            className="flex flex-col gap-4"
+                          >
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                              <Input id="edit_title" name="title" defaultValue={survey.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                              <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                            </div>
+                            <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  ) : null}
+                </div>
+              </CardHeader>
+              <CardContent style={{ color: cardTextColor }} className="flex flex-col gap-3">
                   {surveyOptions
                     .sort((a, b) => (a.display_order as number || 0) - (b.display_order as number || 0))
                     .map((opt) => {
