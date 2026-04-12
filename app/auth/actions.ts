@@ -117,47 +117,58 @@ export async function registerOwner(
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient()
 
+  console.log("[v0] ensureUserProfile called with:", userId, email)
+
   // Check if profile exists
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, condo_id")
+    .select("id, condo_id, house_id")
     .eq("id", userId)
     .single()
 
+  console.log("[v0] Profile lookup result:", profile, profileError)
+
   // If profile exists and has condo_id, we're done
   if (profile?.condo_id) {
+    console.log("[v0] Profile already has condo_id:", profile.condo_id)
     return { success: true, message: "Profile ya completo" }
   }
 
-  // If profile exists but no condo_id, get it from house_owners
-  if (profile && !profile.condo_id) {
-    const { data: houseOwner } = await supabase
-      .from("house_owners")
-      .select("houses(condo_id)")
-      .eq("user_email", email)
-      .single()
+  // Get house owner data
+  const { data: houseOwner, error: houseError } = await supabase
+    .from("house_owners")
+    .select("house_id, houses(id, condo_id)")
+    .eq("user_email", email)
+    .single()
 
-    if (houseOwner?.houses?.condo_id) {
-      await supabase
-        .from("profiles")
-        .update({ condo_id: houseOwner.houses.condo_id })
-        .eq("id", userId)
-      return { success: true, message: "Profile actualizado con condo_id" }
+  console.log("[v0] House owner lookup:", houseOwner, houseError)
+
+  if (!houseOwner?.houses) {
+    console.log("[v0] No house found for email:", email)
+    return { success: false, message: "No hay casa asignada para este email" }
+  }
+
+  const condoId = houseOwner.houses.condo_id
+  const houseId = houseOwner.houses.id
+
+  // If profile exists but no condo_id, update it
+  if (profile && !profile.condo_id) {
+    console.log("[v0] Updating existing profile with condo_id:", condoId)
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ condo_id: condoId, house_id: houseId })
+      .eq("id", userId)
+
+    if (updateError) {
+      console.error("[v0] Error updating profile:", updateError)
+      return { success: false, message: "Error al actualizar perfil" }
     }
+    return { success: true, message: "Profile actualizado con condo_id" }
   }
 
   // If profile doesn't exist, create it from house_owners
   if (!profile) {
-    const { data: houseOwner } = await supabase
-      .from("house_owners")
-      .select("houses(id, condo_id)")
-      .eq("user_email", email)
-      .single()
-
-    if (!houseOwner) {
-      return { success: false, message: "No hay casa asignada para este email" }
-    }
-
+    console.log("[v0] Creating new profile with condo_id:", condoId)
     const { error: insertError } = await supabase
       .from("profiles")
       .insert({
@@ -165,8 +176,8 @@ export async function ensureUserProfile(userId: string, email: string) {
         email,
         first_name: email.split("@")[0],
         last_name: "",
-        house_id: houseOwner.houses.id,
-        condo_id: houseOwner.houses.condo_id,
+        house_id: houseId,
+        condo_id: condoId,
         role: "owner",
       })
 
@@ -175,9 +186,11 @@ export async function ensureUserProfile(userId: string, email: string) {
       return { success: false, message: "Error al crear perfil" }
     }
 
+    console.log("[v0] Profile created successfully")
     return { success: true, message: "Profile creado desde house_owners" }
   }
 
+  console.log("[v0] Profile verification complete")
   return { success: true, message: "Profile verificado" }
 }
 
