@@ -110,34 +110,6 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
             />
             <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Día del mes para vencimiento del pago (1-28)</p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario</Label>
-            <Input
-              id="owner_email"
-              name="owner_email"
-              type="email"
-              placeholder="correo@ejemplo.com"
-              defaultValue={ownerEmail}
-              required
-              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-              className="opacity-75"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="payment_due_day" style={{ color: dialogTextColor }}>Día de Vencimiento de Pago</Label>
-            <Input 
-              id="payment_due_day" 
-              name="payment_due_day" 
-              type="number" 
-              min={1} 
-              max={28} 
-              placeholder="5" 
-              defaultValue={paymentDueDay}
-              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-              className="opacity-75"
-            />
-            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Día del mes para vencimiento del pago (1-28)</p>
-          </div>
           <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios

@@ -312,8 +312,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 required 
-                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                className="opacity-75"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
@@ -322,8 +321,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 id="last_name" 
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-                className="opacity-75"
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
@@ -336,8 +334,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required 
-              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-              className="opacity-75"
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
 
@@ -350,8 +347,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required 
-              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
-              className="opacity-75"
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
             <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Mínimo 6 caracteres</p>
           </div>
@@ -365,7 +361,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 setFormData({ ...formData, role: value })
               }
             }}>
-              <SelectTrigger id="role" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
+              <SelectTrigger id="role" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
@@ -393,7 +389,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
             <div className="space-y-2">
               <Label htmlFor="house_id" style={{ color: dialogTextColor }}>Propiedad *</Label>
               <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
-                <SelectTrigger id="house_id" disabled={loadingHouses} style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
+                <SelectTrigger id="house_id" disabled={loadingHouses} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
