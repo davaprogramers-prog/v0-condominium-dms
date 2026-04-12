@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '../theme-context'
 import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Calendar, Grid2X2, Layout, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   // Initialize staff list from props
   useEffect(() => {
@@ -183,30 +185,32 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   Nueva Solicitud
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
+                  <DialogTitle style={{ color: dialogTextColor }}>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <Label htmlFor="title">Título</Label>
+                    <Label htmlFor="title" style={{ color: dialogTextColor }}>Título</Label>
                     <Input
                       id="title"
                       value={formData.request_title}
                       onChange={(e) => setFormData({ ...formData, request_title: e.target.value })}
                       placeholder="Ej: Compras supermercado"
                       required
+                      style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="requested_by">Solicitado por *</Label>
+                    <Label htmlFor="requested_by" style={{ color: dialogTextColor }}>Solicitado por *</Label>
                     <Input
                       id="requested_by"
                       value={formData.requested_by_name}
                       onChange={(e) => setFormData({ ...formData, requested_by_name: e.target.value })}
                       placeholder="Escribir nombre"
                       required
+                      style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                     />
                     {staff && staff.length > 0 && (
                       <p className="text-xs text-muted-foreground mt-2">
@@ -217,7 +221,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
 
                   <div>
                     <div className="flex justify-between items-center mb-4">
-                      <Label>Detalle de Productos</Label>
+                      <Label style={{ color: dialogTextColor }}>Detalle de Productos</Label>
                       <Button
                         type="button"
                         size="sm"
@@ -229,11 +233,11 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       </Button>
                     </div>
 
-                    <div className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-4">
+                    <div style={{ backgroundColor: inputBgColor, borderColor: inputTextColor }} className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-4">
                       {formData.items.map((item, index) => (
                         <div key={index} className="flex gap-3 items-end">
                           <div className="w-24">
-                            <Label className="text-xs">Cantidad</Label>
+                            <Label className="text-xs" style={{ color: dialogTextColor }}>Cantidad</Label>
                             <Input
                               type="number"
                               value={item.quantity}
@@ -241,15 +245,17 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                               placeholder="1"
                               required
                               min="1"
+                              style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                             />
                           </div>
                           <div className="flex-1">
-                            <Label className="text-xs">Descripción</Label>
+                            <Label className="text-xs" style={{ color: dialogTextColor }}>Descripción</Label>
                             <Input
                               value={item.description}
                               onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                               placeholder="Producto o material"
                               required
+                              style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                             />
                           </div>
                           {formData.items.length > 1 && (
@@ -268,7 +274,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={isSubmitting} className="w-full">
+                  <Button type="submit" disabled={isSubmitting} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
                     {isSubmitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
                   </Button>
                 </form>
