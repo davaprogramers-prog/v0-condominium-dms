@@ -28,7 +28,7 @@ export default async function VisitasPage() {
     const { data: house, error: hError } = await supabase
       .from("houses")
       .select("condo_id")
-      .eq("owner_id", user.id)
+      .eq("user_id", user.id)
       .limit(1)
       .single()
 
