@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { uploadDocument, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
 import { createDocumentType } from "./actions"
 import { Button } from "@/components/ui/button"
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -36,6 +37,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
   const [isCreatingType, setIsCreatingType] = useState(false)
   const [typeName, setTypeName] = useState("")
   const [typeDescription, setTypeDescription] = useState("")
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,38 +67,66 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Nuevo Tipo de Documento</DialogTitle></DialogHeader>
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: dialogTextColor }}>Nuevo Tipo de Documento</DialogTitle>
+                  <DialogDescription style={{ color: dialogTextColor }}>Crea un nuevo tipo para clasificar documentos</DialogDescription>
+                </DialogHeader>
                 <form onSubmit={handleCreateType} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="doc_type_name">Nombre</Label>
-                    <Input 
-                      id="doc_type_name" 
+                    <Label htmlFor="doc_type_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                    <Input
+                      id="doc_type_name"
                       value={typeName}
                       onChange={(e) => setTypeName(e.target.value)}
-                      placeholder="Ej: Reglamento, Sancion, Parte..." 
-                      required 
+                      placeholder="Ej: Reglamento, Sancion, Parte..."
+                      required
+                      style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="doc_type_desc">Descripcion</Label>
-                    <Textarea 
-                      id="doc_type_desc" 
+                    <Label htmlFor="doc_type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                    <Textarea
+                      id="doc_type_desc"
                       value={typeDescription}
                       onChange={(e) => setTypeDescription(e.target.value)}
-                      placeholder="Descripcion del tipo..." 
+                      placeholder="Descripcion del tipo..."
+                      style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                     />
                   </div>
-                  <Button type="submit" disabled={isCreatingType}>{isCreatingType ? "Guardando..." : "Guardar Tipo"}</Button>
+                  <Button type="submit" disabled={isCreatingType} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">{isCreatingType ? "Guardando..." : "Guardar Tipo"}</Button>
                 </form>
               </DialogContent>
             </Dialog>
             <Dialog open={openDoc} onOpenChange={setOpenDoc}>
               <DialogTrigger asChild>
-                <Button><Plus className="mr-2 h-4 w-4" />Subir Documento</Button>
+                <DialogTrigger asChild>
+                  <Button
+                    style={{
+                      backgroundColor: "#2563eb",
+                      color: "white",
+                      padding: "12px 24px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      border: "2px solid #1d4ed8",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                      fontWeight: "600"
+                    }}
+                  >
+                    <FileText className="h-5 w-5" />
+                    Subir Documento
+                  </Button>
+                </DialogTrigger>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Subir Documento</DialogTitle></DialogHeader>
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle style={{ color: dialogTextColor }}>Subir Documento</DialogTitle>
+                  <DialogDescription style={{ color: dialogTextColor }}>Carga un nuevo documento para los residentes</DialogDescription>
+                </DialogHeader>
                 <form
                   action={async (fd) => {
                     fd.set("document_type_id", selectedType)
@@ -109,9 +139,9 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                   className="flex flex-col gap-4"
                 >
                   <div className="flex flex-col gap-2">
-                    <Label>Tipo de Documento</Label>
+                    <Label style={{ color: dialogTextColor }}>Tipo de Documento</Label>
                     <Select value={selectedType} onValueChange={setSelectedType}>
-                      <SelectTrigger><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
                       <SelectContent>
                         {documentTypes.map((t) => (
                           <SelectItem key={t.id as string} value={t.id as string}>
@@ -122,18 +152,18 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                     </Select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="doc_title">Titulo</Label>
-                    <Input id="doc_title" name="title" placeholder="Titulo del documento" required />
+                    <Label htmlFor="doc_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                    <Input id="doc_title" name="title" placeholder="Titulo del documento" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="doc_desc">Descripcion</Label>
-                    <Textarea id="doc_desc" name="description" placeholder="Descripcion opcional..." />
+                    <Label htmlFor="doc_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                    <Textarea id="doc_desc" name="description" placeholder="Descripcion opcional..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label>Archivo</Label>
+                    <Label style={{ color: dialogTextColor }}>Archivo</Label>
                     <FileUpload bucket="documents" onUpload={setFileUrl} accept="image/*,application/pdf" label="Subir archivo (PDF o imagen)" />
                   </div>
-                  <Button type="submit" disabled={!fileUrl}>Guardar Documento</Button>
+                  <Button type="submit" disabled={!fileUrl} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Documento</Button>
                 </form>
               </DialogContent>
             </Dialog>
@@ -212,10 +242,10 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                         <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                       </DropdownMenuItem>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent>
+                                    <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle>Eliminar Documento</AlertDialogTitle>
-                                        <AlertDialogDescription>
+                                        <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Documento</AlertDialogTitle>
+                                        <AlertDialogDescription style={{ color: dialogTextColor }}>
                                           Esta accion no se puede deshacer. Se eliminara permanentemente este documento.
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
@@ -232,8 +262,11 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
 
                               {/* Edit Dialog */}
                               <Dialog open={editOpen === doc.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                                <DialogContent>
-                                  <DialogHeader><DialogTitle>Editar Documento</DialogTitle></DialogHeader>
+                                <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                                  <DialogHeader>
+                                    <DialogTitle style={{ color: dialogTextColor }}>Editar Documento</DialogTitle>
+                                    <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles del documento</DialogDescription>
+                                  </DialogHeader>
                                   <form
                                     action={async (fd) => {
                                       fd.set("id", doc.id as string)
@@ -244,18 +277,18 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                     className="flex flex-col gap-4"
                                   >
                                     <div className="flex flex-col gap-2">
-                                      <Label htmlFor="edit_title">Titulo</Label>
-                                      <Input id="edit_title" name="title" defaultValue={doc.title as string} required />
+                                      <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                                      <Input id="edit_title" name="title" defaultValue={doc.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                      <Label htmlFor="edit_desc">Descripcion (max 500 caracteres)</Label>
-                                      <Textarea id="edit_desc" name="description" defaultValue={(doc.description as string) || ""} maxLength={500} rows={3} />
+                                      <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion (max 500 caracteres)</Label>
+                                      <Textarea id="edit_desc" name="description" defaultValue={(doc.description as string) || ""} maxLength={500} rows={3} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                      <Label>Cambiar archivo (opcional)</Label>
+                                      <Label style={{ color: dialogTextColor }}>Cambiar archivo (opcional)</Label>
                                       <FileUpload bucket="documents" onUpload={setEditFileUrl} accept="application/pdf" label="Subir nuevo PDF" />
                                     </div>
-                                    <Button type="submit">Guardar Cambios</Button>
+                                    <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                                   </form>
                                 </DialogContent>
                               </Dialog>
