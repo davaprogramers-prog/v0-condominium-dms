@@ -43,7 +43,7 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
               <Button 
-                className="bg-slate-700 hover:bg-slate-800 text-white"
+                className="!bg-slate-700 !hover:bg-slate-800 !text-white !py-2 !px-4 !rounded-md"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar Gasto
