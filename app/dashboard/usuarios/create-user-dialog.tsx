@@ -146,25 +146,6 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
     } finally {
       setLoading(false)
     }
-
-      setOpen(false)
-      setFormData({
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: "",
-        role: "admin",
-        condo_id: "",
-        house_id: "",
-        is_owner: false,
-      })
-      router.refresh()
-    } catch (err) {
-      console.error(err)
-      setError("Error al crear el usuario")
-    } finally {
-      setLoading(false)
-    }
   }
 
   return (
