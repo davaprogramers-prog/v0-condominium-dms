@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronLeft, Plus, Edit2, Trash2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Calendar, Grid2X2, Layout, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -88,11 +88,11 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
   const handleEdit = (request: any) => {
     // Parse items from request_description
     const lines = request.request_description?.split('\n') || []
-    
+
     // Extract requested_by_name from first line
     let requested_by_name = ''
     let itemsText = []
-    
+
     lines.forEach((line: string) => {
       if (line.includes('Solicitado por:')) {
         requested_by_name = line.replace('Solicitado por: ', '').trim()
@@ -100,13 +100,13 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
         itemsText.push(line)
       }
     })
-    
+
     const items = itemsText
       .map((line: string) => {
         const [qty, desc] = line.split(' - ')
         return { quantity: qty?.trim() || '', description: desc?.trim() || '' }
       })
-    
+
     setFormData({
       request_title: request.request_title,
       requested_by_name,
@@ -162,12 +162,25 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
           </div>
           {(isAdmin || userRole === 'conserje') && (
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nueva Solicitud
-                </Button>
-              </DialogTrigger>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <LayoutGrid className="h-5 w-5" />
+                Nueva Solicitud
+              </Button>
               <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
@@ -203,7 +216,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <Label>Detalle de Productos</Label>
-                      <Button 
+                      <Button
                         type="button"
                         size="sm"
                         variant="outline"
@@ -213,7 +226,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                         Agregar línea
                       </Button>
                     </div>
-                    
+
                     <div className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-4">
                       {formData.items.map((item, index) => (
                         <div key={index} className="flex gap-3 items-end">
@@ -277,7 +290,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
             ) : (
               solicitudes.map((request) => (
                 <Card key={request.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader 
+                  <CardHeader
                     className="pb-3 hover:bg-muted/50 transition-colors"
                     onClick={() => setExpandedRequest(expandedRequest === request.id ? null : request.id)}
                   >
@@ -307,104 +320,104 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   {expandedRequest === request.id && (
                     <CardContent className="pt-0">
                       <div className="space-y-4">
-                      <div>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="text-left py-2 px-3 font-medium">Cantidad</th>
-                                <th className="text-left py-2 px-3 font-medium">Descripción</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {request.request_description?.split('\n').map((line: string, idx: number) => {
-                                if (!line.trim()) return null
-                                // Skip the "Solicitado por:" line
-                                if (line.includes('Solicitado por:')) return null
-                                const [qty, desc] = line.split(' - ')
-                                return (
-                                  <tr key={idx} className="border-b last:border-b-0">
-                                    <td className="py-2 px-3">{qty?.trim()}</td>
-                                    <td className="py-2 px-3">{desc?.trim()}</td>
-                                  </tr>
-                                )
-                              })}
-                            </tbody>
-                          </table>
+                        <div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left py-2 px-3 font-medium">Cantidad</th>
+                                  <th className="text-left py-2 px-3 font-medium">Descripción</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {request.request_description?.split('\n').map((line: string, idx: number) => {
+                                  if (!line.trim()) return null
+                                  // Skip the "Solicitado por:" line
+                                  if (line.includes('Solicitado por:')) return null
+                                  const [qty, desc] = line.split(' - ')
+                                  return (
+                                    <tr key={idx} className="border-b last:border-b-0">
+                                      <td className="py-2 px-3">{qty?.trim()}</td>
+                                      <td className="py-2 px-3">{desc?.trim()}</td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="pt-2 pb-4 border-b">
-                        <p className="text-sm text-muted-foreground">
-                          {request.request_description
-                            ?.split('\n')[0]
-                            ?.replace('Solicitado por: ', '') && (
+                        <div className="pt-2 pb-4 border-b">
+                          <p className="text-sm text-muted-foreground">
+                            {request.request_description
+                              ?.split('\n')[0]
+                              ?.replace('Solicitado por: ', '') && (
+                                <>
+                                  <span className="font-medium">Solicitado por: </span>
+                                  {request.request_description?.split('\n')[0]?.replace('Solicitado por: ', '')}
+                                </>
+                              )}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2 pt-4 border-t flex-wrap">
+                          {request.status === 'pending' && (
                             <>
-                              <span className="font-medium">Solicitado por: </span>
-                              {request.request_description?.split('\n')[0]?.replace('Solicitado por: ', '')}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(request.id, 'approved')}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Aprobar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive"
+                                onClick={() => handleStatusChange(request.id, 'rejected')}
+                              >
+                                <AlertCircle className="h-4 w-4 mr-2" />
+                                Rechazar
+                              </Button>
                             </>
                           )}
-                        </p>
-                      </div>
 
-                      <div className="flex gap-2 pt-4 border-t flex-wrap">
-                        {request.status === 'pending' && (
-                          <>
-                            <Button 
-                              size="sm" 
+                          {(isAdmin || userRole === 'conserje') && request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(request)}
+                              >
+                                <Edit2 className="h-4 w-4 mr-2" />
+                                Editar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive"
+                                onClick={() => handleDelete(request.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </Button>
+                            </>
+                          )}
+
+                          {request.status === 'approved' && (
+                            <Button
+                              size="sm"
                               variant="outline"
-                              onClick={() => handleStatusChange(request.id, 'approved')}
+                              onClick={() => handleStatusChange(request.id, 'completed')}
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />
-                              Aprobar
+                              Marcar Completada
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-destructive"
-                              onClick={() => handleStatusChange(request.id, 'rejected')}
-                            >
-                              <AlertCircle className="h-4 w-4 mr-2" />
-                              Rechazar
-                            </Button>
-                          </>
-                        )}
-
-                        {(isAdmin || userRole === 'conserje') && request.status === 'pending' && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEdit(request)}
-                            >
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Editar
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-destructive"
-                              onClick={() => handleDelete(request.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Eliminar
-                            </Button>
-                          </>
-                        )}
-
-                        {request.status === 'approved' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleStatusChange(request.id, 'completed')}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Marcar Completada
-                          </Button>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
+                    </CardContent>
                   )}
                 </Card>
               ))

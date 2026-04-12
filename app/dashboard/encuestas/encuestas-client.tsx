@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Plus, Vote, X, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { Plus, Vote, X, MoreHorizontal, Edit2, Trash2, CheckSquare } from "lucide-react"
 
 interface EncuestasClientProps {
   surveys: Record<string, unknown>[]
@@ -44,9 +44,25 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
         </div>
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={(v) => { setOpenNew(v); if (!v) setOptions(["", ""]) }}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Encuesta</Button>
-            </DialogTrigger>
+            <Button
+              style={{
+                backgroundColor: "#2563eb",
+                color: "white",
+                padding: "12px 24px",
+                fontSize: "16px",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #1d4ed8",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                cursor: "pointer",
+                fontWeight: "600"
+              }}
+            >
+              <CheckSquare className="h-5 w-5" />
+              Nueva Encuesta
+            </Button>
             <DialogContent className="max-w-lg">
               <DialogHeader><DialogTitle>Crear Encuesta</DialogTitle></DialogHeader>
               <form
