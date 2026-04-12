@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { CreateHouseDialog } from "./create-house-dialog"
 import { EditHouseDialog } from "./edit-house-dialog"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { getContrastTextColor, type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function CasasPage() {
   const supabase = await createClient()
@@ -19,10 +20,25 @@ export default async function CasasPage() {
     redirect("/dashboard")
   }
 
-  const { data: housesRaw } = await supabase
-    .from("houses")
-    .select("*")
-    .eq("condo_id", condoId)
+  // Fetch houses and theme together
+  const [housesResponse, themeResponse] = await Promise.all([
+    supabase
+      .from("houses")
+      .select("*")
+      .eq("condo_id", condoId),
+    supabase
+      .from("condominium_themes")
+      .select("*")
+      .eq("condo_id", condoId)
+      .single()
+  ])
+
+  const housesRaw = housesResponse.data || []
+  const theme = themeResponse.data as CondoTheme | null
+
+  // Determine which colors to use - custom theme if enabled, otherwise defaults
+  const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
+  const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
 
   // Sort houses numerically by house_number
   const houses = housesRaw?.sort((a, b) => {
@@ -51,31 +67,39 @@ export default async function CasasPage() {
         ) : (
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {houses?.map((house) => {
+              {houses?.map((house, index) => {
                 return (
-                  <div key={house.id} className="rounded-lg border-2 border-slate-600 bg-slate-700 dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+                  <div 
+                    key={house.id} 
+                    className="rounded-lg border-2 p-4 hover:shadow-md transition-shadow"
+                    style={{
+                      backgroundColor: cardBgColor,
+                      borderColor: cardBgColor,
+                      color: cardTextColor
+                    }}
+                  >
                     <div className="flex flex-col gap-4">
                       {/* Header with number and status */}
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-medium uppercase text-slate-300">Casa</p>
-                          <h3 className="text-2xl font-bold text-white">#{house.house_number}</h3>
+                          <p className="text-xs font-medium uppercase opacity-75">Casa</p>
+                          <h3 className="text-2xl font-bold" style={{ color: cardTextColor }}>#{house.house_number}</h3>
                         </div>
-                        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-white text-green-700">
+                        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-white" style={{ color: cardBgColor }}>
                           Activo
                         </span>
                       </div>
 
                       {/* Owner information */}
                       <div>
-                        <p className="text-xs font-medium uppercase text-slate-300">Propietario</p>
-                        <p className="font-semibold text-white">{house.owner_name || "-"}</p>
+                        <p className="text-xs font-medium uppercase opacity-75">Propietario</p>
+                        <p className="font-semibold" style={{ color: cardTextColor }}>{house.owner_name || "-"}</p>
                       </div>
 
                       {/* Email */}
                       <div>
-                        <p className="text-xs font-medium uppercase text-slate-300">Email</p>
-                        <p className="text-sm truncate text-slate-200">{house.owner_email || "-"}</p>
+                        <p className="text-xs font-medium uppercase opacity-75">Email</p>
+                        <p className="text-sm truncate" style={{ color: cardTextColor, opacity: 0.8 }}>{house.owner_email || "-"}</p>
                       </div>
 
                       {/* Actions */}
