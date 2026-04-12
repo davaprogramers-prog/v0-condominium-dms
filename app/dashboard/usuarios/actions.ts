@@ -50,6 +50,37 @@ export async function createUserWithRole(params: CreateUserParams) {
 
     if (authError || !authData.user) {
       console.error("[v0] Auth error creating user:", authError)
+      
+      // If email already exists, try to get the existing user and create profile
+      if (authError?.code === 'email_exists') {
+        console.log("[v0] Email already exists, attempting to create profile for existing user")
+        const existingUser = await adminClient.auth.admin.getUserById(params.email)
+        
+        if (existingUser.data?.user) {
+          // Try to create profile for existing user
+          const { error: profileError } = await adminClient
+            .from("profiles")
+            .insert({
+              id: existingUser.data.user.id,
+              first_name: params.firstName,
+              last_name: params.lastName,
+              role: params.role,
+              condo_id: condoId,
+            })
+            .select()
+          
+          if (profileError && !profileError.message.includes('duplicate key')) {
+            console.error("[v0] Error creating profile for existing user:", profileError)
+            return { 
+              success: false, 
+              error: "Este usuario ya existe. Por favor usa un correo diferente." 
+            }
+          }
+          
+          return { success: true }
+        }
+      }
+      
       return { 
         success: false, 
         error: authError?.message || "Error al crear usuario en autenticación" 
@@ -61,7 +92,6 @@ export async function createUserWithRole(params: CreateUserParams) {
       .from("profiles")
       .insert({
         id: authData.user.id,
-        email: params.email,
         first_name: params.firstName,
         last_name: params.lastName,
         role: params.role,
