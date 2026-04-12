@@ -64,7 +64,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                 }}
               >
                 <CheckSquare className="h-5 w-5" />
-                Nueva Encuesta
+                Agregar Encuesta
               </Button>
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
@@ -140,8 +140,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
 
           return (
             <Card key={survey.id as string} style={{ backgroundColor: cardBgColor || undefined }} className="overflow-hidden">
-              <div style={{ 
-                height: "4px", 
+              <div style={{
+                height: "4px",
                 backgroundColor: isActive ? "#22c55e" : "#ef4444",
                 width: "100%"
               }}></div>
@@ -236,57 +236,58 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                 </div>
               </CardHeader>
               <CardContent style={{ color: cardTextColor }} className="flex flex-col gap-3">
-                  {surveyOptions
-                    .sort((a, b) => (a.display_order as number || 0) - (b.display_order as number || 0))
-                    .map((opt) => {
-                      const optVotes = (opt.survey_votes as Record<string, unknown>[])?.length || 0
-                      const percentage = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0
-                      const isUserVote = (opt.survey_votes as Record<string, unknown>[])?.some(
-                        (v) => v.voter_id === userId
-                      )
+                {surveyOptions
+                  .sort((a, b) => (a.display_order as number || 0) - (b.display_order as number || 0))
+                  .map((opt) => {
+                    const optVotes = (opt.survey_votes as Record<string, unknown>[])?.length || 0
+                    const percentage = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0
+                    const isUserVote = (opt.survey_votes as Record<string, unknown>[])?.some(
+                      (v) => v.voter_id === userId
+                    )
 
-                      return (
-                        <div key={opt.id as string} className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {isActive && !userVoted ? (
-                                <button
-                                  type="button"
-                                  disabled={voting === (opt.id as string)}
-                                  onClick={async () => {
-                                    setVoting(opt.id as string)
-                                    await voteSurvey(survey.id as string, opt.id as string)
-                                    setVoting(null)
-                                  }}
-                                  className="rounded-md border px-3 py-1 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground"
-                                >
-                                  {opt.option_text as string}
-                                </button>
-                              ) : (
-                                <span className={`text-sm ${isUserVote ? "font-semibold" : ""}`}>
-                                  {opt.option_text as string}
-                                  {isUserVote && " (tu voto)"}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              {optVotes} voto{optVotes !== 1 ? "s" : ""} ({percentage}%)
-                            </span>
+                    return (
+                      <div key={opt.id as string} className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {isActive && !userVoted ? (
+                              <button
+                                type="button"
+                                disabled={voting === (opt.id as string)}
+                                onClick={async () => {
+                                  setVoting(opt.id as string)
+                                  await voteSurvey(survey.id as string, opt.id as string)
+                                  setVoting(null)
+                                }}
+                                className="rounded-md border px-3 py-1 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground"
+                              >
+                                {opt.option_text as string}
+                              </button>
+                            ) : (
+                              <span className={`text-sm ${isUserVote ? "font-semibold" : ""}`}>
+                                {opt.option_text as string}
+                                {isUserVote && " (tu voto)"}
+                              </span>
+                            )}
                           </div>
-                          <Progress value={percentage} className="h-2" />
+                          <span className="text-sm text-muted-foreground">
+                            {optVotes} voto{optVotes !== 1 ? "s" : ""} ({percentage}%)
+                          </span>
                         </div>
-                      )
-                    })}
-                  <p className="text-xs text-muted-foreground">
-                    {totalVotes} voto{totalVotes !== 1 ? "s" : ""} en total
-                    {totalHouses > 0 && ` de ${totalHouses} casas`}
-                  </p>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-      )}
+                        <Progress value={percentage} className="h-2" />
+                      </div>
+                    )
+                  })}
+                <p className="text-xs text-muted-foreground">
+                  {totalVotes} voto{totalVotes !== 1 ? "s" : ""} en total
+                  {totalHouses > 0 && ` de ${totalHouses} casas`}
+                </p>
+              </CardContent>
+            </Card>
+          )
+        })}
     </div>
+  )
+}
+    </div >
   )
 }

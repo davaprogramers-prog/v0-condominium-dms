@@ -206,7 +206,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditProject(project.id as string) }}>
                               <Edit2 className="h-4 w-4 mr-2" />Editar
                             </DropdownMenuItem>
@@ -380,7 +380,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                           <MoreHorizontal className="h-4 w-4" />
                                         </Button>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
+                                      <DropdownMenuContent align="end" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
                                         <DropdownMenuItem onClick={() => setEditQuote(q.id as string)}>
                                           <Edit2 className="h-4 w-4 mr-2" />Editar
                                         </DropdownMenuItem>
