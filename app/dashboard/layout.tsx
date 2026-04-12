@@ -60,8 +60,8 @@ export default async function DashboardLayout({
   if (!profile) {
     profile = {
       role: user.user_metadata?.role || "propietario",
-      condo_id: null,
-      house_id: null,
+      condo_id: user.user_metadata?.condo_id || null,
+      house_id: user.user_metadata?.house_id || null,
       first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
       last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
