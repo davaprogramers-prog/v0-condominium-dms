@@ -37,6 +37,8 @@ export function ConfiguracionClient({ condo, theme, isAdmin }: ConfiguracionClie
     try {
       await updateCondoTheme(condo.id as string, themeData)
       setThemeSaved(true)
+      // Refresh the entire layout to reload the theme from the database
+      window.location.reload()
       setTimeout(() => setThemeSaved(false), 3000)
     } catch (error) {
       console.error("Error saving theme:", error)

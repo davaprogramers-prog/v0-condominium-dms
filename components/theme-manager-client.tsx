@@ -26,6 +26,8 @@ export function ThemeManagerClient({ theme, condoId }: ThemeManagerClientProps) 
     root.style.setProperty('--condo-main-text', theme.main_text_color)
     root.style.setProperty('--condo-card-bg', theme.card_bg_color)
     root.style.setProperty('--condo-card-text', theme.card_text_color)
+    root.style.setProperty('--condo-dialog-bg', theme.dialog_bg_color)
+    root.style.setProperty('--condo-dialog-text', theme.dialog_text_color)
   }, [theme])
 
   if (!mounted) {
