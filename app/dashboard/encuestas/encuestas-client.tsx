@@ -204,37 +204,36 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-
-                      <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                        <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
-                          <DialogHeader>
-                            <DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle>
-                            <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la encuesta</DialogDescription>
-                          </DialogHeader>
-                          <form
-                            action={async (fd) => {
-                              fd.set("id", survey.id as string)
-                              await updateSurvey(fd)
-                              setEditOpen(null)
-                            }}
-                            className="flex flex-col gap-4"
-                          >
-                            <div className="flex flex-col gap-2">
-                              <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
-                              <Input id="edit_title" name="title" defaultValue={survey.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
-                              <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                            </div>
-                            <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
                     </div>
                   ) : null}
                 </div>
               </CardHeader>
+              <Dialog open={editOpen === survey.id} onOpenChange={(v) => !v && setEditOpen(null)}>
+                <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                  <DialogHeader>
+                    <DialogTitle style={{ color: dialogTextColor }}>Editar Encuesta</DialogTitle>
+                    <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles de la encuesta</DialogDescription>
+                  </DialogHeader>
+                  <form
+                    action={async (fd) => {
+                      fd.set("id", survey.id as string)
+                      await updateSurvey(fd)
+                      setEditOpen(null)
+                    }}
+                    className="flex flex-col gap-4"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="edit_title" style={{ color: dialogTextColor }}>Titulo</Label>
+                      <Input id="edit_title" name="title" defaultValue={survey.title as string} required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                      <Textarea id="edit_desc" name="description" defaultValue={(survey.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                    </div>
+                    <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
               <CardContent style={{ color: cardTextColor }} className="flex flex-col gap-3">
                 {surveyOptions
                   .sort((a, b) => (a.display_order as number || 0) - (b.display_order as number || 0))
