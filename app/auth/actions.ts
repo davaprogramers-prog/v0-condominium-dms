@@ -111,6 +111,19 @@ export async function registerOwner(
 
   console.log("[v0] Auth user ready:", authData.user.id, "isNewUser:", isNewUser)
 
+  // First, ensure the user exists in the public users table (required by foreign key)
+  // This is needed because auth.users and public.users are separate
+  const { error: userTableError } = await supabase
+    .from("users")
+    .upsert({
+      id: authData.user.id,
+      email,
+    }, { onConflict: "id" })
+
+  if (userTableError) {
+    console.error("[v0] Error inserting into users table:", userTableError)
+  }
+
   // Now create/update the profile
   // Retry up to 10 times with increasing delays
   let lastError = null
