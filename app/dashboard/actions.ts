@@ -730,13 +730,23 @@ export async function markInfractionPaid(id: string) {
 
 export async function updateInfraction(formData: FormData) {
   const { supabase } = await getCondoId()
+  const description = formData.get("description") as string
+  const infraction_date = formData.get("infraction_date") as string
+  
+  if (!description || description.trim() === "") {
+    throw new Error("La descripción es requerida")
+  }
+  if (!infraction_date) {
+    throw new Error("La fecha es requerida")
+  }
+
   const { error } = await supabase
     .from("infractions")
     .update({
-      description: formData.get("description") as string,
+      description: description.trim(),
       fine_amount: Number(formData.get("fine_amount")) || 0,
-      infraction_date: formData.get("infraction_date") as string,
-      notes: formData.get("notes") as string || null,
+      infraction_date: infraction_date,
+      notes: (formData.get("notes") as string) || null,
     })
     .eq("id", formData.get("id") as string)
   if (error) throw error

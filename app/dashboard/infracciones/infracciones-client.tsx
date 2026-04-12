@@ -248,21 +248,21 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 className="flex flex-col gap-4"
                               >
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_desc" className="text-slate-900 dark:text-slate-200">Descripcion</Label>
-                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                  <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required minLength={3} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_fine" className="text-slate-900 dark:text-slate-200">Multa ({currencySymbol})</Label>
-                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                    <Label htmlFor="edit_fine" style={{ color: dialogTextColor }}>Multa ({currencySymbol})</Label>
+                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} min="0" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_date" className="text-slate-900 dark:text-slate-200">Fecha</Label>
+                                    <Label htmlFor="edit_date" style={{ color: dialogTextColor }}>Fecha</Label>
                                     <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_notes" className="text-slate-900 dark:text-slate-200">Notas</Label>
+                                  <Label htmlFor="edit_notes" style={{ color: dialogTextColor }}>Notas</Label>
                                   <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                 </div>
                                 <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
