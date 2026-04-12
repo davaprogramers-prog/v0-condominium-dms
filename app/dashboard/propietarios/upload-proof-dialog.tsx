@@ -149,7 +149,10 @@ export function UploadProofDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={paymentType === "multas" ? "destructive" : "default"} size="sm">
+        <Button 
+          className={paymentType === "multas" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
+          size="sm"
+        >
           <Upload className="h-4 w-4 mr-2" />
           {buttonLabel}
         </Button>
