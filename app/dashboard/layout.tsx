@@ -74,7 +74,7 @@ export default async function DashboardLayout({
   
   if (isOwner && !profile.condo_id) {
     console.log("[v0] Owner without condo_id, searching via utility function")
-    const condoId = await getUserCondoId(supabase, user.id)
+    const condoId = await getUserCondoId(supabase, user.id, user.email)
     if (condoId) {
       profile.condo_id = condoId
       console.log("[v0] Found condo_id via utility:", condoId)
@@ -83,7 +83,7 @@ export default async function DashboardLayout({
 
   if (isOwner && !profile.house_id) {
     console.log("[v0] Owner without house_id, searching via utility function")
-    const houseId = await getUserHouseId(supabase, user.id)
+    const houseId = await getUserHouseId(supabase, user.id, user.email)
     if (houseId) {
       profile.house_id = houseId
       console.log("[v0] Found house_id via utility:", houseId)

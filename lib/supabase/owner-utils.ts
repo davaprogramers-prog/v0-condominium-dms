@@ -6,7 +6,8 @@ import { SupabaseClient } from "@supabase/supabase-js"
  */
 export async function getUserCondoId(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  userEmail?: string
 ): Promise<string | null> {
   try {
     // Try to get from profiles first (for owners and any user)
@@ -44,6 +45,26 @@ export async function getUserCondoId(
       }
     } else {
       console.log("[v0] No profile found for user:", userId)
+      
+      // If no profile but we have email, try searching via house_owners table
+      if (userEmail) {
+        console.log("[v0] Searching house_owners by email:", userEmail)
+        const { data: houseOwners, error: hoError } = await supabase
+          .from("house_owners")
+          .select("house_id, houses(condo_id)")
+          .eq("email", userEmail)
+          .limit(1)
+        
+        console.log("[v0] House owners query result:", { houseOwners, hoError })
+        
+        if (houseOwners && houseOwners.length > 0 && houseOwners[0]?.houses) {
+          const houses = houseOwners[0].houses as any
+          if (houses?.condo_id) {
+            console.log("[v0] Found condo_id via house_owners:", houses.condo_id)
+            return houses.condo_id
+          }
+        }
+      }
     }
   } catch (e) {
     console.log("[v0] Error getting condo:", e)
@@ -58,7 +79,8 @@ export async function getUserCondoId(
  */
 export async function getUserHouseId(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  userEmail?: string
 ): Promise<string | null> {
   try {
     const { data: profile } = await supabase
@@ -69,6 +91,21 @@ export async function getUserHouseId(
 
     if (profile && profile.length > 0 && profile[0]?.house_id) {
       return profile[0].house_id
+    }
+
+    // If no profile house_id but we have email, try searching via house_owners table
+    if (userEmail) {
+      console.log("[v0] Searching house_owners by email for house_id:", userEmail)
+      const { data: houseOwners } = await supabase
+        .from("house_owners")
+        .select("house_id")
+        .eq("email", userEmail)
+        .limit(1)
+      
+      if (houseOwners && houseOwners.length > 0 && houseOwners[0]?.house_id) {
+        console.log("[v0] Found house_id via house_owners:", houseOwners[0].house_id)
+        return houseOwners[0].house_id
+      }
     }
   } catch (e) {
     console.log("[v0] Error getting house from profiles:", e)
