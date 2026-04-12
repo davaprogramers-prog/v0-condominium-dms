@@ -128,7 +128,7 @@ export function RegistroForm() {
           <CardContent>
             <form onSubmit={handleEmailValidation} className="space-y-4">
               {error && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+                <div className="rounded-lg bg-red-600 p-4 text-sm text-white border border-red-700 flex items-start gap-2 font-semibold">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -201,7 +201,7 @@ export function RegistroForm() {
               )}
 
               {error && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+                <div className="rounded-lg bg-red-600 p-4 text-sm text-white border border-red-700 flex items-start gap-2 font-semibold">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>

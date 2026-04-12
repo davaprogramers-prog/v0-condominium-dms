@@ -111,7 +111,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-600 p-4 text-sm text-white border border-red-700 font-semibold">
               {error}
             </div>
           )}
@@ -194,7 +194,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
                 </SelectContent>
               </Select>
               {formData.is_owner && !formData.house_id && (
-                <p className="text-xs text-destructive">La propiedad es requerida si es propietario</p>
+                <p className="text-xs text-red-600 dark:text-red-400 font-semibold">La propiedad es requerida si es propietario</p>
               )}
             </div>
           )}
