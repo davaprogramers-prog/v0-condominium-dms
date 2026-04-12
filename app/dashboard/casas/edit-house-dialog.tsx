@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Edit2, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { updateHouse } from "./actions"
 
 interface EditHouseDialogProps {
@@ -22,6 +23,7 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor } = useTheme()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -54,10 +56,17 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
           <Edit2 className="h-4 w-4" style={{ color: "#64748b" }} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+      <DialogContent 
+        className="border-2"
+        style={{
+          backgroundColor: dialogBgColor,
+          color: dialogTextColor,
+          borderColor: dialogBgColor
+        }}
+      >
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">Editar Casa #{houseNumber}</DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Editar Casa #{houseNumber}</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -66,17 +75,18 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
             <Input
               id="owner_name"
               name="owner_name"
               placeholder="Nombre completo"
               defaultValue={ownerName}
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
+              className="opacity-75"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario</Label>
             <Input
               id="owner_email"
               name="owner_email"
@@ -84,11 +94,12 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
               placeholder="correo@ejemplo.com"
               defaultValue={ownerEmail}
               required
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
+              className="opacity-75"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="payment_due_day" className="text-slate-900 dark:text-slate-200">Día de Vencimiento de Pago</Label>
+            <Label htmlFor="payment_due_day" style={{ color: dialogTextColor }}>Día de Vencimiento de Pago</Label>
             <Input 
               id="payment_due_day" 
               name="payment_due_day" 
@@ -97,11 +108,12 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
               max={28} 
               placeholder="5" 
               defaultValue={paymentDueDay}
-              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
+              className="opacity-75"
             />
-            <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento del pago (1-28)</p>
+            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Día del mes para vencimiento del pago (1-28)</p>
           </div>
-          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios
           </Button>

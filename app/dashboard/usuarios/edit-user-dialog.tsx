@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { updateUser } from "./actions"
 
 interface EditUserDialogProps {
@@ -30,6 +31,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
   const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
   const [loadingHouses, setLoadingHouses] = useState(false)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor } = useTheme()
 
   const [formData, setFormData] = useState({
     first_name: user.first_name || "",
@@ -101,10 +103,17 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 max-w-md">
+      <DialogContent 
+        className="max-w-md border-2"
+        style={{
+          backgroundColor: dialogBgColor,
+          color: dialogTextColor,
+          borderColor: dialogBgColor
+        }}
+      >
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white">Editar Usuario</DialogTitle>
-          <DialogDescription className="text-slate-600 dark:text-slate-400">
+          <DialogTitle style={{ color: dialogTextColor }}>Editar Usuario</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
             Actualiza los datos del usuario
           </DialogDescription>
         </DialogHeader>
@@ -118,30 +127,32 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="first_name" className="text-slate-900 dark:text-slate-200">Nombre *</Label>
+              <Label htmlFor="first_name" style={{ color: dialogTextColor }}>Nombre *</Label>
               <Input
                 id="first_name"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 required
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
+                className="opacity-75"
               />
             </div>
             <div>
-              <Label htmlFor="last_name" className="text-slate-900 dark:text-slate-200">Apellido</Label>
+              <Label htmlFor="last_name" style={{ color: dialogTextColor }}>Apellido</Label>
               <Input
                 id="last_name"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }}
+                className="opacity-75"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="condo_id" className="text-slate-900 dark:text-slate-200">Condominio *</Label>
+            <Label htmlFor="condo_id" style={{ color: dialogTextColor }}>Condominio *</Label>
             <Select value={formData.condo_id} onValueChange={handleCondoChange}>
-              <SelectTrigger id="condo_id" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+              <SelectTrigger id="condo_id" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
                 <SelectValue placeholder="Seleccionar condominio..." />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
@@ -155,9 +166,9 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
           </div>
 
           <div>
-            <Label htmlFor="role" className="text-slate-900 dark:text-slate-200">Rol *</Label>
+            <Label htmlFor="role" style={{ color: dialogTextColor }}>Rol *</Label>
             <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-              <SelectTrigger id="role" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+              <SelectTrigger id="role" style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
@@ -173,16 +184,16 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
               checked={formData.is_owner}
               onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
             />
-            <Label htmlFor="is_owner" className="font-normal text-slate-900 dark:text-slate-200">
+            <Label htmlFor="is_owner" className="font-normal" style={{ color: dialogTextColor }}>
               También es Propietario
             </Label>
           </div>
 
           {formData.is_owner && houses.length > 0 && (
             <div>
-              <Label htmlFor="house_id" className="text-slate-900 dark:text-slate-200">Propiedad *</Label>
+              <Label htmlFor="house_id" style={{ color: dialogTextColor }}>Propiedad *</Label>
               <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
-                <SelectTrigger id="house_id" disabled={loadingHouses} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                <SelectTrigger id="house_id" disabled={loadingHouses} style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor, color: dialogTextColor }} className="opacity-75">
                   <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
@@ -199,7 +210,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
             </div>
           )}
 
-          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Guardar Cambios
           </Button>
