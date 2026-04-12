@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Landmark, ExternalLink, ArrowUp, Building, Building2, Building2Icon } from "lucide-react"
+import { Plus, Landmark, ExternalLink, ArrowUp, Building, Building2, Building2Icon, FileCheck, Icon, Paperclip } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface CartolasClientProps {
@@ -50,7 +50,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                   fontWeight: "600"
                 }}
               >
-                <Building2Icon className="h-5 w-5" />
+                <Paperclip className="h-5 w-5" />
                 Subir Cartolas
               </Button>
 

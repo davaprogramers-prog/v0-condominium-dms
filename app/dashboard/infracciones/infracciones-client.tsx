@@ -13,8 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2, CircleAlertIcon, TriangleAlert } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
+import { Alert } from "@/components/ui/alert"
 
 interface InfraccionesClientProps {
   infractions: Record<string, unknown>[]
@@ -38,8 +39,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const filtered = filter === "todas"
     ? infractions
     : filter === "pendientes"
-    ? infractions.filter((i) => !i.is_paid)
-    : infractions.filter((i) => i.is_paid)
+      ? infractions.filter((i) => !i.is_paid)
+      : infractions.filter((i) => i.is_paid)
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,7 +52,27 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-700 hover:bg-slate-800 text-white"><Plus className="mr-2 h-4 w-4" />Nueva Infraccion</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <TriangleAlert className="h-5 w-5" />
+                Nueva Infraccion
+              </Button>
+
             </DialogTrigger>
             <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
@@ -171,9 +192,9 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                         {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString()}` : "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge 
-                          className={inf.is_paid 
-                            ? "bg-green-600 text-white border-green-600 hover:bg-green-700" 
+                        <Badge
+                          className={inf.is_paid
+                            ? "bg-green-600 text-white border-green-600 hover:bg-green-700"
                             : "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
                           }
                         >
