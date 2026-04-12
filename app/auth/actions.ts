@@ -1,7 +1,6 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { createAdminClient } from "@/lib/supabase/admin"
 import { redirect } from "next/navigation"
 
 export async function login(formData: FormData) {
@@ -112,27 +111,11 @@ export async function registerOwner(
 
   console.log("[v0] Auth user ready:", authData.user.id, "isNewUser:", isNewUser)
 
-  // First, ensure the user exists in the public users table (required by foreign key)
-  // Use admin client to bypass RLS
-  const adminClient = createAdminClient()
-  const { error: userTableError } = await adminClient
-    .from("users")
-    .upsert({
-      id: authData.user.id,
-      email,
-    }, { onConflict: "id" })
+  // Wait longer for auth.users to be fully replicated before referencing it
+  // The foreign key constraint in profiles references auth.users directly
+  await new Promise(resolve => setTimeout(resolve, 3000))
 
-  if (userTableError) {
-    console.error("[v0] Error inserting into users table with admin client:", userTableError)
-    throw new Error("No se pudo crear el usuario en la base de datos")
-  }
-
-  console.log("[v0] User row created in users table with admin client")
-  
-  // Wait for the user row to be committed before attempting to reference it
-  await new Promise(resolve => setTimeout(resolve, 2000))
-
-  // Now create/update the profile using regular client
+  // Now create/update the profile
   // Retry up to 10 times with increasing delays
   let lastError = null
   for (let attempt = 1; attempt <= 10; attempt++) {
