@@ -82,10 +82,10 @@ export async function registerOwner(
   if (houseError || !house) throw new Error("Casa no válida")
 
   // Wait for the user to be fully created in the users table
-  // Retry up to 5 times with increasing delays
+  // Retry up to 10 times with increasing delays
   let lastError = null
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, attempt * 500))
+  for (let attempt = 1; attempt <= 10; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, attempt * 1000))
 
     const { error: profileError } = await supabase
       .from("profiles")
@@ -101,6 +101,7 @@ export async function registerOwner(
 
     if (!profileError) {
       // Success - profile created
+      console.log("[v0] Profile created successfully on attempt", attempt)
       break
     }
 
