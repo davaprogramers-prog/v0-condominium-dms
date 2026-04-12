@@ -2,6 +2,7 @@
 
 import { getConcierges, updateConcierge } from "./actions"
 import { CreateConciergeDialog } from "./create-concierge-dialog"
+import { useTheme } from "../theme-context"
 import { useAsync } from "@/lib/hooks/use-async"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ export default function ConserjesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ firstName: "", lastName: "" })
   const [isSaving, setIsSaving] = useState(false)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   // Get condo_id and role from authenticated user
   useEffect(() => {
@@ -202,33 +204,35 @@ export default function ConserjesPage() {
 
       {/* Edit Dialog */}
       <Dialog open={editingId !== null} onOpenChange={(open) => !open && setEditingId(null)}>
-        <DialogContent>
+        <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
           <DialogHeader>
-            <DialogTitle>Editar Conserje</DialogTitle>
+            <DialogTitle style={{ color: dialogTextColor }}>Editar Conserje</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="firstName">Nombre</Label>
+              <Label htmlFor="firstName" style={{ color: dialogTextColor }}>Nombre</Label>
               <Input
                 id="firstName"
                 value={editForm.firstName}
                 onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
                 placeholder="Nombre del conserje"
+                style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
             <div>
-              <Label htmlFor="lastName">Apellido</Label>
+              <Label htmlFor="lastName" style={{ color: dialogTextColor }}>Apellido</Label>
               <Input
                 id="lastName"
                 value={editForm.lastName}
                 onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
                 placeholder="Apellido del conserje"
+                style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
-            <Button onClick={handleSaveEdit} disabled={isSaving}>
+            <Button onClick={handleSaveEdit} disabled={isSaving} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
               {isSaving ? "Guardando..." : "Guardar"}
             </Button>
           </DialogFooter>
