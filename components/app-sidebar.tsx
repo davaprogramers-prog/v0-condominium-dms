@@ -43,6 +43,7 @@ import {
   Users,
   ChevronDown,
   Calendar,
+  Package,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -68,6 +69,7 @@ const iconColorMap: Record<string, string> = {
   "proyectos": "#FBBF24",      // Ámbar brillante
   "configuracion": "#A78BFA",  // Púrpura claro
   "visitas": "#F472B6",        // Rosa vibrante
+  "encomiendas": "#3B82F6",    // Azul para paquetes
 }
 
 const adminMenuItems = [
@@ -200,9 +202,35 @@ const ownerMenuItems = [
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
       { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
+      { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
+    ]
+  }
+]
+
+const conciergeMenuItems = [
+  {
+    section: "Dashboard",
+    items: [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+    ]
+  },
+  {
+    section: "Conserje",
+    items: [
+      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas-admin", icon: Package },
+      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    ]
+  },
+  {
+    section: "Información",
+    items: [
       { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
       { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
@@ -224,6 +252,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isSuperAdmin = profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
+  const isConcierge = profile?.role === "conserje" || profile?.role === "concierge"
   const hasCondo = !!profile?.condo_id
   const hasProperty = !!profile?.house_id
   const canSwitchCondo = allCondos.length > 1
@@ -257,7 +286,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         }
       ]
     : isAdmin && hasProperty ? adminWithPropertyMenuItems
-    : isAdmin ? adminMenuItems 
+    : isAdmin ? adminMenuItems
+    : isConcierge ? conciergeMenuItems
     : ownerMenuItems
 
   return (

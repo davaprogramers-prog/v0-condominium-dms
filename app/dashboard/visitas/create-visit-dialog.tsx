@@ -18,21 +18,24 @@ interface House {
 
 interface CreateVisitDialogProps {
   houses: House[]
+  houseId?: string
 }
 
-export function CreateVisitDialog({ houses }: CreateVisitDialogProps) {
+export function CreateVisitDialog({ houses, houseId }: CreateVisitDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedHouseId, setSelectedHouseId] = useState('')
+  const [selectedHouseId, setSelectedHouseId] = useState(houseId || '')
   const router = useRouter()
 
   // If owner has only one house, pre-select it
   useEffect(() => {
     if (houses.length === 1) {
       setSelectedHouseId(houses[0].id)
+    } else if (houseId) {
+      setSelectedHouseId(houseId)
     }
-  }, [houses])
+  }, [houses, houseId])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

@@ -1,14 +1,15 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, Plus, Calendar, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
+import { getUserCondoId, getUserHouseId } from '@/lib/supabase/owner-utils'
 
 export const metadata: Metadata = {
-  title: 'Mis Visitas | Condominio Canelo',
+  title: 'Mis Visitas | Condominio',
   description: 'Registra y gestiona las visitas a tu propiedad',
 }
 
@@ -17,86 +18,55 @@ export default async function VisitasPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return <div>No autenticado</div>
+    redirect("/auth/login")
   }
 
-  // Get condo_id from houses (for owners) or user_condos (for admins)
-  let condo_id: string | null = null
+  // Get condo_id and house_id using utility functions
+  const condoId = await getUserCondoId(supabase, user.id)
+  const houseId = await getUserHouseId(supabase, user.id)
 
-  // Try to get from houses first (for owners)
-  try {
-    const { data: house, error: hError } = await supabase
-      .from("houses")
-      .select("condo_id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single()
-
-    if (house?.condo_id && !hError) {
-      condo_id = house.condo_id
-    }
-  } catch (e) {
-    console.log("[v0] No owner house found in visitas")
+  if (!condoId) {
+    redirect("/dashboard")
   }
 
-  // If not found, try to get from user_condos (for admin/super_admin)
-  if (!condo_id) {
-    try {
-      const { data: userCondos, error: ucError } = await supabase
-        .from("user_condos")
-        .select("condo_id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .single()
-
-      if (userCondos?.condo_id && !ucError) {
-        condo_id = userCondos.condo_id
-      }
-    } catch (e) {
-      console.log("[v0] No admin condo found in visitas")
-    }
-  }
-
-  if (!condo_id) {
-    return <div>No tienes condominio asignado</div>
-  }
-
-  // Get user's houses
+  // Get all houses in the condo
   const { data: houses } = await supabase
     .from("houses")
     .select("id, house_number")
-    .eq("condo_id", condo_id)
+    .eq("condo_id", condoId)
     .order("house_number", { ascending: true })
 
-  // Get visits
-  const { data: visits } = await supabase
-    .from("visits")
-    .select("*, house:houses(house_number)")
-    .eq("created_by", user.id)
-    .eq("condo_id", condo_id)
-    .order("visit_date", { ascending: false })
+  // Get visits for the user's houses
+  let visits = []
+  if (houseId) {
+    const { data: userVisits } = await supabase
+      .from("visits")
+      .select("*, house:houses(house_number)")
+      .eq("house_id", houseId)
+      .eq("condo_id", condoId)
+      .order("visit_date", { ascending: false })
+    
+    if (userVisits) {
+      visits = userVisits
+    }
+  }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="border-b bg-background/95 sticky top-0 z-10">
-        <div className="flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="md:hidden">
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
-            <h1 className="text-xl font-semibold">Mis Visitas</h1>
-          </div>
-          <CreateVisitDialog houses={houses || []} />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Calendar className="h-8 w-8 text-blue-500" />
+            Mis Visitas
+          </h1>
+          <p className="text-muted-foreground mt-1">Registra y gestiona las visitas a tu propiedad</p>
         </div>
+        <CreateVisitDialog houses={houses || []} houseId={houseId} />
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto p-4">
-          <VisitsList visits={visits || []} />
-        </div>
-      </div>
+      <VisitsList visits={visits} />
     </div>
   )
 }
