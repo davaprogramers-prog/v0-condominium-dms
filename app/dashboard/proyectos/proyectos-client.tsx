@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Hammer, ChevronDown, ChevronUp, FileText, ExternalLink, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { Plus, Hammer, ChevronDown, ChevronUp, FileText, ExternalLink, MoreHorizontal, Edit2, Trash2, Wrench } from "lucide-react"
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   propuesto: { label: "Propuesto", color: "bg-blue-500/10 text-blue-700" },
@@ -53,7 +53,25 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nuevo Proyecto</Button>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <Wrench className="h-5 w-5" />
+                Agregar Proyecto
+              </Button>
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>
@@ -225,7 +243,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                     <CardDescription>{project.improvement_type as string}</CardDescription>
                   ) : null}
                 </CardHeader>
-                
+
                 {/* Edit Project Dialog */}
                 {isAdmin && (
                   <Dialog open={editProject === project.id} onOpenChange={(v) => !v && setEditProject(null)}>
@@ -340,7 +358,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                 {q.is_selected ? <Badge>Seleccionada</Badge> : null}
                                 {q.document_url ? (
                                   <Button asChild variant="outline" size="sm">
-                                    <a 
+                                    <a
                                       href={q.document_url as string}
                                       target="_blank"
                                       rel="noopener noreferrer"
