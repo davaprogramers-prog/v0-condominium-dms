@@ -16,28 +16,32 @@ interface ThemeCustomizerProps {
 }
 
 export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: ThemeCustomizerProps) {
-  const [enableCustom, setEnableCustom] = useState(currentTheme?.enable_custom_theme ?? false)
-  const [sidebarBg, setSidebarBg] = useState(currentTheme?.sidebar_bg_color ?? '#1e293b')
-  const [mainBg, setMainBg] = useState(currentTheme?.main_bg_color ?? '#f1f5f9')
-  const [cardBg, setCardBg] = useState(currentTheme?.card_bg_color ?? '#ffffff')
+  const [enableCustom, setEnableCustom] = useState(false)
+  const [sidebarBg, setSidebarBg] = useState('#1e293b')
+  const [mainBg, setMainBg] = useState('#f1f5f9')
+  const [cardBg, setCardBg] = useState('#ffffff')
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    console.log('[v0] ThemeCustomizer mounted, currentTheme:', currentTheme)
+    if (currentTheme) {
+      setEnableCustom(currentTheme.enable_custom_theme ?? false)
+      setSidebarBg(currentTheme.sidebar_bg_color ?? '#1e293b')
+      setMainBg(currentTheme.main_bg_color ?? '#f1f5f9')
+      setCardBg(currentTheme.card_bg_color ?? '#ffffff')
+    }
+  }, [currentTheme])
 
   const sidebarText = getContrastTextColor(sidebarBg)
   const mainText = getContrastTextColor(mainBg)
   const cardText = getContrastTextColor(cardBg)
 
-  useEffect(() => {
-    if (currentTheme) {
-      setEnableCustom(currentTheme.enable_custom_theme)
-      setSidebarBg(currentTheme.sidebar_bg_color)
-      setMainBg(currentTheme.main_bg_color)
-      setCardBg(currentTheme.card_bg_color)
-    }
-  }, [currentTheme])
-
   const handleSave = async () => {
     try {
       setLoading(true)
+      console.log('[v0] Saving theme with:', { enableCustom, sidebarBg, mainBg, cardBg })
       await onSave({
         enable_custom_theme: enableCustom,
         sidebar_bg_color: sidebarBg,
@@ -47,10 +51,15 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
         card_bg_color: cardBg,
         card_text_color: cardText,
       })
+      console.log('[v0] Theme saved successfully')
+    } catch (error) {
+      console.error('[v0] Error saving theme:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  if (!mounted) return null
 
   if (!isAdmin) {
     return (
@@ -64,105 +73,124 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   }
 
   return (
-    <Card className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+    <Card className="bg-slate-900 border-2 border-slate-700">
       <CardHeader>
-        <CardTitle className="text-slate-900 dark:text-white">Personalización de Colores</CardTitle>
-        <CardDescription className="text-slate-600 dark:text-slate-400">
+        <CardTitle className="text-white">Personalización de Colores</CardTitle>
+        <CardDescription className="text-slate-400">
           Personaliza los colores de la aplicación para tu condominio
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Enable Custom Theme */}
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-800">
+        <div className="flex items-center justify-between rounded-lg border border-slate-700 p-4 bg-slate-800">
           <div>
-            <Label className="text-slate-900 dark:text-white font-medium">Habilitar Personalización</Label>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Activa colores personalizados para tu condominio</p>
+            <Label className="text-white font-medium">Habilitar Personalización</Label>
+            <p className="text-xs text-slate-400 mt-1">Activa colores personalizados para tu condominio</p>
           </div>
-          <Switch checked={enableCustom} onCheckedChange={setEnableCustom} />
+          <Switch 
+            checked={enableCustom} 
+            onCheckedChange={(checked) => {
+              console.log('[v0] Toggle changed to:', checked)
+              setEnableCustom(checked)
+            }} 
+          />
+        </div>
+
+        {/* Color Pickers - Always show when admin */}
+        <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity ${enableCustom ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          {/* Sidebar Color */}
+          <div className="space-y-3">
+            <Label className="text-white font-medium text-sm">Barra Lateral</Label>
+            <div className="space-y-2">
+              <input
+                type="color"
+                value={sidebarBg}
+                onChange={(e) => {
+                  console.log('[v0] Sidebar color changed to:', e.target.value)
+                  setSidebarBg(e.target.value)
+                }}
+                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                disabled={!enableCustom}
+              />
+              <div
+                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                style={{ backgroundColor: sidebarBg }}
+              >
+                <span style={{ color: sidebarText }} className="text-xs font-medium">
+                  Texto
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">{sidebarBg}</p>
+            </div>
+          </div>
+
+          {/* Main Area Color */}
+          <div className="space-y-3">
+            <Label className="text-white font-medium text-sm">Fondo Principal</Label>
+            <div className="space-y-2">
+              <input
+                type="color"
+                value={mainBg}
+                onChange={(e) => {
+                  console.log('[v0] Main bg color changed to:', e.target.value)
+                  setMainBg(e.target.value)
+                }}
+                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                disabled={!enableCustom}
+              />
+              <div
+                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                style={{ backgroundColor: mainBg }}
+              >
+                <span style={{ color: mainText }} className="text-xs font-medium">
+                  Texto
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">{mainBg}</p>
+            </div>
+          </div>
+
+          {/* Card Color */}
+          <div className="space-y-3">
+            <Label className="text-white font-medium text-sm">Tarjetas</Label>
+            <div className="space-y-2">
+              <input
+                type="color"
+                value={cardBg}
+                onChange={(e) => {
+                  console.log('[v0] Card bg color changed to:', e.target.value)
+                  setCardBg(e.target.value)
+                }}
+                className="w-full h-24 rounded-lg cursor-pointer border-2 border-slate-600"
+                disabled={!enableCustom}
+              />
+              <div
+                className="w-full h-10 rounded-lg border-2 border-slate-600 flex items-center justify-center transition-colors"
+                style={{ backgroundColor: cardBg }}
+              >
+                <span style={{ color: cardText }} className="text-xs font-medium">
+                  Texto
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">{cardBg}</p>
+            </div>
+          </div>
         </div>
 
         {enableCustom && (
-          <>
-            {/* Color Pickers */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Sidebar Color */}
-              <div className="space-y-3">
-                <Label className="text-slate-900 dark:text-white font-medium">Color de Barra Lateral</Label>
-                <div className="space-y-2">
-                  <input
-                    type="color"
-                    value={sidebarBg}
-                    onChange={(e) => setSidebarBg(e.target.value)}
-                    className="w-full h-32 rounded-lg cursor-pointer border-2 border-slate-300 dark:border-slate-600"
-                  />
-                  <div
-                    className="w-full h-12 rounded-lg border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
-                    style={{ backgroundColor: sidebarBg }}
-                  >
-                    <span style={{ color: sidebarText }} className="text-sm font-medium">
-                      Texto de Barra
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">{sidebarBg}</p>
-                </div>
-              </div>
-
-              {/* Main Area Color */}
-              <div className="space-y-3">
-                <Label className="text-slate-900 dark:text-white font-medium">Color de Fondo Principal</Label>
-                <div className="space-y-2">
-                  <input
-                    type="color"
-                    value={mainBg}
-                    onChange={(e) => setMainBg(e.target.value)}
-                    className="w-full h-32 rounded-lg cursor-pointer border-2 border-slate-300 dark:border-slate-600"
-                  />
-                  <div
-                    className="w-full h-12 rounded-lg border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
-                    style={{ backgroundColor: mainBg }}
-                  >
-                    <span style={{ color: mainText }} className="text-sm font-medium">
-                      Texto Principal
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">{mainBg}</p>
-                </div>
-              </div>
-
-              {/* Card Color */}
-              <div className="space-y-3">
-                <Label className="text-slate-900 dark:text-white font-medium">Color de Tarjetas</Label>
-                <div className="space-y-2">
-                  <input
-                    type="color"
-                    value={cardBg}
-                    onChange={(e) => setCardBg(e.target.value)}
-                    className="w-full h-32 rounded-lg cursor-pointer border-2 border-slate-300 dark:border-slate-600"
-                  />
-                  <div
-                    className="w-full h-12 rounded-lg border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
-                    style={{ backgroundColor: cardBg }}
-                  >
-                    <span style={{ color: cardText }} className="text-sm font-medium">
-                      Texto Tarjeta
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">{cardBg}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Info Message */}
-            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                El color de texto se calcula automáticamente basado en el brillo del fondo para garantizar legibilidad.
-              </p>
-            </div>
-          </>
+          <div className="bg-blue-950 border border-blue-700 rounded-lg p-3">
+            <p className="text-xs text-blue-300">
+              El color de texto se calcula automáticamente basado en el brillo del fondo.
+            </p>
+          </div>
         )}
 
         {/* Save Button */}
-        <Button onClick={handleSave} disabled={loading} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+        <Button 
+          onClick={handleSave} 
+          disabled={loading || !enableCustom}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+        >
           <Save className="mr-2 h-4 w-4" />
           {loading ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
