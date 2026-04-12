@@ -272,9 +272,13 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                             {optVotes} voto{optVotes !== 1 ? "s" : ""} ({percentage}%)
                           </span>
                         </div>
-                        <Progress value={percentage} className="h-2" style={{
-                          background: cardBgColor === '#ffffff' || cardBgColor === 'rgb(255, 255, 255)' ? '#e5e7eb' : '#2d3748'
-                        }} />
+                        <Progress 
+                          value={percentage} 
+                          className="h-2" 
+                          style={{
+                            backgroundColor: cardBgColor === '#ffffff' || cardBgColor === 'rgb(255, 255, 255)' ? '#e5e7eb' : '#2d3748'
+                          }} 
+                        />
                       </div>
                     )
                   })}
