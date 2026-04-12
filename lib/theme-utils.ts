@@ -30,10 +30,12 @@ export interface CondoTheme {
   main_bg_color: string;
   card_bg_color: string;
   dialog_bg_color: string;
+  input_bg_color: string;
   sidebar_text_color: string;
   main_text_color: string;
   card_text_color: string;
   dialog_text_color: string;
+  input_text_color: string;
   created_at: string;
   updated_at: string;
 }
@@ -44,8 +46,10 @@ export const DEFAULT_THEME: Omit<CondoTheme, 'id' | 'condo_id' | 'created_at' | 
   main_bg_color: '#f1f5f9',
   card_bg_color: '#ffffff',
   dialog_bg_color: '#1e293b',
+  input_bg_color: '#ffffff',
   sidebar_text_color: '#ffffff',
   main_text_color: '#0f172a',
   card_text_color: '#0f172a',
   dialog_text_color: '#ffffff',
+  input_text_color: '#0f172a',
 };
