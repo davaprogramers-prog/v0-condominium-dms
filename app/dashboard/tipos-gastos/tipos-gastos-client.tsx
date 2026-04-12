@@ -27,8 +27,8 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white"><Plus className="mr-2 h-4 w-4" />Nuevo Tipo</Button>
             </DialogTrigger>
-            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-              <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Crear Tipo de Gasto</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Tipo de Gasto</DialogTitle></DialogHeader>
               <form action={async (fd) => { await createExpenseType(fd); setOpen(false) }} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name" style={{ color: dialogTextColor }}>Nombre</Label>
@@ -75,8 +75,8 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
                         <Edit2 className="h-4 w-4 mr-1" />Editar
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-                      <DialogHeader><DialogTitle className="text-slate-900 dark:text-white">Editar Tipo de Gasto</DialogTitle></DialogHeader>
+                    <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
+                      <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Editar Tipo de Gasto</DialogTitle></DialogHeader>
                       <form action={async (fd) => { fd.set("id", type.id as string); fd.set("is_active", String(type.is_active)); await updateExpenseType(fd); setEditOpen(null) }} className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
                           <Label htmlFor="edit_name" style={{ color: dialogTextColor }}>Nombre</Label>
@@ -96,15 +96,15 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
                         <Trash2 className="h-4 w-4 mr-1" />Eliminar
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+                    <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar Tipo de Gasto</AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+                        <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Tipo de Gasto</AlertDialogTitle>
+                        <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
                           Esta acción no se puede deshacer. Se eliminará permanentemente este tipo de gasto.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div className="flex gap-3 justify-end">
-                        <AlertDialogCancel className="text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel style={{ color: dialogTextColor }}>Cancelar</AlertDialogCancel>
                         <AlertDialogAction onClick={() => deleteExpenseType(type.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                           Eliminar
                         </AlertDialogAction>
