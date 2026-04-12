@@ -10,12 +10,6 @@ export default async function ProyectosPage() {
   const { data: profile } = await supabase.from("profiles").select("condo_id, role").eq("id", user.id).single()
   if (!profile?.condo_id) redirect("/dashboard")
 
-  // Verificar que el usuario tiene acceso (super_admin, admin o conserje)
-  const allowedRoles = ["super_admin", "admin", "concierge"]
-  if (!allowedRoles.includes(profile.role as string)) {
-    redirect("/dashboard")
-  }
-
   const { data: condo } = await supabase.from("condominiums").select("currency_symbol").eq("id", profile.condo_id).single()
 
   const { data: projects } = await supabase
@@ -30,13 +24,16 @@ export default async function ProyectosPage() {
     .eq("condo_id", profile.condo_id)
     .order("name")
 
+  const isAdmin = ["admin", "super_admin"].includes(profile.role as string)
+  const canView = true // Todos pueden ver proyectos (admins, conserjes y propietarios)
+
   return (
     <ProyectosClient
       projects={projects || []}
       commonAreas={commonAreas || []}
       currencySymbol={(condo?.currency_symbol as string) || "$"}
-      isAdmin={["admin", "super_admin"].includes(profile.role as string)}
-      canView={allowedRoles.includes(profile.role as string)}
+      isAdmin={isAdmin}
+      canView={canView}
     />
   )
 }

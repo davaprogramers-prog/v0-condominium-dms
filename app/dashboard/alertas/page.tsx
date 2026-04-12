@@ -8,23 +8,29 @@ export default async function AlertasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login")
 
-  // Get condo_id using the helper function (works for both owners and admins)
-  const condoId = await getUserCondoId(supabase, user.id)
+  // Get condo_id and role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("condo_id, role")
+    .eq("id", user.id)
+    .single()
 
-  if (!condoId) {
+  if (!profile?.condo_id) {
     redirect("/dashboard")
   }
 
   const { data: alerts } = await supabase
     .from("alerts")
     .select("*")
-    .eq("condo_id", condoId)
+    .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
+
+  const isAdmin = ["super_admin", "admin"].includes(profile.role as string)
 
   return (
     <AlertasClient
       alerts={alerts || []}
-      isAdmin={true}
+      isAdmin={isAdmin}
     />
   )
 }
