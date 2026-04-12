@@ -54,7 +54,7 @@ export async function registerOwner(
 ) {
   const supabase = await createClient()
 
-  // Get house details first to validate
+  // Get house details to get condo_id
   const { data: house, error: houseError } = await supabase
     .from("houses")
     .select("id, condo_id")
@@ -63,7 +63,7 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Sign up the user with house info in metadata
+  // Sign up user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -74,14 +74,11 @@ export async function registerOwner(
       data: {
         first_name: firstName,
         last_name: lastName,
-        house_id: houseId,
-        condo_id: house.condo_id,
         role: "owner",
       },
     },
   })
 
-  // If email already exists, user needs to login
   if (authError && authError.message.includes("already registered")) {
     throw new Error("El email ya está registrado. Intenta iniciar sesión.")
   }
@@ -89,10 +86,30 @@ export async function registerOwner(
   if (authError) throw authError
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
 
-  console.log("[v0] User registered successfully:", authData.user.id)
+  const userId = authData.user.id
 
-  // Profile will be created automatically on first login via dashboard layout
-  // The house_id and condo_id are stored in user.user_metadata for later retrieval
+  // Wait 1 second for auth to be ready
+  await new Promise(resolve => setTimeout(resolve, 1000))
+
+  // Create profile with all data including condo_id
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert({
+      id: userId,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      house_id: houseId,
+      condo_id: house.condo_id,
+      role: "owner",
+    })
+
+  if (profileError) {
+    console.error("[v0] Profile creation error:", profileError)
+    throw new Error("Error al crear el perfil")
+  }
+
+  console.log("[v0] User registered with profile:", userId, "condo_id:", house.condo_id)
 
   return authData.user
 }
