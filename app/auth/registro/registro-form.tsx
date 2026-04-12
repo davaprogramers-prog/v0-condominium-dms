@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useTheme } from "@/app/dashboard/theme-context"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,7 +30,6 @@ export function RegistroForm() {
   const [selectedHouseId, setSelectedHouseId] = useState("")
   const router = useRouter()
   const supabase = createClient()
-  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor } = useTheme()
 
   // Step 1: Validate email exists in houses
   const handleEmailValidation = async (e: React.FormEvent) => {
@@ -122,10 +120,10 @@ export function RegistroForm() {
     <div className="w-full max-w-md space-y-4">
       {/* Step 1: Email Validation */}
       {step === "email" && (
-        <Card style={{ backgroundColor: cardBgColor }}>
+        <Card>
           <CardHeader>
-            <CardTitle style={{ color: cardTextColor }}>Verificar Correo</CardTitle>
-            <CardDescription style={{ color: cardTextColor }}>Ingresa el correo registrado en tu propiedad</CardDescription>
+            <CardTitle>Verificar Correo</CardTitle>
+            <CardDescription>Ingresa el correo registrado en tu propiedad</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleEmailValidation} className="space-y-4">
@@ -136,7 +134,7 @@ export function RegistroForm() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="email" style={{ color: cardTextColor }}>Correo electrónico</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   type="email"
@@ -145,7 +143,6 @@ export function RegistroForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
               <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white" disabled={loading}>
@@ -159,21 +156,20 @@ export function RegistroForm() {
 
       {/* Step 2: House Selection */}
       {step === "select" && (
-        <Card style={{ backgroundColor: cardBgColor }}>
+        <Card>
           <CardHeader>
-            <CardTitle style={{ color: cardTextColor }}>Selecciona tu Propiedad</CardTitle>
-            <CardDescription style={{ color: cardTextColor }}>Tienes múltiples propiedades registradas</CardDescription>
+            <CardTitle>Selecciona tu Propiedad</CardTitle>
+            <CardDescription>Tienes múltiples propiedades registradas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {houses.map((house) => (
               <button
                 key={house.id}
                 onClick={() => handleHouseSelection(house.id)}
-                className="w-full rounded-lg border-2 border-muted p-4 text-left transition-all hover:border-primary hover:bg-accent"
-                style={{ color: cardTextColor }}
+                className="w-full rounded-lg border-2 border-muted p-4 text-left transition-all hover:border-primary hover:bg-accent text-foreground"
               >
                 <div className="font-semibold">Casa #{house.house_number}</div>
-                <div className="text-sm" style={{ opacity: 0.7 }}>{house.condoName}</div>
+                <div className="text-sm text-muted-foreground">{house.condoName}</div>
               </button>
             ))}
           </CardContent>
@@ -182,10 +178,10 @@ export function RegistroForm() {
 
       {/* Step 3: Password Setup */}
       {step === "password" && (
-        <Card style={{ backgroundColor: cardBgColor }}>
+        <Card>
           <CardHeader>
-            <CardTitle style={{ color: cardTextColor }}>Crear Contraseña</CardTitle>
-            <CardDescription style={{ color: cardTextColor }}>Define tu contraseña para acceder</CardDescription>
+            <CardTitle>Crear Contraseña</CardTitle>
+            <CardDescription>Define tu contraseña para acceder</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordSetup} className="space-y-4">
@@ -213,7 +209,7 @@ export function RegistroForm() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" style={{ color: cardTextColor }}>Nombre</Label>
+                  <Label htmlFor="firstName">Nombre</Label>
                   <Input
                     id="firstName"
                     type="text"
@@ -221,11 +217,10 @@ export function RegistroForm() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     disabled={loading}
-                    style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" style={{ color: cardTextColor }}>Apellido</Label>
+                  <Label htmlFor="lastName">Apellido</Label>
                   <Input
                     id="lastName"
                     type="text"
@@ -233,13 +228,12 @@ export function RegistroForm() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     disabled={loading}
-                    style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" style={{ color: cardTextColor }}>Contraseña</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -249,12 +243,11 @@ export function RegistroForm() {
                   required
                   minLength={6}
                   disabled={loading}
-                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="passwordConfirm" style={{ color: cardTextColor }}>Confirmar Contraseña</Label>
+                <Label htmlFor="passwordConfirm">Confirmar Contraseña</Label>
                 <Input
                   id="passwordConfirm"
                   type="password"
@@ -264,7 +257,6 @@ export function RegistroForm() {
                   required
                   minLength={6}
                   disabled={loading}
-                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
