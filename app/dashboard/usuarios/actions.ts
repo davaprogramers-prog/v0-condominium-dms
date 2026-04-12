@@ -86,20 +86,7 @@ export async function createUserWithRole(params: CreateUserParams) {
 
       if (houseError) {
         console.error("[v0] Error assigning house:", houseError)
-      }
-    }
-
-    // Assign house if needed
-    if ((params.role === "propietario" || params.isOwner) && params.houseId) {
-      const { error: houseError } = await supabase
-        .from("house_owners")
-        .insert({
-          house_id: params.houseId,
-          user_id: authData.user.id,
-        })
-
-      if (houseError) {
-        console.error("Error assigning house:", houseError)
+        // Don't fail the entire operation if house assignment fails
       }
     }
 
