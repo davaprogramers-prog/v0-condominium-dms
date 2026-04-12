@@ -27,7 +27,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
   const [editPhotoUrl, setEditPhotoUrl] = useState("")
   const [isPaid, setIsPaid] = useState(false)
   const [editIsPaid, setEditIsPaid] = useState(false)
-  const { dialogBgColor, dialogTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleEditClick = (area: Record<string, unknown>) => {
     setEditPhotoUrl((area.photo_url as string) || "")
