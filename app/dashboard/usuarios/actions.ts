@@ -56,8 +56,8 @@ export async function createUserWithRole(params: CreateUserParams) {
       }
     }
 
-    // Create profile
-    const { error: profileError } = await supabase
+    // Create profile using admin client
+    const { error: profileError } = await adminClient
       .from("profiles")
       .insert({
         id: authData.user.id,
@@ -69,9 +69,24 @@ export async function createUserWithRole(params: CreateUserParams) {
       })
 
     if (profileError) {
-      console.error("Error creating profile:", profileError)
-      await supabase.auth.admin.deleteUser(authData.user.id)
+      console.error("[v0] Error creating profile:", profileError)
+      // Delete the auth user since profile creation failed
+      await adminClient.auth.admin.deleteUser(authData.user.id)
       return { success: false, error: "Error al crear perfil de usuario" }
+    }
+
+    // Assign house if needed
+    if ((params.role === "propietario" || params.isOwner) && params.houseId) {
+      const { error: houseError } = await adminClient
+        .from("house_owners")
+        .insert({
+          house_id: params.houseId,
+          user_id: authData.user.id,
+        })
+
+      if (houseError) {
+        console.error("[v0] Error assigning house:", houseError)
+      }
     }
 
     // Assign house if needed
