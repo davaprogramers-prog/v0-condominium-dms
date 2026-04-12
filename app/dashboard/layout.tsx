@@ -69,30 +69,9 @@ export default async function DashboardLayout({
     console.log("[v0] Created fallback profile from metadata:", profile)
   }
 
-  // If propietario/owner without condo_id, try to get it from their house or admin assignment
-  const isOwner = profile.role === "propietario" || profile.role === "owner"
-  
+  // If propietario/owner without condo_id, they need setup
+  // The ensureUserProfile action in login-form should have handled this
   if (isOwner && !profile.condo_id) {
-    console.log("[v0] Owner without condo_id, searching via utility function")
-    const condoId = await getUserCondoId(supabase, user.id, user.email)
-    if (condoId) {
-      profile.condo_id = condoId
-      console.log("[v0] Found condo_id via utility:", condoId)
-    }
-  }
-
-  if (isOwner && !profile.house_id) {
-    console.log("[v0] Owner without house_id, searching via utility function")
-    const houseId = await getUserHouseId(supabase, user.id, user.email)
-    if (houseId) {
-      profile.house_id = houseId
-      console.log("[v0] Found house_id via utility:", houseId)
-    }
-  }
-
-  // If still no condo_id and not super_admin/admin, mark as needs setup
-  // But allow access to dashboard
-  if (!profile.condo_id && profile.role !== "super_admin" && profile.role !== "admin") {
     profile.needs_setup = true
   }
 
