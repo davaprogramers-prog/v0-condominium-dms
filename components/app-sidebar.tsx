@@ -431,11 +431,11 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
             </div>
           </div>
           <Link
-            href="/dashboard/mi-cuenta"
+            href="/dashboard/configuracion"
             className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white hover:bg-blue-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
           >
             <Settings className="h-4 w-4" style={{ color: "#A78BFA" }} />
-            Mi Cuenta
+            Configuración
           </Link>
           <form action={signOut}>
             <button
