@@ -1,28 +1,115 @@
 'use client'
 
-import { useState } from 'react'
-import { Package, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Package, AlertCircle, CheckCircle2, Clock, Plus, Edit, Trash, Camera, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { createClient } from '@/lib/supabase/client'
+import { CreateParcelDialog } from './create-parcel-dialog'
+import { UpdateParcelDialog } from './update-parcel-dialog'
+
+interface Parcel {
+  id: string
+  tracking: string
+  from: string
+  recipient_name: string
+  parcel_type: string
+  status: 'received' | 'delivered' | 'returned'
+  received_date: string
+  delivered_date?: string
+  house_id: string
+  house?: { house_number: string }
+  weight?: number
+  dimensions?: string
+  return_reason?: string
+}
 
 export default function ParcelPage() {
-  const [parcels] = useState([
-    {
-      id: '1',
-      tracking: 'PKG-2025-001',
-      sender: 'Amazon',
-      description: 'Laptop Stand',
-      status: 'received',
-      received_date: '2025-04-08',
-    },
-    {
-      id: '2',
-      tracking: 'PKG-2025-002',
-      sender: 'DHL',
-      description: 'Documents',
-      status: 'delivered',
-      received_date: '2025-04-06',
-    },
-  ])
+  const supabase = createClient()
+  const [parcels, setParcels] = useState<Parcel[]>([])
+  const [role, setRole] = useState<string>('')
+  const [condoId, setCondoId] = useState<string>('')
+  const [houseId, setHouseId] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+  const [showDelivered, setShowDelivered] = useState(false)
+  const [searchTracking, setSearchTracking] = useState('')
+  const [editingParcel, setEditingParcel] = useState<Parcel | null>(null)
+  const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
+
+  useEffect(() => {
+    loadUserAndParcels()
+  }, [])
+
+  const loadUserAndParcels = async () => {
+    try {
+      // Get user profile
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, condo_id, house_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile) return
+
+      setRole(profile.role)
+      setCondoId(profile.condo_id)
+      setHouseId(profile.house_id)
+
+      // Get houses for dropdown
+      const { data: housesData } = await supabase
+        .from('houses')
+        .select('id, house_number')
+        .eq('condo_id', profile.condo_id)
+        .order('house_number', { ascending: true })
+
+      setHouses(housesData || [])
+
+      // Get parcels based on role
+      let query = supabase
+        .from('parcels')
+        .select('*, house:houses(house_number)')
+        .eq('condo_id', profile.condo_id)
+
+      // Filter by role
+      if (profile.role === 'conserje' || profile.role === 'admin' || profile.role === 'super_admin') {
+        // Conserjes and admins see all parcels
+        query = query.order('received_date', { ascending: false })
+      } else {
+        // Owners only see their own parcels
+        query = query.eq('house_id', profile.house_id).order('received_date', { ascending: false })
+      }
+
+      const { data } = await query
+
+      // Filter out delivered parcels unless showDelivered is true
+      let filtered = data || []
+      if (!showDelivered) {
+        filtered = filtered.filter(p => p.status !== 'delivered')
+      }
+
+      // Apply search filter
+      if (searchTracking) {
+        filtered = filtered.filter(p =>
+          p.tracking?.toLowerCase().includes(searchTracking.toLowerCase()) ||
+          p.from?.toLowerCase().includes(searchTracking.toLowerCase())
+        )
+      }
+
+      setParcels(filtered)
+    } catch (error) {
+      console.error('[v0] Error loading parcels:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRefresh = () => {
+    setLoading(true)
+    loadUserAndParcels()
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -30,7 +117,7 @@ export default function ParcelPage() {
         return <Clock className="h-5 w-5 text-yellow-500" />
       case 'delivered':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case 'unclaimed':
+      case 'returned':
         return <AlertCircle className="h-5 w-5 text-red-500" />
       default:
         return <Package className="h-5 w-5 text-gray-500" />
@@ -41,8 +128,7 @@ export default function ParcelPage() {
     const labels: Record<string, string> = {
       received: 'Recibido',
       delivered: 'Entregado',
-      unclaimed: 'No Reclamado',
-      pending: 'Pendiente',
+      returned: 'Devuelto',
     }
     return labels[status] || status
   }
@@ -53,19 +139,29 @@ export default function ParcelPage() {
         return 'bg-yellow-50 border-yellow-200'
       case 'delivered':
         return 'bg-green-50 border-green-200'
-      case 'unclaimed':
+      case 'returned':
         return 'bg-red-50 border-red-200'
       default:
         return 'bg-gray-50 border-gray-200'
     }
   }
 
+  const isConserje = role === 'conserje' || role === 'admin' || role === 'super_admin'
+  const receivedCount = parcels.filter(p => p.status === 'received').length
+  const deliveredCount = parcels.filter(p => p.status === 'delivered').length
+  const totalCount = receivedCount + deliveredCount
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Encomiendas</h1>
-        <p className="text-muted-foreground">Gestiona tus paquetes y entregas</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Encomiendas</h1>
+          <p className="text-muted-foreground">
+            {isConserje ? 'Gestiona las encomiendas del condominio' : 'Tus paquetes y entregas'}
+          </p>
+        </div>
+        {isConserje && <CreateParcelDialog condoId={condoId} houses={houses} onSuccess={handleRefresh} />}
       </div>
 
       {/* Stats */}
@@ -74,7 +170,7 @@ export default function ParcelPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Paquetes Recibidos</p>
-              <p className="text-2xl font-bold">{parcels.filter(p => p.status === 'received').length}</p>
+              <p className="text-2xl font-bold">{receivedCount}</p>
             </div>
             <Clock className="h-8 w-8 text-yellow-500 opacity-20" />
           </div>
@@ -83,7 +179,7 @@ export default function ParcelPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Entregados</p>
-              <p className="text-2xl font-bold">{parcels.filter(p => p.status === 'delivered').length}</p>
+              <p className="text-2xl font-bold">{deliveredCount}</p>
             </div>
             <CheckCircle2 className="h-8 w-8 text-green-500 opacity-20" />
           </div>
@@ -92,54 +188,101 @@ export default function ParcelPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">{parcels.length}</p>
+              <p className="text-2xl font-bold">{totalCount}</p>
             </div>
             <Package className="h-8 w-8 text-primary opacity-20" />
           </div>
         </div>
       </div>
 
-      {/* Parcels List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Mis Encomiendas</h2>
-        <div className="space-y-3">
-          {parcels.map((parcel) => (
-            <div key={parcel.id} className={`rounded-lg border p-4 ${getStatusColor(parcel.status)}`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="mt-1">
-                    {getStatusIcon(parcel.status)}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{parcel.description}</h3>
-                    <p className="text-sm text-muted-foreground">De: {parcel.sender}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Tracking: {parcel.tracking}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(parcel.received_date).toLocaleDateString('es-ES')}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
-                    {getStatusLabel(parcel.status)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Input
+          placeholder="Buscar por tracking o remitente..."
+          value={searchTracking}
+          onChange={(e) => setSearchTracking(e.target.value)}
+          className="flex-1"
+        />
+        <Button
+          variant={showDelivered ? 'default' : 'outline'}
+          onClick={() => setShowDelivered(!showDelivered)}
+          className="flex items-center gap-2"
+        >
+          {showDelivered ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {showDelivered ? 'Ocultar' : 'Mostrar'} Entregadas
+        </Button>
       </div>
 
-      {/* Actions */}
-      <div className="rounded-lg border bg-card p-6 space-y-4">
-        <h2 className="font-semibold">¿Tienes un nuevo paquete?</h2>
-        <p className="text-sm text-muted-foreground">
-          Contacta con la administración del condominio para registrar tu paquete.
-        </p>
-        <Button>Solicitar Seguimiento</Button>
+      {/* Parcels List */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">{isConserje ? 'Encomiendas del Condominio' : 'Mis Encomiendas'}</h2>
+        {loading ? (
+          <p className="text-muted-foreground">Cargando...</p>
+        ) : parcels.length === 0 ? (
+          <p className="text-muted-foreground">No hay encomiendas</p>
+        ) : (
+          <div className="space-y-3">
+            {parcels.map((parcel) => (
+              <div key={parcel.id} className={`rounded-lg border p-4 ${getStatusColor(parcel.status)}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="mt-1">{getStatusIcon(parcel.status)}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{parcel.parcel_type}</h3>
+                        {isConserje && parcel.house && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            Casa #{parcel.house.house_number}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">De: {parcel.from}</p>
+                      <p className="text-sm text-muted-foreground">Para: {parcel.recipient_name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Tracking: {parcel.tracking}</p>
+                      {parcel.weight && <p className="text-xs text-muted-foreground">Peso: {parcel.weight} kg</p>}
+                      {parcel.dimensions && <p className="text-xs text-muted-foreground">Dimensiones: {parcel.dimensions}</p>}
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(parcel.received_date).toLocaleDateString('es-ES')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
+                      {getStatusLabel(parcel.status)}
+                    </span>
+                    {isConserje && parcel.status === 'received' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingParcel(parcel)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {parcel.return_reason && (
+                  <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                    Motivo devolución: {parcel.return_reason}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Update Dialog */}
+      {editingParcel && (
+        <UpdateParcelDialog
+          parcel={editingParcel}
+          onClose={() => setEditingParcel(null)}
+          onSuccess={() => {
+            setEditingParcel(null)
+            handleRefresh()
+          }}
+        />
+      )}
     </div>
   )
 }

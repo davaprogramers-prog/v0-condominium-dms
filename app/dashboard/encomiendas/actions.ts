@@ -151,3 +151,84 @@ export async function updateParcelStatus(parcelId: string, status: string, deliv
     return { success: false, error: String(err) }
   }
 }
+
+export async function updateParcelStatus(data: {
+  parcel_id: string
+  new_status: 'delivered' | 'returned'
+  return_reason?: string
+  photo?: ArrayBuffer
+}) {
+  try {
+    const supabase = await createClient()
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('No autenticado')
+
+    // Verify user is conserje or admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, condo_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'super_admin', 'conserje'].includes(profile.role)) {
+      throw new Error('No autorizado')
+    }
+
+    // Get parcel to verify it belongs to the condo
+    const { data: parcel } = await supabase
+      .from('parcels')
+      .select('id, condo_id')
+      .eq('id', data.parcel_id)
+      .single()
+
+    if (!parcel || parcel.condo_id !== profile.condo_id) {
+      throw new Error('Encomienda no encontrada')
+    }
+
+    // Upload photo if provided
+    let photoUrl = null
+    if (data.photo) {
+      const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+      const blob = new Blob([data.photo], { type: 'image/jpeg' })
+      const result = await put(filename, blob, {
+        access: 'private',
+        addRandomSuffix: false,
+      })
+      photoUrl = result.url
+    }
+
+    // Update parcel
+    const updateData: any = {
+      status: data.new_status,
+      delivered_by: user.id,
+    }
+
+    if (data.new_status === 'delivered' && photoUrl) {
+      updateData.delivery_photo_url = photoUrl
+      updateData.delivered_date = new Date().toISOString()
+    } else if (data.new_status === 'returned') {
+      if (photoUrl) {
+        updateData.return_photo_url = photoUrl
+      }
+      if (data.return_reason) {
+        updateData.return_reason = data.return_reason
+      }
+    }
+
+    const { error } = await supabase
+      .from('parcels')
+      .update(updateData)
+      .eq('id', data.parcel_id)
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error('[v0] Error updating parcel status:', err)
+    return { success: false, error: String(err) }
+  }
+}
