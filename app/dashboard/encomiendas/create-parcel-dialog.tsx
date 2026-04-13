@@ -10,7 +10,7 @@ import { Plus, Camera, Loader2 } from 'lucide-react'
 import { createParcel } from './actions'
 import { useRouter } from 'next/navigation'
 
-export function CreateParcelDialog({ condoId, houses }: { condoId: string; houses: Array<{ id: string; house_number: string }> }) {
+export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: string; houses: Array<{ id: string; house_number: string }>; onSuccess?: () => void }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -20,6 +20,8 @@ export function CreateParcelDialog({ condoId, houses }: { condoId: string; house
     tracking: '',
     recipient_name: '',
     description: '',
+    weight: '',
+    dimensions: '',
   })
   const [receptionPhoto, setReceptionPhoto] = useState<File | null>(null)
   const [receptionPhotoPreview, setReceptionPhotoPreview] = useState<string>('')
@@ -60,12 +62,14 @@ export function CreateParcelDialog({ condoId, houses }: { condoId: string; house
           tracking: '',
           recipient_name: '',
           description: '',
+          weight: '',
+          dimensions: '',
         })
         setReceptionPhoto(null)
         setReceptionPhotoPreview('')
         setOpen(false)
         router.refresh()
-        alert('Encomienda creada exitosamente')
+        onSuccess?.()
       } else {
         alert('Error: ' + result.error)
       }
@@ -139,26 +143,50 @@ export function CreateParcelDialog({ condoId, houses }: { condoId: string; house
             />
           </div>
 
-          {/* Tracking */}
-          <div className="space-y-2">
-            <Label htmlFor="tracking">Número de Tracking</Label>
-            <Input
-              id="tracking"
-              placeholder="PKG-2025-001"
-              value={formData.tracking}
-              onChange={(e) => setFormData({ ...formData, tracking: e.target.value })}
-            />
+          {/* Tracking and Weight */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tracking">Número de Tracking</Label>
+              <Input
+                id="tracking"
+                placeholder="PKG-2025-001"
+                value={formData.tracking}
+                onChange={(e) => setFormData({ ...formData, tracking: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weight">Peso (kg)</Label>
+              <Input
+                id="weight"
+                type="number"
+                step="0.1"
+                placeholder="0.5"
+                value={formData.weight}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+              />
+            </div>
           </div>
 
-          {/* Recipient Name */}
-          <div className="space-y-2">
-            <Label htmlFor="recipient_name">Nombre del Destinatario</Label>
-            <Input
-              id="recipient_name"
-              placeholder="Nombre completo del propietario"
-              value={formData.recipient_name}
-              onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
-            />
+          {/* Recipient Name and Dimensions */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="recipient_name">Nombre del Destinatario</Label>
+              <Input
+                id="recipient_name"
+                placeholder="Nombre completo del propietario"
+                value={formData.recipient_name}
+                onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dimensions">Dimensiones (opcional)</Label>
+              <Input
+                id="dimensions"
+                placeholder="20x15x10 cm"
+                value={formData.dimensions}
+                onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+              />
+            </div>
           </div>
 
           {/* Description */}

@@ -12,6 +12,8 @@ export async function createParcel(data: {
   tracking: string
   recipient_name: string
   description: string
+  weight?: string
+  dimensions?: string
   receptionPhoto?: ArrayBuffer
 }) {
   try {
@@ -61,6 +63,8 @@ export async function createParcel(data: {
         parcel_type: data.parcel_type,
         recipient_name: data.recipient_name,
         description: data.description,
+        weight: data.weight ? parseFloat(data.weight) : null,
+        dimensions: data.dimensions || null,
         reception_photo_url: reception_photo_url,
         created_by: user.id,
       })
