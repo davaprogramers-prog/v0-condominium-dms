@@ -168,7 +168,7 @@ export default async function MiCasaPage() {
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-xs opacity-75">{balance > 0 ? "Deuda" : "Saldo"}</p>
+              <p className="text-xs opacity-75">{balance > 0 ? "Deuda" : "Saldo pendiente"}</p>
               <p className="text-lg font-bold">
                 {condo?.currency_symbol}{Math.abs(balance)}
               </p>
