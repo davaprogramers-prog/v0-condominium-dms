@@ -12,8 +12,15 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Generating download URL for pathname:', pathname)
 
     try {
-      // getDownloadUrl() accepts just the pathname/key for private blobs
-      const url = await getDownloadUrl(pathname)
+      // getDownloadUrl() requires a full URL, even for private blobs
+      // For the "parcels" bucket, construct the full URL
+      // The bucket name is in the environment or we need to extract it from the URL stored in DB
+      // Since we're storing pathnames, we need to construct the URL to the parcels bucket
+      const parcelsBucketUrl = `https://${process.env.BLOB_STORE_ID}.blob.vercel-storage.com/parcels/${pathname}`
+      
+      console.log('[v0] Full parcels bucket URL:', parcelsBucketUrl)
+      
+      const url = await getDownloadUrl(parcelsBucketUrl)
       
       console.log('[v0] Generated download blob URL:', url)
       
