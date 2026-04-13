@@ -9,10 +9,17 @@ export async function login(formData: FormData) {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   }
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error, data: authData } = await supabase.auth.signInWithPassword(data)
   if (error) {
     return redirect("/auth/login?error=" + encodeURIComponent(error.message))
   }
+
+  // Ensure user profile is set up correctly
+  if (authData?.user) {
+    const result = await ensureUserProfile(authData.user.id, authData.user.email || "")
+    console.log("[v0] Login ensureUserProfile result:", result)
+  }
+
   return redirect("/dashboard")
 }
 
@@ -53,6 +60,7 @@ export async function registerOwner(
   houseId: string
 ) {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
 
   // Get house details to get condo_id
   const { data: house, error: houseError } = await supabase
@@ -63,7 +71,33 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Sign up user
+  // Check if user already exists
+  const { data: existingAuth } = await supabase.auth.admin.listUsers()
+  const userExists = existingAuth?.users?.some(u => u.email === email)
+
+  if (userExists) {
+    // User already exists in auth, just ensure profile is updated
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    
+    if (authUser?.email === email) {
+      // Current user - update their profile
+      const { error: updateError } = await serviceClient
+        .from("profiles")
+        .update({
+          house_id: houseId,
+          condo_id: house.condo_id,
+        })
+        .eq("id", authUser.id)
+      
+      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
+      
+      return authUser
+    } else {
+      throw new Error("El email ya está registrado. Intenta iniciar sesión.")
+    }
+  }
+
+  // Sign up new user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -79,10 +113,6 @@ export async function registerOwner(
     },
   })
 
-  if (authError && authError.message.includes("already registered")) {
-    throw new Error("El email ya está registrado. Intenta iniciar sesión.")
-  }
-
   if (authError) throw authError
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
 
@@ -91,8 +121,8 @@ export async function registerOwner(
   // Wait 1 second for auth to be ready
   await new Promise(resolve => setTimeout(resolve, 1000))
 
-  // Create profile with all data including condo_id
-  const { error: profileError } = await supabase
+  // Create profile with all data including condo_id using service client
+  const { error: profileError } = await serviceClient
     .from("profiles")
     .insert({
       id: userId,
@@ -106,7 +136,22 @@ export async function registerOwner(
 
   if (profileError) {
     console.error("[v0] Profile creation error:", profileError)
-    throw new Error("Error al crear el perfil")
+    // If insert fails due to duplicate, try update
+    if (profileError.code === "23505") {
+      const { error: updateError } = await serviceClient
+        .from("profiles")
+        .update({
+          house_id: houseId,
+          condo_id: house.condo_id,
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq("id", userId)
+      
+      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
+    } else {
+      throw new Error("Error al crear el perfil")
+    }
   }
 
   console.log("[v0] User registered with profile:", userId, "condo_id:", house.condo_id)
