@@ -38,16 +38,16 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
-        const filename = `${data.condo_id}/${uuidv4()}.jpg`
+        // Use "parcels/" prefix in filename to store in parcels bucket
+        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
-          bucket: 'parcels',
         })
-        // Store only pathname - will use getDownloadUrl() to generate signed URLs for viewing
-        reception_photo_url = result.pathname
-        console.log('[v0] Photo uploaded to parcels bucket:', reception_photo_url)
+        // Store the full URL - it includes the parcels/ prefix
+        reception_photo_url = result.url
+        console.log('[v0] Photo uploaded to:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
       }
@@ -134,16 +134,16 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        // Use "parcels/" prefix in filename to store in parcels bucket
+        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
-          bucket: 'parcels',
         })
-        // Store only pathname - will use getDownloadUrl() to generate signed URLs for viewing
-        photoUrl = result.pathname
-        console.log('[v0] Photo uploaded to parcels bucket:', photoUrl)
+        // Store the full URL - it includes the parcels/ prefix
+        photoUrl = result.url
+        console.log('[v0] Photo uploaded to:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
       }
@@ -256,19 +256,12 @@ export async function editParcelReception(data: {
   }
 }
 
-export async function getPhotoDownloadUrl(pathname: string): Promise<string> {
+export async function getPhotoDownloadUrl(photoUrl: string): Promise<string> {
   try {
-    // Construct full URL for the parcel photo stored in the parcels bucket
-    // pathname is like: "a36bc395-19fb-49ac-8645-53d0beea68aa/0303ee18-916e-4346-a978-54ed658f3d6d.jpg"
-    // Need to prepend: "https://{BLOB_STORE_ID}.blob.vercel-storage.com/parcels/"
-    
-    // Extract BLOB_STORE_ID from BLOB_READ_WRITE_TOKEN (format: "vercel_blob_rw_ABC123_xyz")
-    const token = process.env.BLOB_READ_WRITE_TOKEN || ''
-    const blobStoreId = token.split('_')[3] || 'bubne0yte73emafl' // fallback to known ID
-    
-    const fullUrl = `https://${blobStoreId}.private.blob.vercel-storage.com/parcels/${pathname}`
-    
-    const signedUrl = await getDownloadUrl(fullUrl)
+    // photoUrl is the complete URL stored in the database
+    // e.g., "https://bubne0yte73emafl.private.blob.vercel-storage.com/parcels/..."
+    // Just call getDownloadUrl() to generate a signed temporary URL
+    const signedUrl = await getDownloadUrl(photoUrl)
     return signedUrl
   } catch (err) {
     console.error('[v0] Error generating download URL:', err)
