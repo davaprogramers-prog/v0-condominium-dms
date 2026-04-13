@@ -1,3 +1,4 @@
+import { download } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -8,14 +9,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'pathname required' }, { status: 400 })
     }
 
-    console.log('[v0] Generating signed URL for pathname:', pathname)
+    console.log('[v0] Generating download URL for pathname:', pathname)
 
-    // Vercel Blob pathnames stored are in format: parcels/condo-id/parcel-id/filename.jpg
-    // Build the full blob URL
-    const blobUrl = `https://blob.vercel-storage.com/${pathname}`
-    console.log('[v0] Generated blob URL:', blobUrl)
+    try {
+      // Use download() to get a temporary signed URL for the blob file
+      const blob = await download(pathname)
+      
+      if (!blob) {
+        return NextResponse.json({ error: 'blob not found' }, { status: 404 })
+      }
 
-    return NextResponse.json({ url: blobUrl })
+      // The blob object contains a url that can be used to access the file
+      console.log('[v0] Generated download blob URL:', blob.url)
+      
+      return NextResponse.json({ url: blob.url })
+    } catch (downloadError) {
+      console.error('[v0] Error downloading blob:', downloadError)
+      throw downloadError
+    }
   } catch (error) {
     console.error('[v0] Error generating blob URL:', error)
     return NextResponse.json({ error: 'Failed to generate URL' }, { status: 500 })
