@@ -12,9 +12,10 @@ import { createConcierge } from "./actions"
 
 interface CreateConciergeDialogProps {
   condoId: string
+  onSuccess?: () => void
 }
 
-export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
+export function CreateConciergeDialog({ condoId, onSuccess }: CreateConciergeDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -59,6 +60,7 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
         setSuccess(false)
         setSuccessMessage("")
         router.refresh()
+        onSuccess?.()
       }, 2000)
     } catch (err: any) {
       console.error("[v0] Error creating concierge:", err)

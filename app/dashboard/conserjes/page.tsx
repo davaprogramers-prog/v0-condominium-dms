@@ -59,7 +59,7 @@ export default function ConserjesPage() {
     fetchCondoId()
   }, [])
 
-  const { data: concierges = [], isLoading } = useAsync(() => {
+  const { data: concierges = [], isLoading, refetch } = useAsync(() => {
     if (!condoId) return Promise.resolve([])
     return getConcierges(condoId)
   }, true, [condoId])
@@ -139,7 +139,7 @@ export default function ConserjesPage() {
             <h1 className="text-3xl font-bold">Gestión de Conserjes</h1>
             <p className="text-muted-foreground">Administra los conserjes del condominio</p>
           </div>
-          {canManageConcierges && <CreateConciergeDialog condoId={condoId} />}
+          {canManageConcierges && <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />}
         </div>
 
         {isLoading ? (
