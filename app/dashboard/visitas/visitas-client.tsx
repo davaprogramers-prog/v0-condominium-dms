@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Calendar, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, AlertCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { VisitsList } from './visits-list'
@@ -17,7 +17,9 @@ interface Visit {
   visitor_phone?: string
   description?: string
   status: 'scheduled' | 'completed' | 'cancelled'
+  house_id: string
   house?: {
+    id: string
     house_number: string
   }
 }
@@ -43,14 +45,44 @@ export default function VisitasPageClient({
 }: VisitasPageClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all')
+  const [selectedHouses, setSelectedHouses] = useState<Set<string>>(new Set())
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
-  // Filter visits based on search and status
+  // Helper function to check if a visit is older than 1 day
+  const isVisitOlderThanOneDay = (visitDate: string) => {
+    const visit = new Date(visitDate)
+    const now = new Date()
+    const oneDayMs = 24 * 60 * 60 * 1000
+    return now.getTime() - visit.getTime() > oneDayMs
+  }
+
+  // Filter visits based on search, status, house, and date range
   const filteredVisits = useMemo(() => {
     let filtered = initialVisits || []
+
+    // Hide visits older than 1 day
+    filtered = filtered.filter(v => !isVisitOlderThanOneDay(v.visit_date))
 
     // Filter by status
     if (filterStatus !== 'all') {
       filtered = filtered.filter(v => v.status === filterStatus)
+    }
+
+    // Filter by selected houses
+    if (selectedHouses.size > 0) {
+      filtered = filtered.filter(v => selectedHouses.has(v.house_id))
+    }
+
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter(v => new Date(v.visit_date) >= new Date(dateFrom))
+    }
+    if (dateTo) {
+      // Add 1 day to include the entire end date
+      const endDate = new Date(dateTo)
+      endDate.setDate(endDate.getDate() + 1)
+      filtered = filtered.filter(v => new Date(v.visit_date) < endDate)
     }
 
     // Filter by search query (search in visitor name, title, email, phone)
@@ -65,12 +97,34 @@ export default function VisitasPageClient({
     }
 
     return filtered
-  }, [initialVisits, searchQuery, filterStatus])
+  }, [initialVisits, searchQuery, filterStatus, selectedHouses, dateFrom, dateTo])
 
-  const scheduledCount = initialVisits.filter(v => v.status === 'scheduled').length
-  const completedCount = initialVisits.filter(v => v.status === 'completed').length
-  const cancelledCount = initialVisits.filter(v => v.status === 'cancelled').length
-  const totalCount = initialVisits.length
+  // Calculate counts based on filtered data (after hiding old visits)
+  const visibleVisits = initialVisits.filter(v => !isVisitOlderThanOneDay(v.visit_date))
+  const scheduledCount = visibleVisits.filter(v => v.status === 'scheduled').length
+  const completedCount = visibleVisits.filter(v => v.status === 'completed').length
+  const cancelledCount = visibleVisits.filter(v => v.status === 'cancelled').length
+  const totalCount = visibleVisits.length
+
+  const toggleHouse = (houseId: string) => {
+    const newSelected = new Set(selectedHouses)
+    if (newSelected.has(houseId)) {
+      newSelected.delete(houseId)
+    } else {
+      newSelected.add(houseId)
+    }
+    setSelectedHouses(newSelected)
+  }
+
+  const clearFilters = () => {
+    setSearchQuery('')
+    setFilterStatus('all')
+    setSelectedHouses(new Set())
+    setDateFrom('')
+    setDateTo('')
+  }
+
+  const hasActiveFilters = searchQuery || filterStatus !== 'all' || selectedHouses.size > 0 || dateFrom || dateTo
 
   return (
     <div className="space-y-6">
@@ -129,17 +183,48 @@ export default function VisitasPageClient({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4">
-        <Input
-          placeholder="Buscar por visitante, correo o teléfono..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1"
-        />
+      <div className="space-y-4 bg-secondary/20 p-4 rounded-lg border">
+        {/* Search and Date Range */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Input
+            placeholder="Buscar por visitante, correo o teléfono..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            placeholder="Desde"
+            title="Fecha desde"
+          />
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            placeholder="Hasta"
+            title="Fecha hasta"
+          />
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearFilters}
+              className="flex items-center gap-2"
+            >
+              <X className="h-4 w-4" />
+              Limpiar
+            </Button>
+          )}
+        </div>
+
+        {/* Status Buttons */}
         <div className="flex gap-2 flex-wrap">
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('all')}
+            size="sm"
           >
             Todas ({totalCount})
           </Button>
@@ -147,6 +232,7 @@ export default function VisitasPageClient({
             variant={filterStatus === 'scheduled' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('scheduled')}
             className="flex items-center gap-2"
+            size="sm"
           >
             <Clock className="h-4 w-4" />
             Programadas ({scheduledCount})
@@ -155,6 +241,7 @@ export default function VisitasPageClient({
             variant={filterStatus === 'completed' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('completed')}
             className="flex items-center gap-2"
+            size="sm"
           >
             <CheckCircle2 className="h-4 w-4" />
             Completadas ({completedCount})
@@ -163,11 +250,31 @@ export default function VisitasPageClient({
             variant={filterStatus === 'cancelled' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('cancelled')}
             className="flex items-center gap-2"
+            size="sm"
           >
             <AlertCircle className="h-4 w-4" />
             Canceladas ({cancelledCount})
           </Button>
         </div>
+
+        {/* Property Filter (if viewing as admin) */}
+        {isViewingAsAdmin && houses && houses.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Propiedades:</p>
+            <div className="flex gap-2 flex-wrap">
+              {houses.map(house => (
+                <Button
+                  key={house.id}
+                  variant={selectedHouses.has(house.id) ? 'default' : 'outline'}
+                  onClick={() => toggleHouse(house.id)}
+                  size="sm"
+                >
+                  Casa #{house.house_number}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Content */}
