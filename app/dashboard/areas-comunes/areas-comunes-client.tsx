@@ -205,7 +205,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
 
                 {/* Botones de acciones */}
                 {isAdmin && (
-                  <div className="flex gap-2 pt-3" style={{ borderTopColor: cardTextColor, borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+                  <div className="flex gap-2 pt-3" style={{ borderTopColor: cardTextColor, borderTop: `1px solid ${cardTextColor}`, paddingTop: "12px" }}>
                     <Dialog open={openEdit === area.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                       <DialogTrigger asChild>
                         <Button
