@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label'
 import { Plus, Camera, Loader2 } from 'lucide-react'
 import { createParcel } from './actions'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/app/dashboard/theme-context'
 
 export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: string; houses: Array<{ id: string; house_number: string }>; onSuccess?: () => void }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
   const [formData, setFormData] = useState({
     house_id: '',
     parcel_type: 'package',
@@ -88,10 +90,16 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           Crear Encomienda
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-screen overflow-y-auto">
+      <DialogContent 
+        className="max-w-2xl max-h-screen overflow-y-auto"
+        style={{
+          backgroundColor: cardBgColor || '#ffffff',
+          color: cardTextColor || '#000000',
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Crear Nueva Encomienda</DialogTitle>
-          <DialogDescription>
+          <DialogTitle style={{ color: cardTextColor || '#000000' }}>Crear Nueva Encomienda</DialogTitle>
+          <DialogDescription style={{ color: cardTextColor || '#000000' }}>
             Registra una encomienda con tipo, destinatario y foto de recepción
           </DialogDescription>
         </DialogHeader>
@@ -99,9 +107,9 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Property Selection */}
           <div className="space-y-2">
-            <Label htmlFor="house_id">Propiedad Destinataria *</Label>
+            <Label htmlFor="house_id" style={{ color: cardTextColor || '#000000' }}>Propiedad Destinataria *</Label>
             <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
-              <SelectTrigger id="house_id">
+              <SelectTrigger id="house_id" style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
                 <SelectValue placeholder="Selecciona una propiedad" />
               </SelectTrigger>
               <SelectContent>
@@ -116,9 +124,9 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
           {/* Parcel Type */}
           <div className="space-y-2">
-            <Label htmlFor="parcel_type">Tipo de Encomienda *</Label>
+            <Label htmlFor="parcel_type" style={{ color: cardTextColor || '#000000' }}>Tipo de Encomienda *</Label>
             <Select value={formData.parcel_type} onValueChange={(value) => setFormData({ ...formData, parcel_type: value })}>
-              <SelectTrigger id="parcel_type">
+              <SelectTrigger id="parcel_type" style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -133,12 +141,13 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
           {/* From */}
           <div className="space-y-2">
-            <Label htmlFor="from">De (Remitente) *</Label>
+            <Label htmlFor="from" style={{ color: cardTextColor || '#000000' }}>De (Remitente) *</Label>
             <Input
               id="from"
               placeholder="Amazon, DHL, etc"
               value={formData.from}
               onChange={(e) => setFormData({ ...formData, from: e.target.value })}
+              style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               required
             />
           </div>
@@ -146,16 +155,17 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           {/* Tracking and Weight */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tracking">Número de Tracking</Label>
+              <Label htmlFor="tracking" style={{ color: cardTextColor || '#000000' }}>Número de Tracking</Label>
               <Input
                 id="tracking"
                 placeholder="PKG-2025-001"
                 value={formData.tracking}
                 onChange={(e) => setFormData({ ...formData, tracking: e.target.value })}
+                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weight">Peso (kg)</Label>
+              <Label htmlFor="weight" style={{ color: cardTextColor || '#000000' }}>Peso (kg)</Label>
               <Input
                 id="weight"
                 type="number"
@@ -163,6 +173,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                 placeholder="0.5"
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               />
             </div>
           </div>
@@ -170,33 +181,36 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           {/* Recipient Name and Dimensions */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="recipient_name">Nombre del Destinatario</Label>
+              <Label htmlFor="recipient_name" style={{ color: cardTextColor || '#000000' }}>Nombre del Destinatario</Label>
               <Input
                 id="recipient_name"
                 placeholder="Nombre completo del propietario"
                 value={formData.recipient_name}
                 onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
+                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dimensions">Dimensiones (opcional)</Label>
+              <Label htmlFor="dimensions" style={{ color: cardTextColor || '#000000' }}>Dimensiones (opcional)</Label>
               <Input
                 id="dimensions"
                 placeholder="20x15x10 cm"
                 value={formData.dimensions}
                 onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               />
             </div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
+            <Label htmlFor="description" style={{ color: cardTextColor || '#000000' }}>Descripción</Label>
             <Input
               id="description"
               placeholder="Descripción del contenido (opcional)"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
             />
           </div>
 

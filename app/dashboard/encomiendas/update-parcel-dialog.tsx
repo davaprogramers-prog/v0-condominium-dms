@@ -21,6 +21,7 @@ import {
 import { Camera, Loader2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { updateParcelStatus } from './actions'
+import { useTheme } from '@/app/dashboard/theme-context'
 
 interface ParcelPhoto {
   id: string
@@ -43,6 +44,7 @@ export function UpdateParcelDialog({
   onClose: () => void
   onSuccess: () => void
 }) {
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
   const [newStatus, setNewStatus] = useState<'delivered' | 'returned'>('delivered')
   const [returnReason, setReturnReason] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
@@ -142,10 +144,16 @@ export function UpdateParcelDialog({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent 
+        className="max-w-2xl"
+        style={{
+          backgroundColor: cardBgColor || '#ffffff',
+          color: cardTextColor || '#000000',
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Actualizar Estado de Encomienda</DialogTitle>
-          <DialogDescription>
+          <DialogTitle style={{ color: cardTextColor || '#000000' }}>Actualizar Estado de Encomienda</DialogTitle>
+          <DialogDescription style={{ color: cardTextColor || '#000000' }}>
             {parcel.tracking} - {parcel.recipient_name}
           </DialogDescription>
         </DialogHeader>
@@ -153,9 +161,9 @@ export function UpdateParcelDialog({
         <div className="space-y-4">
           {/* Status Selection */}
           <div className="space-y-2">
-            <Label htmlFor="status">Nuevo Estado</Label>
+            <Label htmlFor="status" style={{ color: cardTextColor || '#000000' }}>Nuevo Estado</Label>
             <Select value={newStatus} onValueChange={(value: any) => setNewStatus(value)}>
-              <SelectTrigger>
+              <SelectTrigger style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -168,23 +176,24 @@ export function UpdateParcelDialog({
           {/* Return Reason - Only show if returning */}
           {newStatus === 'returned' && (
             <div className="space-y-2">
-              <Label htmlFor="reason">Motivo de Devolución</Label>
+              <Label htmlFor="reason" style={{ color: cardTextColor || '#000000' }}>Motivo de Devolución</Label>
               <Textarea
                 id="reason"
                 placeholder="Ej: Ya no vive en el condominio, Rechazó la encomienda..."
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
                 className="min-h-24"
+                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
               />
             </div>
           )}
 
           {/* Photo Section */}
           <div className="space-y-2">
-            <Label>Foto de {newStatus === 'delivered' ? 'Entrega' : 'Devolución'}</Label>
+            <Label style={{ color: cardTextColor || '#000000' }}>Foto de {newStatus === 'delivered' ? 'Entrega' : 'Devolución'}</Label>
 
             {photoPreview ? (
-              <div className="relative rounded-lg border p-4">
+              <div className="relative rounded-lg border p-4" style={{ borderColor: cardTextColor || '#ccc' }}>
                 <img src={photoPreview} alt="Foto" className="w-full max-h-96 object-cover rounded" />
                 <Button
                   variant="ghost"
