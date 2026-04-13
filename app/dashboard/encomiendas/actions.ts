@@ -40,10 +40,11 @@ export async function createParcel(data: {
         const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
         const blob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
-          access: 'public',
+          access: 'private',
           addRandomSuffix: false,
         })
-        reception_photo_url = result.url
+        // Store the pathname (without domain) so we can regenerate signed URLs later
+        reception_photo_url = result.pathname
         console.log('[v0] Photo uploaded successfully:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
@@ -136,10 +137,11 @@ export async function updateParcelStatus(data: {
         const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
-          access: 'public',
+          access: 'private',
           addRandomSuffix: false,
         })
-        photoUrl = result.url
+        // Store the pathname (without domain) so we can regenerate signed URLs later
+        photoUrl = result.pathname
         console.log('[v0] Photo uploaded successfully:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)

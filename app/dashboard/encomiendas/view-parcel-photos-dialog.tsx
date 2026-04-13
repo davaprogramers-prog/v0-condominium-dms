@@ -35,6 +35,7 @@ export function ViewParcelPhotosDialog({
   loadPhotos,
 }: ViewParcelPhotosDialogProps) {
   const [photos, setPhotos] = useState<ParcelPhoto[]>([])
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
@@ -50,6 +51,25 @@ export function ViewParcelPhotosDialog({
       const fetchedPhotos = await loadPhotos(parcelId)
       setPhotos(fetchedPhotos)
       setCurrentPhotoIndex(0)
+
+      // Generate signed URLs for all photos
+      const urls: Record<string, string> = {}
+      for (const photo of fetchedPhotos) {
+        try {
+          const response = await fetch('/api/blob-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pathname: photo.photo_url }),
+          })
+          if (response.ok) {
+            const { url } = await response.json()
+            urls[photo.id] = url
+          }
+        } catch (error) {
+          console.error('[v0] Error generating signed URL for photo:', photo.id, error)
+        }
+      }
+      setSignedUrls(urls)
     } catch (error) {
       console.error('Error loading photos:', error)
     } finally {
@@ -91,13 +111,13 @@ export function ViewParcelPhotosDialog({
             <>
               {/* Current Photo */}
               <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-                {photos[currentPhotoIndex].photo_url ? (
+                {signedUrls[photos[currentPhotoIndex].id] ? (
                   <img
-                    src={photos[currentPhotoIndex].photo_url}
+                    src={signedUrls[photos[currentPhotoIndex].id]}
                     alt={photoTypeLabels[photos[currentPhotoIndex].photo_type]}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      console.error('[v0] Image failed to load:', photos[currentPhotoIndex].photo_url)
+                      console.error('[v0] Image failed to load:', signedUrls[photos[currentPhotoIndex].id])
                       const target = e.target as HTMLImageElement
                       target.style.display = 'none'
                       const parent = target.parentElement
@@ -113,7 +133,7 @@ export function ViewParcelPhotosDialog({
                 ) : (
                   <div className="flex flex-col items-center justify-center text-gray-400">
                     <ImageOff className="h-12 w-12 mb-2" />
-                    <span>Foto no disponible</span>
+                    <span>Generando URL de la foto...</span>
                   </div>
                 )}
               </div>
@@ -168,23 +188,29 @@ export function ViewParcelPhotosDialog({
                           : 'border-gray-300 hover:border-blue-300'
                       }`}
                     >
-                      <img
-                        src={photo.photo_url}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.style.display = 'none'
-                          const parent = target.parentElement
-                          if (parent) {
-                            const errorDiv = document.createElement('div')
-                            errorDiv.className = 'flex items-center justify-center text-gray-300 text-xs w-full h-full bg-gray-100'
-                            errorDiv.textContent = '✕'
-                            parent.appendChild(errorDiv)
-                          }
-                        }}
-                        crossOrigin="anonymous"
-                      />
+                      {signedUrls[photo.id] ? (
+                        <img
+                          src={signedUrls[photo.id]}
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.style.display = 'none'
+                            const parent = target.parentElement
+                            if (parent) {
+                              const errorDiv = document.createElement('div')
+                              errorDiv.className = 'flex items-center justify-center text-gray-300 text-xs w-full h-full bg-gray-100'
+                              errorDiv.textContent = '✕'
+                              parent.appendChild(errorDiv)
+                            }
+                          }}
+                          crossOrigin="anonymous"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                          ⟳
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
