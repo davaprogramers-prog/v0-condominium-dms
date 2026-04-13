@@ -1,56 +1,98 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+'use client'
+
+import { useTheme } from '../theme-context'
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
 import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
-import { type CondoTheme, getContrastTextColor, DEFAULT_THEME } from "@/lib/theme-utils"
+import { type CondoTheme } from "@/lib/theme-utils"
 import { ProfileSettingsForm } from "./profile-settings-form"
 import { AvatarUploadSettings } from "./avatar-upload-settings"
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
-export default async function ConfiguracionPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function ConfiguracionPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const { cardBgColor, cardTextColor } = useTheme()
+  
+  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<any>(null)
+  const [condo, setCondo] = useState<any>(null)
+  const [parameters, setParameters] = useState<any>(null)
+  const [theme, setTheme] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
 
-  if (!user) {
-    redirect("/auth/login")
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          router.push('/auth/login')
+          return
+        }
+
+        setUserEmail(user.email || '')
+
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single()
+
+        if (profileData) {
+          setProfile(profileData)
+          setIsAdmin(profileData.role === "admin" || profileData.role === "super_admin")
+
+          const { data: condoData } = await supabase
+            .from("condominiums")
+            .select("*")
+            .eq("id", profileData.condo_id)
+            .single()
+
+          if (condoData) setCondo(condoData)
+
+          const { data: parametersData } = await supabase
+            .from("parameters")
+            .select("*")
+            .eq("condo_id", profileData.condo_id)
+            .single()
+
+          if (parametersData) setParameters(parametersData)
+
+          const { data: themeData } = await supabase
+            .from("condominium_themes")
+            .select("*")
+            .eq("condo_id", profileData.condo_id)
+            .single()
+
+          if (themeData) setTheme(themeData)
+        }
+      } catch (error) {
+        console.error("[v0] Error loading configuration:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [supabase, router])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p style={{ color: cardTextColor }}>Cargando...</p>
+      </div>
+    )
   }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  const { data: condo } = await supabase
-    .from("condominiums")
-    .select("*")
-    .eq("id", profile?.condo_id)
-    .single()
-
-  const { data: parameters } = await supabase
-    .from("parameters")
-    .select("*")
-    .eq("condo_id", profile?.condo_id)
-    .single()
-
-  const { data: theme } = await supabase
-    .from("condominium_themes")
-    .select("*")
-    .eq("condo_id", profile?.condo_id)
-    .single()
-
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-
-  // Determine which colors to use - custom theme if enabled, otherwise defaults
-  const cardBgColor = (theme as CondoTheme | null)?.enable_custom_theme ? (theme as CondoTheme).card_bg_color : DEFAULT_THEME.card_bg_color
-  const cardTextColor = (theme as CondoTheme | null)?.enable_custom_theme ? (theme as CondoTheme).card_text_color : DEFAULT_THEME.card_text_color
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Mi Cuenta</h1>
-        <p className="text-muted-foreground">Administra tu perfil y seguridad</p>
+        <h1 className="text-3xl font-bold" style={{ color: cardTextColor }}>Mi Cuenta</h1>
+        <p style={{ color: cardTextColor, opacity: 0.7 }}>Administra tu perfil y seguridad</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -60,13 +102,15 @@ export default async function ConfiguracionPage() {
           style={{
             backgroundColor: cardBgColor,
             color: cardTextColor,
-            borderColor: cardBgColor
+            borderColor: "rgba(255,255,255,0.1)"
           }}
         >
           <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Foto de Perfil</h2>
           <AvatarUploadSettings 
             currentAvatarUrl={profile?.avatar_url}
             userName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario"}
+            cardBgColor={cardBgColor}
+            cardTextColor={cardTextColor}
           />
         </div>
 
@@ -76,30 +120,16 @@ export default async function ConfiguracionPage() {
           style={{
             backgroundColor: cardBgColor,
             color: cardTextColor,
-            borderColor: cardBgColor
+            borderColor: "rgba(255,255,255,0.1)"
           }}
         >
           <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Información Personal</h2>
           <ProfileSettingsForm 
             profile={profile}
-            userEmail={user.email}
+            userEmail={userEmail}
+            cardBgColor={cardBgColor}
+            cardTextColor={cardTextColor}
           />
-        </div>
-      </div>
-
-      {/* Cambiar Contraseña */}
-      <div 
-        className="rounded-lg border-2 p-6 space-y-4"
-        style={{
-          backgroundColor: cardBgColor,
-          color: cardTextColor,
-          borderColor: cardBgColor
-        }}
-      >
-        <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Seguridad</h2>
-        <div className="space-y-2 text-sm" style={{ color: cardTextColor }}>
-          <p style={{ opacity: 0.7 }}>Cambia tu contraseña para mantener tu cuenta segura</p>
-          {/* Change password form will be in a client component */}
         </div>
       </div>
 
@@ -112,7 +142,7 @@ export default async function ConfiguracionPage() {
             style={{
               backgroundColor: cardBgColor,
               color: cardTextColor,
-              borderColor: cardBgColor
+              borderColor: "rgba(255,255,255,0.1)"
             }}
           >
             <h2 className="text-xl font-semibold" style={{ color: cardTextColor }}>Condominio</h2>
@@ -141,14 +171,20 @@ export default async function ConfiguracionPage() {
             <CondoLogoUploader 
               condoId={condo.id} 
               currentLogoUrl={condo.logo_url}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
             />
           )}
 
           {/* Parámetros del Condominio */}
-          <ParametersForm 
-            condoId={profile?.condo_id} 
-            currentParams={parameters}
-          />
+          {parameters && (
+            <ParametersForm 
+              condoId={profile?.condo_id} 
+              currentParams={parameters}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
+            />
+          )}
 
           {/* Personalización de Colores */}
           {condo && (
@@ -156,6 +192,8 @@ export default async function ConfiguracionPage() {
               condoId={condo.id} 
               currentTheme={theme as CondoTheme | null}
               isAdmin={isAdmin}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
             />
           )}
         </>
@@ -167,7 +205,7 @@ export default async function ConfiguracionPage() {
         style={{
           backgroundColor: cardBgColor,
           color: cardTextColor,
-          borderColor: cardBgColor
+          borderColor: "rgba(255,255,255,0.1)"
         }}
       >
         <div className="flex items-center justify-between">

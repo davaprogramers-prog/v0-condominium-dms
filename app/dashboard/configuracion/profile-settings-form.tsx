@@ -10,9 +10,11 @@ import { Loader2, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react"
 interface ProfileSettingsFormProps {
   profile: any
   userEmail?: string
+  cardBgColor?: string
+  cardTextColor?: string
 }
 
-export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormProps) {
+export function ProfileSettingsForm({ profile, userEmail, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9" }: ProfileSettingsFormProps) {
   const [saving, setSaving] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -116,14 +118,28 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
   return (
     <div className="space-y-6">
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
+        <div 
+          className="border px-4 py-3 rounded flex items-center gap-2"
+          style={{
+            backgroundColor: "#065f46",
+            borderColor: "#10b981",
+            color: "#d1fae5"
+          }}
+        >
           <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
           <span>{success}</span>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
+        <div 
+          className="border px-4 py-3 rounded flex items-center gap-2"
+          style={{
+            backgroundColor: "#7f1d1d",
+            borderColor: "#dc2626",
+            color: "#fecaca"
+          }}
+        >
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -133,53 +149,85 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
       <form onSubmit={handleUpdateProfile} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Nombre</Label>
+            <Label htmlFor="firstName" style={{ color: cardTextColor }}>Nombre</Label>
             <Input
               id="firstName"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               disabled={saving}
-              className="bg-slate-700 text-white border-slate-600"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: cardTextColor,
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px"
+              }}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Apellido</Label>
+            <Label htmlFor="lastName" style={{ color: cardTextColor }}>Apellido</Label>
             <Input
               id="lastName"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               disabled={saving}
-              className="bg-slate-700 text-white border-slate-600"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: cardTextColor,
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px"
+              }}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Correo Electrónico</Label>
+          <Label htmlFor="email" style={{ color: cardTextColor }}>Correo Electrónico</Label>
           <Input
             id="email"
             value={userEmail || ""}
             disabled
-            className="bg-slate-700 text-white border-slate-600 opacity-75"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.05)",
+              color: cardTextColor,
+              borderColor: "rgba(255,255,255,0.2)",
+              borderRadius: "8px",
+              opacity: 0.7
+            }}
           />
-          <p className="text-xs opacity-75">
+          <p style={{ fontSize: "12px", color: cardTextColor, opacity: 0.6 }}>
             El correo electrónico no puede ser modificado
           </p>
         </div>
 
         {profile?.role && (
           <div className="space-y-2">
-            <Label>Rol</Label>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-700 text-white border border-slate-600">
-              <span className="capitalize">{profile.role}</span>
+            <Label style={{ color: cardTextColor }}>Rol</Label>
+            <div 
+              className="flex items-center gap-2 px-3 py-2 rounded-md border capitalize"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: cardTextColor,
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px"
+              }}
+            >
+              <span>{profile.role}</span>
             </div>
           </div>
         )}
 
         <Button 
           type="submit" 
-          disabled={saving} 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={saving}
+          style={{
+            backgroundColor: "#2563eb",
+            color: "white",
+            width: "100%",
+            borderRadius: "8px",
+            border: "none",
+            cursor: saving ? "not-allowed" : "pointer",
+            opacity: saving ? 0.7 : 1
+          }}
         >
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Guardar Cambios
@@ -187,11 +235,17 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
       </form>
 
       {/* Change Password Form */}
-      <div className="border-t pt-6">
-        <h3 className="text-sm font-semibold mb-4">Cambiar Contraseña</h3>
+      <div 
+        className="border-t pt-6"
+        style={{
+          borderColor: "rgba(255,255,255,0.1)",
+          color: cardTextColor
+        }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: cardTextColor }}>Cambiar Contraseña</h3>
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Contraseña Actual</Label>
+            <Label htmlFor="currentPassword" style={{ color: cardTextColor }}>Contraseña Actual</Label>
             <div className="relative">
               <Input
                 id="currentPassword"
@@ -200,12 +254,28 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
                 disabled={savingPassword}
-                className="bg-slate-700 text-white border-slate-600 pr-10"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  color: cardTextColor,
+                  borderColor: "rgba(255,255,255,0.2)",
+                  borderRadius: "8px",
+                  paddingRight: "40px"
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: cardTextColor,
+                  opacity: 0.5,
+                  cursor: "pointer",
+                  background: "none",
+                  border: "none"
+                }}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -213,7 +283,7 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newPassword">Nueva Contraseña</Label>
+            <Label htmlFor="newPassword" style={{ color: cardTextColor }}>Nueva Contraseña</Label>
             <Input
               id="newPassword"
               type={showPassword ? "text" : "password"}
@@ -222,12 +292,17 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
               onChange={(e) => setNewPassword(e.target.value)}
               required
               disabled={savingPassword}
-              className="bg-slate-700 text-white border-slate-600"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: cardTextColor,
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px"
+              }}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+            <Label htmlFor="confirmPassword" style={{ color: cardTextColor }}>Confirmar Nueva Contraseña</Label>
             <Input
               id="confirmPassword"
               type={showPassword ? "text" : "password"}
@@ -236,7 +311,12 @@ export function ProfileSettingsForm({ profile, userEmail }: ProfileSettingsFormP
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={savingPassword}
-              className="bg-slate-700 text-white border-slate-600"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: cardTextColor,
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px"
+              }}
             />
           </div>
 
