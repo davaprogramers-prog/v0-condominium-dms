@@ -31,12 +31,15 @@ interface EditAdminDialogProps {
 
 export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, condoId }: EditAdminDialogProps) {
   const [open, setOpen] = useState(false)
-  const [selectedHouse, setSelectedHouse] = useState(currentHouseId || "")
+  const [selectedHouse, setSelectedHouse] = useState<string | null>(currentHouseId || null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleSave = async () => {
-    if (!selectedHouse) return
+    if (selectedHouse === null || selectedHouse === "") {
+      alert("Por favor selecciona una propiedad")
+      return
+    }
 
     setLoading(true)
     try {
@@ -76,13 +79,12 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Propiedad (Opcional)</label>
-            <Select value={selectedHouse} onValueChange={setSelectedHouse}>
+            <label className="text-sm font-medium">Propiedad</label>
+            <Select value={selectedHouse || ""} onValueChange={(value) => setSelectedHouse(value || null)}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar propiedad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin propiedad asignada</SelectItem>
                 {houses.map((house) => (
                   <SelectItem key={house.id} value={house.id}>
                     Casa #{house.house_number}
@@ -91,7 +93,7 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
               </SelectContent>
             </Select>
             <p className="text-xs text-gray-600">
-              Si asignas una propiedad, el admin podrá verla en Mi Casa
+              Selecciona una propiedad para que el admin pueda verla en Mi Casa
             </p>
           </div>
 
