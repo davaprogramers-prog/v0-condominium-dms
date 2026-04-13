@@ -38,10 +38,17 @@ export default async function AdministradoresPage() {
   // Get admins for this condo
   const { data: admins } = await supabase
     .from("profiles")
-    .select("id, email, first_name, last_name, created_at, can_change_theme")
+    .select("id, email, first_name, last_name, created_at, can_change_theme, house_id")
     .eq("condo_id", condoId)
     .eq("role", "admin")
     .order("created_at", { ascending: false })
+
+  // Get all houses for this condo
+  const { data: houses } = await supabase
+    .from("houses")
+    .select("id, house_number")
+    .eq("condo_id", condoId)
+    .order("house_number", { ascending: true })
 
   return (
     <div className="space-y-6 p-6">
@@ -56,6 +63,7 @@ export default async function AdministradoresPage() {
         admins={admins || []} 
         condoId={condoId} 
         condoName={condo?.name || ""}
+        houses={houses || []}
       />
     </div>
   )

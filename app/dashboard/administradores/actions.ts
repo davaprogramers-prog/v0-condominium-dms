@@ -91,7 +91,66 @@ export async function updateAdminThemePermission(adminId: string, canChangeTheme
   return { success: true }
 }
 
-export async function createAdmin(data: {
+export async function updateAdminHouse(adminId: string, houseId: string) {
+  const supabase = await createClient()
+  
+  // Verify the current user is super_admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "No autenticado" }
+  }
+  
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+  
+  if (currentProfile?.role !== "super_admin") {
+    return { success: false, error: "No tienes permisos para esta acción" }
+  }
+
+  // Get house details to ensure it exists and get condo_id
+  const { data: house, error: houseError } = await supabase
+    .from("houses")
+    .select("id, condo_id")
+    .eq("id", houseId)
+    .single()
+
+  if (houseError || !house) {
+    return { success: false, error: "Propiedad no válida" }
+  }
+
+  // Use service role client to update (bypasses RLS)
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+
+  const { error: updateError } = await supabaseAdmin
+    .from("profiles")
+    .update({
+      house_id: houseId,
+      condo_id: house.condo_id,
+    })
+    .eq("id", adminId)
+
+  if (updateError) {
+    console.error("[v0] Error updating admin house:", updateError)
+    return { success: false, error: updateError.message }
+  }
+
+  revalidatePath("/dashboard/administradores")
+  return { success: true }
+}
+
+
   email: string
   password: string
   firstName: string
