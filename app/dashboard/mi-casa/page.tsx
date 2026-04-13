@@ -234,7 +234,7 @@ export default async function MiCasaPage() {
       </div>
 
       {/* Vencimiento */}
-      <div className="rounded-lg border-2 p-4" style={{ backgroundColor: "#78350f", borderColor: "#b45309", color: "#fef3c7" }}>
+      <div className="rounded-lg border-2 p-4" style={{ backgroundColor: "#fef3c7", borderColor: "#78350f", color: "#000000" }}>
         <p className="text-sm">
           <span className="font-semibold">Fecha de Vencimiento:</span> {parameters?.payment_deadline_day} de cada mes
         </p>
