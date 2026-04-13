@@ -43,7 +43,7 @@ export function VisitsAdminClient({
   userId,
 }: VisitsAdminClientProps) {
   const { cardBgColor, cardTextColor, borderColor } = useTheme()
-  const [selectedHouse, setSelectedHouse] = useState<string>('')
+  const [selectedHouse, setSelectedHouse] = useState<string>('all')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
   const [searchName, setSearchName] = useState<string>('')
@@ -52,7 +52,7 @@ export function VisitsAdminClient({
   const filteredVisits = useMemo(() => {
     return visits.filter((visit) => {
       // Filter by house
-      if (selectedHouse && visit.house.id !== selectedHouse) {
+      if (selectedHouse !== 'all' && visit.house.id !== selectedHouse) {
         return false
       }
 
@@ -138,7 +138,7 @@ export function VisitsAdminClient({
                   <SelectValue placeholder="Todas las propiedades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las propiedades</SelectItem>
+                  <SelectItem value="all">Todas las propiedades</SelectItem>
                   {houses.map((house) => (
                     <SelectItem key={house.id} value={house.id}>
                       Casa #{house.house_number}
@@ -173,7 +173,7 @@ export function VisitsAdminClient({
             <Button
               variant="outline"
               onClick={() => {
-                setSelectedHouse('')
+                setSelectedHouse('all')
                 setStartDate('')
                 setEndDate('')
                 setSearchName('')
