@@ -94,40 +94,31 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-6"
+          style={{
+            '--input-bg': inputBgColor || '#f5f5f5',
+            '--input-text': inputTextColor || '#000000',
+            '--input-bg-hover': inputBgColor ? (parseInt(inputBgColor.slice(1), 16) > 0xffffff / 2 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)') : '#e8e8e8'
+          } as React.CSSProperties}
+        >
           {/* Property Selection */}
           <div className="space-y-2">
             <Label htmlFor="house_id" style={{ color: cardTextColor || '#000000' }}>Propiedad Destinataria *</Label>
             <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
               <SelectTrigger 
                 id="house_id"
-                className="!bg-opacity-100"
-                style={{ 
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`, 
-                  color: `${inputTextColor || '#000000'} !important`, 
-                  borderColor: `${cardTextColor || '#ccc'} !important`,
-                  border: `1px solid ${cardTextColor || '#ccc'}`
-                }}
+                className="select-trigger-themed"
               >
                 <SelectValue placeholder="Selecciona una propiedad" />
               </SelectTrigger>
-              <SelectContent 
-                className="!bg-opacity-100 !bg-color !text-color"
-                style={{
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                  color: `${inputTextColor || '#000000'} !important`,
-                  borderColor: `${inputTextColor || '#000000'} !important`
-                }}
-              >
+              <SelectContent className="select-content-themed">
                 {houses.map((house) => (
                   <SelectItem 
                     key={house.id} 
                     value={house.id}
-                    style={{
-                      backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                      color: `${inputTextColor || '#000000'} !important`
-                    }}
-                    className="!bg-opacity-100"
+                    className="select-item-themed"
                   >
                     Casa #{house.house_number}
                   </SelectItem>
@@ -142,74 +133,16 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             <Select value={formData.parcel_type} onValueChange={(value) => setFormData({ ...formData, parcel_type: value })}>
               <SelectTrigger 
                 id="parcel_type"
-                className="!bg-opacity-100"
-                style={{ 
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`, 
-                  color: `${inputTextColor || '#000000'} !important`, 
-                  borderColor: `${cardTextColor || '#ccc'} !important`,
-                  border: `1px solid ${cardTextColor || '#ccc'}`
-                }}
+                className="select-trigger-themed"
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent 
-                className="!bg-opacity-100 !bg-color !text-color"
-                style={{
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                  color: `${inputTextColor || '#000000'} !important`,
-                  borderColor: `${inputTextColor || '#000000'} !important`
-                }}
-              >
-                <SelectItem 
-                  value="envelope"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Sobre
-                </SelectItem>
-                <SelectItem 
-                  value="package"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Paquete
-                </SelectItem>
-                <SelectItem 
-                  value="box"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Caja
-                </SelectItem>
-                <SelectItem 
-                  value="tube"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Tubo
-                </SelectItem>
-                <SelectItem 
-                  value="other"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Otro
-                </SelectItem>
+              <SelectContent className="select-content-themed">
+                <SelectItem value="envelope" className="select-item-themed">Sobre</SelectItem>
+                <SelectItem value="package" className="select-item-themed">Paquete</SelectItem>
+                <SelectItem value="box" className="select-item-themed">Caja</SelectItem>
+                <SelectItem value="tube" className="select-item-themed">Tubo</SelectItem>
+                <SelectItem value="other" className="select-item-themed">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>

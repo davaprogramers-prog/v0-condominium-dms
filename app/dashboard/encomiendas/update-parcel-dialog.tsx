@@ -158,50 +158,24 @@ export function UpdateParcelDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div 
+          className="space-y-4"
+          style={{
+            '--input-bg': inputBgColor || '#f5f5f5',
+            '--input-text': inputTextColor || '#000000',
+            '--input-bg-hover': inputBgColor ? (parseInt(inputBgColor.slice(1), 16) > 0xffffff / 2 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)') : '#e8e8e8'
+          } as React.CSSProperties}
+        >
           {/* Status Selection */}
           <div className="space-y-2">
             <Label htmlFor="status" style={{ color: cardTextColor || '#000000' }}>Nuevo Estado</Label>
             <Select value={newStatus} onValueChange={(value: any) => setNewStatus(value)}>
-              <SelectTrigger 
-                className="!bg-opacity-100"
-                style={{ 
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`, 
-                  color: `${inputTextColor || '#000000'} !important`, 
-                  borderColor: `${cardTextColor || '#ccc'} !important`,
-                  border: `1px solid ${cardTextColor || '#ccc'}`
-                }}
-              >
+              <SelectTrigger className="select-trigger-themed">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent 
-                className="!bg-opacity-100 !bg-color !text-color"
-                style={{
-                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                  color: `${inputTextColor || '#000000'} !important`,
-                  borderColor: `${inputTextColor || '#000000'} !important`
-                }}
-              >
-                <SelectItem 
-                  value="delivered"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Entregado
-                </SelectItem>
-                <SelectItem 
-                  value="returned"
-                  style={{
-                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                    color: `${inputTextColor || '#000000'} !important`
-                  }}
-                  className="!bg-opacity-100"
-                >
-                  Devuelto
-                </SelectItem>
+              <SelectContent className="select-content-themed">
+                <SelectItem value="delivered" className="select-item-themed">Entregado</SelectItem>
+                <SelectItem value="returned" className="select-item-themed">Devuelto</SelectItem>
               </SelectContent>
             </Select>
           </div>
