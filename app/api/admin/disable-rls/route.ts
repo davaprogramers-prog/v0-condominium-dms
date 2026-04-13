@@ -46,11 +46,8 @@ export async function POST() {
     for (const table of tables) {
       try {
         // Execute raw SQL to disable RLS
-        const { error } = await supabase.rpc("exec", {
+        const { data, error } = await supabase.rpc("exec", {
           sql: `ALTER TABLE public."${table}" DISABLE ROW LEVEL SECURITY;`,
-        }).catch(() => {
-          // If rpc doesn't exist, try via the SQL API directly
-          return { error: null }
         })
 
         if (error && error.code !== "42704") { // 42704 is "does not exist"
