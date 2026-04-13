@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -14,10 +14,11 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params
     const { error } = await supabase
       .from("condominiums")
       .delete()
-      .eq("id", params.id)
+      .eq("id", id)
 
     if (error) throw error
     return NextResponse.json({ success: true })
