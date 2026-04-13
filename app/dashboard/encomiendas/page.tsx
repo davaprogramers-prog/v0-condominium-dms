@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react'
 import { Package, AlertCircle, CheckCircle2, Clock, Plus, Edit, Trash, Camera, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
+import { useTheme } from '@/app/dashboard/theme-context'
 import { CreateParcelDialog } from './create-parcel-dialog'
 import { UpdateParcelDialog } from './update-parcel-dialog'
 import { ViewParcelPhotosDialog } from './view-parcel-photos-dialog'
@@ -30,21 +38,31 @@ interface Parcel {
 
 export default function ParcelPage() {
   const supabase = createClient()
+  const { inputBgColor, inputTextColor } = useTheme()
   const [parcels, setParcels] = useState<Parcel[]>([])
   const [role, setRole] = useState<string>('')
   const [condoId, setCondoId] = useState<string>('')
   const [houseId, setHouseId] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const [showDelivered, setShowDelivered] = useState(false)
   const [searchTracking, setSearchTracking] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'recibido' | 'entregado' | 'devuelto' | 'all'>('recibido')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [selectedHouseId, setSelectedHouseId] = useState<string>('all')
   const [editingParcel, setEditingParcel] = useState<Parcel | null>(null)
   const [viewingPhotosParcel, setViewingPhotosParcel] = useState<Parcel | null>(null)
   const [parcelPhotosCounts, setParcelPhotosCounts] = useState<Record<string, number>>({})
   const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
+  const [allParcels, setAllParcels] = useState<Parcel[]>([])
 
   useEffect(() => {
     loadUserAndParcels()
   }, [])
+
+  // Apply filters whenever filter criteria change
+  useEffect(() => {
+    applyFilters()
+  }, [searchTracking, statusFilter, dateFrom, dateTo, selectedHouseId, allParcels])
 
   const loadUserAndParcels = async () => {
     try {
@@ -73,7 +91,7 @@ export default function ParcelPage() {
 
       setHouses(housesData || [])
 
-      // Get parcels based on role
+      // Get parcels based on role - NO filtering here, just fetch all
       let query = supabase
         .from('parcels')
         .select('*, house:houses(house_number)')
@@ -90,25 +108,13 @@ export default function ParcelPage() {
 
       const { data } = await query
 
-      // Filter out delivered parcels unless showDelivered is true
-      let filtered = data || []
-      if (!showDelivered) {
-        filtered = filtered.filter(p => p.status !== 'entregado')
-      }
+      const fetchedParcels = data || []
+      setAllParcels(fetchedParcels)
 
-      // Apply search filter
-      if (searchTracking) {
-        filtered = filtered.filter(p =>
-          p.from_sender?.toLowerCase().includes(searchTracking.toLowerCase())
-        )
-      }
-
-      setParcels(filtered)
-
-      // Count photos for each parcel - do this in parallel for better performance
-      if (filtered.length > 0) {
+      // Count photos for each parcel
+      if (fetchedParcels.length > 0) {
         try {
-          const countPromises = filtered.map(parcel =>
+          const countPromises = fetchedParcels.map(parcel =>
             supabase
               .from('parcel_photos')
               .select('*', { count: 'exact', head: true })
@@ -130,6 +136,42 @@ export default function ParcelPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const applyFilters = () => {
+    let filtered = [...allParcels]
+
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(p => p.status === statusFilter)
+    }
+
+    // Filter by search
+    if (searchTracking) {
+      filtered = filtered.filter(p =>
+        p.from_sender?.toLowerCase().includes(searchTracking.toLowerCase()) ||
+        p.id?.toLowerCase().includes(searchTracking.toLowerCase())
+      )
+    }
+
+    // Filter by property
+    if (selectedHouseId !== 'all') {
+      filtered = filtered.filter(p => p.house_id === selectedHouseId)
+    }
+
+    // Filter by date range
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom)
+      filtered = filtered.filter(p => new Date(p.received_date) >= fromDate)
+    }
+
+    if (dateTo) {
+      const toDate = new Date(dateTo)
+      toDate.setHours(23, 59, 59, 999)
+      filtered = filtered.filter(p => new Date(p.received_date) <= toDate)
+    }
+
+    setParcels(filtered)
   }
 
   const handleRefresh = () => {
@@ -192,9 +234,10 @@ export default function ParcelPage() {
   }
 
   const isConserje = role === 'conserje' || role === 'admin' || role === 'super_admin'
-  const receivedCount = parcels.filter(p => p.status === 'recibido').length
-  const deliveredCount = parcels.filter(p => p.status === 'entregado').length
-  const totalCount = receivedCount + deliveredCount
+  const receivedCount = allParcels.filter(p => p.status === 'recibido').length
+  const deliveredCount = allParcels.filter(p => p.status === 'entregado').length
+  const returnedCount = allParcels.filter(p => p.status === 'devuelto').length
+  const totalCount = receivedCount + deliveredCount + returnedCount
 
   return (
     <div className="space-y-6">
@@ -241,21 +284,114 @@ export default function ParcelPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-4">
+        {/* Search */}
         <Input
-          placeholder="Buscar por tracking o remitente..."
+          placeholder="Buscar por tracking, remitente..."
           value={searchTracking}
           onChange={(e) => setSearchTracking(e.target.value)}
-          className="flex-1"
+          className="w-full"
+          style={{
+            backgroundColor: inputBgColor,
+            color: inputTextColor,
+          }}
         />
-        <Button
-          variant={showDelivered ? 'default' : 'outline'}
-          onClick={() => setShowDelivered(!showDelivered)}
-          className="flex items-center gap-2"
-        >
-          {showDelivered ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-          {showDelivered ? 'Ocultar' : 'Mostrar'} Entregadas
-        </Button>
+
+        {/* Filters Row */}
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-wrap">
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
+            <SelectTrigger 
+              className="w-full lg:w-48"
+              style={{
+                backgroundColor: inputBgColor,
+                color: inputTextColor,
+              }}
+            >
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent
+              style={{
+                '--select-bg': inputBgColor,
+                '--select-text': inputTextColor,
+              } as React.CSSProperties}
+            >
+              <SelectItem value="recibido">Recibido</SelectItem>
+              <SelectItem value="entregado">Entregado</SelectItem>
+              <SelectItem value="devuelto">Devuelto</SelectItem>
+              <SelectItem value="all">Todos los Estados</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Property Filter (Conserjes only) */}
+          {isConserje && (
+            <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
+              <SelectTrigger 
+                className="w-full lg:w-48"
+                style={{
+                  backgroundColor: inputBgColor,
+                  color: inputTextColor,
+                }}
+              >
+                <SelectValue placeholder="Propiedad" />
+              </SelectTrigger>
+              <SelectContent
+                style={{
+                  '--select-bg': inputBgColor,
+                  '--select-text': inputTextColor,
+                } as React.CSSProperties}
+              >
+                <SelectItem value="all">Todas las Propiedades</SelectItem>
+                {houses.map(house => (
+                  <SelectItem key={house.id} value={house.id}>
+                    Casa #{house.house_number}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* Date From */}
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-full lg:w-40"
+            style={{
+              backgroundColor: inputBgColor,
+              color: inputTextColor,
+            }}
+          />
+
+          {/* Date To */}
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-full lg:w-40"
+            style={{
+              backgroundColor: inputBgColor,
+              color: inputTextColor,
+            }}
+          />
+
+          {/* Clear Filters Button */}
+          {(searchTracking || statusFilter !== 'recibido' || dateFrom || dateTo || selectedHouseId !== 'all') && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTracking('')
+                setStatusFilter('recibido')
+                setDateFrom('')
+                setDateTo('')
+                setSelectedHouseId('all')
+              }}
+              className="w-full lg:w-auto"
+            >
+              Limpiar Filtros
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Parcels List */}
@@ -264,16 +400,16 @@ export default function ParcelPage() {
         {loading ? (
           <p className="text-muted-foreground">Cargando...</p>
         ) : parcels.length === 0 ? (
-          <p className="text-muted-foreground">No hay encomiendas</p>
+          <p className="text-muted-foreground">No hay encomiendas que coincidan con los filtros</p>
         ) : (
           <div className="space-y-3">
             {parcels.map((parcel) => (
               <div key={parcel.id} className={`rounded-lg border p-4 ${getStatusColor(parcel.status)}`}>
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="mt-1">{getStatusIcon(parcel.status)}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    <div className="mt-1 flex-shrink-0">{getStatusIcon(parcel.status)}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold">{parcel.parcel_type}</h3>
                         {isConserje && parcel.house && (
                           <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -281,14 +417,14 @@ export default function ParcelPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">De: {parcel.from_sender}</p>
+                      <p className="text-sm text-muted-foreground truncate">De: {parcel.from_sender}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(parcel.received_date).toLocaleDateString('es-ES')}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50 whitespace-nowrap">
                       {getStatusLabel(parcel.status)}
                     </span>
                     <Button
