@@ -226,15 +226,40 @@ export async function deleteConcierge(condoId: string, profileId: string) {
     throw new Error("No autorizado")
   }
 
-  const { error } = await supabase
+  // Use admin client to delete the auth user and profile
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  )
+
+  // Get the profile first to verify it belongs to this condo
+  const { data: profileData } = await adminSupabase
+    .from("profiles")
+    .select("id, condo_id, email")
+    .eq("id", profileId)
+    .single()
+
+  if (!profileData || profileData.condo_id !== condoId) {
+    throw new Error("Conserje no encontrado o no pertenece a este condominio")
+  }
+
+  // Delete profile
+  const { error: profileError } = await adminSupabase
     .from("profiles")
     .delete()
     .eq("id", profileId)
-    .eq("condo_id", condoId)
 
-  if (error) {
-    console.error("[v0] Error deleting concierge:", error)
-    throw new Error(error.message)
+  if (profileError) {
+    console.error("[v0] Error deleting profile:", profileError)
+    throw new Error(profileError.message)
+  }
+
+  // Delete auth user
+  const { error: authError } = await adminSupabase.auth.admin.deleteUser(profileId)
+  
+  if (authError) {
+    console.error("[v0] Error deleting auth user:", authError)
+    // Don't throw error here - profile is already deleted, just log it
   }
 
   return { success: true }
