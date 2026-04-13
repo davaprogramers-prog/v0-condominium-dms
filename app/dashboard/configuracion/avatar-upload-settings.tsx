@@ -145,7 +145,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       )}
 
       {/* Action Buttons */}
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-wrap gap-2 w-full">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -154,7 +154,8 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
                 color: "white",
                 borderRadius: "8px",
                 border: "none",
-                width: "100%",
+                flex: "1 1 auto",
+                minWidth: "120px",
                 cursor: "pointer",
                 padding: "8px 16px"
               }}
@@ -294,7 +295,8 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
             color: "white",
             borderRadius: "8px",
             border: "none",
-            width: "100%",
+            flex: "1 1 auto",
+            minWidth: "120px",
             cursor: "pointer",
             padding: "8px 16px"
           }}
