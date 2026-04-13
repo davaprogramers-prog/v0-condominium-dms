@@ -14,9 +14,11 @@ import { regenerateMonthlyIncome } from "./actions"
 interface ParametersFormProps {
   condoId: string
   currentParams: any
+  cardBgColor?: string
+  cardTextColor?: string
 }
 
-export function ParametersForm({ condoId, currentParams }: ParametersFormProps) {
+export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9" }: ParametersFormProps) {
   const [loading, setLoading] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
   const [regenerateResult, setRegenerateResult] = useState<{success: boolean, message: string} | null>(null)

@@ -1,92 +1,50 @@
-'use client'
-
-import { useTheme } from '../theme-context'
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
 import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
-import { type CondoTheme } from "@/lib/theme-utils"
-import { ProfileSettingsForm } from "./profile-settings-form"
+import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
+import { ProfileSettingsFormServer } from "./profile-settings-form-server"
 import { AvatarUploadSettings } from "./avatar-upload-settings"
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
-export default function ConfiguracionPage() {
-  const router = useRouter()
-  const supabase = createClient()
-  const { cardBgColor, cardTextColor } = useTheme()
-  
-  const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<any>(null)
-  const [condo, setCondo] = useState<any>(null)
-  const [parameters, setParameters] = useState<any>(null)
-  const [theme, setTheme] = useState<any>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [userEmail, setUserEmail] = useState('')
+export default async function ConfiguracionPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/auth/login')
-          return
-        }
-
-        setUserEmail(user.email || '')
-
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single()
-
-        if (profileData) {
-          setProfile(profileData)
-          setIsAdmin(profileData.role === "admin" || profileData.role === "super_admin")
-
-          const { data: condoData } = await supabase
-            .from("condominiums")
-            .select("*")
-            .eq("id", profileData.condo_id)
-            .single()
-
-          if (condoData) setCondo(condoData)
-
-          const { data: parametersData } = await supabase
-            .from("parameters")
-            .select("*")
-            .eq("condo_id", profileData.condo_id)
-            .single()
-
-          if (parametersData) setParameters(parametersData)
-
-          const { data: themeData } = await supabase
-            .from("condominium_themes")
-            .select("*")
-            .eq("condo_id", profileData.condo_id)
-            .single()
-
-          if (themeData) setTheme(themeData)
-        }
-      } catch (error) {
-        console.error("[v0] Error loading configuration:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadData()
-  }, [supabase, router])
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p style={{ color: cardTextColor }}>Cargando...</p>
-      </div>
-    )
+  if (!user) {
+    redirect("/auth/login")
   }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single()
+
+  const { data: condo } = await supabase
+    .from("condominiums")
+    .select("*")
+    .eq("id", profile?.condo_id)
+    .single()
+
+  const { data: parameters } = await supabase
+    .from("parameters")
+    .select("*")
+    .eq("condo_id", profile?.condo_id)
+    .single()
+
+  const { data: themeData } = await supabase
+    .from("condominium_themes")
+    .select("*")
+    .eq("condo_id", profile?.condo_id)
+    .single()
+
+  const theme = themeData as CondoTheme | null
+  const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
+  const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   return (
     <div className="space-y-6">
@@ -124,9 +82,9 @@ export default function ConfiguracionPage() {
           }}
         >
           <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Información Personal</h2>
-          <ProfileSettingsForm 
+          <ProfileSettingsFormServer 
             profile={profile}
-            userEmail={userEmail}
+            userEmail={user.email}
             cardBgColor={cardBgColor}
             cardTextColor={cardTextColor}
           />
@@ -190,7 +148,7 @@ export default function ConfiguracionPage() {
           {condo && (
             <ThemeCustomizerWrapper 
               condoId={condo.id} 
-              currentTheme={theme as CondoTheme | null}
+              currentTheme={theme}
               isAdmin={isAdmin}
               cardBgColor={cardBgColor}
               cardTextColor={cardTextColor}

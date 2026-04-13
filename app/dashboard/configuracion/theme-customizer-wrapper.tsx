@@ -8,9 +8,11 @@ interface ThemeCustomizerWrapperProps {
   condoId: string
   currentTheme: CondoTheme | null
   isAdmin?: boolean
+  cardBgColor?: string
+  cardTextColor?: string
 }
 
-export function ThemeCustomizerWrapper({ condoId, currentTheme, isAdmin = true }: ThemeCustomizerWrapperProps) {
+export function ThemeCustomizerWrapper({ condoId, currentTheme, isAdmin = true, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9" }: ThemeCustomizerWrapperProps) {
   const handleSave = async (themeData: Partial<CondoTheme>) => {
     try {
       console.log("[v0] Saving theme:", themeData)
