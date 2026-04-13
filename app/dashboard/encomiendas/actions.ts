@@ -38,18 +38,25 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
+        console.log('[v0] Starting photo upload...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
         // Use "parcels/" prefix in filename to store in parcels bucket
         const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
+        console.log('[v0] Filename:', filename)
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
+        console.log('[v0] Blob created:', { blobSize: photoBlob.size, blobType: photoBlob.type })
         const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
         })
+        console.log('[v0] Put result:', { url: result.url, pathname: result.pathname, size: result.size })
         // Store the full URL - it includes the parcels/ prefix
         reception_photo_url = result.url
-        console.log('[v0] Photo uploaded to:', reception_photo_url)
+        console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
       } catch (photoUploadError) {
-        console.error('[v0] Error uploading photo to Blob:', photoUploadError)
+        console.error('[v0] ERROR uploading photo:', {
+          error: photoUploadError instanceof Error ? photoUploadError.message : String(photoUploadError),
+          stack: photoUploadError instanceof Error ? photoUploadError.stack : undefined
+        })
       }
     }
 
