@@ -320,8 +320,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     <Sidebar 
       className="!border-r !bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
       style={{
-        backgroundColor: cardBgColor + " !important",
-        borderColor: cardTextColor,
+        backgroundColor: (cardBgColor || "#ffffff") + " !important",
+        borderColor: cardTextColor || "#000000",
         backdropFilter: "none !important",
         WebkitBackdropFilter: "none !important",
       }}
@@ -329,8 +329,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarHeader 
         className="border-b p-4"
         style={{
-          backgroundColor: cardBgColor,
-          borderColor: cardTextColor,
+          backgroundColor: cardBgColor || "#ffffff",
+          borderColor: cardTextColor || "#000000",
         }}
       >
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
@@ -382,7 +382,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarContent 
         className="!bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
         style={{ 
-          backgroundColor: cardBgColor + " !important",
+          backgroundColor: (cardBgColor || "#ffffff") + " !important",
           backdropFilter: "none !important",
           WebkitBackdropFilter: "none !important",
         }}
@@ -460,8 +460,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarFooter 
         className="border-t p-4"
         style={{
-          backgroundColor: cardBgColor,
-          borderColor: cardTextColor,
+          backgroundColor: cardBgColor || "#ffffff",
+          borderColor: cardTextColor || "#000000",
         }}
       >
         <div className="flex flex-col gap-2">
