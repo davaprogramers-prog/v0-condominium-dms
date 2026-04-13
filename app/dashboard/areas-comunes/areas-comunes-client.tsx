@@ -266,7 +266,11 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               <Checkbox
                                 id="edit_is_paid"
                                 checked={editIsPaid}
-                                onCheckedChange={setEditIsPaid}
+                                onCheckedChange={(checked) => {
+                                  if (typeof checked === 'boolean') {
+                                    setEditIsPaid(checked)
+                                  }
+                                }}
                                 className="w-5 h-5 border-2"
                               />
                               <Label htmlFor="edit_is_paid" style={{ color: dialogTextColor }}>Uso pagado</Label>
