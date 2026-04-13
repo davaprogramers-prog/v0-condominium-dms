@@ -79,6 +79,7 @@ export default async function MiCasaPage() {
   const theme = themeData as CondoTheme | null
   const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
   const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
+  const parameterBgColor = theme?.enable_custom_theme ? theme.parameter_bg_color : "#fef3c7"
 
   const currentMonthIncomes = incomes?.filter(i => {
     return i.period_month === parameters?.current_month && 
@@ -158,8 +159,8 @@ export default async function MiCasaPage() {
         </div>
 
         <div className="rounded-lg border-2 p-4" style={{ 
-          backgroundColor: balance > 0 ? "#7f1d1d" : "#1e3a1f", 
-          borderColor: balance > 0 ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.1)",
+          backgroundColor: cardBgColor, 
+          borderColor: "rgba(255,255,255,0.1)",
           color: cardTextColor
         }}>
           <div className="flex items-center gap-3">
@@ -203,7 +204,7 @@ export default async function MiCasaPage() {
                       <td className="px-6 py-3">{condo?.currency_symbol}{income.amount}</td>
                       <td className="px-6 py-3">
                         {hasReceipt ? (
-                          <span className="text-xs text-blue-400">
+                          <span className="text-xs" style={{ color: "#000000" }}>
                             {proofs.length} comprobante(s)
                           </span>
                         ) : (
@@ -233,7 +234,7 @@ export default async function MiCasaPage() {
       </div>
 
       {/* Vencimiento */}
-      <div className="rounded-lg border-2 p-4" style={{ backgroundColor: "#78350f", borderColor: "rgba(255,255,255,0.1)", color: cardTextColor }}>
+      <div className="rounded-lg border-2 p-4" style={{ backgroundColor: parameterBgColor, borderColor: "rgba(255,255,255,0.1)", color: "#1f2937" }}>
         <p className="text-sm">
           <span className="font-semibold">Fecha de Vencimiento:</span> {parameters?.payment_deadline_day} de cada mes
         </p>
