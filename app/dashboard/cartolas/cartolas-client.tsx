@@ -16,15 +16,12 @@ import { useTheme } from "@/app/dashboard/theme-context"
 interface CartolasClientProps {
   statements: Record<string, unknown>[]
   isAdmin: boolean
-  cardBgColor?: string
-  cardTextColor?: string
-  borderColor?: string
 }
 
-export function CartolasClient({ statements, isAdmin, cardBgColor = "#f5f5f5", cardTextColor = "#1f2937", borderColor = "#e5e7eb" }: CartolasClientProps) {
+export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
-  const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
+  const { cardBgColor, cardTextColor, borderColor, inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   return (
     <div className="flex flex-col gap-6">
