@@ -162,7 +162,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
               Cambiar Foto
             </Button>
           </DialogTrigger>
-      <DialogContent
+          <DialogContent
         className="max-w-md"
         style={{
           backgroundColor: cardBgColor,
@@ -282,24 +282,25 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
 
-    {/* Delete Avatar Button */}
-    {currentAvatarUrl && (
-      <Button
-        onClick={handleDeleteAvatar}
-        style={{
-          backgroundColor: "#dc2626",
-          color: "white",
-          borderRadius: "8px",
-          border: "none",
-          flex: 1,
-          cursor: "pointer"
-        }}
-      >
-        Eliminar Foto
-      </Button>
-    )}
+      {/* Delete Avatar Button */}
+      {currentAvatarUrl && (
+        <Button
+          onClick={handleDeleteAvatar}
+          style={{
+            backgroundColor: "#dc2626",
+            color: "white",
+            borderRadius: "8px",
+            border: "none",
+            flex: 1,
+            cursor: "pointer"
+          }}
+        >
+          Eliminar Foto
+        </Button>
+      )}
+      </div>
     </div>
   )
 }
