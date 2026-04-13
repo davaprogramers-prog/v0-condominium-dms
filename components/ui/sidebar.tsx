@@ -184,14 +184,15 @@ function Sidebar({
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
-          hideClose
-          side={side}
+          data-sidebar="content"
+          data-slot="sidebar-content"
           className={cn(
             'w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden',
             className,
           )}
           style={{
             backgroundColor: "var(--sidebar-bg, inherit)",
+            ...props?.style,
           }}
         >
           <SheetHeader className="sr-only">
