@@ -24,14 +24,25 @@ export async function deleteAdmin(userId: string) {
   }
 
   try {
-    // Delete from auth first
+    // First, delete related records in condo_income table
+    const { error: incomeError } = await supabase
+      .from("condo_income")
+      .delete()
+      .eq("created_by", userId)
+
+    if (incomeError) {
+      console.error("[v0] Error deleting condo_income records:", incomeError)
+      // Continue anyway as there might not be any records
+    }
+
+    // Delete from auth
     await supabase.auth.admin.deleteUser(userId)
   } catch (authError) {
     console.error("[v0] Error deleting from auth:", authError)
     // Continue to delete profile even if auth delete fails
   }
 
-  // Delete from profiles table (cascades will handle related records)
+  // Delete from profiles table
   const { error: profileError } = await supabase
     .from("profiles")
     .delete()
