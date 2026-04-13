@@ -284,10 +284,21 @@ export default function VisitasPageClient({
                   }
                 }}
               >
-                <SelectTrigger className="w-full sm:w-56 bg-popover">
+                <SelectTrigger 
+                  className="w-full sm:w-56 bg-popover"
+                  style={{
+                    backgroundColor: inputBgColor,
+                    color: inputTextColor,
+                  }}
+                >
                   <SelectValue placeholder="Seleccionar propiedad..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  style={{
+                    '--select-bg': inputBgColor,
+                    '--select-text': inputTextColor,
+                  } as React.CSSProperties}
+                >
                   <SelectItem value="all">Todas las propiedades</SelectItem>
                   {houses.map(house => (
                     <SelectItem key={house.id} value={house.id}>
