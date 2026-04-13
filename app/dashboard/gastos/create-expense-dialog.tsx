@@ -53,10 +53,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
   useEffect(() => {
     async function loadLogos() {
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
         .order("name")
+      
+      console.log("[v0] Logos query - data:", data, "error:", error)
       setExpenseLogos(data || [])
     }
     if (open) {
