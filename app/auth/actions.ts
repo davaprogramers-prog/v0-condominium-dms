@@ -71,33 +71,7 @@ export async function registerOwner(
 
   if (houseError || !house) throw new Error("Casa no válida")
 
-  // Check if user already exists
-  const { data: existingAuth } = await supabase.auth.admin.listUsers()
-  const userExists = existingAuth?.users?.some(u => u.email === email)
-
-  if (userExists) {
-    // User already exists in auth, just ensure profile is updated
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    
-    if (authUser?.email === email) {
-      // Current user - update their profile
-      const { error: updateError } = await serviceClient
-        .from("profiles")
-        .update({
-          house_id: houseId,
-          condo_id: house.condo_id,
-        })
-        .eq("id", authUser.id)
-      
-      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
-      
-      return authUser
-    } else {
-      throw new Error("El email ya está registrado. Intenta iniciar sesión.")
-    }
-  }
-
-  // Sign up new user
+  // Try to sign up new user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -112,6 +86,36 @@ export async function registerOwner(
       },
     },
   })
+
+  // If user already exists, that's fine - we'll just ensure profile is updated
+  if (authError && authError.message.includes("already registered")) {
+    console.log("[v0] User already registered, attempting to get their auth user...")
+    
+    // User already exists, try to get their current user
+    const { data: { user: existingUser } } = await supabase.auth.getUser()
+    
+    if (existingUser?.email === email) {
+      // Logged in user - update their profile
+      console.log("[v0] Updating profile for existing logged-in user:", existingUser.id)
+      
+      const { error: updateError } = await serviceClient
+        .from("profiles")
+        .update({
+          house_id: houseId,
+          condo_id: house.condo_id,
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq("id", existingUser.id)
+      
+      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
+      
+      return existingUser
+    } else {
+      // Different user exists with this email - can't register
+      throw new Error("El email ya está registrado. Intenta iniciar sesión.")
+    }
+  }
 
   if (authError) throw authError
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
