@@ -56,14 +56,24 @@ export function ViewParcelPhotosDialog({
       const urls: Record<string, string> = {}
       for (const photo of fetchedPhotos) {
         try {
+          // Normalize pathname - remove leading slash if present
+          const normalizedPathname = photo.photo_url.startsWith('/') 
+            ? photo.photo_url.substring(1) 
+            : photo.photo_url
+          
+          console.log('[v0] Loading photo:', normalizedPathname)
+          
           const response = await fetch('/api/blob-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pathname: photo.photo_url }),
+            body: JSON.stringify({ pathname: normalizedPathname }),
           })
           if (response.ok) {
             const { url } = await response.json()
+            console.log('[v0] Got signed URL for photo:', photo.id, url)
             urls[photo.id] = url
+          } else {
+            console.error('[v0] Failed to get signed URL:', response.status, response.statusText)
           }
         } catch (error) {
           console.error('[v0] Error generating signed URL for photo:', photo.id, error)
