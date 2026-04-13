@@ -235,23 +235,26 @@ export async function deleteConcierge(condoId: string, profileId: string) {
     .select("id, condo_id, email")
     .eq("id", profileId)
     .eq("condo_id", condoId)
-    .single()
+    .maybeSingle()
 
-  if (profileFetchError || !profileData) {
+  // If profile doesn't exist, that's OK - just try to delete the auth user
+  if (profileFetchError && profileFetchError.code !== 'PGRST116') {
     console.error("[v0] Error fetching profile:", profileFetchError)
-    throw new Error("Conserje no encontrado o no pertenece a este condominio")
+    throw new Error("Error al buscar conserje: " + profileFetchError.message)
   }
 
-  // Delete profile first
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .delete()
-    .eq("id", profileId)
-    .eq("condo_id", condoId)
+  // Delete profile if it exists
+  if (profileData) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", profileId)
+      .eq("condo_id", condoId)
 
-  if (profileError) {
-    console.error("[v0] Error deleting profile:", profileError)
-    throw new Error(profileError.message)
+    if (profileError) {
+      console.error("[v0] Error deleting profile:", profileError)
+      throw new Error(profileError.message)
+    }
   }
 
   // Try to delete auth user via API call to admin function
