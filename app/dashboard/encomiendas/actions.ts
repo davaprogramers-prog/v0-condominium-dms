@@ -65,16 +65,7 @@ export async function createParcel(data: {
     }
 
     // Save reception photo to parcel_photos table if provided
-    if (reception_photo_url && parcel && profile) {
-      const userRole = profile.role || 'conserje'
-      const { data: fullProfile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .single()
-      
-      const userName = fullProfile?.first_name ? `${fullProfile.first_name} ${fullProfile.last_name || ''}`.trim() : user.email
-      
+    if (reception_photo_url && parcel) {
       const { error: photoError } = await supabase
         .from('parcel_photos')
         .insert({
@@ -82,8 +73,6 @@ export async function createParcel(data: {
           photo_url: reception_photo_url,
           photo_type: 'recepcion_garita',
           uploaded_by: user.id,
-          uploaded_by_role: userRole,
-          description: `Recibido por: ${userName} (${userRole})`,
         })
 
       if (photoError) {
@@ -170,9 +159,8 @@ export async function updateParcelStatus(data: {
     }
 
     // Save delivery/return photo to parcel_photos table if provided
-    if (photoUrl && profile) {
+    if (photoUrl) {
       const photoType = data.new_status === 'delivered' ? 'entrega_propietario' : 'devolucion'
-      const userRole = profile.role || 'conserje'
       
       const { error: photoError } = await supabase
         .from('parcel_photos')
@@ -181,8 +169,6 @@ export async function updateParcelStatus(data: {
           photo_url: photoUrl,
           photo_type: photoType,
           uploaded_by: user.id,
-          uploaded_by_role: userRole,
-          description: `${data.new_status === 'delivered' ? 'Entregado' : 'Devuelto'} por: ${userRole}`,
         })
 
       if (photoError) {
