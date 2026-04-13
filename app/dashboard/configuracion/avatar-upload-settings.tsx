@@ -145,7 +145,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 w-full">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -154,8 +154,9 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
                 color: "white",
                 borderRadius: "8px",
                 border: "none",
-                flex: 1,
-                cursor: "pointer"
+                width: "100%",
+                cursor: "pointer",
+                padding: "8px 16px"
               }}
             >
               <Camera className="h-4 w-4 mr-2" />
@@ -293,8 +294,9 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
             color: "white",
             borderRadius: "8px",
             border: "none",
-            flex: 1,
-            cursor: "pointer"
+            width: "100%",
+            cursor: "pointer",
+            padding: "8px 16px"
           }}
         >
           Eliminar Foto
