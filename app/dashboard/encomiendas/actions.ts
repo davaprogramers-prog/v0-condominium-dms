@@ -72,6 +72,7 @@ export async function createParcel(data: {
           parcel_id: parcel.id,
           photo_url: reception_photo_url,
           photo_type: 'recepcion_garita',
+          uploaded_by: user.id,
         })
 
       if (photoError) {
