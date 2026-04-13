@@ -26,7 +26,7 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const { dialogBgColor, dialogTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputTextColor } = useTheme()
 
   const handleDelete = async () => {
     setLoading(true)
@@ -64,7 +64,7 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
         className="max-w-sm"
         style={{
           backgroundColor: dialogBgColor,
-          borderColor: borderColor,
+          borderColor: inputTextColor,
           color: dialogTextColor
         }}
       >
@@ -80,7 +80,7 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
             style={{
               backgroundColor: dialogBgColor,
               color: dialogTextColor,
-              borderColor: borderColor
+              borderColor: inputTextColor
             }}
             className="border"
           >
