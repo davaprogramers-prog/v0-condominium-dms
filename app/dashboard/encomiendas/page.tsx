@@ -9,13 +9,6 @@ import { CreateParcelDialog } from './create-parcel-dialog'
 import { UpdateParcelDialog } from './update-parcel-dialog'
 import { ViewParcelPhotosDialog } from './view-parcel-photos-dialog'
 
-interface ParcelPhoto {
-  id: string
-  photo_url: string
-  photo_type: 'recepcion_garita' | 'entrega_propietario' | 'devolucion'
-  created_at: string
-}
-
 interface Parcel {
   id: string
   from_sender: string
@@ -26,7 +19,6 @@ interface Parcel {
   house_id: string
   house?: { house_number: string }
   return_reason?: string
-  photos?: ParcelPhoto[]
 }
 
 export default function ParcelPage() {
@@ -40,11 +32,7 @@ export default function ParcelPage() {
   const [searchTracking, setSearchTracking] = useState('')
   const [editingParcel, setEditingParcel] = useState<Parcel | null>(null)
   const [viewingPhotosParcel, setViewingPhotosParcel] = useState<Parcel | null>(null)
-  const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
-
-  useEffect(() => {
-    loadUserAndParcels()
-  }, [])
+  const [parcelPhotosCounts, setParcelPhotosCounts] = useState<Record<string, number>>({})
 
   const loadUserAndParcels = async () => {
     try {
@@ -90,51 +78,32 @@ export default function ParcelPage() {
 
       const { data } = await query
 
-      // Fetch photos for each parcel
-      if (data && data.length > 0) {
-        const { data: photosData } = await supabase
-          .from('parcel_photos')
-          .select('id, parcel_id, photo_url, photo_type, created_at')
-          .in('parcel_id', data.map(p => p.id))
+      // Filter out delivered parcels unless showDelivered is true
+      let filtered = data || []
+      if (!showDelivered) {
+        filtered = filtered.filter(p => p.status !== 'entregado')
+      }
 
-        // Group photos by parcel_id
-        const photosByParcelId: Record<string, ParcelPhoto[]> = {}
-        if (photosData) {
-          photosData.forEach((photo: any) => {
-            if (!photosByParcelId[photo.parcel_id]) {
-              photosByParcelId[photo.parcel_id] = []
-            }
-            photosByParcelId[photo.parcel_id].push({
-              id: photo.id,
-              photo_url: photo.photo_url,
-              photo_type: photo.photo_type,
-              created_at: photo.created_at,
-            })
-          })
+      // Apply search filter
+      if (searchTracking) {
+        filtered = filtered.filter(p =>
+          p.from_sender?.toLowerCase().includes(searchTracking.toLowerCase())
+        )
+      }
+
+      setParcels(filtered)
+
+      // Count photos for each parcel (without loading the actual images)
+      if (filtered.length > 0) {
+        const counts: Record<string, number> = {}
+        for (const parcel of filtered) {
+          const { count } = await supabase
+            .from('parcel_photos')
+            .select('*', { count: 'exact', head: true })
+            .eq('parcel_id', parcel.id)
+          counts[parcel.id] = count || 0
         }
-
-        // Add photos to parcels
-        const dataWithPhotos = data.map(p => ({
-          ...p,
-          photos: photosByParcelId[p.id] || []
-        }))
-        
-        // Filter out delivered parcels unless showDelivered is true
-        let filtered = dataWithPhotos
-        if (!showDelivered) {
-          filtered = filtered.filter(p => p.status !== 'entregado')
-        }
-
-        // Apply search filter
-        if (searchTracking) {
-          filtered = filtered.filter(p =>
-            p.from_sender?.toLowerCase().includes(searchTracking.toLowerCase())
-          )
-        }
-
-        setParcels(filtered)
-      } else {
-        setParcels([])
+        setParcelPhotosCounts(counts)
       }
     } catch (error) {
       console.error('[v0] Error loading parcels:', error)
@@ -146,6 +115,25 @@ export default function ParcelPage() {
   const handleRefresh = () => {
     setLoading(true)
     loadUserAndParcels()
+  }
+
+  const loadPhotosForParcel = async (parcelId: string): Promise<ParcelPhoto[]> => {
+    const { data: photosData } = await supabase
+      .from('parcel_photos')
+      .select('id, photo_url, photo_type, created_at')
+      .eq('parcel_id', parcelId)
+      .order('created_at', { ascending: false })
+
+    return (photosData || []).map(photo => ({
+      id: photo.id,
+      photo_url: photo.photo_url,
+      photo_type: photo.photo_type,
+      created_at: photo.created_at,
+    }))
+  }
+
+  const handleViewPhotos = async (parcel: Parcel) => {
+    setViewingPhotosParcel(parcel)
   }
 
   const getStatusIcon = (status: string) => {
@@ -283,16 +271,16 @@ export default function ParcelPage() {
                     <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
                       {getStatusLabel(parcel.status)}
                     </span>
-                    {parcel.photos && parcel.photos.length > 0 && (
+                    {parcelPhotosCounts[parcel.id] && parcelPhotosCounts[parcel.id] > 0 && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setViewingPhotosParcel(parcel)}
+                        onClick={() => handleViewPhotos(parcel)}
                         className="flex items-center gap-2"
                         title="Ver fotos de la encomienda"
                       >
                         <Camera className="h-4 w-4" />
-                        {parcel.photos.length}
+                        {parcelPhotosCounts[parcel.id]}
                       </Button>
                     )}
                     {isConserje && parcel.status === 'recibido' && (
@@ -336,7 +324,7 @@ export default function ParcelPage() {
           onOpenChange={(open) => !open && setViewingPhotosParcel(null)}
           parcelId={viewingPhotosParcel.id}
           status={viewingPhotosParcel.status}
-          photos={viewingPhotosParcel.photos || []}
+          loadPhotos={loadPhotosForParcel}
         />
       )}
     </div>

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ImageOff, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ImageOff, ChevronLeft, ChevronRight, Loader } from 'lucide-react'
 import Image from 'next/image'
 
 interface ParcelPhoto {
@@ -18,7 +18,7 @@ interface ViewParcelPhotosDialogProps {
   onOpenChange: (open: boolean) => void
   parcelId: string
   status: 'recibido' | 'entregado' | 'devuelto'
-  photos: ParcelPhoto[]
+  loadPhotos: (parcelId: string) => Promise<ParcelPhoto[]>
 }
 
 const photoTypeLabels: Record<string, string> = {
@@ -32,22 +32,37 @@ export function ViewParcelPhotosDialog({
   onOpenChange,
   parcelId,
   status,
-  photos,
+  loadPhotos,
 }: ViewParcelPhotosDialogProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [photos, setPhotos] = useState<ParcelPhoto[]>([])
+  const [loading, setLoading] = useState(false)
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
-  if (!photos || photos.length === 0) {
-    return null
+  useEffect(() => {
+    if (isOpen && photos.length === 0) {
+      loadPhotosData()
+    }
+  }, [isOpen])
+
+  const loadPhotosData = async () => {
+    setLoading(true)
+    try {
+      const fetchedPhotos = await loadPhotos(parcelId)
+      setPhotos(fetchedPhotos)
+      setCurrentPhotoIndex(0)
+    } catch (error) {
+      console.error('Error loading photos:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const currentPhoto = photos[currentIndex]
-
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % photos.length)
+    setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
   }
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length)
+    setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
   }
 
   return (
@@ -58,80 +73,98 @@ export function ViewParcelPhotosDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Current Photo */}
-          <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-            {currentPhoto.photo_url ? (
-              <img
-                src={currentPhoto.photo_url}
-                alt={photoTypeLabels[currentPhoto.photo_type]}
-                className="w-full h-full object-cover"
-              />
-            ) : (
+          {loading ? (
+            <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center text-gray-400">
+                <Loader className="h-8 w-8 animate-spin mb-2" />
+                <span>Cargando fotos...</span>
+              </div>
+            </div>
+          ) : photos.length === 0 ? (
+            <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
               <div className="flex flex-col items-center justify-center text-gray-400">
                 <ImageOff className="h-12 w-12 mb-2" />
-                <span>Foto no disponible</span>
+                <span>No hay fotos disponibles</span>
               </div>
-            )}
-          </div>
-
-          {/* Photo Info */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <p className="text-sm font-medium text-blue-900">
-              {photoTypeLabels[currentPhoto.photo_type]}
-            </p>
-            <p className="text-xs text-blue-700 mt-1">
-              {new Date(currentPhoto.created_at).toLocaleString('es-ES')}
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrevious}
-              disabled={photos.length <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-
-            <span className="text-sm text-muted-foreground">
-              {currentIndex + 1} de {photos.length}
-            </span>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNext}
-              disabled={photos.length <= 1}
-            >
-              Siguiente
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Thumbnails */}
-          {photos.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {photos.map((photo, index) => (
-                <button
-                  key={photo.id}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                    index === currentIndex
-                      ? 'border-blue-500 bg-blue-100'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
+            </div>
+          ) : (
+            <>
+              {/* Current Photo */}
+              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+                {photos[currentPhotoIndex].photo_url ? (
                   <img
-                    src={photo.photo_url}
-                    alt={`Foto ${index + 1}`}
+                    src={photos[currentPhotoIndex].photo_url}
+                    alt={photoTypeLabels[photos[currentPhotoIndex].photo_type]}
                     className="w-full h-full object-cover"
                   />
-                </button>
-              ))}
-            </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400">
+                    <ImageOff className="h-12 w-12 mb-2" />
+                    <span>Foto no disponible</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Photo Info */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <p className="text-sm font-medium text-blue-900">
+                  {photoTypeLabels[photos[currentPhotoIndex].photo_type]}
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  {new Date(photos[currentPhotoIndex].created_at).toLocaleString('es-ES')}
+                </p>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrevious}
+                  disabled={photos.length <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+
+                <span className="text-sm text-muted-foreground">
+                  {currentPhotoIndex + 1} de {photos.length}
+                </span>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNext}
+                  disabled={photos.length <= 1}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Thumbnails */}
+              {photos.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {photos.map((photo, index) => (
+                    <button
+                      key={photo.id}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
+                        index === currentPhotoIndex
+                          ? 'border-blue-500 bg-blue-100'
+                          : 'border-gray-300 hover:border-blue-300'
+                      }`}
+                    >
+                      <img
+                        src={photo.photo_url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </DialogContent>
