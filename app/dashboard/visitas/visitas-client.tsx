@@ -192,43 +192,43 @@ export default function VisitasPageClient({
       {/* Filters */}
       <div className="space-y-4 bg-secondary/20 p-4 rounded-lg border">
         {/* First Row: Search and Dates */}
-        <div className="flex flex-col sm:flex-row gap-3 items-end flex-wrap">
+        <div className="flex flex-col gap-3">
           <Input
             placeholder="Buscar visitante, correo, teléfono..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 min-w-[200px]"
+            className="w-full"
           />
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               placeholder="Desde"
               title="Fecha desde"
-              className="w-32"
+              className="w-full sm:w-40"
             />
-            <span className="text-muted-foreground text-sm">-</span>
+            <span className="hidden sm:block text-muted-foreground text-sm">-</span>
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               placeholder="Hasta"
               title="Fecha hasta"
-              className="w-32"
+              className="w-full sm:w-40"
             />
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="flex items-center gap-2 h-10 w-full sm:w-auto"
+              >
+                <X className="h-4 w-4" />
+                Limpiar
+              </Button>
+            )}
           </div>
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilters}
-              className="flex items-center gap-2 h-10"
-            >
-              <X className="h-4 w-4" />
-              Limpiar
-            </Button>
-          )}
         </div>
 
         {/* Second Row: Status Buttons */}
@@ -271,9 +271,9 @@ export default function VisitasPageClient({
 
         {/* Third Row: Property Filter Dropdown (if viewing as admin) */}
         {isViewingAsAdmin && houses && houses.length > 0 && (
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
             <span className="text-sm font-medium text-muted-foreground">Propiedades:</span>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center w-full sm:w-auto">
               <Select
                 value={selectedHouses.size === 0 ? 'all' : Array.from(selectedHouses)[0]}
                 onValueChange={(value) => {
@@ -284,7 +284,7 @@ export default function VisitasPageClient({
                   }
                 }}
               >
-                <SelectTrigger className="w-64">
+                <SelectTrigger className="w-full sm:w-56 bg-popover">
                   <SelectValue placeholder="Seleccionar propiedad..." />
                 </SelectTrigger>
                 <SelectContent>
