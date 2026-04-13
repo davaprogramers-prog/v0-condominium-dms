@@ -16,9 +16,12 @@ import { useTheme } from "@/app/dashboard/theme-context"
 interface CartolasClientProps {
   statements: Record<string, unknown>[]
   isAdmin: boolean
+  cardBgColor?: string
+  cardTextColor?: string
+  borderColor?: string
 }
 
-export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
+export function CartolasClient({ statements, isAdmin, cardBgColor = "#f5f5f5", cardTextColor = "#1f2937", borderColor = "#e5e7eb" }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
@@ -92,14 +95,14 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
         )}
       </div>
 
-      <Card>
+      <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }}>
         <CardHeader>
-          <CardTitle className="text-base">Historial de Cartolas</CardTitle>
-          <CardDescription>Archivos PDF de cartolas bancarias del condominio</CardDescription>
+          <CardTitle className="text-base" style={{ color: cardTextColor }}>Historial de Cartolas</CardTitle>
+          <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Archivos PDF de cartolas bancarias del condominio</CardDescription>
         </CardHeader>
         <CardContent>
           {statements.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 py-8" style={{ color: cardTextColor, opacity: 0.6 }}>
               <Landmark className="h-10 w-10" />
               <p>No hay cartolas subidas</p>
             </div>
@@ -107,29 +110,30 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Titulo</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Notas</TableHead>
-                    <TableHead>Subido</TableHead>
-                    <TableHead>Archivo</TableHead>
+                  <TableRow style={{ borderColor: borderColor }}>
+                    <TableHead style={{ color: cardTextColor }}>Titulo</TableHead>
+                    <TableHead style={{ color: cardTextColor }}>Fecha</TableHead>
+                    <TableHead style={{ color: cardTextColor }}>Notas</TableHead>
+                    <TableHead style={{ color: cardTextColor }}>Subido</TableHead>
+                    <TableHead style={{ color: cardTextColor }}>Archivo</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {statements.map((stmt) => (
-                    <TableRow key={stmt.id as string}>
-                      <TableCell className="font-medium">{stmt.title as string}</TableCell>
-                      <TableCell className="text-sm">{stmt.statement_date as string}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                    <TableRow key={stmt.id as string} style={{ borderColor: borderColor }}>
+                      <TableCell className="font-medium" style={{ color: cardTextColor }}>{stmt.title as string}</TableCell>
+                      <TableCell className="text-sm" style={{ color: cardTextColor }}>{stmt.statement_date as string}</TableCell>
+                      <TableCell className="max-w-[200px] truncate text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>
                         {(stmt.notes as string) || "-"}
                       </TableCell>
-                      <TableCell className="text-sm">{new Date(stmt.created_at as string).toLocaleDateString("es-CL")}</TableCell>
+                      <TableCell className="text-sm" style={{ color: cardTextColor }}>{new Date(stmt.created_at as string).toLocaleDateString("es-CL")}</TableCell>
                       <TableCell>
                         <a
                           href={stmt.file_url as string}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                          className="inline-flex items-center gap-1 text-sm hover:underline"
+                          style={{ color: "#2563eb" }}
                         >
                           <ExternalLink className="h-3 w-3" />Ver PDF
                         </a>
