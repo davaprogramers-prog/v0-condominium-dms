@@ -35,7 +35,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
   const [editingType, setEditingType] = useState<string | null>(null)
   const [deletingExemption, setDeletingExemption] = useState<string | null>(null)
   const [deletingType, setDeletingType] = useState<string | null>(null)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
 
   const handleDeleteExemption = async (id: string) => {
     setDeletingExemption(id)
@@ -190,14 +190,14 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           <TabsTrigger value="types">Tipos ({exemptionTypes.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="exemptions">
-          <Card>
+          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
             <CardHeader>
-              <CardTitle className="text-base">Exoneraciones Activas</CardTitle>
-              <CardDescription>Casas con exoneracion de gasto comun</CardDescription>
+              <CardTitle className="text-base" style={{ color: cardTextColor }}>Exoneraciones Activas</CardTitle>
+              <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Casas con exoneracion de gasto comun</CardDescription>
             </CardHeader>
             <CardContent>
               {exemptions.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2 py-8" style={{ color: cardTextColor, opacity: 0.6 }}>
                   <ShieldOff className="h-10 w-10" />
                   <p>No hay exoneraciones registradas</p>
                 </div>
@@ -205,23 +205,23 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Casa</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Porcentaje</TableHead>
-                        <TableHead>Desde</TableHead>
-                        <TableHead>Hasta</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Razon</TableHead>
-                        {isAdmin && <TableHead>Acciones</TableHead>}
+                      <TableRow style={{ borderColor: borderColor }}>
+                        <TableHead style={{ color: cardTextColor }}>Casa</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Tipo</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Porcentaje</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Desde</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Hasta</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Estado</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Razon</TableHead>
+                        {isAdmin && <TableHead style={{ color: cardTextColor }}>Acciones</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {exemptions.map((ex) => {
                         const isActive = ex.is_permanent || !ex.end_date || new Date(ex.end_date as string) >= new Date()
                         return (
-                          <TableRow key={ex.id as string}>
-                            <TableCell className="font-medium">
+                          <TableRow key={ex.id as string} style={{ borderColor: borderColor }}>
+                            <TableCell className="font-medium" style={{ color: cardTextColor }}>
                               {(ex.houses as Record<string, unknown>)?.house_number as string || "?"}
                             </TableCell>
                             <TableCell>
@@ -229,15 +229,15 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                                 {(ex.exemption_types as Record<string, unknown>)?.name as string || "Sin tipo"}
                               </Badge>
                             </TableCell>
-                            <TableCell>{ex.percentage as number || 100}%</TableCell>
-                            <TableCell className="text-sm">{ex.start_date as string}</TableCell>
-                            <TableCell className="text-sm">{ex.is_permanent ? "Permanente" : (ex.end_date as string || "-")}</TableCell>
+                            <TableCell style={{ color: cardTextColor }}>{ex.percentage as number || 100}%</TableCell>
+                            <TableCell className="text-sm" style={{ color: cardTextColor }}>{ex.start_date as string}</TableCell>
+                            <TableCell className="text-sm" style={{ color: cardTextColor }}>{ex.is_permanent ? "Permanente" : (ex.end_date as string || "-")}</TableCell>
                             <TableCell>
                               <Badge variant={isActive ? "default" : "secondary"}>
                                 {isActive ? "Activa" : "Expirada"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                            <TableCell className="max-w-[200px] truncate text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>
                               {(ex.reason as string) || "-"}
                             </TableCell>
                             {isAdmin && (
@@ -266,20 +266,20 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           </Card>
         </TabsContent>
         <TabsContent value="types">
-          <Card>
+          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
             <CardHeader>
-              <CardTitle className="text-base">Tipos de Exoneracion</CardTitle>
+              <CardTitle className="text-base" style={{ color: cardTextColor }}>Tipos de Exoneracion</CardTitle>
             </CardHeader>
             <CardContent>
               {exemptionTypes.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">No hay tipos definidos</p>
+                <p className="py-4 text-center text-sm" style={{ color: cardTextColor, opacity: 0.6 }}>No hay tipos definidos</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {exemptionTypes.map((t) => (
-                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3">
+                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: borderColor, backgroundColor: `${cardBgColor}88` }}>
                       <div>
-                        <p className="text-sm font-medium">{t.name as string}</p>
-                        {t.description ? <p className="text-xs text-muted-foreground">{t.description as string}</p> : null}
+                        <p className="text-sm font-medium" style={{ color: cardTextColor }}>{t.name as string}</p>
+                        {t.description ? <p className="text-xs" style={{ color: cardTextColor, opacity: 0.7 }}>{t.description as string}</p> : null}
                       </div>
                       {isAdmin && (
                         <div className="flex gap-2">
