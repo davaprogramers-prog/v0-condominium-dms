@@ -101,12 +101,12 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
               <SelectTrigger 
                 id="house_id"
-                className="!bg-opacity-100 !border-2"
+                className="!bg-opacity-100"
                 style={{ 
-                  backgroundColor: inputBgColor || '#f5f5f5', 
-                  color: inputTextColor || '#000000', 
-                  borderColor: cardTextColor || '#ccc',
-                  borderWidth: '1px'
+                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`, 
+                  color: `${inputTextColor || '#000000'} !important`, 
+                  borderColor: `${cardTextColor || '#ccc'} !important`,
+                  border: `1px solid ${cardTextColor || '#ccc'}`
                 }}
               >
                 <SelectValue placeholder="Selecciona una propiedad" />
@@ -127,12 +127,12 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             <Select value={formData.parcel_type} onValueChange={(value) => setFormData({ ...formData, parcel_type: value })}>
               <SelectTrigger 
                 id="parcel_type"
-                className="!bg-opacity-100 !border-2"
+                className="!bg-opacity-100"
                 style={{ 
-                  backgroundColor: inputBgColor || '#f5f5f5', 
-                  color: inputTextColor || '#000000', 
-                  borderColor: cardTextColor || '#ccc',
-                  borderWidth: '1px'
+                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`, 
+                  color: `${inputTextColor || '#000000'} !important`, 
+                  borderColor: `${cardTextColor || '#ccc'} !important`,
+                  border: `1px solid ${cardTextColor || '#ccc'}`
                 }}
               >
                 <SelectValue />
