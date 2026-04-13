@@ -191,8 +191,8 @@ function Sidebar({
             className,
           )}
           style={{
-            backgroundColor: "var(--sidebar-bg, inherit)",
-            ...props?.style,
+            backgroundColor: "var(--sidebar-bg, #ffffff)",
+            color: "var(--sidebar-text, #000000)",
           }}
         >
           <SheetHeader className="sr-only">

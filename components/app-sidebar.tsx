@@ -308,11 +308,13 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     <Sidebar 
       className="!border-r !bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
       style={{
-        backgroundColor: (sidebarBgColor || "#ffffff") + " !important",
+        '--sidebar-bg': (sidebarBgColor || "#ffffff"),
+        '--sidebar-text': (sidebarTextColor || "#000000"),
+        backgroundColor: (sidebarBgColor || "#ffffff"),
         borderColor: sidebarTextColor || "#000000",
         backdropFilter: "none !important",
         WebkitBackdropFilter: "none !important",
-      }}
+      } as React.CSSProperties}
     >
       <SidebarHeader 
         className="border-b p-4"
