@@ -120,7 +120,12 @@ export function EditReceptionDialog({
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: inputBgColor,
+                  color: inputTextColor,
+                }}
+              >
                 <SelectItem value="paquete">Paquete</SelectItem>
                 <SelectItem value="documento">Documento</SelectItem>
                 <SelectItem value="sobre">Sobre</SelectItem>
@@ -166,7 +171,12 @@ export function EditReceptionDialog({
               >
                 <SelectValue placeholder="Selecciona propiedad" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                style={{
+                  backgroundColor: inputBgColor,
+                  color: inputTextColor,
+                }}
+              >
                 {houses.map((house) => (
                   <SelectItem key={house.id} value={house.id}>
                     Casa #{house.house_number}
