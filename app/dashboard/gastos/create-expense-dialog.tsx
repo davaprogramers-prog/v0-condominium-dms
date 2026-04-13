@@ -308,7 +308,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           {/* Receipt Upload */}
           <div className="space-y-2">
             <Label style={{ color: dialogTextColor }}>Imagen de Boleta/Factura</Label>
-            <div style={{ borderColor: inputTextColor, backgroundColor: inputBgColor === "#f8fafc" ? "#f1f5f9" : "#0f172a" }} className="border-2 border-dashed rounded-lg p-4 text-center">
+            <div style={{ borderColor: inputTextColor, backgroundColor: "#ffffff" }} className="border-2 border-dashed rounded-lg p-4 text-center">
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
@@ -331,8 +331,8 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
-                    <span style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">
+                    <Upload className="h-6 w-6" style={{ color: "#9ca3af" }} />
+                    <span style={{ color: "#6b7280" }} className="text-sm">
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
