@@ -180,7 +180,20 @@ export async function ensureUserProfile(userId: string, email: string) {
     console.log("[v0] House query - found:", !!house, "error:", houseErr?.message)
 
     if (!house) {
-      console.log("[v0] No house found for email:", email)
+      console.log("[v0] No house found for email:", email, "- checking for existing profile")
+      
+      // Check if profile already exists without house_id
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single()
+      
+      if (existingProfile && !existingProfile.house_id && !existingProfile.condo_id) {
+        console.log("[v0] Profile exists without house/condo - waiting for admin assignment")
+        return { success: false, message: "Awaiting admin assignment" }
+      }
+      
       return { success: false }
     }
 
@@ -213,6 +226,15 @@ export async function ensureUserProfile(userId: string, email: string) {
         })
         .eq("id", userId)
       console.log("[v0] UPDATE - error:", updateErr?.message)
+      return { success: !updateErr }
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error("[v0] ensureUserProfile ERROR:", err)
+    return { success: false, error: String(err) }
+  }
+}
     } else {
       console.log("[v0] INSERT SUCCESS - Profile created")
     }
