@@ -211,8 +211,11 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                   </SelectContent>
                 </Select>
               ) : (
-                <div style={{ color: inputTextColor, borderColor: inputTextColor }} className="text-sm p-2 border rounded-md bg-slate-50 dark:bg-slate-800">
-                  No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-blue-600 dark:text-blue-400 underline">Crear tipos de gastos</a>
+                <div style={{ backgroundColor: "#1e40af", borderColor: "#1e40af" }} className="text-sm p-3 border rounded-md">
+                  <span style={{ color: "#ffffff" }}>No hay tipos definidos. </span>
+                  <a href="/dashboard/tipos-gastos" className="text-white hover:text-blue-200 underline font-medium">
+                    Crear tipos de gastos
+                  </a>
                 </div>
               )}
             </div>
@@ -284,8 +287,11 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 </SelectContent>
               </Select>
             ) : (
-              <div style={{ color: inputTextColor, borderColor: inputTextColor }} className="text-sm p-2 border rounded-md bg-slate-50 dark:bg-slate-800">
-                No hay logos. <Link href="/dashboard/gastos/logos" className="text-blue-600 dark:text-blue-400 underline">Agregar logos</Link>
+              <div style={{ backgroundColor: "#1e40af", borderColor: "#1e40af" }} className="text-sm p-3 border rounded-md flex items-center justify-between">
+                <span style={{ color: "#ffffff" }}>No hay logos</span>
+                <Link href="/dashboard/gastos/logos" className="text-white hover:text-blue-200 underline text-xs font-medium">
+                  Agregar logos
+                </Link>
               </div>
             )}
           </div>
