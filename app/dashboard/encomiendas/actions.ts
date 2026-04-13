@@ -123,15 +123,8 @@ export async function updateParcelStatus(data: {
     // Get parcel to verify it belongs to the condo
     const { data: parcel } = await supabase
       .from('parcels')
-      .insert({
-        condo_id: data.condo_id,
-        house_id: data.house_id,
-        parcel_type: data.parcel_type,
-        from_sender: data.from,
-        status: 'recibido',
-        received_date: getSantiagoDateTime(),
-      })
-      .select()
+      .select('*')
+      .eq('id', data.parcel_id)
       .single()
 
     if (!parcel || parcel.condo_id !== profile.condo_id) {
