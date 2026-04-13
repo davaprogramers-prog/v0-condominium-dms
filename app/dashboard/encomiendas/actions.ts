@@ -38,14 +38,15 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
-        const filename = `${data.condo_id}/${uuidv4()}.jpg`
+        // Use the fully qualified blob filename to target the 'parcels' bucket
+        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
-          bucket: 'parcels',
         })
         reception_photo_url = result.url
+        console.log('[v0] Photo uploaded to:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
       }
@@ -132,19 +133,16 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
-          bucket: 'parcels',
         })
-        // Store the complete URL returned by put()
         photoUrl = result.url
-        console.log('[v0] Photo uploaded to parcels bucket:', photoUrl)
+        console.log('[v0] Photo uploaded to:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
-        // Don't throw - continue without photo
       }
     }
 
