@@ -46,18 +46,21 @@ export async function createParcel(data: {
     }
 
     // Create parcel in database
+    const insertData: any = {
+      condo_id: data.condo_id,
+      house_id: data.house_id,
+      parcel_type: data.parcel_type,
+      status: 'received',
+      received_date: new Date().toISOString(),
+      reception_photo_url: reception_photo_url,
+      created_by: user.id,
+    }
+    // Use bracket notation for 'from' column since it's a reserved keyword
+    insertData['from'] = data.from
+
     const { data: parcel, error } = await supabase
       .from('parcels')
-      .insert({
-        condo_id: data.condo_id,
-        house_id: data.house_id,
-        from: data.from,
-        status: 'received',
-        received_date: new Date().toISOString(),
-        parcel_type: data.parcel_type,
-        reception_photo_url: reception_photo_url,
-        created_by: user.id,
-      })
+      .insert(insertData)
       .select()
       .single()
 
