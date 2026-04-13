@@ -114,81 +114,87 @@ export function VisitsAdminClient({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b bg-background/95 sticky top-0 z-10 p-4">
-        <h1 className="text-2xl font-bold mb-4">Gestión de Visitas</h1>
+      {/* Content with scrollable filters */}
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto p-4">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold mb-4">Gestión de Visitas</h1>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <div>
-            <label className="text-sm font-medium">Buscar por Visitante</label>
-            <Input
-              placeholder="Nombre del visitante"
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
-            />
-          </div>
+            {/* Filters - Responsive layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
+              {/* First row: Search visitor */}
+              <div>
+                <label className="text-sm font-medium">Buscar por Visitante</label>
+                <Input
+                  placeholder="Nombre del visitante"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                />
+              </div>
 
-          {houses.length > 0 && (
-            <div>
-              <label className="text-sm font-medium">Propiedad</label>
-              <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                <SelectTrigger style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}>
-                  <SelectValue placeholder="Todas las propiedades" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las propiedades</SelectItem>
-                  {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id}>
-                      Casa #{house.house_number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* First row: Property filter */}
+              {houses.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium">Propiedad</label>
+                  <Select value={selectedHouse} onValueChange={setSelectedHouse}>
+                    <SelectTrigger style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}>
+                      <SelectValue placeholder="Todas las propiedades" />
+                    </SelectTrigger>
+                    <SelectContent style={{ backgroundColor: cardBgColor }}>
+                      <SelectItem value="all">Todas las propiedades</SelectItem>
+                      {houses.map((house) => (
+                        <SelectItem key={house.id} value={house.id}>
+                          Casa #{house.house_number}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Second row: Start date */}
+              <div>
+                <label className="text-sm font-medium">Desde</label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                />
+              </div>
+
+              {/* Second row: End date */}
+              <div>
+                <label className="text-sm font-medium">Hasta</label>
+                <Input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                />
+              </div>
+
+              {/* Clear button - spans full width */}
+              <div className="lg:col-span-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedHouse('all')
+                    setStartDate('')
+                    setEndDate('')
+                    setSearchName('')
+                  }}
+                  className="w-full"
+                >
+                  Limpiar Filtros
+                </Button>
+              </div>
             </div>
-          )}
-
-          <div>
-            <label className="text-sm font-medium">Desde</label>
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
-            />
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Hasta</label>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
-            />
-          </div>
-
-          <div className="flex items-end">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelectedHouse('all')
-                setStartDate('')
-                setEndDate('')
-                setSearchName('')
-              }}
-              className="w-full"
-            >
-              Limpiar Filtros
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="max-w-6xl mx-auto">
+          {/* Visits List */}
           {filteredVisits.length === 0 ? (
             <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }}>
               <CardContent className="text-center py-12">
