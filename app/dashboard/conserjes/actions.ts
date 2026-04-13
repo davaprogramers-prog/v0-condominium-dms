@@ -1,7 +1,6 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { createClient as createAdminClient } from "@supabase/supabase-js"
 
 export async function createConcierge(condoId: string, data: {
   email: string
@@ -222,44 +221,52 @@ export async function deleteConcierge(condoId: string, profileId: string) {
     .eq("id", user.id)
     .single()
 
-  if (adminProfile?.condo_id !== condoId) {
+  if (adminProfile?.role !== "admin" && adminProfile?.role !== "super_admin") {
     throw new Error("No autorizado")
   }
 
-  // Use admin client to delete the auth user and profile
-  const adminSupabase = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-  )
+  if (adminProfile?.condo_id !== condoId) {
+    throw new Error("No autorizado para este condominio")
+  }
 
   // Get the profile first to verify it belongs to this condo
-  const { data: profileData } = await adminSupabase
+  const { data: profileData, error: profileFetchError } = await supabase
     .from("profiles")
     .select("id, condo_id, email")
     .eq("id", profileId)
+    .eq("condo_id", condoId)
     .single()
 
-  if (!profileData || profileData.condo_id !== condoId) {
+  if (profileFetchError || !profileData) {
+    console.error("[v0] Error fetching profile:", profileFetchError)
     throw new Error("Conserje no encontrado o no pertenece a este condominio")
   }
 
-  // Delete profile
-  const { error: profileError } = await adminSupabase
+  // Delete profile first
+  const { error: profileError } = await supabase
     .from("profiles")
     .delete()
     .eq("id", profileId)
+    .eq("condo_id", condoId)
 
   if (profileError) {
     console.error("[v0] Error deleting profile:", profileError)
     throw new Error(profileError.message)
   }
 
-  // Delete auth user
-  const { error: authError } = await adminSupabase.auth.admin.deleteUser(profileId)
-  
-  if (authError) {
-    console.error("[v0] Error deleting auth user:", authError)
-    // Don't throw error here - profile is already deleted, just log it
+  // Try to delete auth user via API call to admin function
+  try {
+    const response = await fetch("/api/admin/delete-auth-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: profileId })
+    })
+    
+    if (!response.ok) {
+      console.warn("[v0] Warning: Could not delete auth user, but profile was deleted")
+    }
+  } catch (err) {
+    console.warn("[v0] Warning: Error calling delete-auth-user API, but profile was deleted")
   }
 
   return { success: true }
