@@ -331,7 +331,6 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         style={{
           backgroundColor: cardBgColor,
           borderColor: cardTextColor,
-          opacity: 0.8
         }}
       >
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
