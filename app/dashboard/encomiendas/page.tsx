@@ -10,18 +10,16 @@ import { UpdateParcelDialog } from './update-parcel-dialog'
 
 interface Parcel {
   id: string
-  tracking: string
-  from: string
-  recipient_name: string
+  from_sender: string
   parcel_type: string
-  status: 'received' | 'delivered' | 'returned'
+  status: 'recibido' | 'entregado' | 'devuelto'
   received_date: string
   delivered_date?: string
   house_id: string
   house?: { house_number: string }
-  weight?: number
-  dimensions?: string
   return_reason?: string
+  reception_photo_url?: string
+  delivery_photo_url?: string
 }
 
 export default function ParcelPage() {
@@ -87,14 +85,13 @@ export default function ParcelPage() {
       // Filter out delivered parcels unless showDelivered is true
       let filtered = data || []
       if (!showDelivered) {
-        filtered = filtered.filter(p => p.status !== 'delivered')
+        filtered = filtered.filter(p => p.status !== 'entregado')
       }
 
       // Apply search filter
       if (searchTracking) {
         filtered = filtered.filter(p =>
-          p.tracking?.toLowerCase().includes(searchTracking.toLowerCase()) ||
-          p.from?.toLowerCase().includes(searchTracking.toLowerCase())
+          p.from_sender?.toLowerCase().includes(searchTracking.toLowerCase())
         )
       }
 
@@ -113,11 +110,11 @@ export default function ParcelPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'received':
+      case 'recibido':
         return <Clock className="h-5 w-5 text-yellow-500" />
-      case 'delivered':
+      case 'entregado':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case 'returned':
+      case 'devuelto':
         return <AlertCircle className="h-5 w-5 text-red-500" />
       default:
         return <Package className="h-5 w-5 text-gray-500" />
@@ -126,20 +123,20 @@ export default function ParcelPage() {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      received: 'Recibido',
-      delivered: 'Entregado',
-      returned: 'Devuelto',
+      recibido: 'Recibido',
+      entregado: 'Entregado',
+      devuelto: 'Devuelto',
     }
     return labels[status] || status
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'received':
+      case 'recibido':
         return 'bg-yellow-50 border-yellow-200'
-      case 'delivered':
+      case 'entregado':
         return 'bg-green-50 border-green-200'
-      case 'returned':
+      case 'devuelto':
         return 'bg-red-50 border-red-200'
       default:
         return 'bg-gray-50 border-gray-200'
@@ -147,8 +144,8 @@ export default function ParcelPage() {
   }
 
   const isConserje = role === 'conserje' || role === 'admin' || role === 'super_admin'
-  const receivedCount = parcels.filter(p => p.status === 'received').length
-  const deliveredCount = parcels.filter(p => p.status === 'delivered').length
+  const receivedCount = parcels.filter(p => p.status === 'recibido').length
+  const deliveredCount = parcels.filter(p => p.status === 'entregado').length
   const totalCount = receivedCount + deliveredCount
 
   return (
@@ -236,12 +233,8 @@ export default function ParcelPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">De: {parcel.from}</p>
-                      <p className="text-sm text-muted-foreground">Para: {parcel.recipient_name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Tracking: {parcel.tracking}</p>
-                      {parcel.weight && <p className="text-xs text-muted-foreground">Peso: {parcel.weight} kg</p>}
-                      {parcel.dimensions && <p className="text-xs text-muted-foreground">Dimensiones: {parcel.dimensions}</p>}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">De: {parcel.from_sender}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {new Date(parcel.received_date).toLocaleDateString('es-ES')}
                       </p>
                     </div>
@@ -250,7 +243,18 @@ export default function ParcelPage() {
                     <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
                       {getStatusLabel(parcel.status)}
                     </span>
-                    {isConserje && parcel.status === 'received' && (
+                    {parcel.reception_photo_url && (
+                      <a
+                        href={parcel.reception_photo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center p-2 hover:bg-white/50 rounded-md transition"
+                        title="Ver foto de recepción"
+                      >
+                        <Camera className="h-5 w-5 text-blue-600" />
+                      </a>
+                    )}
+                    {isConserje && parcel.status === 'recibido' && (
                       <Button
                         size="sm"
                         variant="outline"
