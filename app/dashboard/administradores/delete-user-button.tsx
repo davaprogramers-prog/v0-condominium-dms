@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
@@ -25,6 +26,7 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, borderColor } = useTheme()
 
   const handleDelete = async () => {
     setLoading(true)
@@ -58,16 +60,30 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
           Eliminar
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-sm">
+      <AlertDialogContent 
+        className="max-w-sm"
+        style={{
+          backgroundColor: dialogBgColor,
+          borderColor: borderColor,
+          color: dialogTextColor
+        }}
+      >
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg">Eliminar Administrador</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm pt-2">
-            ¿Estás seguro de eliminar a <strong className="text-foreground">{userEmail}</strong>? 
+          <AlertDialogTitle className="text-lg" style={{ color: dialogTextColor }}>Eliminar Administrador</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm pt-2" style={{ color: dialogTextColor, opacity: 0.7 }}>
+            ¿Estás seguro de eliminar a <strong style={{ color: dialogTextColor }}>{userEmail}</strong>? 
             Esta acción no se puede deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 pt-4">
-          <AlertDialogCancel className="bg-slate-200 text-slate-900 hover:bg-slate-300 border-0">
+          <AlertDialogCancel 
+            style={{
+              backgroundColor: dialogBgColor,
+              color: dialogTextColor,
+              borderColor: borderColor
+            }}
+            className="border"
+          >
             Cancelar
           </AlertDialogCancel>
           <Button
