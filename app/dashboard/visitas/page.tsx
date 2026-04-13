@@ -1,10 +1,8 @@
 import { Metadata } from 'next'
-import { ChevronLeft, Plus, Calendar, MapPin } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { VisitsList } from './visits-list'
-import { CreateVisitDialog } from './create-visit-dialog'
+import VisitasPageClient from './visitas-client'
 
 export const metadata: Metadata = {
   title: 'Mis Visitas | Condominio',
@@ -70,23 +68,14 @@ export default async function VisitasPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-blue-500" />
-            {isViewingAsAdmin ? "Visitas del Condominio" : "Mis Visitas"}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {isViewingAsAdmin ? "Gestiona todas las visitas del condominio" : "Registra y gestiona las visitas a tu propiedad"}
-          </p>
-        </div>
-        {houseId && <CreateVisitDialog houses={houses || []} houseId={houseId} />}
-      </div>
-
-      {/* Content */}
-      <VisitsList visits={visits} />
-    </div>
+    <VisitasPageClient 
+      initialVisits={visits}
+      isViewingAsAdmin={isViewingAsAdmin}
+      isAdmin={isAdmin}
+      isConcierge={isConcierge}
+      houseId={houseId}
+      houses={houses || []}
+      condoId={condoId}
+    />
   )
 }
