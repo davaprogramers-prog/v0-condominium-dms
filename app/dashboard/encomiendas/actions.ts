@@ -147,12 +147,12 @@ export async function updateParcelStatus(data: {
       photoUrl = result.url
     }
 
-    // Update parcel
+    // Update parcel status
     const updateData: any = {
       status: data.new_status === 'delivered' ? 'entregado' : 'devuelto',
     }
 
-    if (data.new_status === 'delivered' && photoUrl) {
+    if (data.new_status === 'delivered') {
       updateData.delivered_date = new Date().toISOString()
     } else if (data.new_status === 'returned') {
       if (data.return_reason) {
@@ -168,6 +168,28 @@ export async function updateParcelStatus(data: {
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    // Save delivery/return photo to parcel_photos table if provided
+    if (photoUrl && profile) {
+      const photoType = data.new_status === 'delivered' ? 'entrega_propietario' : 'devolucion'
+      const userRole = profile.role || 'conserje'
+      
+      const { error: photoError } = await supabase
+        .from('parcel_photos')
+        .insert({
+          parcel_id: data.parcel_id,
+          photo_url: photoUrl,
+          photo_type: photoType,
+          uploaded_by: user.id,
+          uploaded_by_role: userRole,
+          description: `${data.new_status === 'delivered' ? 'Entregado' : 'Devuelto'} por: ${userRole}`,
+        })
+
+      if (photoError) {
+        console.error('[v0] Error saving photo record:', photoError)
+        // Don't throw - parcel was updated successfully
+      }
     }
 
     return { success: true }
