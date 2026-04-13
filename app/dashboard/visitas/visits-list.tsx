@@ -25,9 +25,12 @@ interface Visit {
 
 interface VisitsListProps {
   visits: Visit[]
+  cardBgColor?: string
+  cardTextColor?: string
+  borderColor?: string
 }
 
-export function VisitsList({ visits }: VisitsListProps) {
+export function VisitsList({ visits, cardBgColor = "#f5f5f5", cardTextColor = "#1f2937", borderColor = "#e5e7eb" }: VisitsListProps) {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; visit: Visit | null }>({ open: false, visit: null })
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
@@ -94,7 +97,15 @@ export function VisitsList({ visits }: VisitsListProps) {
     <>
       <div className="space-y-4">
         {visits.map((visit) => (
-          <div key={visit.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+          <div 
+            key={visit.id} 
+            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+            style={{
+              backgroundColor: cardBgColor,
+              borderColor: borderColor,
+              color: cardTextColor
+            }}
+          >
             <div className="flex justify-between items-start mb-3">
               <div>
                 <h3 className="font-semibold text-lg">{visit.visitor_name}</h3>
