@@ -235,26 +235,6 @@ export async function ensureUserProfile(userId: string, email: string) {
     return { success: false, error: String(err) }
   }
 }
-    } else {
-      console.log("[v0] INSERT SUCCESS - Profile created")
-    }
-
-    // UPDATE houses con owner_user_id
-    console.log("[v0] Updating houses table with owner_user_id:", userId)
-    const { error: houseUpdateErr } = await supabase
-      .from("houses")
-      .update({ owner_user_id: userId })
-      .eq("id", house.id)
-
-    console.log("[v0] House update - error:", houseUpdateErr?.message)
-    console.log("[v0] ensureUserProfile COMPLETE")
-
-    return { success: true }
-  } catch (err: any) {
-    console.error("[v0] ensureUserProfile EXCEPTION:", err?.message, err)
-    return { success: false, error: err?.message }
-  }
-}
 
 export async function signOut() {
   const supabase = await createClient()
