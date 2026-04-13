@@ -339,7 +339,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               className="h-9 w-9 rounded-lg object-contain"
             />
           )}
-          <span className="text-sm font-semibold truncate max-w-[140px] text-white">
+          <span className="text-sm font-semibold truncate max-w-[140px]" style={{ color: sidebarTextColor || "#000000" }}>
             {condo ? String(condo.name) : "Sin condominio"}
           </span>
         </Link>
@@ -465,18 +465,19 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                 {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
               </div>
             )}
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-white">
+          <div className="flex flex-col">
+              <span className="text-xs font-medium" style={{ color: sidebarTextColor || "#000000" }}>
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs text-white">
+              <span className="text-xs" style={{ color: sidebarTextColor || "#000000", opacity: 0.7 }}>
                 {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
               </span>
             </div>
           </div>
           <Link
             href="/dashboard/configuracion"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white hover:bg-blue-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-blue-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
+            style={{ color: sidebarTextColor || "#000000" }}
           >
             <Settings className="h-4 w-4" style={{ color: "#A78BFA" }} />
             Configuración
@@ -484,7 +485,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white hover:bg-red-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-red-400"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-red-500 hover:text-white dark:text-white dark:hover:bg-slate-700 dark:hover:text-red-400"
+              style={{ color: sidebarTextColor || "#000000" }}
             >
               <LogOut className="h-4 w-4" style={{ color: "#F87171" }} />
               Cerrar sesión
