@@ -239,9 +239,10 @@ const ownerMenuItems = [
 
 const conciergeMenuItems = [
   {
-    section: "Dashboard",
+    section: "Mi Propiedad",
     items: [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
     ]
   },
   {

@@ -35,6 +35,9 @@ export default async function VisitasPage() {
   const role = profile.role
   const isAdmin = role === "admin" || role === "super_admin"
   const isConcierge = role === "conserje"
+  
+  // Determine if user is viewing as admin (all visits) or as owner (only their property)
+  const isViewingAsAdmin = (isAdmin || isConcierge) && !houseId
 
   // Get all houses in the condo
   const { data: houses } = await supabase
@@ -45,7 +48,7 @@ export default async function VisitasPage() {
 
   // Get visits based on role
   let visits = []
-  if (isAdmin || isConcierge) {
+  if (isViewingAsAdmin) {
     // Admins and conserjes see all visits in the condo
     const { data: allVisits } = await supabase
       .from("visits")
@@ -55,7 +58,7 @@ export default async function VisitasPage() {
     
     visits = allVisits || []
   } else if (houseId) {
-    // Owners see only their property's visits
+    // Owners and admin+owners see only their property's visits
     const { data: userVisits } = await supabase
       .from("visits")
       .select("*, house:houses(house_number)")
@@ -73,10 +76,10 @@ export default async function VisitasPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Calendar className="h-8 w-8 text-blue-500" />
-            {isAdmin || isConcierge ? "Visitas del Condominio" : "Mis Visitas"}
+            {isViewingAsAdmin ? "Visitas del Condominio" : "Mis Visitas"}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {isAdmin || isConcierge ? "Gestiona todas las visitas del condominio" : "Registra y gestiona las visitas a tu propiedad"}
+            {isViewingAsAdmin ? "Gestiona todas las visitas del condominio" : "Registra y gestiona las visitas a tu propiedad"}
           </p>
         </div>
         {houseId && <CreateVisitDialog houses={houses || []} houseId={houseId} />}
