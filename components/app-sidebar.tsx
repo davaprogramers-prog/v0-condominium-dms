@@ -379,9 +379,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       </SidebarHeader>
       
       <SidebarContent 
-        className="!bg-transparent"
         style={{ 
-          backgroundColor: cardBgColor,
+          backgroundColor: cardBgColor + " !important",
         }}
       >
         {menuSections.map((section) => (
