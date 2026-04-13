@@ -151,6 +151,7 @@ export async function updateAdminHouse(adminId: string, houseId: string) {
 }
 
 
+export async function createAdmin(data: {
   email: string
   password: string
   firstName: string
