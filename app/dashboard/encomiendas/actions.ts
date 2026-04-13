@@ -38,15 +38,16 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
-        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
+        const filename = `${data.condo_id}/${uuidv4()}.jpg`
         const blob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
+          bucket: 'parcels',
         })
-        // Store the complete URL returned by blob
-        reception_photo_url = result.url
-        console.log('[v0] Photo uploaded successfully:', reception_photo_url)
+        // Store only the pathname for private blobs
+        reception_photo_url = result.pathname
+        console.log('[v0] Photo uploaded to parcels bucket:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
         // Don't throw - continue without photo
@@ -135,15 +136,16 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
+          bucket: 'parcels',
         })
-        // Store the complete URL returned by blob
-        photoUrl = result.url
-        console.log('[v0] Photo uploaded successfully:', photoUrl)
+        // Store only the pathname for private blobs
+        photoUrl = result.pathname
+        console.log('[v0] Photo uploaded to parcels bucket:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
         // Don't throw - continue without photo
