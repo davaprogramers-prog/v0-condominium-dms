@@ -423,7 +423,7 @@ export default function ParcelPage() {
                       </div>
                       <p className="text-sm text-muted-foreground truncate">De: {parcel.from_sender}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(parcel.received_date).toLocaleString('es-ES')}
+                        {new Date(parcel.received_date).toISOString().replace('T', ' ').slice(0, 19)}
                       </p>
                     </div>
                   </div>
