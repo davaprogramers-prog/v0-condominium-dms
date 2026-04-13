@@ -117,7 +117,7 @@ export function ViewParcelPhotosDialog({
                   {photoTypeLabels[photos[currentPhotoIndex].photo_type]}
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  {new Date(photos[currentPhotoIndex].created_at).toLocaleDateString('es-ES', { timeZone: 'America/Santiago' })} {new Date(photos[currentPhotoIndex].created_at).toLocaleTimeString('es-ES', { timeZone: 'America/Santiago' })}
+                  {new Date(photos[currentPhotoIndex].created_at).toLocaleString('es-ES')}
                 </p>
               </div>
 
