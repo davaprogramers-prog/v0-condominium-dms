@@ -112,14 +112,23 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                 <SelectValue placeholder="Selecciona una propiedad" />
               </SelectTrigger>
               <SelectContent 
-                className="!bg-opacity-100"
+                className="!bg-opacity-100 !bg-color !text-color"
                 style={{
                   backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                  color: `${inputTextColor || '#000000'} !important`
+                  color: `${inputTextColor || '#000000'} !important`,
+                  borderColor: `${inputTextColor || '#000000'} !important`
                 }}
               >
                 {houses.map((house) => (
-                  <SelectItem key={house.id} value={house.id}>
+                  <SelectItem 
+                    key={house.id} 
+                    value={house.id}
+                    style={{
+                      backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                      color: `${inputTextColor || '#000000'} !important`
+                    }}
+                    className="!bg-opacity-100"
+                  >
                     Casa #{house.house_number}
                   </SelectItem>
                 ))}
@@ -144,17 +153,63 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                 <SelectValue />
               </SelectTrigger>
               <SelectContent 
-                className="!bg-opacity-100"
+                className="!bg-opacity-100 !bg-color !text-color"
                 style={{
                   backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
-                  color: `${inputTextColor || '#000000'} !important`
+                  color: `${inputTextColor || '#000000'} !important`,
+                  borderColor: `${inputTextColor || '#000000'} !important`
                 }}
               >
-                <SelectItem value="envelope">Sobre</SelectItem>
-                <SelectItem value="package">Paquete</SelectItem>
-                <SelectItem value="box">Caja</SelectItem>
-                <SelectItem value="tube">Tubo</SelectItem>
-                <SelectItem value="other">Otro</SelectItem>
+                <SelectItem 
+                  value="envelope"
+                  style={{
+                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                    color: `${inputTextColor || '#000000'} !important`
+                  }}
+                  className="!bg-opacity-100"
+                >
+                  Sobre
+                </SelectItem>
+                <SelectItem 
+                  value="package"
+                  style={{
+                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                    color: `${inputTextColor || '#000000'} !important`
+                  }}
+                  className="!bg-opacity-100"
+                >
+                  Paquete
+                </SelectItem>
+                <SelectItem 
+                  value="box"
+                  style={{
+                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                    color: `${inputTextColor || '#000000'} !important`
+                  }}
+                  className="!bg-opacity-100"
+                >
+                  Caja
+                </SelectItem>
+                <SelectItem 
+                  value="tube"
+                  style={{
+                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                    color: `${inputTextColor || '#000000'} !important`
+                  }}
+                  className="!bg-opacity-100"
+                >
+                  Tubo
+                </SelectItem>
+                <SelectItem 
+                  value="other"
+                  style={{
+                    backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                    color: `${inputTextColor || '#000000'} !important`
+                  }}
+                  className="!bg-opacity-100"
+                >
+                  Otro
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
