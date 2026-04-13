@@ -38,20 +38,25 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
+        console.log('[v0] Uploading photo, type:', typeof data.receptionPhoto, 'is ArrayBuffer:', data.receptionPhoto instanceof ArrayBuffer)
         const filename = `${data.condo_id}/${uuidv4()}.jpg`
-        const blob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
-        const result = await put(filename, blob, {
+        // data.receptionPhoto is already an ArrayBuffer, convert it to Blob directly
+        const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
+        console.log('[v0] Created blob, size:', photoBlob.size)
+        const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
           bucket: 'parcels',
         })
         // Store the complete URL returned by put()
         reception_photo_url = result.url
-        console.log('[v0] Photo uploaded to parcels bucket:', reception_photo_url)
+        console.log('[v0] Photo uploaded successfully to parcels bucket:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
         // Don't throw - continue without photo
       }
+    } else {
+      console.log('[v0] No reception photo provided')
     }
 
     // Create parcel in database
