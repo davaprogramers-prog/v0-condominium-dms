@@ -142,9 +142,9 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                     <Label style={{ color: dialogTextColor }}>Tipo de Documento</Label>
                     <Select value={selectedType} onValueChange={setSelectedType}>
                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
-                      <SelectContent>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         {documentTypes.map((t) => (
-                          <SelectItem key={t.id as string} value={t.id as string}>
+                          <SelectItem key={t.id as string} value={t.id as string} style={{ color: inputTextColor }}>
                             {t.name as string}
                           </SelectItem>
                         ))}
