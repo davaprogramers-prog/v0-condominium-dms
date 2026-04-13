@@ -35,7 +35,7 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
   const [selectedHouse, setSelectedHouse] = useState<string | null>(currentHouseId || null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { dialogBgColor, dialogTextColor, borderColor, inputBgColor, inputTextColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleSave = async () => {
     if (selectedHouse === null || selectedHouse === "") {
@@ -66,7 +66,7 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
         <Button 
           size="sm" 
           className="border"
-          style={{ borderColor: borderColor, backgroundColor: inputBgColor, color: inputTextColor }}
+          style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
         >
           <Pencil className="h-4 w-4" />
         </Button>
@@ -76,7 +76,7 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
         style={{
           backgroundColor: dialogBgColor,
           color: dialogTextColor,
-          borderColor: borderColor
+          borderColor: inputTextColor
         }}
       >
         <DialogHeader>
