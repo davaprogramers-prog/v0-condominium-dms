@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { put } from '@vercel/blob'
+import { put, getDownloadUrl } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 import { getSantiagoDateTime } from '@/lib/date-utils'
 
@@ -38,15 +38,16 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
-        // Use the fully qualified blob filename to target the 'parcels' bucket
-        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
+        const filename = `${data.condo_id}/${uuidv4()}.jpg`
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
+          bucket: 'parcels',
         })
-        reception_photo_url = result.url
-        console.log('[v0] Photo uploaded to:', reception_photo_url)
+        // Store only pathname - will use getDownloadUrl() to generate signed URLs for viewing
+        reception_photo_url = result.pathname
+        console.log('[v0] Photo uploaded to parcels bucket:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
       }
@@ -133,14 +134,16 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
+          bucket: 'parcels',
         })
-        photoUrl = result.url
-        console.log('[v0] Photo uploaded to:', photoUrl)
+        // Store only pathname - will use getDownloadUrl() to generate signed URLs for viewing
+        photoUrl = result.pathname
+        console.log('[v0] Photo uploaded to parcels bucket:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
       }
@@ -195,7 +198,16 @@ export async function updateParcelStatus(data: {
   }
 }
 
-export async function editParcelReception(data: {
+export async function getPhotoDownloadUrl(pathname: string): Promise<string> {
+  try {
+    // Generate a signed download URL for the parcel photo stored in the parcels bucket
+    const fullUrl = await getDownloadUrl(pathname)
+    return fullUrl
+  } catch (err) {
+    console.error('[v0] Error generating download URL:', err)
+    throw err
+  }
+}
   parcel_id: string
   parcel_type: string
   from: string

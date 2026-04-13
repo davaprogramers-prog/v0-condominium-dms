@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { ImageOff, ChevronLeft, ChevronRight, Loader } from 'lucide-react'
 import Image from 'next/image'
+import { getPhotoDownloadUrl } from './actions'
 
 interface ParcelPhoto {
   id: string
@@ -35,6 +36,7 @@ export function ViewParcelPhotosDialog({
   loadPhotos,
 }: ViewParcelPhotosDialogProps) {
   const [photos, setPhotos] = useState<ParcelPhoto[]>([])
+  const [downloadUrls, setDownloadUrls] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
@@ -50,7 +52,18 @@ export function ViewParcelPhotosDialog({
       const fetchedPhotos = await loadPhotos(parcelId)
       setPhotos(fetchedPhotos)
       setCurrentPhotoIndex(0)
-      console.log('[v0] Loaded photos:', fetchedPhotos)
+
+      // Generate download URLs for all photos
+      const urls: Record<string, string> = {}
+      for (const photo of fetchedPhotos) {
+        try {
+          const url = await getPhotoDownloadUrl(photo.photo_url)
+          urls[photo.id] = url
+        } catch (error) {
+          console.error('[v0] Error generating download URL for photo:', photo.id, error)
+        }
+      }
+      setDownloadUrls(urls)
     } catch (error) {
       console.error('Error loading photos:', error)
     } finally {
@@ -92,23 +105,30 @@ export function ViewParcelPhotosDialog({
             <>
               {/* Current Photo */}
               <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-                <img
-                  src={photos[currentPhotoIndex].photo_url}
-                  alt={photoTypeLabels[photos[currentPhotoIndex].photo_type]}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error('[v0] Image failed to load:', photos[currentPhotoIndex].photo_url)
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    const parent = target.parentElement
-                    if (parent) {
-                      const errorDiv = document.createElement('div')
-                      errorDiv.className = 'flex flex-col items-center justify-center text-gray-400 w-full h-full'
-                      errorDiv.innerHTML = `<svg class="h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>No se pudo cargar la imagen</span>`
-                      parent.appendChild(errorDiv)
-                    }
-                  }}
-                />
+                {downloadUrls[photos[currentPhotoIndex].id] ? (
+                  <img
+                    src={downloadUrls[photos[currentPhotoIndex].id]}
+                    alt={photoTypeLabels[photos[currentPhotoIndex].photo_type]}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('[v0] Image failed to load')
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const parent = target.parentElement
+                      if (parent) {
+                        const errorDiv = document.createElement('div')
+                        errorDiv.className = 'flex flex-col items-center justify-center text-gray-400 w-full h-full'
+                        errorDiv.innerHTML = `<svg class="h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>No se pudo cargar la imagen</span>`
+                        parent.appendChild(errorDiv)
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400">
+                    <Loader className="h-12 w-12 mb-2 animate-spin" />
+                    <span>Generando enlace de descarga...</span>
+                  </div>
+                )}
               </div>
 
               {/* Photo Info */}
@@ -161,22 +181,28 @@ export function ViewParcelPhotosDialog({
                           : 'border-gray-300 hover:border-blue-300'
                       }`}
                     >
-                      <img
-                        src={photo.photo_url}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.style.display = 'none'
-                          const parent = target.parentElement
-                          if (parent) {
-                            const errorDiv = document.createElement('div')
-                            errorDiv.className = 'flex items-center justify-center text-gray-300 text-xs w-full h-full bg-gray-100'
-                            errorDiv.textContent = '✕'
-                            parent.appendChild(errorDiv)
-                          }
-                        }}
-                      />
+                      {downloadUrls[photo.id] ? (
+                        <img
+                          src={downloadUrls[photo.id]}
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.style.display = 'none'
+                            const parent = target.parentElement
+                            if (parent) {
+                              const errorDiv = document.createElement('div')
+                              errorDiv.className = 'flex items-center justify-center text-gray-300 text-xs w-full h-full bg-gray-100'
+                              errorDiv.textContent = '✕'
+                              parent.appendChild(errorDiv)
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <Loader className="h-4 w-4 animate-spin text-gray-400" />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
