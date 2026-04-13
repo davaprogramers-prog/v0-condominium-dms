@@ -307,14 +307,6 @@ export function CreateVisitDialog({ houses, houseId }: CreateVisitDialogProps) {
     </Dialog>
   )
 }
-
-interface CreateVisitDialogProps {
-  houses: House[]
-  houseId?: string
-}
-
-export function CreateVisitDialog({ houses, houseId }: CreateVisitDialogProps) {
-  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedHouseId, setSelectedHouseId] = useState(houseId || '')
