@@ -130,10 +130,10 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                     <Label style={{ color: dialogTextColor }}>Casa</Label>
                     <Select value={selectedHouse} onValueChange={setSelectedHouse}>
                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
-                      <SelectContent className="dark:bg-slate-800">
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         {houses.map((h) => (
-                          <SelectItem key={h.id as string} value={h.id as string}>
-                            {h.house_number as string}
+                          <SelectItem key={h.id as string} value={h.id as string} style={{ color: inputTextColor }}>
+                            Casa #{h.house_number as string}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -143,9 +143,9 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                     <Label style={{ color: dialogTextColor }}>Tipo de Exoneracion</Label>
                     <Select value={selectedType} onValueChange={setSelectedType}>
                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
-                      <SelectContent className="dark:bg-slate-800">
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         {exemptionTypes.map((t) => (
-                          <SelectItem key={t.id as string} value={t.id as string}>
+                          <SelectItem key={t.id as string} value={t.id as string} style={{ color: inputTextColor }}>
                             {t.name as string}
                           </SelectItem>
                         ))}
