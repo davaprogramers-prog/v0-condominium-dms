@@ -1,12 +1,10 @@
 import { Metadata } from 'next'
-import Link from 'next/link'
 import { ChevronLeft, Plus, Calendar, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
-import { getUserCondoId, getUserHouseId } from '@/lib/supabase/owner-utils'
 
 export const metadata: Metadata = {
   title: 'Mis Visitas | Condominio',
@@ -21,13 +19,22 @@ export default async function VisitasPage() {
     redirect("/auth/login")
   }
 
-  // Get condo_id and house_id using utility functions
-  const condoId = await getUserCondoId(supabase, user.id)
-  const houseId = await getUserHouseId(supabase, user.id)
+  // Get user profile to check role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role, condo_id, house_id")
+    .eq("id", user.id)
+    .single()
 
-  if (!condoId) {
+  if (!profile || !profile.condo_id) {
     redirect("/dashboard")
   }
+
+  const condoId = profile.condo_id
+  const houseId = profile.house_id
+  const role = profile.role
+  const isAdmin = role === "admin" || role === "super_admin"
+  const isConcierge = role === "conserje"
 
   // Get all houses in the condo
   const { data: houses } = await supabase
@@ -36,9 +43,19 @@ export default async function VisitasPage() {
     .eq("condo_id", condoId)
     .order("house_number", { ascending: true })
 
-  // Get visits for the user's houses
+  // Get visits based on role
   let visits = []
-  if (houseId) {
+  if (isAdmin || isConcierge) {
+    // Admins and conserjes see all visits in the condo
+    const { data: allVisits } = await supabase
+      .from("visits")
+      .select("*, house:houses(house_number)")
+      .eq("condo_id", condoId)
+      .order("visit_date", { ascending: false })
+    
+    visits = allVisits || []
+  } else if (houseId) {
+    // Owners see only their property's visits
     const { data: userVisits } = await supabase
       .from("visits")
       .select("*, house:houses(house_number)")
@@ -46,9 +63,7 @@ export default async function VisitasPage() {
       .eq("condo_id", condoId)
       .order("visit_date", { ascending: false })
     
-    if (userVisits) {
-      visits = userVisits
-    }
+    visits = userVisits || []
   }
 
   return (
@@ -58,11 +73,13 @@ export default async function VisitasPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Calendar className="h-8 w-8 text-blue-500" />
-            Mis Visitas
+            {isAdmin || isConcierge ? "Visitas del Condominio" : "Mis Visitas"}
           </h1>
-          <p className="text-muted-foreground mt-1">Registra y gestiona las visitas a tu propiedad</p>
+          <p className="text-muted-foreground mt-1">
+            {isAdmin || isConcierge ? "Gestiona todas las visitas del condominio" : "Registra y gestiona las visitas a tu propiedad"}
+          </p>
         </div>
-        <CreateVisitDialog houses={houses || []} houseId={houseId} />
+        {houseId && <CreateVisitDialog houses={houses || []} houseId={houseId} />}
       </div>
 
       {/* Content */}

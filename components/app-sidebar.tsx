@@ -242,21 +242,14 @@ const conciergeMenuItems = [
     section: "Dashboard",
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { title: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
     ]
   },
   {
     section: "Conserje",
     items: [
-      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas-admin", icon: Package },
+      { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    ]
-  },
-  {
-    section: "Información",
-    items: [
-      { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
       { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
