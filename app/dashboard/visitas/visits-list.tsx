@@ -108,8 +108,8 @@ export function VisitsList({ visits, cardBgColor = "#f5f5f5", cardTextColor = "#
           >
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h3 className="font-semibold text-lg">{visit.visitor_name}</h3>
-                <p className="text-sm text-muted-foreground">{visit.visit_title}</p>
+                <h3 className="font-semibold text-lg" style={{ color: cardTextColor }}>{visit.visitor_name}</h3>
+                <p className="text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>{visit.visit_title}</p>
               </div>
               <Badge className={getStatusColor(visit.status)}>
                 {getStatusLabel(visit.status)}
@@ -117,11 +117,11 @@ export function VisitsList({ visits, cardBgColor = "#f5f5f5", cardTextColor = "#
             </div>
 
             <div className="space-y-2 mb-4 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                 <MapPin className="h-4 w-4" />
                 <span>Casa #{visit.house?.house_number}</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                 <Calendar className="h-4 w-4" />
                 <span>
                   {new Date(visit.visit_date).toLocaleDateString('es-CL')}
@@ -129,24 +129,24 @@ export function VisitsList({ visits, cardBgColor = "#f5f5f5", cardTextColor = "#
                 </span>
               </div>
               {visit.visitor_email && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                   <Mail className="h-4 w-4" />
                   <span>{visit.visitor_email}</span>
                 </div>
               )}
               {visit.visitor_phone && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                   <Phone className="h-4 w-4" />
                   <span>{visit.visitor_phone}</span>
                 </div>
               )}
               {visit.description && (
-                <p className="text-muted-foreground italic mt-2">{visit.description}</p>
+                <p style={{ color: cardTextColor, opacity: 0.7 }} className="italic mt-2">{visit.description}</p>
               )}
             </div>
 
             {visit.status === 'scheduled' && (
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${borderColor}` }}>
                 <Button
                   size="sm"
                   variant="outline"

@@ -95,7 +95,7 @@ export function CartolasClient({ statements, isAdmin, cardBgColor = "#f5f5f5", c
         )}
       </div>
 
-      <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }}>
+      <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, borderWidth: "1px", color: cardTextColor }}>
         <CardHeader>
           <CardTitle className="text-base" style={{ color: cardTextColor }}>Historial de Cartolas</CardTitle>
           <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Archivos PDF de cartolas bancarias del condominio</CardDescription>
