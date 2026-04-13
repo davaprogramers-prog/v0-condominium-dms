@@ -39,8 +39,8 @@ export async function createParcel(data: {
     if (data.receptionPhoto) {
       try {
         console.log('[v0] Starting photo upload...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
-        // Use "parcels/" prefix in filename to store in parcels bucket
-        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
+        // Use simple filename without "parcels/" prefix - put() will save to the selected bucket (parcels)
+        const filename = `${data.condo_id}/${uuidv4()}.jpg`
         console.log('[v0] Filename:', filename)
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
         console.log('[v0] Blob created:', { blobSize: photoBlob.size, blobType: photoBlob.type })
@@ -49,7 +49,7 @@ export async function createParcel(data: {
           addRandomSuffix: false,
         })
         console.log('[v0] Put result:', { url: result.url, pathname: result.pathname, size: result.size })
-        // Store the full URL - it includes the parcels/ prefix
+        // Store the full URL
         reception_photo_url = result.url
         console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
       } catch (photoUploadError) {
@@ -61,6 +61,10 @@ export async function createParcel(data: {
     }
 
     // Create parcel in database
+    const now = new Date()
+    // Format as: YYYY-MM-DD HH:MM:SS.ffffff (PostgreSQL timestamp format)
+    const utcTimestamp = now.toISOString().slice(0, 23)  // Remove the 'Z'
+    
     const { data: parcel, error } = await supabase
       .from('parcels')
       .insert({
@@ -68,7 +72,7 @@ export async function createParcel(data: {
         house_id: data.house_id,
         from_sender: data.from,
         status: 'recibido',
-        received_date: new Date().toISOString(),
+        received_date: utcTimestamp,
         parcel_type: data.parcel_type,
         created_by: user.id,
       })
@@ -141,14 +145,14 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        // Use "parcels/" prefix in filename to store in parcels bucket
-        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        // Use simple filename without "parcels/" prefix - will save to parcels bucket
+        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
         })
-        // Store the full URL - it includes the parcels/ prefix
+        // Store the full URL
         photoUrl = result.url
         console.log('[v0] Photo uploaded to:', photoUrl)
       } catch (photoUploadError) {
