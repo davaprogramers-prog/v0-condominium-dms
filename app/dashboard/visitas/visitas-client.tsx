@@ -1,9 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Calendar, Clock, CheckCircle2, AlertCircle, X } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
 
@@ -184,34 +191,39 @@ export default function VisitasPageClient({
 
       {/* Filters */}
       <div className="space-y-4 bg-secondary/20 p-4 rounded-lg border">
-        {/* Search and Date Range */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* First Row: Search and Dates */}
+        <div className="flex flex-col sm:flex-row gap-3 items-end flex-wrap">
           <Input
-            placeholder="Buscar por visitante, correo o teléfono..."
+            placeholder="Buscar visitante, correo, teléfono..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1"
+            className="flex-1 min-w-[200px]"
           />
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            placeholder="Desde"
-            title="Fecha desde"
-          />
-          <Input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            placeholder="Hasta"
-            title="Fecha hasta"
-          />
+          <div className="flex gap-2 items-center">
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              placeholder="Desde"
+              title="Fecha desde"
+              className="w-32"
+            />
+            <span className="text-muted-foreground text-sm">-</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              placeholder="Hasta"
+              title="Fecha hasta"
+              className="w-32"
+            />
+          </div>
           {hasActiveFilters && (
             <Button
               variant="outline"
               size="sm"
               onClick={clearFilters}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-10"
             >
               <X className="h-4 w-4" />
               Limpiar
@@ -219,7 +231,7 @@ export default function VisitasPageClient({
           )}
         </div>
 
-        {/* Status Buttons */}
+        {/* Second Row: Status Buttons */}
         <div className="flex gap-2 flex-wrap">
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
@@ -257,22 +269,42 @@ export default function VisitasPageClient({
           </Button>
         </div>
 
-        {/* Property Filter (if viewing as admin) */}
+        {/* Third Row: Property Filter Dropdown (if viewing as admin) */}
         {isViewingAsAdmin && houses && houses.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Propiedades:</p>
-            <div className="flex gap-2 flex-wrap">
-              {houses.map(house => (
-                <Button
-                  key={house.id}
-                  variant={selectedHouses.has(house.id) ? 'default' : 'outline'}
-                  onClick={() => toggleHouse(house.id)}
-                  size="sm"
-                >
-                  Casa #{house.house_number}
-                </Button>
-              ))}
-            </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium text-muted-foreground">Propiedades:</span>
+            <Select
+              value={Array.from(selectedHouses).join(',')}
+              onValueChange={(value) => {
+                if (value === '') {
+                  setSelectedHouses(new Set())
+                } else {
+                  setSelectedHouses(new Set(value.split(',')))
+                }
+              }}
+            >
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="Seleccionar propiedades..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todas las propiedades</SelectItem>
+                {houses.map(house => (
+                  <SelectItem key={house.id} value={house.id}>
+                    Casa #{house.house_number}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedHouses.size > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedHouses(new Set())}
+                className="text-xs"
+              >
+                Limpiar propiedades
+              </Button>
+            )}
           </div>
         )}
       </div>
