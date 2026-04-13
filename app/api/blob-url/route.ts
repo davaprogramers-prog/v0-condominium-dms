@@ -1,4 +1,4 @@
-import { download } from '@vercel/blob'
+import { getDownloadUrl } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -12,19 +12,14 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Generating download URL for pathname:', pathname)
 
     try {
-      // Use download() to get a temporary signed URL for the blob file
-      const blob = await download(pathname)
+      // Use getDownloadUrl() to get a temporary signed URL for the blob file
+      const url = await getDownloadUrl(pathname)
       
-      if (!blob) {
-        return NextResponse.json({ error: 'blob not found' }, { status: 404 })
-      }
-
-      // The blob object contains a url that can be used to access the file
-      console.log('[v0] Generated download blob URL:', blob.url)
+      console.log('[v0] Generated download blob URL:', url)
       
-      return NextResponse.json({ url: blob.url })
+      return NextResponse.json({ url })
     } catch (downloadError) {
-      console.error('[v0] Error downloading blob:', downloadError)
+      console.error('[v0] Error generating download URL:', downloadError)
       throw downloadError
     }
   } catch (error) {
