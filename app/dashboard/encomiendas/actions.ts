@@ -45,8 +45,8 @@ export async function createParcel(data: {
           addRandomSuffix: false,
           bucket: 'parcels',
         })
-        // Store only the pathname for private blobs
-        reception_photo_url = result.pathname
+        // Store the complete URL returned by put()
+        reception_photo_url = result.url
         console.log('[v0] Photo uploaded to parcels bucket:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
@@ -143,8 +143,8 @@ export async function updateParcelStatus(data: {
           addRandomSuffix: false,
           bucket: 'parcels',
         })
-        // Store only the pathname for private blobs
-        photoUrl = result.pathname
+        // Store the complete URL returned by put()
+        photoUrl = result.url
         console.log('[v0] Photo uploaded to parcels bucket:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
