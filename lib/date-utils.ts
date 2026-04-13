@@ -5,11 +5,18 @@
 export function getSantiagoDateTime(): string {
   const now = new Date()
   
-  // Create offset for Santiago (UTC-4)
-  // Get UTC time and subtract 4 hours
-  const santiagoTime = new Date(now.getTime() - (4 * 60 * 60 * 1000))
+  // UTC offset for Santiago, Chile (UTC-4)
+  const utcOffset = -4 * 60 * 60 * 1000
+  const santiagoTime = new Date(now.getTime() + utcOffset)
   
-  // Format as ISO string without Z
-  const isoString = santiagoTime.toISOString().slice(0, 19)
-  return isoString
+  // Get UTC components and format manually for correct date-time representation
+  const year = santiagoTime.getUTCFullYear()
+  const month = String(santiagoTime.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(santiagoTime.getUTCDate()).padStart(2, '0')
+  const hours = String(santiagoTime.getUTCHours()).padStart(2, '0')
+  const minutes = String(santiagoTime.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(santiagoTime.getUTCSeconds()).padStart(2, '0')
+  
+  // Return ISO-like format without Z suffix
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
 }
