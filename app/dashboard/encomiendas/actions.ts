@@ -44,8 +44,8 @@ export async function createParcel(data: {
           access: 'private',
           addRandomSuffix: false,
         })
-        // Store the pathname (without domain) so we can regenerate signed URLs later
-        reception_photo_url = result.pathname
+        // Store the complete URL returned by blob
+        reception_photo_url = result.url
         console.log('[v0] Photo uploaded successfully:', reception_photo_url)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
@@ -61,7 +61,7 @@ export async function createParcel(data: {
         house_id: data.house_id,
         from_sender: data.from,
         status: 'recibido',
-        received_date: new Date().toISOString(),
+        received_date: getSantiagoDateTime(),
         parcel_type: data.parcel_type,
         created_by: user.id,
       })
@@ -141,8 +141,8 @@ export async function updateParcelStatus(data: {
           access: 'private',
           addRandomSuffix: false,
         })
-        // Store the pathname (without domain) so we can regenerate signed URLs later
-        photoUrl = result.pathname
+        // Store the complete URL returned by blob
+        photoUrl = result.url
         console.log('[v0] Photo uploaded successfully:', photoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo to Blob:', photoUploadError)
