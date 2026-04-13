@@ -99,7 +99,16 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           <div className="space-y-2">
             <Label htmlFor="house_id" style={{ color: cardTextColor || '#000000' }}>Propiedad Destinataria *</Label>
             <Select value={formData.house_id} onValueChange={(value) => setFormData({ ...formData, house_id: value })}>
-              <SelectTrigger id="house_id" style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
+              <SelectTrigger 
+                id="house_id"
+                className="!bg-opacity-100 !border-2"
+                style={{ 
+                  backgroundColor: inputBgColor || '#f5f5f5', 
+                  color: inputTextColor || '#000000', 
+                  borderColor: cardTextColor || '#ccc',
+                  borderWidth: '1px'
+                }}
+              >
                 <SelectValue placeholder="Selecciona una propiedad" />
               </SelectTrigger>
               <SelectContent>
@@ -116,7 +125,16 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           <div className="space-y-2">
             <Label htmlFor="parcel_type" style={{ color: cardTextColor || '#000000' }}>Tipo de Encomienda *</Label>
             <Select value={formData.parcel_type} onValueChange={(value) => setFormData({ ...formData, parcel_type: value })}>
-              <SelectTrigger id="parcel_type" style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
+              <SelectTrigger 
+                id="parcel_type"
+                className="!bg-opacity-100 !border-2"
+                style={{ 
+                  backgroundColor: inputBgColor || '#f5f5f5', 
+                  color: inputTextColor || '#000000', 
+                  borderColor: cardTextColor || '#ccc',
+                  borderWidth: '1px'
+                }}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

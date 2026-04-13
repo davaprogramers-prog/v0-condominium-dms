@@ -163,7 +163,15 @@ export function UpdateParcelDialog({
           <div className="space-y-2">
             <Label htmlFor="status" style={{ color: cardTextColor || '#000000' }}>Nuevo Estado</Label>
             <Select value={newStatus} onValueChange={(value: any) => setNewStatus(value)}>
-              <SelectTrigger style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}>
+              <SelectTrigger 
+                className="!bg-opacity-100 !border-2"
+                style={{ 
+                  backgroundColor: inputBgColor || '#f5f5f5', 
+                  color: inputTextColor || '#000000', 
+                  borderColor: cardTextColor || '#ccc',
+                  borderWidth: '1px'
+                }}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
