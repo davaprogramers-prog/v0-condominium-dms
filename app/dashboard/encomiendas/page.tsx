@@ -182,12 +182,14 @@ export default function ParcelPage() {
   }
 
   const loadPhotosForParcel = async (parcelId: string): Promise<ParcelPhoto[]> => {
-    const { data: photosData } = await supabase
+    const { data: photosData, error } = await supabase
       .from('parcel_photos')
       .select('id, photo_url, photo_type, created_at')
       .eq('parcel_id', parcelId)
       .order('created_at', { ascending: false })
 
+    console.log('[v0] loadPhotosForParcel query:', { parcelId, photosData, error })
+    
     return (photosData || []).map(photo => ({
       id: photo.id,
       photo_url: photo.photo_url,
