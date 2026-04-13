@@ -43,6 +43,8 @@ export default async function ConfiguracionPage() {
   const theme = themeData as CondoTheme | null
   const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
   const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
+  const inputBgColor = theme?.enable_custom_theme ? theme.input_bg_color : DEFAULT_THEME.input_bg_color
+  const inputTextColor = theme?.enable_custom_theme ? theme.input_text_color : DEFAULT_THEME.input_text_color
 
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
@@ -135,12 +137,14 @@ export default async function ConfiguracionPage() {
           )}
 
           {/* Parámetros del Condominio */}
-          {parameters && (
+          {condo && (
             <ParametersForm 
               condoId={profile?.condo_id} 
               currentParams={parameters}
               cardBgColor={cardBgColor}
               cardTextColor={cardTextColor}
+              inputBgColor={inputBgColor}
+              inputTextColor={inputTextColor}
             />
           )}
 

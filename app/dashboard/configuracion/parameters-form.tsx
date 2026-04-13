@@ -16,9 +16,11 @@ interface ParametersFormProps {
   currentParams: any
   cardBgColor?: string
   cardTextColor?: string
+  inputBgColor?: string
+  inputTextColor?: string
 }
 
-export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9" }: ParametersFormProps) {
+export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9", inputBgColor = "#0f172a", inputTextColor = "#e2e8f0" }: ParametersFormProps) {
   const [loading, setLoading] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
   const [regenerateResult, setRegenerateResult] = useState<{success: boolean, message: string} | null>(null)
@@ -93,10 +95,17 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className="rounded-lg border bg-card p-6 space-y-6">
+    <div 
+      className="rounded-lg border p-6 space-y-6"
+      style={{
+        backgroundColor: cardBgColor,
+        color: cardTextColor,
+        borderColor: "rgba(255,255,255,0.1)"
+      }}
+    >
       <div>
-        <h2 className="text-xl font-semibold">Parámetros del Condominio</h2>
-        <p className="text-sm text-muted-foreground mt-1">Configuración de mes actual, vencimientos y moratorios</p>
+        <h2 className="text-xl font-semibold" style={{ color: cardTextColor }}>Parámetros del Condominio</h2>
+        <p className="text-sm mt-1" style={{ color: cardTextColor, opacity: 0.7 }}>Configuración de mes actual, vencimientos, saldo inicial, gastos y moratorios</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
