@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { put } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
+import { getSantiagoDateTime } from '@/lib/date-utils'
 
 export async function createParcel(data: {
   condo_id: string
@@ -122,8 +123,15 @@ export async function updateParcelStatus(data: {
     // Get parcel to verify it belongs to the condo
     const { data: parcel } = await supabase
       .from('parcels')
-      .select('id, condo_id')
-      .eq('id', data.parcel_id)
+      .insert({
+        condo_id: data.condo_id,
+        house_id: data.house_id,
+        parcel_type: data.parcel_type,
+        from_sender: data.from,
+        status: 'recibido',
+        received_date: getSantiagoDateTime(),
+      })
+      .select()
       .single()
 
     if (!parcel || parcel.condo_id !== profile.condo_id) {
@@ -155,12 +163,12 @@ export async function updateParcelStatus(data: {
     }
 
     if (data.new_status === 'delivered') {
-      updateData.delivered_date = new Date().toISOString()
+      updateData.delivered_date = getSantiagoDateTime()
     } else if (data.new_status === 'returned') {
       if (data.return_reason) {
         updateData.return_reason = data.return_reason
       }
-      updateData.returned_date = new Date().toISOString()
+      updateData.returned_date = getSantiagoDateTime()
     }
 
     const { error } = await supabase
