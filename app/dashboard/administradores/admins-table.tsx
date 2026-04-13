@@ -25,14 +25,14 @@ interface AdminsTableProps {
 }
 
 export function AdminsTable({ admins, condoId, condoName, houses }: AdminsTableProps) {
-  const { cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputTextColor } = useTheme()
 
   return (
     <div
       className="rounded-lg border p-6 space-y-4"
       style={{
         backgroundColor: cardBgColor,
-        borderColor: borderColor,
+        borderColor: inputTextColor,
         color: cardTextColor
       }}
     >
@@ -47,7 +47,7 @@ export function AdminsTable({ admins, condoId, condoName, houses }: AdminsTableP
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ borderColor: borderColor }} className="border-b">
+            <tr style={{ borderColor: inputTextColor }} className="border-b">
               <th className="px-4 py-3 text-left font-semibold" style={{ color: cardTextColor }}>Nombre</th>
               <th className="px-4 py-3 text-left font-semibold" style={{ color: cardTextColor }}>Email</th>
               <th className="px-4 py-3 text-left font-semibold" style={{ color: cardTextColor }}>Propiedad</th>
@@ -58,7 +58,7 @@ export function AdminsTable({ admins, condoId, condoName, houses }: AdminsTableP
           </thead>
           <tbody>
             {(admins || []).map((admin) => (
-              <tr key={admin.id} style={{ borderColor: borderColor }} className="border-b hover:opacity-80">
+              <tr key={admin.id} style={{ borderColor: inputTextColor }} className="border-b hover:opacity-80">
                 <td className="px-4 py-3 font-medium" style={{ color: cardTextColor }}>
                   {admin.first_name} {admin.last_name || ""}
                 </td>
