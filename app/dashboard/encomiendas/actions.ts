@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { put } from '@vercel/blob'
+import { put, getDownloadUrl } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 import { getSantiagoDateTime } from '@/lib/date-utils'
 
@@ -61,9 +61,8 @@ export async function createParcel(data: {
     }
 
     // Create parcel in database
-    const now = new Date()
-    // Format as: YYYY-MM-DD HH:MM:SS.ffffff (PostgreSQL timestamp format)
-    const utcTimestamp = now.toISOString().slice(0, 23)  // Remove the 'Z'
+    // Use UTC timestamp in ISO format - Supabase will store it as-is
+    const utcNow = new Date().toISOString().split('.')[0]  // YYYY-MM-DDTHH:MM:SS format
     
     const { data: parcel, error } = await supabase
       .from('parcels')
@@ -72,7 +71,7 @@ export async function createParcel(data: {
         house_id: data.house_id,
         from_sender: data.from,
         status: 'recibido',
-        received_date: utcTimestamp,
+        received_date: utcNow,
         parcel_type: data.parcel_type,
         created_by: user.id,
       })
@@ -268,6 +267,12 @@ export async function editParcelReception(data: {
 }
 
 export async function getPhotoUrl(photoUrl: string): Promise<string> {
-  // Simply return the URL as-is - it's already a complete Vercel Blob URL
-  return photoUrl
+  try {
+    // Generate a signed/authorized download URL for the private blob
+    const signedUrl = await getDownloadUrl(photoUrl)
+    return signedUrl
+  } catch (err) {
+    console.error('[v0] Error generating photo download URL:', err)
+    throw err
+  }
 }

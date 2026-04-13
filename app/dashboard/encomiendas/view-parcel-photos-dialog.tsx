@@ -137,7 +137,10 @@ export function ViewParcelPhotosDialog({
                   {photoTypeLabels[photos[currentPhotoIndex].photo_type]}
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  {photos[currentPhotoIndex].created_at.toString().slice(0, 19).replace('T', ' ')}
+                  {typeof photos[currentPhotoIndex].created_at === 'string'
+                    ? photos[currentPhotoIndex].created_at.split('T').join(' ').slice(0, 19)
+                    : new Date(photos[currentPhotoIndex].created_at).toISOString().split('T').join(' ').slice(0, 19)
+                  }
                 </p>
               </div>
 
