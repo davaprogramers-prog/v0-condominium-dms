@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useTheme } from '@/app/dashboard/theme-context'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
 
@@ -50,6 +51,8 @@ export default function VisitasPageClient({
   houses,
   condoId,
 }: VisitasPageClientProps) {
+  const { inputBgColor, inputTextColor } = useTheme()
+  
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all')
   const [selectedHouses, setSelectedHouses] = useState<Set<string>>(new Set())
