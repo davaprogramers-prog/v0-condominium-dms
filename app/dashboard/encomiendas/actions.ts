@@ -64,6 +64,22 @@ export async function createParcel(data: {
       throw new Error(error.message)
     }
 
+    // Save reception photo to parcel_photos table if provided
+    if (reception_photo_url && parcel) {
+      const { error: photoError } = await supabase
+        .from('parcel_photos')
+        .insert({
+          parcel_id: parcel.id,
+          photo_url: reception_photo_url,
+          photo_type: 'recepcion_garita',
+        })
+
+      if (photoError) {
+        console.error('[v0] Error saving photo record:', photoError)
+        // Don't throw - parcel was created successfully
+      }
+    }
+
     return { success: true, parcel }
   } catch (err) {
     console.error('[v0] Error creating parcel:', err)
