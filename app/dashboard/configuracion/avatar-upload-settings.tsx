@@ -28,6 +28,27 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
+  const handleDeleteAvatar = async () => {
+    if (!confirm("¿Estás seguro de que deseas eliminar tu foto de perfil?")) return
+
+    const supabase = createClient()
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", user.id)
+      
+      if (updateError) throw updateError
+      router.refresh()
+    } catch (error) {
+      console.error("[v0] Avatar delete error:", error)
+      alert("Error al eliminar la imagen. Intente de nuevo.")
+    }
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -85,21 +106,62 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
+    <div className="space-y-4">
+      {/* Avatar Preview */}
+      {currentAvatarUrl && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium" style={{ color: cardTextColor }}>Tu foto actual</p>
+          <div
+            className="w-32 h-32 rounded-lg overflow-hidden border-2 flex items-center justify-center"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.05)",
+              borderColor: "rgba(255,255,255,0.2)"
+            }}
+          >
+            <img
+              src={currentAvatarUrl}
+              alt="Avatar actual"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* No Avatar Message */}
+      {!currentAvatarUrl && (
+        <div
+          className="w-32 h-32 rounded-lg overflow-hidden border-2 border-dashed flex items-center justify-center"
           style={{
-            backgroundColor: "rgba(255,255,255,0.1)",
-            color: cardTextColor,
+            backgroundColor: "rgba(255,255,255,0.05)",
             borderColor: "rgba(255,255,255,0.2)",
-            borderRadius: "8px"
+            color: cardTextColor
           }}
         >
-          <Camera className="h-4 w-4 mr-2" />
-          Cambiar Foto
-        </Button>
-      </DialogTrigger>
+          <div className="text-center">
+            <Camera className="h-8 w-8 mx-auto mb-2" style={{ opacity: 0.5 }} />
+            <p className="text-xs" style={{ opacity: 0.7 }}>Sin foto</p>
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              style={{
+                backgroundColor: "#2563eb",
+                color: "white",
+                borderRadius: "8px",
+                border: "none",
+                flex: 1,
+                cursor: "pointer"
+              }}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Cambiar Foto
+            </Button>
+          </DialogTrigger>
       <DialogContent
         className="max-w-md"
         style={{
@@ -221,5 +283,23 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Delete Avatar Button */}
+    {currentAvatarUrl && (
+      <Button
+        onClick={handleDeleteAvatar}
+        style={{
+          backgroundColor: "#dc2626",
+          color: "white",
+          borderRadius: "8px",
+          border: "none",
+          flex: 1,
+          cursor: "pointer"
+        }}
+      >
+        Eliminar Foto
+      </Button>
+    )}
+    </div>
   )
 }
