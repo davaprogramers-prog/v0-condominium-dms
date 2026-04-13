@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from "react"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
   const [selectedHouse, setSelectedHouse] = useState<string | null>(currentHouseId || null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, borderColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleSave = async () => {
     if (selectedHouse === null || selectedHouse === "") {
@@ -63,44 +65,52 @@ export function EditAdminDialog({ adminId, adminEmail, currentHouseId, houses, c
       <DialogTrigger asChild>
         <Button 
           size="sm" 
-          variant="outline"
-          className="border-gray-300 hover:bg-gray-100"
+          className="border"
+          style={{ borderColor: borderColor, backgroundColor: inputBgColor, color: inputTextColor }}
         >
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm">
+      <DialogContent 
+        className="max-w-sm"
+        style={{
+          backgroundColor: dialogBgColor,
+          color: dialogTextColor,
+          borderColor: borderColor
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Editar Administrador</DialogTitle>
-          <DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Editar Administrador</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
             Asigna una propiedad al administrador {adminEmail}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Propiedad</label>
+            <label className="text-sm font-medium" style={{ color: dialogTextColor }}>Propiedad</label>
             <Select value={selectedHouse || ""} onValueChange={(value) => setSelectedHouse(value || null)}>
-              <SelectTrigger>
+              <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                 <SelectValue placeholder="Seleccionar propiedad" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                 {houses.map((house) => (
-                  <SelectItem key={house.id} value={house.id}>
+                  <SelectItem key={house.id} value={house.id} style={{ color: inputTextColor }}>
                     Casa #{house.house_number}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>
               Selecciona una propiedad para que el admin pueda verla en Mi Casa
             </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button 
-              variant="outline" 
               onClick={() => setOpen(false)}
+              style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
+              className="border"
             >
               Cancelar
             </Button>
