@@ -1,4 +1,4 @@
-import { download } from '@vercel/blob'
+import { getDownloadUrl } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -10,19 +10,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get signed download URL for the blob
-    // Vercel Blob automatically generates signed URLs for private blobs
     try {
-      const blob = await download(pathname)
-      
-      if (!blob) {
-        return NextResponse.json({ error: 'blob not found' }, { status: 404 })
-      }
-
-      // Return the blob URL which is already signed
-      const url = blob.url
+      const url = await getDownloadUrl(pathname)
       return NextResponse.json({ url })
     } catch (error) {
-      console.error('[v0] Error downloading blob:', error)
+      console.error('[v0] Error getting blob download URL:', error)
       throw error
     }
   } catch (error) {
