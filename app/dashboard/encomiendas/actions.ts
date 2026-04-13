@@ -36,13 +36,19 @@ export async function createParcel(data: {
     // Upload reception photo if provided
     let reception_photo_url = null
     if (data.receptionPhoto) {
-      const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
-      const blob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
-      const result = await put(filename, blob, {
-        access: 'private',
-        addRandomSuffix: false,
-      })
-      reception_photo_url = result.url
+      try {
+        const filename = `parcels/${data.condo_id}/${uuidv4()}.jpg`
+        const blob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
+        const result = await put(filename, blob, {
+          access: 'public',
+          addRandomSuffix: false,
+        })
+        reception_photo_url = result.url
+        console.log('[v0] Photo uploaded successfully:', reception_photo_url)
+      } catch (photoUploadError) {
+        console.error('[v0] Error uploading photo to Blob:', photoUploadError)
+        // Don't throw - continue without photo
+      }
     }
 
     // Create parcel in database
@@ -126,13 +132,19 @@ export async function updateParcelStatus(data: {
     // Upload photo if provided
     let photoUrl = null
     if (data.photo) {
-      const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
-      const blob = new Blob([data.photo], { type: 'image/jpeg' })
-      const result = await put(filename, blob, {
-        access: 'private',
-        addRandomSuffix: false,
-      })
-      photoUrl = result.url
+      try {
+        const filename = `parcels/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        const blob = new Blob([data.photo], { type: 'image/jpeg' })
+        const result = await put(filename, blob, {
+          access: 'public',
+          addRandomSuffix: false,
+        })
+        photoUrl = result.url
+        console.log('[v0] Photo uploaded successfully:', photoUrl)
+      } catch (photoUploadError) {
+        console.error('[v0] Error uploading photo to Blob:', photoUploadError)
+        // Don't throw - continue without photo
+      }
     }
 
     // Update parcel status
