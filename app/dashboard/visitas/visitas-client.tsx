@@ -273,38 +273,40 @@ export default function VisitasPageClient({
         {isViewingAsAdmin && houses && houses.length > 0 && (
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-sm font-medium text-muted-foreground">Propiedades:</span>
-            <Select
-              value={Array.from(selectedHouses).join(',')}
-              onValueChange={(value) => {
-                if (value === '') {
-                  setSelectedHouses(new Set())
-                } else {
-                  setSelectedHouses(new Set(value.split(',')))
-                }
-              }}
-            >
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="Seleccionar propiedades..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todas las propiedades</SelectItem>
-                {houses.map(house => (
-                  <SelectItem key={house.id} value={house.id}>
-                    Casa #{house.house_number}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedHouses.size > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedHouses(new Set())}
-                className="text-xs"
+            <div className="flex gap-2 items-center">
+              <Select
+                value={selectedHouses.size === 0 ? 'all' : Array.from(selectedHouses)[0]}
+                onValueChange={(value) => {
+                  if (value === 'all') {
+                    setSelectedHouses(new Set())
+                  } else {
+                    setSelectedHouses(new Set([value]))
+                  }
+                }}
               >
-                Limpiar propiedades
-              </Button>
-            )}
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Seleccionar propiedad..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las propiedades</SelectItem>
+                  {houses.map(house => (
+                    <SelectItem key={house.id} value={house.id}>
+                      Casa #{house.house_number}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedHouses.size > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedHouses(new Set())}
+                  className="text-xs"
+                >
+                  Limpiar
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -9,6 +9,13 @@ import { CreateParcelDialog } from './create-parcel-dialog'
 import { UpdateParcelDialog } from './update-parcel-dialog'
 import { ViewParcelPhotosDialog } from './view-parcel-photos-dialog'
 
+interface ParcelPhoto {
+  id: string
+  photo_url: string
+  photo_type: 'recepcion_garita' | 'entrega_propietario' | 'devolucion'
+  created_at: string
+}
+
 interface Parcel {
   id: string
   from_sender: string
@@ -33,6 +40,11 @@ export default function ParcelPage() {
   const [editingParcel, setEditingParcel] = useState<Parcel | null>(null)
   const [viewingPhotosParcel, setViewingPhotosParcel] = useState<Parcel | null>(null)
   const [parcelPhotosCounts, setParcelPhotosCounts] = useState<Record<string, number>>({})
+  const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
+
+  useEffect(() => {
+    loadUserAndParcels()
+  }, [])
 
   const loadUserAndParcels = async () => {
     try {
@@ -93,17 +105,25 @@ export default function ParcelPage() {
 
       setParcels(filtered)
 
-      // Count photos for each parcel (without loading the actual images)
+      // Count photos for each parcel - do this in parallel for better performance
       if (filtered.length > 0) {
-        const counts: Record<string, number> = {}
-        for (const parcel of filtered) {
-          const { count } = await supabase
-            .from('parcel_photos')
-            .select('*', { count: 'exact', head: true })
-            .eq('parcel_id', parcel.id)
-          counts[parcel.id] = count || 0
+        try {
+          const countPromises = filtered.map(parcel =>
+            supabase
+              .from('parcel_photos')
+              .select('*', { count: 'exact', head: true })
+              .eq('parcel_id', parcel.id)
+              .then(({ count }) => ({ parcelId: parcel.id, count: count || 0 }))
+          )
+          const results = await Promise.all(countPromises)
+          const counts: Record<string, number> = {}
+          results.forEach(({ parcelId, count }) => {
+            counts[parcelId] = count
+          })
+          setParcelPhotosCounts(counts)
+        } catch (error) {
+          console.error('[v0] Error counting photos:', error)
         }
-        setParcelPhotosCounts(counts)
       }
     } catch (error) {
       console.error('[v0] Error loading parcels:', error)
