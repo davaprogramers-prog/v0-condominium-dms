@@ -9,11 +9,6 @@ export async function createParcel(data: {
   house_id: string
   parcel_type: string
   from: string
-  tracking: string
-  recipient_name: string
-  description: string
-  weight?: string
-  dimensions?: string
   receptionPhoto?: ArrayBuffer
 }) {
   try {
@@ -57,14 +52,9 @@ export async function createParcel(data: {
         condo_id: data.condo_id,
         house_id: data.house_id,
         from: data.from,
-        tracking: data.tracking,
         status: 'received',
         received_date: new Date().toISOString(),
         parcel_type: data.parcel_type,
-        recipient_name: data.recipient_name,
-        description: data.description,
-        weight: data.weight ? parseFloat(data.weight) : null,
-        dimensions: data.dimensions || null,
         reception_photo_url: reception_photo_url,
         created_by: user.id,
       })
@@ -78,76 +68,6 @@ export async function createParcel(data: {
     return { success: true, parcel }
   } catch (err) {
     console.error('[v0] Error creating parcel:', err)
-    return { success: false, error: String(err) }
-  }
-}
-
-export async function updateParcelStatus(parcelId: string, status: string, deliveryPhoto?: ArrayBuffer, returnReason?: string) {
-  try {
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('No autenticado')
-
-    // Verify parcel belongs to user's condo
-    const { data: parcel } = await supabase
-      .from('parcels')
-      .select('condo_id')
-      .eq('id', parcelId)
-      .single()
-
-    if (!parcel) throw new Error('Encomienda no encontrada')
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('condo_id')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.condo_id !== parcel.condo_id) {
-      throw new Error('No autorizado')
-    }
-
-    // Upload delivery photo if provided
-    let delivery_photo_url = null
-    if (deliveryPhoto) {
-      const filename = `parcels/${parcel.condo_id}/${parcelId}/${status}.jpg`
-      const blob = new Blob([deliveryPhoto], { type: 'image/jpeg' })
-      const result = await put(filename, blob, {
-        access: 'private',
-        addRandomSuffix: false,
-      })
-      delivery_photo_url = result.url
-    }
-
-    // Update parcel
-    const updateData: any = {
-      status,
-      delivered_by: user.id,
-    }
-
-    if (delivery_photo_url) {
-      if (status === 'delivered') {
-        updateData.delivery_photo_url = delivery_photo_url
-      } else if (status === 'returned') {
-        updateData.return_photo_url = delivery_photo_url
-        updateData.return_reason = returnReason
-      }
-    }
-
-    const { error } = await supabase
-      .from('parcels')
-      .update(updateData)
-      .eq('id', parcelId)
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    return { success: true }
-  } catch (err) {
-    console.error('[v0] Error updating parcel:', err)
     return { success: false, error: String(err) }
   }
 }

@@ -19,11 +19,6 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
     house_id: '',
     parcel_type: 'package',
     from: '',
-    tracking: '',
-    recipient_name: '',
-    description: '',
-    weight: '',
-    dimensions: '',
   })
   const [receptionPhoto, setReceptionPhoto] = useState<File | null>(null)
   const [receptionPhotoPreview, setReceptionPhotoPreview] = useState<string>('')
@@ -61,11 +56,6 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
           house_id: '',
           parcel_type: 'package',
           from: '',
-          tracking: '',
-          recipient_name: '',
-          description: '',
-          weight: '',
-          dimensions: '',
         })
         setReceptionPhoto(null)
         setReceptionPhotoPreview('')
@@ -98,9 +88,9 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
         }}
       >
         <DialogHeader>
-          <DialogTitle style={{ color: cardTextColor || '#000000' }}>Crear Nueva Encomienda</DialogTitle>
+          <DialogTitle style={{ color: cardTextColor || '#000000' }}>Registrar Nueva Encomienda</DialogTitle>
           <DialogDescription style={{ color: cardTextColor || '#000000' }}>
-            Registra una encomienda con tipo, destinatario y foto de recepción
+            Registra la recepción de una encomienda en garita
           </DialogDescription>
         </DialogHeader>
 
@@ -139,12 +129,12 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             </Select>
           </div>
 
-          {/* From */}
+          {/* From (Delivery Company) */}
           <div className="space-y-2">
-            <Label htmlFor="from" style={{ color: cardTextColor || '#000000' }}>De (Remitente) *</Label>
+            <Label htmlFor="from" style={{ color: cardTextColor || '#000000' }}>Empresa que Entrega *</Label>
             <Input
               id="from"
-              placeholder="Amazon, DHL, etc"
+              placeholder="Amazon, DHL, Correos, etc"
               value={formData.from}
               onChange={(e) => setFormData({ ...formData, from: e.target.value })}
               style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
@@ -152,99 +142,48 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             />
           </div>
 
-          {/* Tracking and Weight */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="tracking" style={{ color: cardTextColor || '#000000' }}>Número de Tracking</Label>
-              <Input
-                id="tracking"
-                placeholder="PKG-2025-001"
-                value={formData.tracking}
-                onChange={(e) => setFormData({ ...formData, tracking: e.target.value })}
-                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight" style={{ color: cardTextColor || '#000000' }}>Peso (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                step="0.1"
-                placeholder="0.5"
-                value={formData.weight}
-                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
-              />
-            </div>
-          </div>
-
-          {/* Recipient Name and Dimensions */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="recipient_name" style={{ color: cardTextColor || '#000000' }}>Nombre del Destinatario</Label>
-              <Input
-                id="recipient_name"
-                placeholder="Nombre completo del propietario"
-                value={formData.recipient_name}
-                onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
-                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dimensions" style={{ color: cardTextColor || '#000000' }}>Dimensiones (opcional)</Label>
-              <Input
-                id="dimensions"
-                placeholder="20x15x10 cm"
-                value={formData.dimensions}
-                onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" style={{ color: cardTextColor || '#000000' }}>Descripción</Label>
-            <Input
-              id="description"
-              placeholder="Descripción del contenido (opcional)"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              style={{ backgroundColor: inputBgColor || '#f5f5f5', color: inputTextColor || '#000000', borderColor: cardTextColor || '#ccc' }}
-            />
-          </div>
-
           {/* Reception Photo */}
           <div className="space-y-2">
-            <Label htmlFor="reception_photo">Foto de Recepción en Garita</Label>
-            <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center">
+            <Label style={{ color: cardTextColor || '#000000' }}>Foto de Recepción en Garita *</Label>
+            <div className="border-2 border-dashed rounded-lg p-4 text-center" style={{ borderColor: cardTextColor || '#ccc' }}>
               {receptionPhotoPreview ? (
                 <div className="space-y-2">
-                  <img src={receptionPhotoPreview} alt="Preview" className="max-h-32 mx-auto rounded" />
+                  <img src={receptionPhotoPreview} alt="Preview" className="max-h-48 mx-auto rounded" />
                   <button
                     type="button"
                     onClick={() => {
                       setReceptionPhoto(null)
                       setReceptionPhotoPreview('')
                     }}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm hover:underline"
+                    style={{ color: primaryColor || '#0066cc' }}
                   >
                     Cambiar foto
                   </button>
                 </div>
               ) : (
-                <label htmlFor="reception_photo" className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-2 py-4">
-                    <Camera className="h-6 w-6 text-blue-500" />
-                    <span className="text-sm text-gray-600">Tomar o subir foto de recepción</span>
+                <label className="cursor-pointer block">
+                  <div className="flex flex-col items-center gap-2 py-6">
+                    <Camera className="h-8 w-8" style={{ color: primaryColor || '#0066cc' }} />
+                    <span style={{ color: cardTextColor || '#000000' }}>Tomar o subir foto</span>
                   </div>
                   <input
-                    id="reception_photo"
                     type="file"
                     accept="image/*"
                     capture="environment"
-                    onChange={handlePhotoChange}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setReceptionPhoto(file)
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          setReceptionPhotoPreview(reader.result as string)
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    }}
                     className="hidden"
+                    required
                   />
                 </label>
               )}
@@ -256,9 +195,9 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={loading} style={{ backgroundColor: primaryColor || '#0066cc' }}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Crear Encomienda
+              Registrar Encomienda
             </Button>
           </div>
         </form>
