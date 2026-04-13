@@ -17,7 +17,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
   const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
   const [formData, setFormData] = useState({
     house_id: '',
-    parcel_type: 'package',
+    parcel_type: 'paquete',
     from: '',
   })
   const [receptionPhoto, setReceptionPhoto] = useState<File | null>(null)
@@ -54,7 +54,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
       if (result.success) {
         setFormData({
           house_id: '',
-          parcel_type: 'package',
+          parcel_type: 'paquete',
           from: '',
         })
         setReceptionPhoto(null)
@@ -138,11 +138,10 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="select-content-themed">
-                <SelectItem value="envelope" className="select-item-themed">Sobre</SelectItem>
-                <SelectItem value="package" className="select-item-themed">Paquete</SelectItem>
-                <SelectItem value="box" className="select-item-themed">Caja</SelectItem>
-                <SelectItem value="tube" className="select-item-themed">Tubo</SelectItem>
-                <SelectItem value="other" className="select-item-themed">Otro</SelectItem>
+                <SelectItem value="sobre" className="select-item-themed">Sobre</SelectItem>
+                <SelectItem value="paquete" className="select-item-themed">Paquete</SelectItem>
+                <SelectItem value="documento" className="select-item-themed">Documento</SelectItem>
+                <SelectItem value="otro" className="select-item-themed">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
