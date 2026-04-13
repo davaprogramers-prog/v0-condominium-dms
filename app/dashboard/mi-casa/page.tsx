@@ -241,32 +241,6 @@ export default async function MiCasaPage() {
     </div>
   )
 }
-  } catch (e) {
-    console.log("[v0] Could not fetch profile:", e)
-  }
-
-  let parameters: any = null
-  try {
-    const { data: paramsData } = await supabase
-      .from("parameters")
-      .select("current_month, current_year, payment_deadline_day")
-      .eq("condo_id", condoId)
-      .single()
-
-    if (paramsData) {
-      parameters = paramsData
-    }
-  } catch (e) {
-    console.log("[v0] Could not fetch parameters:", e)
-  }
-
-  const { data: incomes } = await supabase
-    .from("condo_income")
-    .select("*")
-    .eq("house_id", houseId)
-    .order("income_date", { ascending: false })
-
-  const { data: paymentProofs } = await supabase
     .from("payment_proofs")
     .select("*")
     .eq("house_id", houseId)
