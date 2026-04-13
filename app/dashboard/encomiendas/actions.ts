@@ -65,7 +65,16 @@ export async function createParcel(data: {
     }
 
     // Save reception photo to parcel_photos table if provided
-    if (reception_photo_url && parcel) {
+    if (reception_photo_url && parcel && profile) {
+      const userRole = profile.role || 'conserje'
+      const { data: fullProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single()
+      
+      const userName = fullProfile?.first_name ? `${fullProfile.first_name} ${fullProfile.last_name || ''}`.trim() : user.email
+      
       const { error: photoError } = await supabase
         .from('parcel_photos')
         .insert({
@@ -73,12 +82,15 @@ export async function createParcel(data: {
           photo_url: reception_photo_url,
           photo_type: 'recepcion_garita',
           uploaded_by: user.id,
+          uploaded_by_role: userRole,
+          description: `Recibido por: ${userName} (${userRole})`,
         })
 
       if (photoError) {
         console.error('[v0] Error saving photo record:', photoError)
         // Don't throw - parcel was created successfully
       }
+    }
     }
 
     return { success: true, parcel }
