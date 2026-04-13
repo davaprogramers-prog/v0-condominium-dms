@@ -464,8 +464,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               <div 
                 className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
                 style={{ 
-                  backgroundColor: primaryColor || "#60A5FA",
-                  color: sidebarTextColor || "#000000"
+                  backgroundColor: cardBgColor || "#60A5FA",
+                  color: cardTextColor || "#FFFFFF"
                 }}
               >
                 {(profile?.first_name as string)?.[0] || user.email?.[0]?.toUpperCase() || "U"}
