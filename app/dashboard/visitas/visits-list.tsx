@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/app/dashboard/theme-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar, MapPin, User, Mail, Phone, Trash2, Check, X, Loader2 } from 'lucide-react'
@@ -25,15 +26,13 @@ interface Visit {
 
 interface VisitsListProps {
   visits: Visit[]
-  cardBgColor?: string
-  cardTextColor?: string
-  borderColor?: string
 }
 
-export function VisitsList({ visits, cardBgColor = "#f5f5f5", cardTextColor = "#1f2937", borderColor = "#e5e7eb" }: VisitsListProps) {
+export function VisitsList({ visits }: VisitsListProps) {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; visit: Visit | null }>({ open: false, visit: null })
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
+  const { cardBgColor, cardTextColor, borderColor } = useTheme()
 
   async function handleDelete() {
     if (!deleteDialog.visit) return

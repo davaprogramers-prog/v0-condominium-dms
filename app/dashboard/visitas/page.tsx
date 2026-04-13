@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation'
 import { VisitsList } from './visits-list'
 import { CreateVisitDialog } from './create-visit-dialog'
 import { getUserCondoId, getUserHouseId } from '@/lib/supabase/owner-utils'
-import { type CondoTheme, DEFAULT_THEME } from '@/lib/theme-utils'
 
 export const metadata: Metadata = {
   title: 'Mis Visitas | Condominio',
@@ -52,18 +51,6 @@ export default async function VisitasPage() {
     }
   }
 
-  // Get condo theme
-  const { data: themeData } = await supabase
-    .from("condominiums")
-    .select("enable_custom_theme, card_bg_color, card_text_color, border_color")
-    .eq("id", condoId)
-    .single()
-
-  const theme = themeData as CondoTheme | null
-  const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
-  const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
-  const borderColor = theme?.enable_custom_theme ? theme.border_color : DEFAULT_THEME.border_color
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -79,7 +66,7 @@ export default async function VisitasPage() {
       </div>
 
       {/* Content */}
-      <VisitsList visits={visits} cardBgColor={cardBgColor} cardTextColor={cardTextColor} borderColor={borderColor} />
+      <VisitsList visits={visits} />
     </div>
   )
 }
