@@ -255,18 +255,18 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
           </div>
 
           <div className="space-y-2">
-            <Label>Tipo de Multa</Label>
+            <Label style={{ color: cardTextColor }}>Tipo de Multa</Label>
             <Select value={fineType} onValueChange={setFineType}>
-              <SelectTrigger>
+              <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                 <SelectValue placeholder="Seleccionar tipo de multa" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="porcentaje">Porcentaje del gasto comun</SelectItem>
-                <SelectItem value="fijo">Monto fijo</SelectItem>
-                <SelectItem value="uf">Monto en UF</SelectItem>
+              <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                <SelectItem value="porcentaje" style={{ color: inputTextColor }}>Porcentaje del gasto comun</SelectItem>
+                <SelectItem value="fijo" style={{ color: inputTextColor }}>Monto fijo</SelectItem>
+                <SelectItem value="uf" style={{ color: inputTextColor }}>Monto en UF</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs" style={{ color: cardTextColor, opacity: 0.6 }}>
               {fineType === "porcentaje" && "Se aplicara un porcentaje sobre el valor del gasto comun"}
               {fineType === "fijo" && "Se cobrara un monto fijo independiente del gasto comun"}
               {fineType === "uf" && "Se cobrara el valor en UF segun cotizacion del dia de vencimiento"}
@@ -322,25 +322,29 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold" disabled={loading}>
           {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Guardar Parámetros
         </Button>
       </form>
 
       {/* Regenerate Income Section */}
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
         <div>
-          <h3 className="text-sm font-medium">Generar Ingresos Mensuales</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="text-sm font-medium" style={{ color: cardTextColor }}>Generar Ingresos Mensuales</h3>
+          <p className="text-xs mt-1" style={{ color: cardTextColor, opacity: 0.6 }}>
             Crea automáticamente los registros de gasto común (fijo y variable) para todas las casas que no lo tengan en el mes actual
           </p>
         </div>
         
         <Button 
           type="button" 
-          variant="outline" 
-          className="w-full"
+          className="w-full border-2"
+          style={{ 
+            backgroundColor: inputBgColor, 
+            color: inputTextColor, 
+            borderColor: inputTextColor
+          }}
           onClick={handleRegenerate}
           disabled={regenerating || !currentParams?.fixed_income_amount}
         >
@@ -353,7 +357,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
         </Button>
 
         {!currentParams?.fixed_income_amount && (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs" style={{ color: inputTextColor, opacity: 0.7 }}>
             Primero configura los montos de gasto común fijo y variable arriba
           </p>
         )}
