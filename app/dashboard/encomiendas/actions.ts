@@ -79,8 +79,10 @@ export async function createParcel(data: {
     }
 
     // Save reception photo to parcel_photos table if provided
+    console.log('[v0] reception_photo_url:', reception_photo_url, 'parcel.id:', parcel?.id)
     if (reception_photo_url && parcel) {
-      const { error: photoError } = await supabase
+      console.log('[v0] Inserting photo record...')
+      const { data: photoData, error: photoError } = await supabase
         .from('parcel_photos')
         .insert({
           parcel_id: parcel.id,
@@ -88,11 +90,17 @@ export async function createParcel(data: {
           photo_type: 'recepcion_garita',
           uploaded_by: user.id,
         })
+        .select()
 
+      console.log('[v0] Photo insert result:', photoData, 'error:', photoError)
       if (photoError) {
         console.error('[v0] Error saving photo record:', photoError)
         // Don't throw - parcel was created successfully
+      } else {
+        console.log('[v0] Photo saved successfully!')
       }
+    } else {
+      console.log('[v0] Skipped photo insert - reception_photo_url is null or parcel is missing')
     }
 
     return { success: true, parcel }
