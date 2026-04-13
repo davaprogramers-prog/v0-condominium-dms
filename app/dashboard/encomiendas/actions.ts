@@ -258,9 +258,18 @@ export async function editParcelReception(data: {
 
 export async function getPhotoDownloadUrl(pathname: string): Promise<string> {
   try {
-    // Generate a signed download URL for the parcel photo stored in the parcels bucket
-    const fullUrl = await getDownloadUrl(pathname)
-    return fullUrl
+    // Construct full URL for the parcel photo stored in the parcels bucket
+    // pathname is like: "a36bc395-19fb-49ac-8645-53d0beea68aa/0303ee18-916e-4346-a978-54ed658f3d6d.jpg"
+    // Need to prepend: "https://{BLOB_STORE_ID}.blob.vercel-storage.com/parcels/"
+    
+    // Extract BLOB_STORE_ID from BLOB_READ_WRITE_TOKEN (format: "vercel_blob_rw_ABC123_xyz")
+    const token = process.env.BLOB_READ_WRITE_TOKEN || ''
+    const blobStoreId = token.split('_')[3] || 'bubne0yte73emafl' // fallback to known ID
+    
+    const fullUrl = `https://${blobStoreId}.private.blob.vercel-storage.com/parcels/${pathname}`
+    
+    const signedUrl = await getDownloadUrl(fullUrl)
+    return signedUrl
   } catch (err) {
     console.error('[v0] Error generating download URL:', err)
     throw err
