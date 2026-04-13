@@ -174,7 +174,13 @@ export function UpdateParcelDialog({
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="!bg-opacity-100"
+                style={{
+                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                  color: `${inputTextColor || '#000000'} !important`
+                }}
+              >
                 <SelectItem value="delivered">Entregado</SelectItem>
                 <SelectItem value="returned">Devuelto</SelectItem>
               </SelectContent>

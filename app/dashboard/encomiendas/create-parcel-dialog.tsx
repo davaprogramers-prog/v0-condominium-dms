@@ -111,7 +111,13 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
               >
                 <SelectValue placeholder="Selecciona una propiedad" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="!bg-opacity-100"
+                style={{
+                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                  color: `${inputTextColor || '#000000'} !important`
+                }}
+              >
                 {houses.map((house) => (
                   <SelectItem key={house.id} value={house.id}>
                     Casa #{house.house_number}
@@ -137,7 +143,13 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="!bg-opacity-100"
+                style={{
+                  backgroundColor: `${inputBgColor || '#f5f5f5'} !important`,
+                  color: `${inputTextColor || '#000000'} !important`
+                }}
+              >
                 <SelectItem value="envelope">Sobre</SelectItem>
                 <SelectItem value="package">Paquete</SelectItem>
                 <SelectItem value="box">Caja</SelectItem>
