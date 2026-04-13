@@ -163,21 +163,45 @@ const adminWithPropertyMenuItems = [
     ]
   },
   {
+    section: "Configuraciones",
+    items: [
+      { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
+      { title: "Tipos de Exoneraciones", href: "/dashboard/tipos-exoneraciones", icon: ShieldOff },
+    ]
+  },
+  {
     section: "Finanzas",
     items: [
       { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
+      { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
+    ]
+  },
+  {
+    section: "Regulaciones",
+    items: [
+      { title: "Infracciones", href: "/dashboard/infracciones", icon: AlertTriangle },
+      { title: "Exoneraciones", href: "/dashboard/exoneraciones", icon: ShieldOff },
     ]
   },
   {
     section: "Administración",
     items: [
+      { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
       { title: "Documentos", href: "/dashboard/documentos", icon: FileText },
+    ]
+  },
+  {
+    section: "Sistema",
+    items: [
+      { title: "Configuración", href: "/dashboard/configuracion", icon: Settings },
       { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
   }
