@@ -134,10 +134,18 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} style={{ borderColor: inputTextColor, color: inputTextColor }}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  fontWeight: "600",
+                }}
+              >
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Crear Conserje
               </Button>
