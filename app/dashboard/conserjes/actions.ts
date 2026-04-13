@@ -38,9 +38,9 @@ export async function createConcierge(condoId: string, data: {
   // Step 1: Check if profile already exists for this email in this condo
   const { data: existingProfile } = await adminSupabase
     .from("profiles")
-    .select("id, role, condo_id")
+    .select("id, role, condo_id, email")
     .eq("email", data.email)
-    .single()
+    .maybeSingle()
 
   if (existingProfile) {
     // Profile exists
@@ -126,17 +126,17 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No se generó ID de usuario")
   }
 
-  // Step 4: Create profile for new auth user
+  // Step 4: Create or update profile for new auth user
   const { data: profileData, error: profileError } = await adminSupabase
     .from("profiles")
-    .insert({
+    .upsert({
       id: authData.user.id,
       email: data.email,
       role: "conserje",
       condo_id: condoId,
       first_name: data.firstName,
       last_name: data.lastName
-    })
+    }, { onConflict: "id" })
     .select()
     .single()
 
