@@ -62,7 +62,7 @@ export async function createParcel(data: {
         house_id: data.house_id,
         from_sender: data.from,
         status: 'recibido',
-        received_date: getSantiagoDateTime(),
+        received_date: new Date().toISOString(),
         parcel_type: data.parcel_type,
         created_by: user.id,
       })
