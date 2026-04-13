@@ -9,9 +9,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'pathname required' }, { status: 400 })
     }
 
-    // Get signed download URL for the blob
+    // Get the blob store host from environment
+    // The BLOB_READ_WRITE_TOKEN contains the host info
+    const token = process.env.BLOB_READ_WRITE_TOKEN
+    if (!token) {
+      return NextResponse.json({ error: 'Blob storage not configured' }, { status: 500 })
+    }
+
+    // Extract host from token (format: {randomId}:{base64encodedhost})
+    // For simplicity, construct the blob URL using the standard Vercel Blob domain
+    const blobUrl = `https://blob.vercel-storage.com${pathname}`
+
     try {
-      const url = await getDownloadUrl(pathname)
+      const url = await getDownloadUrl(blobUrl)
       return NextResponse.json({ url })
     } catch (error) {
       console.error('[v0] Error getting blob download URL:', error)
