@@ -199,7 +199,15 @@ function Sidebar({
             <SheetTitle>Menu</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col" style={{ backgroundColor: "inherit" }}>{children}</div>
+          <div 
+            className="flex h-full w-full flex-col" 
+            style={{ 
+              backgroundColor: "var(--sidebar-bg, #ffffff)",
+              color: "var(--sidebar-text, #000000)",
+            }}
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
