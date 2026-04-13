@@ -187,24 +187,16 @@ function Sidebar({
           data-sidebar="content"
           data-slot="sidebar-content"
           className={cn(
-            'w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden',
+            'w-(--sidebar-width) p-0 text-sidebar-foreground [&>button]:hidden bg-slate-700',
             className,
           )}
-          style={{
-            backgroundColor: "var(--sidebar-bg, #ffffff)",
-            color: "var(--sidebar-text, #000000)",
-          }}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Menu</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
           <div 
-            className="flex h-full w-full flex-col" 
-            style={{ 
-              backgroundColor: "var(--sidebar-bg, #ffffff)",
-              color: "var(--sidebar-text, #000000)",
-            }}
+            className="flex h-full w-full flex-col bg-slate-700" 
           >
             {children}
           </div>
