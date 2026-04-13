@@ -170,7 +170,7 @@ export async function ensureUserProfile(userId: string, email: string) {
 
     console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
 
-    // Buscar en public.houses por owner_email
+    // Buscar en public.houses por owner_email (para propietarios)
     const { data: house, error: houseErr } = await supabase
       .from("houses")
       .select("id, condo_id, owner_name")
@@ -179,57 +179,74 @@ export async function ensureUserProfile(userId: string, email: string) {
 
     console.log("[v0] House query - found:", !!house, "error:", houseErr?.message)
 
-    if (!house) {
-      console.log("[v0] No house found for email:", email, "- checking for existing profile")
-      
-      // Check if profile already exists without house_id
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single()
-      
-      if (existingProfile && !existingProfile.house_id && !existingProfile.condo_id) {
-        console.log("[v0] Profile exists without house/condo - waiting for admin assignment")
-        return { success: false, message: "Awaiting admin assignment" }
-      }
-      
-      return { success: false }
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single()
+
+    if (existingProfile) {
+      console.log("[v0] Profile already exists for user:", userId)
+      return { success: true }
     }
 
-    console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
+    if (house) {
+      // User is a property owner - associate with house and condo
+      console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
 
-    // INSERT en profiles usando service client (bypasses RLS)
-    console.log("[v0] Attempting INSERT into profiles...")
-    const { error: insertError, data: insertData } = await supabase
-      .from("profiles")
-      .insert({
-        id: userId,
-        email,
-        first_name: house.owner_name || email.split("@")[0],
-        last_name: "",
-        house_id: house.id,
-        condo_id: house.condo_id,
-        role: "owner",
-      })
-
-    console.log("[v0] INSERT - error:", insertError?.message, "code:", insertError?.code, "success:", !insertError)
-
-    // Si ya existe, hacer UPDATE
-    if (insertError) {
-      console.log("[v0] INSERT failed with code", insertError.code, "- attempting UPDATE...")
-      const { error: updateErr } = await supabase
+      const { error: insertError } = await supabase
         .from("profiles")
-        .update({
+        .insert({
+          id: userId,
+          email,
+          first_name: house.owner_name || email.split("@")[0],
+          last_name: "",
           house_id: house.id,
           condo_id: house.condo_id,
+          role: "owner",
         })
-        .eq("id", userId)
-      console.log("[v0] UPDATE - error:", updateErr?.message)
-      return { success: !updateErr }
-    }
 
-    return { success: true }
+      if (insertError && insertError.code !== "23505") {
+        console.log("[v0] INSERT error:", insertError.message)
+        return { success: false, error: insertError.message }
+      }
+
+      return { success: true }
+    } else {
+      // No house found - user might be conserje, admin, etc.
+      // Get the condo_id from auth user metadata if available
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId)
+      const condoId = authUser?.user_metadata?.condo_id
+      const role = authUser?.user_metadata?.role || "owner"
+
+      if (condoId) {
+        // User has condo_id but no house - likely conserje, admin, etc.
+        console.log("[v0] Creating profile for non-owner user with condo_id:", condoId, "role:", role)
+        
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            email,
+            first_name: email.split("@")[0],
+            last_name: "",
+            condo_id: condoId,
+            role: role,
+          })
+
+        if (insertError && insertError.code !== "23505") {
+          console.log("[v0] INSERT error for non-owner:", insertError.message)
+          return { success: false, error: insertError.message }
+        }
+
+        return { success: true }
+      } else {
+        // No condo_id and no house - can't assign
+        console.log("[v0] No house and no condo_id - cannot auto-assign")
+        return { success: false, message: "Awaiting admin assignment" }
+      }
+    }
   } catch (err) {
     console.error("[v0] ensureUserProfile ERROR:", err)
     return { success: false, error: String(err) }
