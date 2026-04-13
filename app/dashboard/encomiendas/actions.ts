@@ -91,7 +91,6 @@ export async function createParcel(data: {
         // Don't throw - parcel was created successfully
       }
     }
-    }
 
     return { success: true, parcel }
   } catch (err) {
