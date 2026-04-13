@@ -46,21 +46,17 @@ export async function createParcel(data: {
     }
 
     // Create parcel in database
-    const insertData: any = {
-      condo_id: data.condo_id,
-      house_id: data.house_id,
-      parcel_type: data.parcel_type,
-      status: 'received',
-      received_date: new Date().toISOString(),
-      reception_photo_url: reception_photo_url,
-      created_by: user.id,
-    }
-    // Use bracket notation for 'from' column since it's a reserved keyword
-    insertData['from'] = data.from
-
     const { data: parcel, error } = await supabase
       .from('parcels')
-      .insert(insertData)
+      .insert({
+        condo_id: data.condo_id,
+        house_id: data.house_id,
+        from_sender: data.from,
+        status: 'recibido',
+        received_date: new Date().toISOString(),
+        parcel_type: data.parcel_type,
+        created_by: user.id,
+      })
       .select()
       .single()
 
@@ -124,20 +120,16 @@ export async function updateParcelStatus(data: {
 
     // Update parcel
     const updateData: any = {
-      status: data.new_status,
-      delivered_by: user.id,
+      status: data.new_status === 'delivered' ? 'entregado' : 'devuelto',
     }
 
     if (data.new_status === 'delivered' && photoUrl) {
-      updateData.delivery_photo_url = photoUrl
       updateData.delivered_date = new Date().toISOString()
     } else if (data.new_status === 'returned') {
-      if (photoUrl) {
-        updateData.return_photo_url = photoUrl
-      }
       if (data.return_reason) {
         updateData.return_reason = data.return_reason
       }
+      updateData.returned_date = new Date().toISOString()
     }
 
     const { error } = await supabase
