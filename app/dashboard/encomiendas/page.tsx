@@ -291,18 +291,16 @@ export default function ParcelPage() {
                     <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50">
                       {getStatusLabel(parcel.status)}
                     </span>
-                    {parcelPhotosCounts[parcel.id] && parcelPhotosCounts[parcel.id] > 0 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewPhotos(parcel)}
-                        className="flex items-center gap-2"
-                        title="Ver fotos de la encomienda"
-                      >
-                        <Camera className="h-4 w-4" />
-                        {parcelPhotosCounts[parcel.id]}
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewPhotos(parcel)}
+                      className="flex items-center gap-2"
+                      title="Ver fotos de la encomienda"
+                    >
+                      <Camera className="h-4 w-4" />
+                      {parcelPhotosCounts[parcel.id] || 0}
+                    </Button>
                     {isConserje && parcel.status === 'recibido' && (
                       <Button
                         size="sm"
