@@ -318,13 +318,20 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
 
   return (
     <Sidebar 
-      className="border-r"
+      className="!border-r"
       style={{
-        backgroundColor: cardBgColor,
+        backgroundColor: cardBgColor + " !important",
         borderColor: cardTextColor,
       }}
     >
-      <SidebarHeader className="border-b border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-4">
+      <SidebarHeader 
+        className="border-b p-4"
+        style={{
+          backgroundColor: cardBgColor,
+          borderColor: cardTextColor,
+          opacity: 0.8
+        }}
+      >
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
           {condo?.logo_url ? (
             <Image
@@ -371,7 +378,12 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         )}
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent 
+        className="!bg-transparent"
+        style={{ 
+          backgroundColor: cardBgColor,
+        }}
+      >
         {menuSections.map((section) => (
           <SidebarGroup key={section.section}>
             <SidebarGroupLabel style={{ color: cardTextColor, opacity: 0.7 }} className="font-semibold">{section.section}</SidebarGroupLabel>
@@ -442,7 +454,13 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-4">
+      <SidebarFooter 
+        className="border-t p-4"
+        style={{
+          backgroundColor: cardBgColor,
+          borderColor: cardTextColor,
+        }}
+      >
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
             {profile?.avatar_url ? (
