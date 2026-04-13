@@ -1,31 +1,15 @@
 /**
- * Get current date/time in Santiago, Chile timezone (America/Santiago)
- * Returns ISO string formatted for Santiago timezone
+ * Get current date/time in Santiago, Chile timezone (America/Santiago, UTC-4)
+ * Returns ISO string in Santiago local time (without Z suffix)
  */
 export function getSantiagoDateTime(): string {
   const now = new Date()
   
-  // Create a formatter for Santiago timezone
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: 'America/Santiago',
-  })
+  // Create offset for Santiago (UTC-4)
+  // Get UTC time and subtract 4 hours
+  const santiagoTime = new Date(now.getTime() - (4 * 60 * 60 * 1000))
   
-  const parts = formatter.formatToParts(now)
-  const dateObj: Record<string, string> = {}
-  
-  parts.forEach(part => {
-    dateObj[part.type] = part.value
-  })
-  
-  // Construct ISO string without Z suffix - this tells Supabase it's already in Santiago time
-  // The format is: YYYY-MM-DDTHH:mm:ss
-  const isoString = `${dateObj.year}-${dateObj.month}-${dateObj.day}T${dateObj.hour}:${dateObj.minute}:${dateObj.second}`
+  // Format as ISO string without Z
+  const isoString = santiagoTime.toISOString().slice(0, 19)
   return isoString
 }
