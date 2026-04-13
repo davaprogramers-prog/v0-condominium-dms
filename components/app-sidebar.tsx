@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "@/app/dashboard/theme-context"
 import {
   Sidebar,
   SidebarContent,
@@ -273,6 +274,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const router = useRouter()
   const [switching, setSwitching] = useState(false)
   const { isMobile, setOpenMobile } = useSidebar()
+  const { cardBgColor, cardTextColor } = useTheme()
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isSuperAdmin = profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
@@ -315,7 +317,13 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     : ownerMenuItems
 
   return (
-    <Sidebar className="bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+    <Sidebar 
+      className="border-r"
+      style={{
+        backgroundColor: cardBgColor,
+        borderColor: cardTextColor,
+      }}
+    >
       <SidebarHeader className="border-b border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-4">
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
           {condo?.logo_url ? (
@@ -366,7 +374,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarContent>
         {menuSections.map((section) => (
           <SidebarGroup key={section.section}>
-            <SidebarGroupLabel className="text-slate-400 dark:text-slate-100 font-semibold">{section.section}</SidebarGroupLabel>
+            <SidebarGroupLabel style={{ color: cardTextColor, opacity: 0.7 }} className="font-semibold">{section.section}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
@@ -378,7 +386,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                       <SidebarMenuButton 
                         asChild 
                         isActive={pathname === item.href}
-                        className="text-slate-300 dark:text-slate-100 hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
+                        style={{ color: cardTextColor }}
+                        className="hover:opacity-80"
                       >
                         <Link href={item.href} onClick={handleNavClick}>
                           <IconComponent className="h-4 w-4" style={{ color: iconColor }} />
@@ -396,14 +405,15 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
         {/* Super Admin Section */}
         {isSuperAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-slate-400 dark:text-white font-semibold">Super Admin</SidebarGroupLabel>
+            <SidebarGroupLabel style={{ color: cardTextColor, opacity: 0.7 }} className="font-semibold">Super Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
                     isActive={pathname === "/admin"}
-                    className="text-slate-300 dark:text-white hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
+                    style={{ color: cardTextColor }}
+                    className="hover:opacity-80"
                   >
                     <Link href="/admin" onClick={handleNavClick}>
                       <Key className="h-4 w-4" style={{ color: "#6366F1" }} />
@@ -416,7 +426,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
                     <SidebarMenuButton 
                       asChild 
                       isActive={pathname === "/dashboard/administradores"}
-                      className="text-slate-300 dark:text-white hover:text-white dark:hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700"
+                      style={{ color: cardTextColor }}
+                      className="hover:opacity-80"
                     >
                       <Link href="/dashboard/administradores" onClick={handleNavClick}>
                         <Users className="h-4 w-4" style={{ color: "#A855F7" }} />
