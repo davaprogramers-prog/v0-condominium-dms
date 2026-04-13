@@ -318,10 +318,12 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
 
   return (
     <Sidebar 
-      className="!border-r"
+      className="!border-r !bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
       style={{
         backgroundColor: cardBgColor + " !important",
         borderColor: cardTextColor,
+        backdropFilter: "none !important",
+        WebkitBackdropFilter: "none !important",
       }}
     >
       <SidebarHeader 
@@ -379,8 +381,11 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       </SidebarHeader>
       
       <SidebarContent 
+        className="!bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
         style={{ 
           backgroundColor: cardBgColor + " !important",
+          backdropFilter: "none !important",
+          WebkitBackdropFilter: "none !important",
         }}
       >
         {menuSections.map((section) => (
