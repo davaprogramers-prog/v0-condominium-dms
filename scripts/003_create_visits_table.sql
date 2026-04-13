@@ -25,6 +25,10 @@ CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(visit_date);
 ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for visits
-CREATE POLICY IF NOT EXISTS "Users can view visits from their condo" ON visits FOR SELECT USING (condo_id IN (SELECT condo_id FROM profiles WHERE id = auth.uid()));
-CREATE POLICY IF NOT EXISTS "Owners can create visits for their houses" ON visits FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM houses h JOIN profiles p ON h.condo_id = p.condo_id WHERE h.id = house_id AND h.condo_id = visits.condo_id AND p.id = auth.uid() AND (p.role = 'propietario' OR p.role = 'admin' OR p.role = 'super_admin')));
-CREATE POLICY IF NOT EXISTS "Owners can update their visits" ON visits FOR UPDATE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND condo_id = visits.condo_id));
+DROP POLICY IF EXISTS "Users can view visits from their condo" ON visits;
+DROP POLICY IF EXISTS "Owners can create visits for their houses" ON visits;
+DROP POLICY IF EXISTS "Owners can update their visits" ON visits;
+
+CREATE POLICY "Users can view visits from their condo" ON visits FOR SELECT USING (condo_id IN (SELECT condo_id FROM profiles WHERE id = auth.uid()));
+CREATE POLICY "Owners can create visits for their houses" ON visits FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM houses h JOIN profiles p ON h.condo_id = p.condo_id WHERE h.id = house_id AND h.condo_id = visits.condo_id AND p.id = auth.uid() AND (p.role = 'propietario' OR p.role = 'admin' OR p.role = 'super_admin')));
+CREATE POLICY "Owners can update their visits" ON visits FOR UPDATE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin') AND condo_id = visits.condo_id));
