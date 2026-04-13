@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { ImageOff, ChevronLeft, ChevronRight, Loader } from 'lucide-react'
 import Image from 'next/image'
-import { getPhotoDownloadUrl } from './actions'
+import { getPhotoUrl } from './actions'
 
 interface ParcelPhoto {
   id: string
@@ -53,14 +53,14 @@ export function ViewParcelPhotosDialog({
       setPhotos(fetchedPhotos)
       setCurrentPhotoIndex(0)
 
-      // Generate download URLs for all photos
+      // Get download URLs for all photos
       const urls: Record<string, string> = {}
       for (const photo of fetchedPhotos) {
         try {
-          const url = await getPhotoDownloadUrl(photo.photo_url)
+          const url = await getPhotoUrl(photo.photo_url)
           urls[photo.id] = url
         } catch (error) {
-          console.error('[v0] Error generating download URL for photo:', photo.id, error)
+          console.error('[v0] Error getting photo URL:', photo.id, error)
         }
       }
       setDownloadUrls(urls)

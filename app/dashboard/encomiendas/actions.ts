@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { put, getDownloadUrl } from '@vercel/blob'
+import { put } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 import { getSantiagoDateTime } from '@/lib/date-utils'
 
@@ -256,15 +256,7 @@ export async function editParcelReception(data: {
   }
 }
 
-export async function getPhotoDownloadUrl(photoUrl: string): Promise<string> {
-  try {
-    // photoUrl is the complete URL stored in the database
-    // e.g., "https://bubne0yte73emafl.private.blob.vercel-storage.com/parcels/..."
-    // Just call getDownloadUrl() to generate a signed temporary URL
-    const signedUrl = await getDownloadUrl(photoUrl)
-    return signedUrl
-  } catch (err) {
-    console.error('[v0] Error generating download URL:', err)
-    throw err
-  }
+export async function getPhotoUrl(photoUrl: string): Promise<string> {
+  // Simply return the URL as-is - it's already a complete Vercel Blob URL
+  return photoUrl
 }
