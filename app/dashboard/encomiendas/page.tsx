@@ -14,6 +14,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/app/dashboard/theme-context'
 import { CreateParcelDialog } from './create-parcel-dialog'
+import { EditReceptionDialog } from './edit-reception-dialog'
 import { UpdateParcelDialog } from './update-parcel-dialog'
 import { ViewParcelPhotosDialog } from './view-parcel-photos-dialog'
 
@@ -54,6 +55,7 @@ export default function ParcelPage() {
   const [parcelPhotosCounts, setParcelPhotosCounts] = useState<Record<string, number>>({})
   const [houses, setHouses] = useState<Array<{ id: string; house_number: string }>>([])
   const [allParcels, setAllParcels] = useState<Parcel[]>([])
+  const [editingReceptionParcel, setEditingReceptionParcel] = useState<Parcel | null>(null)
 
   useEffect(() => {
     loadUserAndParcels()
@@ -438,13 +440,24 @@ export default function ParcelPage() {
                       {parcelPhotosCounts[parcel.id] || 0}
                     </Button>
                     {isConserje && parcel.status === 'recibido' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingParcel(parcel)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingReceptionParcel(parcel)}
+                          title="Editar detalles de recepción"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setEditingParcel(parcel)}
+                          title="Registrar entrega o devolución"
+                        >
+                          <Camera className="h-4 w-4 mr-2" />
+                          Entregar
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -458,6 +471,19 @@ export default function ParcelPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Reception Dialog */}
+      {editingReceptionParcel && (
+        <EditReceptionDialog
+          parcel={editingReceptionParcel}
+          houses={houses}
+          onClose={() => setEditingReceptionParcel(null)}
+          onSuccess={() => {
+            setEditingReceptionParcel(null)
+            handleRefresh()
+          }}
+        />
+      )}
 
       {/* Update Dialog */}
       {editingParcel && (

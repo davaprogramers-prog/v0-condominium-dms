@@ -198,3 +198,61 @@ export async function updateParcelStatus(data: {
     return { success: false, error: String(err) }
   }
 }
+
+export async function editParcelReception(data: {
+  parcel_id: string
+  parcel_type: string
+  from: string
+  house_id: string
+}) {
+  try {
+    const supabase = await createClient()
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('No autenticado')
+
+    // Verify user belongs to this condo
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, condo_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) throw new Error('Perfil no encontrado')
+
+    // Get parcel to verify it belongs to the condo and is still in "recibido" status
+    const { data: parcel } = await supabase
+      .from('parcels')
+      .select('*')
+      .eq('id', data.parcel_id)
+      .single()
+
+    if (!parcel || parcel.condo_id !== profile.condo_id) {
+      throw new Error('Encomienda no encontrada')
+    }
+
+    if (parcel.status !== 'recibido') {
+      throw new Error('Solo se pueden editar encomiendas en estado "recibido"')
+    }
+
+    // Update parcel fields
+    const { error } = await supabase
+      .from('parcels')
+      .update({
+        parcel_type: data.parcel_type,
+        from_sender: data.from,
+        house_id: data.house_id,
+      })
+      .eq('id', data.parcel_id)
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error('[v0] Error editing parcel reception:', err)
+    return { success: false, error: String(err) }
+  }
+}
