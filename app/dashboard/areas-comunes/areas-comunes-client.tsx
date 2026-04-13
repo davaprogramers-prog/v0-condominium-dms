@@ -120,7 +120,12 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Checkbox id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} className="w-5 h-5 border-2" />
+                    <Checkbox 
+                      id="is_paid_area" 
+                      checked={isPaid} 
+                      onCheckedChange={(checked) => setIsPaid(checked === true)} 
+                      className="w-5 h-5 border-2" 
+                    />
                     <Label htmlFor="is_paid_area" style={{ color: dialogTextColor }}>Uso pagado</Label>
                   </div>
                   <Badge className="bg-white text-slate-900 border font-semibold">
