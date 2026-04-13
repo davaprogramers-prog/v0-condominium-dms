@@ -53,12 +53,19 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
   useEffect(() => {
     async function loadLogos() {
       const supabase = createClient()
+      // Get ALL logos regardless of condo_id (logos are global/shared)
       const { data, error } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
         .order("name")
       
-      console.log("[v0] Logos query - data:", data, "error:", error)
+      console.log("[v0] Expense logos query - returned:", data?.length || 0, "logos")
+      if (error) {
+        console.log("[v0] Logos error:", error.message, "code:", error.code)
+      }
+      if (data) {
+        console.log("[v0] Logos data:", data.map(l => ({ id: l.id, name: l.name })))
+      }
       setExpenseLogos(data || [])
     }
     if (open) {
