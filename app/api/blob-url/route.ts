@@ -12,13 +12,8 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Generating download URL for pathname:', pathname)
 
     try {
-      // getDownloadUrl() expects a full blob URL, not just a pathname
-      // Construct the full URL from the pathname
-      const fullUrl = `https://blob.vercel-storage.com/${pathname}`
-      console.log('[v0] Full blob URL:', fullUrl)
-      
-      // Use getDownloadUrl() to get a temporary signed URL for the blob file
-      const url = await getDownloadUrl(fullUrl)
+      // getDownloadUrl() accepts just the pathname/key for private blobs
+      const url = await getDownloadUrl(pathname)
       
       console.log('[v0] Generated download blob URL:', url)
       
