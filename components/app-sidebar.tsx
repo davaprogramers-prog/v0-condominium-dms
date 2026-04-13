@@ -262,7 +262,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const router = useRouter()
   const [switching, setSwitching] = useState(false)
   const { isMobile, setOpenMobile } = useSidebar()
-  const { cardBgColor, cardTextColor } = useTheme()
+  const { sidebarBgColor, sidebarTextColor, cardBgColor, cardTextColor } = useTheme()
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
   const isSuperAdmin = profile?.role === "super_admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
@@ -308,8 +308,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     <Sidebar 
       className="!border-r !bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
       style={{
-        backgroundColor: (cardBgColor || "#ffffff") + " !important",
-        borderColor: cardTextColor || "#000000",
+        backgroundColor: (sidebarBgColor || "#ffffff") + " !important",
+        borderColor: sidebarTextColor || "#000000",
         backdropFilter: "none !important",
         WebkitBackdropFilter: "none !important",
       }}
@@ -317,8 +317,8 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarHeader 
         className="border-b p-4"
         style={{
-          backgroundColor: cardBgColor || "#ffffff",
-          borderColor: cardTextColor || "#000000",
+          backgroundColor: sidebarBgColor || "#ffffff",
+          borderColor: sidebarTextColor || "#000000",
         }}
       >
         <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
@@ -370,7 +370,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
       <SidebarContent 
         className="!bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
         style={{ 
-          backgroundColor: (cardBgColor || "#ffffff") + " !important",
+          backgroundColor: (sidebarBgColor || "#ffffff") + " !important",
           backdropFilter: "none !important",
           WebkitBackdropFilter: "none !important",
         }}
@@ -447,9 +447,9 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
 
       <SidebarFooter 
         className="border-t p-4"
-        style={{
-          backgroundColor: cardBgColor || "#ffffff",
-          borderColor: cardTextColor || "#000000",
+        style={{ 
+          backgroundColor: sidebarBgColor || "#ffffff",
+          borderColor: sidebarTextColor || "#000000",
         }}
       >
         <div className="flex flex-col gap-2">
