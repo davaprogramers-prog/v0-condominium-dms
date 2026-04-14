@@ -97,29 +97,31 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
           Crear Casa
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle>Crear Nueva Casa</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-gray-900">Crear Nueva Casa</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Agrega una nueva propiedad al condominio
           </DialogDescription>
         </DialogHeader>
 
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-3 text-green-800">
-            {successMessage}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700 font-medium">
+            ✓ {successMessage}
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-800">
-            {error}
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 font-medium">
+            ✕ {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <Label htmlFor="houseNumber">Número de Casa</Label>
+            <Label htmlFor="houseNumber" className="text-gray-700 font-semibold mb-2 block">
+              Número de Casa
+            </Label>
             <Input
               id="houseNumber"
               name="houseNumber"
@@ -127,11 +129,14 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.houseNumber}
               onChange={handleInputChange}
               disabled={loading || success}
+              className="border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-200 bg-white text-gray-900 placeholder-gray-400"
             />
           </div>
 
           <div>
-            <Label htmlFor="ownerName">Nombre del Propietario</Label>
+            <Label htmlFor="ownerName" className="text-gray-700 font-semibold mb-2 block">
+              Nombre del Propietario
+            </Label>
             <Input
               id="ownerName"
               name="ownerName"
@@ -139,11 +144,14 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.ownerName}
               onChange={handleInputChange}
               disabled={loading || success}
+              className="border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-200 bg-white text-gray-900 placeholder-gray-400"
             />
           </div>
 
           <div>
-            <Label htmlFor="ownerEmail">Email del Propietario</Label>
+            <Label htmlFor="ownerEmail" className="text-gray-700 font-semibold mb-2 block">
+              Email del Propietario
+            </Label>
             <Input
               id="ownerEmail"
               name="ownerEmail"
@@ -152,22 +160,24 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.ownerEmail}
               onChange={handleInputChange}
               disabled={loading || success}
+              className="border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-200 bg-white text-gray-900 placeholder-gray-400"
             />
           </div>
 
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={loading}
+              className="px-6 text-gray-700 border-gray-300 hover:bg-gray-50"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={loading || success}
-              style={{ backgroundColor: "#2563eb" }}
+              className="px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
             >
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Crear Casa
