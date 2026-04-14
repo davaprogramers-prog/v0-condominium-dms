@@ -220,7 +220,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                       {exemptions.map((ex) => {
                         const isActive = ex.is_permanent || !ex.end_date || new Date(ex.end_date as string) >= new Date()
                         return (
-                          <TableRow key={ex.id as string} style={{ borderColor: borderColor }}>
+                          <TableRow key={ex.id as string} style={{ borderColor: inputTextColor }}>
                             <TableCell className="font-medium" style={{ color: cardTextColor }}>
                               {(ex.houses as Record<string, unknown>)?.house_number as string || "?"}
                             </TableCell>
