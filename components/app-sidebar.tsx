@@ -126,6 +126,7 @@ const adminMenuItems = [
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
@@ -195,6 +196,7 @@ const adminWithPropertyMenuItems = [
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
