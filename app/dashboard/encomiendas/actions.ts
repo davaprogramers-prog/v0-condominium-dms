@@ -46,9 +46,9 @@ export async function createParcel(data: {
         const filename = `parcel-photos/${data.condo_id}/${uuidv4()}.jpg`
         console.log('[v0] Uploading to:', filename)
         
-        // Upload to Supabase Storage
+        // Upload to Supabase Storage using 'receipts' bucket which has proper RLS policies
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('parcels')
+          .from('receipts')
           .upload(filename, photoFile, { upsert: true })
         
         if (uploadError) {
@@ -57,7 +57,7 @@ export async function createParcel(data: {
         
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('parcels')
+          .from('receipts')
           .getPublicUrl(uploadData.path)
         
         reception_photo_url = urlData.publicUrl
@@ -158,9 +158,9 @@ export async function updateParcelStatus(data: {
         // Create file path: parcel-photos/{condoId}/{parcelId}/{status}-{timestamp}.jpg
         const filename = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         
-        // Upload to Supabase Storage
+        // Upload to Supabase Storage using 'receipts' bucket which has proper RLS policies
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('parcels')
+          .from('receipts')
           .upload(filename, photoFile, { upsert: true })
         
         if (uploadError) {
@@ -169,7 +169,7 @@ export async function updateParcelStatus(data: {
         
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('parcels')
+          .from('receipts')
           .getPublicUrl(uploadData.path)
         
         photoUrl = urlData.publicUrl
