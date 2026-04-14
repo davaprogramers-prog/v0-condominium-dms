@@ -45,10 +45,11 @@ export async function createParcel(data: {
       .insert({
         condo_id: data.condo_id,
         house_id: data.house_id,
-        from_sender: data.from,
-        status: 'recibido',
+        from: data.from,
+        status: 'received',
         received_date: utcNow,
         parcel_type: data.parcel_type,
+        reception_photo_url: reception_photo_url,
         created_by: user.id,
       })
       .select()
@@ -121,16 +122,15 @@ export async function updateParcelStatus(data: {
 
     // Update parcel status
     const updateData: any = {
-      status: data.new_status === 'delivered' ? 'entregado' : 'devuelto',
+      status: data.new_status,  // Use 'delivered' or 'returned' directly
+    }
+
+    if (data.new_status === 'returned' && data.return_reason) {
+      updateData.return_reason = data.return_reason
     }
 
     if (data.new_status === 'delivered') {
-      updateData.delivered_date = getSantiagoDateTime()
-    } else if (data.new_status === 'returned') {
-      if (data.return_reason) {
-        updateData.return_reason = data.return_reason
-      }
-      updateData.returned_date = getSantiagoDateTime()
+      updateData.delivered_by = user.id
     }
 
     const { error } = await supabase
@@ -144,7 +144,7 @@ export async function updateParcelStatus(data: {
 
     // Save delivery/return photo to parcel_photos table if provided
     if (photoUrl) {
-      const photoType = data.new_status === 'delivered' ? 'entrega_propietario' : 'devolucion'
+      const photoType = data.new_status === 'delivered' ? 'delivery' : 'return'
       
       const { error: photoError } = await supabase
         .from('parcel_photos')

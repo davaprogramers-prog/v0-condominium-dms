@@ -55,12 +55,13 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('No autenticado')
 
-        // Upload to receipts bucket
-        const filePath = `parcel-photos/${condoId}/${Date.now()}.jpg`
+        // Upload to documents bucket (PUBLIC, no strict RLS policies)
+        const ext = receptionPhoto.name.split('.').pop() || 'jpg'
+        const filePath = `parcel-photos/${condoId}/${Date.now()}.${ext}`
         console.log('[v0] Uploading to:', filePath)
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('receipts')
+          .from('documents')
           .upload(filePath, receptionPhoto, { upsert: true })
 
         if (uploadError) {
@@ -70,7 +71,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('receipts')
+          .from('documents')
           .getPublicUrl(uploadData.path)
 
         receptionPhotoUrl = urlData.publicUrl
@@ -85,11 +86,11 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
       } as any)
 
       if (result.success) {
-        setFormData({
-          house_id: '',
-          parcel_type: 'paquete',
-          from: '',
-        })
+    setFormData({
+      house_id: '',
+      parcel_type: 'package',
+      from: '',
+    })
         setReceptionPhoto(null)
         setReceptionPhotoPreview('')
         setOpen(false)
@@ -172,10 +173,11 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="select-content-themed">
-                <SelectItem value="sobre" className="select-item-themed">Sobre</SelectItem>
-                <SelectItem value="paquete" className="select-item-themed">Paquete</SelectItem>
-                <SelectItem value="documento" className="select-item-themed">Documento</SelectItem>
-                <SelectItem value="otro" className="select-item-themed">Otro</SelectItem>
+                <SelectItem value="envelope" className="select-item-themed">Sobre</SelectItem>
+                <SelectItem value="package" className="select-item-themed">Paquete</SelectItem>
+                <SelectItem value="box" className="select-item-themed">Caja</SelectItem>
+                <SelectItem value="tube" className="select-item-themed">Tubo</SelectItem>
+                <SelectItem value="other" className="select-item-themed">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
