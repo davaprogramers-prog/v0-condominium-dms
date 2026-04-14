@@ -38,19 +38,20 @@ export function ViewParcelPhotosDialog({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
   useEffect(() => {
-    if (isOpen && photos.length === 0) {
+    if (isOpen) {
       loadPhotosData()
     }
-  }, [isOpen])
+  }, [isOpen, parcelId])
 
   const loadPhotosData = async () => {
     setLoading(true)
     try {
       const fetchedPhotos = await loadPhotos(parcelId)
+      console.log('[v0] View dialog - Fetched photos for parcel:', { parcelId, count: fetchedPhotos.length, photos: fetchedPhotos })
       setPhotos(fetchedPhotos)
       setCurrentPhotoIndex(0)
     } catch (error) {
-      console.error('Error loading photos:', error)
+      console.error('[v0] View dialog - Error loading photos:', error)
     } finally {
       setLoading(false)
     }
