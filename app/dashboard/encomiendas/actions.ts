@@ -60,19 +60,6 @@ export async function createParcel(data: {
           .from('parcels')
           .getPublicUrl(uploadData.path)
         
-        photoUrl = urlData.publicUrl
-        console.log('[v0] Photo uploaded to:', photoUrl)
-      } catch (photoUploadError) {
-        console.error('[v0] Error uploading photo:', photoUploadError)
-        // Don't throw - parcel status update should continue even if photo upload fails
-      }
-    }
-        
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('parcels')
-          .getPublicUrl(uploadData.path)
-        
         reception_photo_url = urlData.publicUrl
         console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
       } catch (photoUploadError) {
