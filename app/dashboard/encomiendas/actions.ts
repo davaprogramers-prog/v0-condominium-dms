@@ -33,7 +33,7 @@ export async function createParcel(data: {
       throw new Error('Rol no autorizado')
     }
 
-    // Create parcel in database
+    // Create parcel in database with photo URL if provided
     const utcNow = new Date().toISOString().split('.')[0]
     
     const { data: parcel, error } = await supabase
@@ -45,6 +45,7 @@ export async function createParcel(data: {
         status: 'recibido',
         received_date: utcNow,
         parcel_type: data.parcel_type,
+        reception_photo_url: data.receptionPhotoUrl || null,
         created_by: user.id,
       })
       .select()
@@ -52,23 +53,6 @@ export async function createParcel(data: {
 
     if (error) {
       throw new Error(error.message)
-    }
-
-    // Save reception photo to parcel_photos table if provided
-    if (data.receptionPhotoUrl && parcel) {
-      const { error: photoError } = await supabase
-        .from('parcel_photos')
-        .insert({
-          parcel_id: parcel.id,
-          photo_url: data.receptionPhotoUrl,
-          photo_type: 'recepcion_garita',
-          uploaded_by: user.id,
-        })
-
-      if (photoError) {
-        console.error('[v0] Error saving photo record:', photoError)
-        // Don't throw - parcel was created successfully
-      }
     }
 
     return { success: true, parcel }
@@ -113,13 +97,22 @@ export async function updateParcelStatus(data: {
       throw new Error('Encomienda no encontrada')
     }
 
-    // Update parcel status
+    // Update parcel status and photo URLs
     const updateData: any = {
       status: data.new_status,
     }
 
     if (data.new_status === 'devuelto' && data.return_reason) {
       updateData.return_reason = data.return_reason
+    }
+
+    // Add delivery or return photo URL to update
+    if (data.photoUrl) {
+      if (data.new_status === 'entregado') {
+        updateData.delivery_photo_url = data.photoUrl
+      } else if (data.new_status === 'devuelto') {
+        updateData.return_photo_url = data.photoUrl
+      }
     }
 
     const { error } = await supabase
@@ -129,25 +122,6 @@ export async function updateParcelStatus(data: {
 
     if (error) {
       throw new Error(error.message)
-    }
-
-    // Save delivery/return photo to parcel_photos table if provided
-    if (data.photoUrl) {
-      const photoType = data.new_status === 'entregado' ? 'entrega_propietario' : 'devolucion'
-      
-      const { error: photoError } = await supabase
-        .from('parcel_photos')
-        .insert({
-          parcel_id: data.parcel_id,
-          photo_url: data.photoUrl,
-          photo_type: photoType,
-          uploaded_by: user.id,
-        })
-
-      if (photoError) {
-        console.error('[v0] Error saving photo record:', photoError)
-        // Don't throw - parcel was updated successfully
-      }
     }
 
     return { success: true }

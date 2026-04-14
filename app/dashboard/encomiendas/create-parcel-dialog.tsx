@@ -48,41 +48,12 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
     try {
       let receptionPhotoUrl: string | null = null
 
-      // Upload photo to Supabase Storage from client if provided
-      if (receptionPhoto) {
-        console.log('[v0] Uploading photo from client...')
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('No autenticado')
-
-        // Upload to documents bucket (PUBLIC, no strict RLS policies)
-        const ext = receptionPhoto.name.split('.').pop() || 'jpg'
-        const filePath = `parcel-photos/${condoId}/${Date.now()}.${ext}`
-        console.log('[v0] Uploading to:', filePath)
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(filePath, receptionPhoto, { upsert: true })
-
-        if (uploadError) {
-          console.error('[v0] Upload error:', uploadError)
-          throw uploadError
-        }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('documents')
-          .getPublicUrl(uploadData.path)
-
-        receptionPhotoUrl = urlData.publicUrl
-        console.log('[v0] Photo uploaded successfully to:', receptionPhotoUrl)
-      }
-
-      // Call server action to create parcel with photo URL
+      // Call server action to create parcel with photo file
+      // The server action will handle the upload with service role permissions
       const result = await createParcel({
         ...formData,
         condo_id: condoId,
-        receptionPhotoUrl: receptionPhotoUrl,
+        receptionPhoto: receptionPhoto,
       } as any)
 
       if (result.success) {
