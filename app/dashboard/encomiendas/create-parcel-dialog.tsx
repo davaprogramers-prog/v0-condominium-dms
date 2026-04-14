@@ -46,18 +46,22 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
     setLoading(true)
     try {
-      // Convert File to ArrayBuffer if provided (for server action serialization)
-      let photoArrayBuffer: ArrayBuffer | null = null
+      // Convert File to number array if provided (for server action serialization)
+      let photoArray: number[] | undefined
       if (receptionPhoto) {
-        photoArrayBuffer = await receptionPhoto.arrayBuffer()
-        console.log('[v0] Converted photo to ArrayBuffer, size:', photoArrayBuffer.byteLength)
+        const photoArrayBuffer = await receptionPhoto.arrayBuffer()
+        photoArray = Array.from(new Uint8Array(photoArrayBuffer))
+        console.log('[v0] Client: Converted photo to array, size:', photoArray.length, 'first bytes:', photoArray.slice(0, 10))
+      } else {
+        console.log('[v0] Client: No photo selected')
       }
 
-      // Call server action to create parcel with photo ArrayBuffer
+      // Call server action to create parcel with photo array
+      console.log('[v0] Client: Calling createParcel with:', { receptionPhotoFileName: receptionPhoto?.name, photoArraySize: photoArray?.length })
       const result = await createParcel({
         ...formData,
         condo_id: condoId,
-        receptionPhoto: photoArrayBuffer ? Array.from(new Uint8Array(photoArrayBuffer)) : undefined,
+        receptionPhoto: photoArray,
         receptionPhotoFileName: receptionPhoto?.name,
       } as any)
 

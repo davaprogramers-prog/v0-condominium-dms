@@ -38,10 +38,11 @@ export async function createParcel(data: {
     let receptionPhotoUrl: string | null = null
     if (data.receptionPhoto && data.receptionPhoto.length > 0) {
       try {
-        console.log('[v0] Uploading photo from server with service role...', { photoSize: data.receptionPhoto.length })
+        console.log('[v0] Uploading photo from server with service role...', { photoSize: data.receptionPhoto.length, fileName: data.receptionPhotoFileName })
         
         // Convert number array back to Buffer
         const photoBuffer = Buffer.from(data.receptionPhoto)
+        console.log('[v0] Buffer created, size:', photoBuffer.length)
         
         // Create file path with original filename extension or jpg
         const ext = data.receptionPhotoFileName?.split('.').pop() || 'jpg'
@@ -54,8 +55,11 @@ export async function createParcel(data: {
           .upload(filePath, photoBuffer, { upsert: true })
 
         if (uploadError) {
+          console.error('[v0] Upload failed:', uploadError)
           throw new Error(`Upload error: ${uploadError.message}`)
         }
+
+        console.log('[v0] Upload success, path:', uploadData.path)
 
         // Get public URL
         const { data: urlData } = supabase.storage
@@ -68,6 +72,8 @@ export async function createParcel(data: {
         console.error('[v0] Error uploading photo:', photoUploadError)
         // Don't throw - parcel creation should continue even if photo upload fails
       }
+    } else {
+      console.log('[v0] No photo provided or empty array')
     }
 
     // Create parcel in database
@@ -93,6 +99,7 @@ export async function createParcel(data: {
 
     // Save reception photo to parcel_photos table if provided
     if (receptionPhotoUrl && parcel) {
+      console.log('[v0] Saving photo record to parcel_photos table with URL:', receptionPhotoUrl)
       const { error: photoError } = await supabase
         .from('parcel_photos')
         .insert({
@@ -105,7 +112,11 @@ export async function createParcel(data: {
       if (photoError) {
         console.error('[v0] Error saving photo record:', photoError)
         // Don't throw - parcel was created successfully
+      } else {
+        console.log('[v0] Photo record saved successfully')
       }
+    } else {
+      console.log('[v0] Skipping photo record - URL or parcel missing', { hasUrl: !!receptionPhotoUrl, hasParcel: !!parcel })
     }
 
     return { success: true, parcel }
