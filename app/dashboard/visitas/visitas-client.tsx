@@ -98,12 +98,11 @@ export default function VisitasPageClient({
     return filtered
   }, [initialVisits, searchQuery, filterStatus, selectedHouses, dateFrom, dateTo])
 
-  // Calculate counts based on filtered data (after hiding old visits)
-  const visibleVisits = initialVisits.filter(v => !isVisitOlderThanOneDay(v.visit_date))
-  const scheduledCount = visibleVisits.filter(v => v.status === 'scheduled').length
-  const completedCount = visibleVisits.filter(v => v.status === 'completed').length
-  const cancelledCount = visibleVisits.filter(v => v.status === 'cancelled').length
-  const totalCount = visibleVisits.length
+  // Calculate counts based on all visits (not just visible/recent ones)
+  const scheduledCount = initialVisits.filter(v => v.status === 'scheduled').length
+  const completedCount = initialVisits.filter(v => v.status === 'completed').length
+  const cancelledCount = initialVisits.filter(v => v.status === 'cancelled').length
+  const totalCount = initialVisits.length
 
   const toggleHouse = (houseId: string) => {
     const newSelected = new Set(selectedHouses)
