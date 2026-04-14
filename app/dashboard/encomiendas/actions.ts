@@ -51,7 +51,7 @@ export async function createParcel(data: {
         console.log('[v0] Uploading to:', filePath)
         
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
+          .from('parcels')
           .upload(filePath, photoBuffer, { upsert: true })
 
         if (uploadError) {
@@ -61,9 +61,9 @@ export async function createParcel(data: {
 
         console.log('[v0] Upload success, path:', uploadData.path)
 
-        // Get public URL
+        // Get public URL from parcels bucket
         const { data: urlData } = supabase.storage
-          .from('documents')
+          .from('parcels')
           .getPublicUrl(uploadData.path)
 
         receptionPhotoUrl = urlData.publicUrl
@@ -170,16 +170,16 @@ export async function updateParcelStatus(data: {
         const filePath = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
+          .from('parcels')
           .upload(filePath, data.photoFile, { upsert: true })
 
         if (uploadError) {
           throw new Error(`Upload error: ${uploadError.message}`)
         }
 
-        // Get public URL
+        // Get public URL from parcels bucket
         const { data: urlData } = supabase.storage
-          .from('documents')
+          .from('parcels')
           .getPublicUrl(uploadData.path)
 
         photoUrl = urlData.publicUrl
