@@ -190,7 +190,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           <TabsTrigger value="types">Tipos ({exemptionTypes.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="exemptions">
-          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
+          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="border">
             <CardHeader>
               <CardTitle className="text-base" style={{ color: cardTextColor }}>Exoneraciones Activas</CardTitle>
               <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Casas con exoneracion de gasto comun</CardDescription>
@@ -205,7 +205,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow style={{ borderColor: borderColor }}>
+                      <TableRow style={{ borderColor: inputTextColor }}>
                         <TableHead style={{ color: cardTextColor }}>Casa</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Tipo</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Porcentaje</TableHead>
@@ -266,7 +266,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           </Card>
         </TabsContent>
         <TabsContent value="types">
-          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
+          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="border">
             <CardHeader>
               <CardTitle className="text-base" style={{ color: cardTextColor }}>Tipos de Exoneracion</CardTitle>
             </CardHeader>
@@ -276,7 +276,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
               ) : (
                 <div className="flex flex-col gap-2">
                   {exemptionTypes.map((t) => (
-                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: borderColor, backgroundColor: `${cardBgColor}88` }}>
+                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: inputTextColor, backgroundColor: `${cardBgColor}88` }}>
                       <div>
                         <p className="text-sm font-medium" style={{ color: cardTextColor }}>{t.name as string}</p>
                         {t.description ? <p className="text-xs" style={{ color: cardTextColor, opacity: 0.7 }}>{t.description as string}</p> : null}
