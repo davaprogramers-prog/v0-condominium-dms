@@ -174,20 +174,14 @@ export async function updateParcelStatus(data: {
       }
     }
 
-    // Update parcel status
+    // Update parcel status (only status and return_reason fields)
     const updateData: any = {
       status: data.new_status,
     }
 
-    if (data.new_status === 'entregado' && photoUrl) {
-      updateData.delivery_photo_url = photoUrl
-    } else if (data.new_status === 'devuelto') {
-      if (data.return_reason) {
-        updateData.return_reason = data.return_reason
-      }
-      if (photoUrl) {
-        updateData.return_photo_url = photoUrl
-      }
+    // Only add return_reason if status is devuelto
+    if (data.new_status === 'devuelto' && data.return_reason) {
+      updateData.return_reason = data.return_reason
     }
 
     const { error } = await supabase

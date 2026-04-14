@@ -1,14 +1,14 @@
 /**
  * Redimensiona una imagen si excede los límites de dimensiones especificados
  * @param file - File object de la imagen
- * @param maxWidth - Ancho máximo permitido en píxeles (default: 1920)
- * @param maxHeight - Alto máximo permitido en píxeles (default: 1080)
+ * @param maxWidth - Ancho máximo permitido en píxeles (default: 600)
+ * @param maxHeight - Alto máximo permitido en píxeles (default: 600)
  * @returns Promise<File> - Archivo redimensionado o el original si es más pequeño
  */
 export async function resizeImageIfNeeded(
   file: File,
-  maxWidth: number = 1920,
-  maxHeight: number = 1080
+  maxWidth: number = 600,
+  maxHeight: number = 600
 ): Promise<File> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -18,11 +18,16 @@ export async function resizeImageIfNeeded(
       img.crossOrigin = 'anonymous'
       
       img.onload = () => {
+        console.log(`[v0] Image dimensions: ${img.width}x${img.height}, max allowed: ${maxWidth}x${maxHeight}`)
+        
         // Si la imagen es más pequeña que los límites, retorna la original
         if (img.width <= maxWidth && img.height <= maxHeight) {
+          console.log('[v0] Image is within limits, returning original file')
           resolve(file)
           return
         }
+
+        console.log('[v0] Image exceeds limits, resizing...')
 
         // Calcula nuevas dimensiones manteniendo aspecto ratio
         let newWidth = img.width
@@ -37,6 +42,8 @@ export async function resizeImageIfNeeded(
           newWidth = Math.round((newWidth * maxHeight) / newHeight)
           newHeight = maxHeight
         }
+
+        console.log(`[v0] New image dimensions: ${newWidth}x${newHeight}`)
 
         // Redimensiona la imagen en canvas
         const canvas = document.createElement('canvas')
@@ -64,6 +71,7 @@ export async function resizeImageIfNeeded(
               lastModified: Date.now(),
             })
 
+            console.log(`[v0] Image resized successfully, new size: ${(newFile.size / 1024).toFixed(2)}KB`)
             resolve(newFile)
           },
           'image/jpeg',
