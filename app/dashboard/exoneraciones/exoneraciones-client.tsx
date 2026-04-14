@@ -35,7 +35,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
   const [editingType, setEditingType] = useState<string | null>(null)
   const [deletingExemption, setDeletingExemption] = useState<string | null>(null)
   const [deletingType, setDeletingType] = useState<string | null>(null)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleDeleteExemption = async (id: string) => {
     setDeletingExemption(id)

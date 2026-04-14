@@ -42,7 +42,7 @@ export function VisitsAdminClient({
   condoId,
   userId,
 }: VisitsAdminClientProps) {
-  const { cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { cardBgColor, cardTextColor } = useTheme()
   const [selectedHouse, setSelectedHouse] = useState<string>('all')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')

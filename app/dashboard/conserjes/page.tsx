@@ -25,7 +25,7 @@ export default function ConserjesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ firstName: "", lastName: "" })
   const [isSaving, setIsSaving] = useState(false)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   // Get condo_id and role from authenticated user
   useEffect(() => {

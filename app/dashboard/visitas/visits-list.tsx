@@ -32,7 +32,7 @@ export function VisitsList({ visits }: VisitsListProps) {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; visit: Visit | null }>({ open: false, visit: null })
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
-  const { cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { cardBgColor, cardTextColor } = useTheme()
 
   async function handleDelete() {
     if (!deleteDialog.visit) return

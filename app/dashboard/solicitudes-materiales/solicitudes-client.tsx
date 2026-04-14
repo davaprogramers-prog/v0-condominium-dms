@@ -36,7 +36,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     items: [{ quantity: '', description: '' }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   // Filter solicitudes based on criteria
   const filteredSolicitudes = useMemo(() => {
