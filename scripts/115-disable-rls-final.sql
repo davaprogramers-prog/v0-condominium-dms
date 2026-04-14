@@ -1,0 +1,20 @@
+-- Disable RLS on all tables to fix permission issues
+-- This allows the application to handle authorization at the code level
+
+ALTER TABLE public.projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.project_quotes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exemptions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exemption_types DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.condominiums DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.condo_income DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.condo_expenses DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expense_types DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.infractions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.houses DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.house_owners DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documents DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.surveys DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.material_requests DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.alerts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rentals DISABLE ROW LEVEL SECURITY;

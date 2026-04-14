@@ -1,84 +1,138 @@
-'use client'
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
-import { Suspense } from "react"
-import Link from "next/link"
-import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2 } from "lucide-react"
-import { SiteLogo } from "@/components/site-logo"
-import { CompanyLogo } from "@/components/company-logo"
-import { SearchParamsHandler } from "@/components/search-params-handler"
-
-export default function LandingPage() {
+export default function Page() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex flex-col items-center justify-center gap-6 border-b px-4 py-6 sm:px-6 sm:py-8">
-        {/* Logos centrados */}
-        <div className="flex items-center justify-center gap-8 flex-wrap">
-          <SiteLogo />
-          <div className="hidden sm:block">
-            <CompanyLogo />
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="InteliCon Logo" 
+              width={150} 
+              height={50}
+              className="h-14 w-auto"
+              priority
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="px-6 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors duration-200">
+              Iniciar Sesión
+            </a>
+            <a href="/auth/registro" className="relative px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl overflow-hidden group transition-all duration-300 hover:scale-105">
+              <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+              <span className="relative flex items-center gap-2">
+                Registrarse
+              </span>
+            </a>
           </div>
         </div>
-        
-        {/* Botones centrados */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-          <Link href="/auth/login" className="px-6 py-2 text-sm sm:text-base border rounded-md hover:bg-gray-100 whitespace-nowrap text-center">
-            Iniciar Sesión
-          </Link>
-          <Link href="/auth/registro" className="px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap text-center">
-            Registrarse
-          </Link>
-        </div>
-        
-        {/* Logo empresa en móvil centrado */}
-        <div className="sm:hidden">
-          <CompanyLogo />
-        </div>
-      </header>
+      </nav>
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-12 px-4 py-12 sm:px-6 sm:py-16">
-        <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
-          <h1 className="text-3xl font-bold sm:text-4xl">
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto text-center space-y-8">
+          <div className="inline-block px-4 py-2 bg-secondary text-secondary-foreground rounded-full text-sm font-medium">
+            Gestión completa de condominios en una plataforma
+          </div>
+          
+          <h1 className="text-5xl sm:text-6xl font-bold text-foreground text-balance leading-tight">
             Administra tu condominio de forma integral
           </h1>
-          <p className="text-base text-gray-600 sm:text-lg">
+          
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
             InteliCon es la plataforma completa para gestionar gastos, ingresos, encuestas, documentos, proyectos y mucho más. Todo en un solo lugar.
           </p>
-          <div className="flex flex-col gap-3 pt-4 sm:flex-row">
-            <Link href="/auth/registro" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-center">
-              Comenzar ahora
-            </Link>
-            <Link href="/auth/login" className="px-6 py-2 border rounded-md hover:bg-gray-100 font-medium text-center">
-              Ya tengo cuenta
-            </Link>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <a href="/auth/registro" className="relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative flex items-center gap-2">
+                Comenzar ahora
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </a>
+            <a href="/auth/login" className="relative px-8 py-3.5 border-2 border-primary/30 text-foreground rounded-full font-semibold text-base group transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-105">
+              <span className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative">Ya tengo cuenta</span>
+            </a>
           </div>
         </div>
+      </section>
 
-        <div className="w-full grid max-w-4xl grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { icon: BarChart3, title: "Reportes financieros", desc: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos" },
-            { icon: Home, title: "Control por casa", desc: "Cards de estado por casa, histórico de pagos y comprobantes de depósito" },
-            { icon: Vote, title: "Encuestas en vivo", desc: "Votaciones en tiempo real con resultados visibles al instante" },
-            { icon: FileText, title: "Documentos", desc: "Almacena reglamentos, sanciones, partes y cualquier documentación" },
-            { icon: ShieldCheck, title: "Exoneraciones", desc: "Gestiona exoneraciones permanentes o temporales por servicios" },
-            { icon: Building2, title: "Proyectos de mejora", desc: "Crea proyectos con cotizaciones, fotos y seguimiento de estado" },
-          ].map((feature) => (
-            <div key={feature.title} className="flex flex-col gap-2 rounded-xl border bg-white p-6 shadow-sm">
-              <feature.icon className="h-8 w-8 text-blue-600" />
-              <h3 className="font-semibold">{feature.title}</h3>
-              <p className="text-sm text-gray-600">{feature.desc}</p>
-            </div>
-          ))}
+      {/* Features Grid */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold text-foreground">Características principales</h2>
+            <p className="text-lg text-muted-foreground">Todo lo que necesitas para administrar tu condominio eficientemente</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: BarChart3,
+                title: "Reportes Financieros",
+                description: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos"
+              },
+              {
+                icon: Home,
+                title: "Control por Casa",
+                description: "Cards de estado por casa, histórico de pagos y comprobantes de depósito"
+              },
+              {
+                icon: Vote,
+                title: "Encuestas en Vivo",
+                description: "Votaciones en tiempo real con resultados visibles al instante"
+              },
+              {
+                icon: FileText,
+                title: "Gestión de Documentos",
+                description: "Almacena reglamentos, sanciones, partes y cualquier documentación"
+              },
+              {
+                icon: ShieldCheck,
+                title: "Exoneraciones",
+                description: "Gestiona exoneraciones permanentes o temporales por servicios"
+              },
+              {
+                icon: Building2,
+                title: "Proyectos de Mejora",
+                description: "Crea proyectos con cotizaciones, fotos y seguimiento de estado"
+              },
+            ].map((feature) => (
+              <div key={feature.title} className="group p-6 bg-background border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition">
+                  <feature.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
 
-      <footer className="border-t px-4 py-6 text-center text-xs text-gray-600 sm:px-6 sm:text-sm">
-        InteliCon - Sistema de Administración de Condominios
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center space-y-8 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 rounded-3xl p-12 backdrop-blur-sm">
+          <h2 className="text-3xl font-bold text-foreground">¿Listo para transformar tu administración?</h2>
+          <p className="text-lg text-muted-foreground">Únete a cientos de condominios que ya confían en InteliCon</p>
+          <a href="/auth/registro" className="inline-block relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105">
+            <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative">Comenzar prueba gratuita</span>
+          </a>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-background/50 py-8 px-4 sm:px-6 lg:px-8 mt-auto">
+        <div className="max-w-6xl mx-auto text-center text-sm text-muted-foreground">
+          <p>© 2026 InteliCon. Todos los derechos reservados.</p>
+        </div>
       </footer>
-
-      <Suspense fallback={null}>
-        <SearchParamsHandler />
-      </Suspense>
     </div>
   )
 }
-

@@ -3,16 +3,17 @@
 import { useState } from "react"
 import { createCommonArea, updateCommonArea, deleteCommonArea } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2 } from "lucide-react"
+import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2, AreaChart, Popsicle, PlusCircle, MapPlus } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { useTheme } from "@/app/dashboard/theme-context"
+import { Area } from "recharts"
 
 interface AreasComunesClientProps {
   areas: Record<string, unknown>[]
@@ -27,6 +28,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
   const [editPhotoUrl, setEditPhotoUrl] = useState("")
   const [isPaid, setIsPaid] = useState(false)
   const [editIsPaid, setEditIsPaid] = useState(false)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleEditClick = (area: Record<string, unknown>) => {
     setEditPhotoUrl((area.photo_url as string) || "")
@@ -64,10 +66,35 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Area</Button>
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <MapPin className="h-5 w-5" />
+                Nueva Area
+              </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Registrar Area Comun</DialogTitle></DialogHeader>
+            <DialogContent
+              className="border-2"
+              style={{
+                backgroundColor: dialogBgColor,
+                color: dialogTextColor,
+                borderColor: dialogBgColor
+              }}
+            >
+              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Registrar Área Común</DialogTitle></DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("photo_url", photoUrl)
@@ -80,32 +107,42 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="area_name">Nombre</Label>
-                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required />
+                  <Label htmlFor="area_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                  <Input id="area_name" name="name" placeholder="Ej: Piscina, Salon multiuso..." required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="area_desc">Descripcion</Label>
-                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." />
+                  <Label htmlFor="area_desc" style={{ color: dialogTextColor }}>Descripción</Label>
+                  <Textarea id="area_desc" name="description" placeholder="Descripcion del area..." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Foto</Label>
+                  <Label style={{ color: dialogTextColor }}>Foto</Label>
                   <FileUpload bucket="projects" folder="areas" onUpload={setPhotoUrl} label="Subir foto" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Switch id="is_paid_area" checked={isPaid} onCheckedChange={setIsPaid} />
-                  <Label htmlFor="is_paid_area">Uso pagado</Label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      id="is_paid_area" 
+                      checked={isPaid} 
+                      onCheckedChange={(checked) => setIsPaid(checked === true)} 
+                      className="w-5 h-5 border-2" 
+                    />
+                    <Label htmlFor="is_paid_area" style={{ color: dialogTextColor }}>Uso pagado</Label>
+                  </div>
+                  <Badge className="bg-white text-slate-900 border font-semibold">
+                    {isPaid ? "Pagado" : "Gratis"}
+                  </Badge>
                 </div>
                 {isPaid && (
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="usage_fee">Tarifa de uso ({currencySymbol})</Label>
-                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" />
+                    <Label htmlFor="usage_fee" style={{ color: dialogTextColor }}>Tarifa de uso ({currencySymbol})</Label>
+                    <Input id="usage_fee" name="usage_fee" type="number" step="0.01" placeholder="0.00" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 )}
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="maintenance_responsible">Responsable de mantenimiento</Label>
-                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" />
+                  <Label htmlFor="maintenance_responsible" style={{ color: dialogTextColor }}>Responsable de mantenimiento</Label>
+                  <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
-                <Button type="submit">Guardar Area</Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Área</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -113,65 +150,83 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       </div>
 
       {areas.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
-            <MapPin className="h-10 w-10" />
-            <p>No hay areas comunes registradas</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border-2 p-12 text-center" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
+          <MapPin className="h-10 w-10 mx-auto mb-2" />
+          <p>No hay areas comunes registradas</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {areas.map((area) => (
-            <Card key={area.id as string}>
-              {area.photo_url ? (
-                <div className="aspect-video overflow-hidden rounded-t-lg">
-                  <img
-                    src={area.photo_url as string}
-                    alt={area.name as string}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </div>
-              ) : null}
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{area.name as string}</CardTitle>
-                  <Badge variant={area.is_paid ? "default" : "secondary"}>
-                    {area.is_paid ? "Pagado" : "Gratis"}
-                  </Badge>
-                </div>
-                {area.description ? <CardDescription>{area.description as string}</CardDescription> : null}
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 text-sm">
-                {area.is_paid && area.usage_fee ? (
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span>Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
-                  </div>
-                ) : null}
-                {area.maintenance_responsible ? (
-                  <div className="flex items-center gap-2">
-                    <Wrench className="h-4 w-4 text-muted-foreground" />
-                    <span>Mantenimiento: {area.maintenance_responsible as string}</span>
+            <div key={area.id as string} className="rounded-lg border-2 p-4 hover:shadow-md transition-shadow" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
+              <div className="flex flex-col gap-4">
+                {/* Foto del área */}
+                {area.photo_url ? (
+                  <div className="aspect-video overflow-hidden rounded-lg">
+                    <img
+                      src={area.photo_url as string}
+                      alt={area.name as string}
+                      className="h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                    />
                   </div>
                 ) : null}
 
+                {/* Nombre y estado */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase" style={{ color: cardTextColor, opacity: 0.7 }}>Área</p>
+                    <h3 className="text-xl font-bold" style={{ color: cardTextColor }}>{area.name as string}</h3>
+                  </div>
+                  <Badge variant={area.is_paid ? "default" : "secondary"} className="text-xs bg-green-600 text-white dark:bg-green-700 dark:text-white">
+                    {area.is_paid ? "Pagado" : "Gratis"}
+                  </Badge>
+                </div>
+
+                {/* Descripción */}
+                {area.description ?
+                  <p className="text-sm" style={{ color: cardTextColor, opacity: 0.8 }}>{area.description as string}</p>
+                  : null}
+
+                {/* Información de tarifa */}
+                {area.is_paid && area.usage_fee ? (
+                  <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.8 }}>
+                    <DollarSign className="h-4 w-4" />
+                    <span className="text-sm">Tarifa: {currencySymbol}{Number(area.usage_fee).toLocaleString()}</span>
+                  </div>
+                ) : null}
+
+                {/* Responsable de mantenimiento */}
+                {area.maintenance_responsible ? (
+                  <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.8 }}>
+                    <Wrench className="h-4 w-4" />
+                    <span className="text-sm">Mant.: {area.maintenance_responsible as string}</span>
+                  </div>
+                ) : null}
+
+                {/* Botones de acciones */}
                 {isAdmin && (
-                  <div className="mt-3 flex gap-2 pt-3 border-t">
+                  <div className="flex gap-2 pt-3" style={{ borderTopColor: cardTextColor, borderTop: `1px solid ${cardTextColor}`, paddingTop: "12px" }}>
                     <Dialog open={openEdit === area.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                       <DialogTrigger asChild>
                         <Button
-                          variant="outline"
                           size="sm"
                           className="flex-1"
+                          style={{ backgroundColor: cardBgColor === "#1e293b" ? "#f1f5f9" : "#1e293b", color: cardBgColor === "#1e293b" ? "#1e293b" : "#f1f5f9" }}
                           onClick={() => handleEditClick(area)}
                         >
-                          <Edit2 className="h-4 w-4 mr-1" />
+                          <Edit2 className="h-4 w-4 mr-1" style={{ color: cardBgColor === "#1e293b" ? "#64748b" : "#94a3b8" }} />
                           Editar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader><DialogTitle>Editar Area Comun</DialogTitle></DialogHeader>
+                      <DialogContent
+                        className="border-2"
+                        style={{
+                          backgroundColor: dialogBgColor,
+                          color: dialogTextColor,
+                          borderColor: dialogBgColor
+                        }}
+                      >
+                        <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Editar Área Común</DialogTitle></DialogHeader>
                         <form
                           action={async (fd) => {
                             await handleEditSubmit(fd, area.id as string)
@@ -179,24 +234,26 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                           className="flex flex-col gap-4"
                         >
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_name">Nombre</Label>
+                            <Label htmlFor="edit_name" style={{ color: dialogTextColor }}>Nombre</Label>
                             <Input
                               id="edit_name"
                               name="name"
                               defaultValue={area.name as string}
                               required
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_desc">Descripcion</Label>
+                            <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripción</Label>
                             <Textarea
                               id="edit_desc"
                               name="description"
                               defaultValue={(area.description as string) || ""}
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label>Foto</Label>
+                            <Label style={{ color: dialogTextColor }}>Foto</Label>
                             <FileUpload
                               bucket="projects"
                               folder="areas"
@@ -204,55 +261,74 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               label="Cambiar foto"
                             />
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Switch
-                              id="edit_is_paid"
-                              checked={editIsPaid}
-                              onCheckedChange={setEditIsPaid}
-                            />
-                            <Label htmlFor="edit_is_paid">Uso pagado</Label>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Checkbox
+                                id="edit_is_paid"
+                                checked={editIsPaid}
+                                onCheckedChange={(checked) => {
+                                  if (typeof checked === 'boolean') {
+                                    setEditIsPaid(checked)
+                                  }
+                                }}
+                                className="w-5 h-5 border-2"
+                              />
+                              <Label htmlFor="edit_is_paid" style={{ color: dialogTextColor }}>Uso pagado</Label>
+                            </div>
+                            <Badge className="bg-white text-slate-900 border font-semibold">
+                              {editIsPaid ? "Pagado" : "Gratis"}
+                            </Badge>
                           </div>
                           {editIsPaid && (
                             <div className="flex flex-col gap-2">
-                              <Label htmlFor="edit_usage_fee">Tarifa de uso ({currencySymbol})</Label>
+                              <Label htmlFor="edit_usage_fee" style={{ color: dialogTextColor }}>Tarifa de uso ({currencySymbol})</Label>
                               <Input
                                 id="edit_usage_fee"
                                 name="usage_fee"
                                 type="number"
                                 step="0.01"
                                 defaultValue={(area.usage_fee as number) || 0}
+                                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                               />
                             </div>
                           )}
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor="edit_maintenance">Responsable de mantenimiento</Label>
+                            <Label htmlFor="edit_maintenance" style={{ color: dialogTextColor }}>Responsable de mantenimiento</Label>
                             <Input
                               id="edit_maintenance"
                               name="maintenance_responsible"
                               defaultValue={(area.maintenance_responsible as string) || ""}
+                              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
-                          <Button type="submit">Guardar Cambios</Button>
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Cambios</Button>
                         </form>
                       </DialogContent>
                     </Dialog>
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" className="flex-1">
+                        <Button size="sm" className="flex-1 bg-destructive hover:bg-destructive/90 text-white">
                           <Trash2 className="h-4 w-4 mr-1" />
                           Eliminar
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent
+                        className="border-2"
+                        style={{
+                          backgroundColor: dialogBgColor,
+                          color: dialogTextColor,
+                          borderColor: dialogBgColor
+                        }}
+                      >
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Eliminar Area Comun</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Área Común</AlertDialogTitle>
+                          <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
                             {"¿Estás seguro de que deseas eliminar \"" + (area.name as string) + "\"? Esta acción no puede deshacerse."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 justify-end">
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogCancel style={{ color: dialogTextColor, borderColor: dialogTextColor }}>Cancelar</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteClick(area.id as string)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -264,8 +340,8 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                     </AlertDialog>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

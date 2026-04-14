@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTheme } from "../theme-context"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +28,7 @@ export default function MiCuentaPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   
   const supabase = createClient()
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor } = useTheme()
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -159,8 +161,8 @@ export default function MiCuentaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Mi Cuenta</h1>
-        <p className="text-muted-foreground">Administra tu información personal y seguridad</p>
+        <h1 className="text-3xl font-bold" style={{ color: cardTextColor }}>Mi Cuenta</h1>
+        <p className="text-muted-foreground" style={{ color: cardTextColor }}>Administra tu información personal y seguridad</p>
       </div>
 
       {success && (
@@ -178,13 +180,13 @@ export default function MiCuentaPage() {
       )}
 
       {/* Profile Information */}
-      <Card>
+      <Card style={{ backgroundColor: cardBgColor || undefined }}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2" style={{ color: cardTextColor }}>
             <User className="h-5 w-5" />
             Información Personal
           </CardTitle>
-          <CardDescription>
+          <CardDescription style={{ color: cardTextColor }}>
             Actualiza tu nombre y datos de contacto
           </CardDescription>
         </CardHeader>
@@ -192,49 +194,51 @@ export default function MiCuentaPage() {
           <form onSubmit={handleUpdateProfile} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
+                <Label htmlFor="firstName" style={{ color: cardTextColor }}>Nombre</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   disabled={saving}
+                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
+                <Label htmlFor="lastName" style={{ color: cardTextColor }}>Apellido</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   disabled={saving}
+                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
+              <Label htmlFor="email" style={{ color: cardTextColor }}>Correo Electrónico</Label>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   value={email}
                   disabled
-                  className="bg-muted"
+                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground" style={{ color: cardTextColor }}>
                 El correo electrónico no puede ser modificado
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label>Rol</Label>
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
+              <Label style={{ color: cardTextColor }}>Rol</Label>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-md" style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                 <span className="capitalize">{profile?.role || "Usuario"}</span>
               </div>
             </div>
 
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Guardar Cambios
             </Button>
@@ -243,20 +247,20 @@ export default function MiCuentaPage() {
       </Card>
 
       {/* Change Password */}
-      <Card>
+      <Card style={{ backgroundColor: cardBgColor || undefined }}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2" style={{ color: cardTextColor }}>
             <Key className="h-5 w-5" />
             Cambiar Contrasena
           </CardTitle>
-          <CardDescription>
+          <CardDescription style={{ color: cardTextColor }}>
             Actualiza tu contraseña para mantener tu cuenta segura
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Contraseña Actual</Label>
+              <Label htmlFor="currentPassword" style={{ color: cardTextColor }}>Contraseña Actual</Label>
               <div className="relative">
                 <Input
                   id="currentPassword"
@@ -266,6 +270,7 @@ export default function MiCuentaPage() {
                   required
                   disabled={savingPassword}
                   className="pr-10"
+                  style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
                 <button
                   type="button"
@@ -278,7 +283,7 @@ export default function MiCuentaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nueva Contraseña</Label>
+              <Label htmlFor="newPassword" style={{ color: cardTextColor }}>Nueva Contraseña</Label>
               <Input
                 id="newPassword"
                 type={showPassword ? "text" : "password"}
@@ -287,11 +292,12 @@ export default function MiCuentaPage() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 disabled={savingPassword}
+                style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+              <Label htmlFor="confirmPassword" style={{ color: cardTextColor }}>Confirmar Nueva Contraseña</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
@@ -300,10 +306,11 @@ export default function MiCuentaPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={savingPassword}
+                style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
 
-            <Button type="submit" disabled={savingPassword}>
+            <Button type="submit" disabled={savingPassword} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
               {savingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Cambiar Contraseña
             </Button>

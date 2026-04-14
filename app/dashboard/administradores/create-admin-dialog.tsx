@@ -82,48 +82,74 @@ export function CreateAdminDialog({ condoId, condoName }: CreateAdminDialogProps
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <UserPlus className="h-4 w-4 mr-2" />
+        <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <UserPlus className="h-5 w-5 mr-2" />
           Crear Administrador
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle>Crear Administrador</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-white">Crear Administrador</DialogTitle>
+          <DialogDescription className="text-slate-600 dark:text-slate-400">
             Crea un nuevo administrador para {condoName}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-200 border border-red-200 dark:border-red-800">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="first_name">Nombre *</Label>
-              <Input id="first_name" name="first_name" required />
+              <Label htmlFor="first_name" className="text-slate-900 dark:text-slate-200">Nombre *</Label>
+              <Input 
+                id="first_name" 
+                name="first_name" 
+                required 
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name">Apellido</Label>
-              <Input id="last_name" name="last_name" />
+              <Label htmlFor="last_name" className="text-slate-900 dark:text-slate-200">Apellido</Label>
+              <Input 
+                id="last_name" 
+                name="last_name"
+                className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico *</Label>
-            <Input id="email" name="email" type="email" required />
+            <Label htmlFor="email" className="text-slate-900 dark:text-slate-200">Correo electrónico *</Label>
+            <Input 
+              id="email" 
+              name="email" 
+              type="email" 
+              required 
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña *</Label>
-            <Input id="password" name="password" type="password" minLength={6} required />
-            <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
+            <Label htmlFor="password" className="text-slate-900 dark:text-slate-200">Contraseña *</Label>
+            <Input 
+              id="password" 
+              name="password" 
+              type="password" 
+              minLength={6} 
+              required 
+              className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+            />
+            <p className="text-xs text-slate-600 dark:text-slate-400">Mínimo 6 caracteres</p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={loading}
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Crear Administrador
           </Button>

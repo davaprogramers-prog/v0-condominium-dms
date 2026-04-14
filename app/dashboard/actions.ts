@@ -347,88 +347,191 @@ export async function createExemption(formData: FormData) {
   revalidatePath("/dashboard/exoneraciones")
 }
 
+export async function updateExemption(id: string, formData: FormData) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemptions").update({
+    exemption_type_id: formData.get("exemption_type_id") as string,
+    is_permanent: formData.get("is_permanent") === "true",
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string || null,
+    percentage: Number(formData.get("percentage")) || 100,
+    reason: formData.get("reason") as string || null,
+  }).eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
+export async function deleteExemption(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase.from("exemptions").delete().eq("id", id)
+  if (error) throw error
+  revalidatePath("/dashboard/exoneraciones")
+}
+
 // ===== Projects =====
 export async function createProject(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
-  const { error } = await supabase.from("projects").insert({
-    condo_id: condoId,
-    name: formData.get("name") as string,
-    description: formData.get("description") as string,
-    improvement_type: formData.get("improvement_type") as string,
-    location_description: formData.get("location_description") as string || null,
-    location_photo_url: formData.get("location_photo_url") as string || null,
-    estimated_cost: Number(formData.get("estimated_cost")) || null,
-    start_date: formData.get("start_date") as string || null,
-    created_by: userId,
-  })
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  
+  try {
+    const { error } = await supabase.from("projects").insert({
+      condo_id: condoId,
+      name: formData.get("name") as string,
+      improvement_type: formData.get("improvement_type") as string || null,
+      description: formData.get("description") as string || null,
+      location_description: formData.get("location_description") as string || null,
+      location_photo_url: formData.get("location_photo_url") as string || null,
+      estimated_cost: Number(formData.get("estimated_cost")) || 0,
+      start_date: formData.get("start_date") as string || null,
+      status: "propuesto",
+      created_by: userId,
+    })
+    
+    if (error) {
+      console.error("Error creating project:", error)
+      // Handle specific error codes
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para crear proyectos. Contacta al administrador del sistema.")
+      }
+      throw new Error(error.message || "Error al crear el proyecto")
+    }
+    
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in createProject:", err)
+    throw err
+  }
 }
 
 export async function updateProjectStatus(id: string, status: string) {
   const { supabase } = await getCondoId()
-  const { error } = await supabase.from("projects").update({ status }).eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const { error } = await supabase.from("projects").update({ status }).eq("id", id)
+    if (error) {
+      console.error("Error updating project status:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para actualizar estados de proyectos.")
+      }
+      throw new Error(error.message || "Error al actualizar estado")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in updateProjectStatus:", err)
+    throw err
+  }
 }
 
 export async function addProjectQuote(formData: FormData) {
   const { supabase } = await getCondoId()
-  const { error } = await supabase.from("project_quotes").insert({
-    project_id: formData.get("project_id") as string,
-    vendor_name: formData.get("vendor_name") as string,
-    amount: Number(formData.get("amount")),
-    description: formData.get("description") as string || null,
-    document_url: formData.get("document_url") as string || null,
-  })
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const { error } = await supabase.from("project_quotes").insert({
+      project_id: formData.get("project_id") as string,
+      vendor_name: formData.get("vendor_name") as string,
+      amount: Number(formData.get("amount")),
+      description: formData.get("description") as string || null,
+      document_url: formData.get("document_url") as string || null,
+    })
+    if (error) {
+      console.error("Error adding project quote:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para agregar cotizaciones.")
+      }
+      throw new Error(error.message || "Error al agregar cotización")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in addProjectQuote:", err)
+    throw err
+  }
 }
 
 export async function updateProject(formData: FormData) {
   const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("projects")
-    .update({
-      name: formData.get("name") as string,
-      description: formData.get("description") as string || null,
-      improvement_type: formData.get("improvement_type") as string || null,
-      location_description: formData.get("location_description") as string || null,
-      estimated_cost: Number(formData.get("estimated_cost")) || null,
-    })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const { error } = await supabase
+      .from("projects")
+      .update({
+        name: formData.get("name") as string,
+        description: formData.get("description") as string || null,
+        improvement_type: formData.get("improvement_type") as string || null,
+        location_description: formData.get("location_description") as string || null,
+        estimated_cost: Number(formData.get("estimated_cost")) || null,
+      })
+      .eq("id", formData.get("id") as string)
+    if (error) {
+      console.error("Error updating project:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para actualizar proyectos.")
+      }
+      throw new Error(error.message || "Error al actualizar proyecto")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in updateProject:", err)
+    throw err
+  }
 }
 
 export async function deleteProject(id: string) {
   const { supabase } = await getCondoId()
-  // Delete quotes first
-  await supabase.from("project_quotes").delete().eq("project_id", id)
-  const { error } = await supabase.from("projects").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    // Delete quotes first
+    await supabase.from("project_quotes").delete().eq("project_id", id)
+    const { error } = await supabase.from("projects").delete().eq("id", id)
+    if (error) {
+      console.error("Error deleting project:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para eliminar proyectos.")
+      }
+      throw new Error(error.message || "Error al eliminar proyecto")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in deleteProject:", err)
+    throw err
+  }
 }
 
 export async function updateProjectQuote(formData: FormData) {
   const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("project_quotes")
-    .update({
-      vendor_name: formData.get("vendor_name") as string,
-      amount: Number(formData.get("amount")),
-      description: formData.get("description") as string || null,
-    })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const { error } = await supabase
+      .from("project_quotes")
+      .update({
+        vendor_name: formData.get("vendor_name") as string,
+        amount: Number(formData.get("amount")),
+        description: formData.get("description") as string || null,
+      })
+      .eq("id", formData.get("id") as string)
+    if (error) {
+      console.error("Error updating project quote:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para actualizar cotizaciones.")
+      }
+      throw new Error(error.message || "Error al actualizar cotización")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in updateProjectQuote:", err)
+    throw err
+  }
 }
 
 export async function deleteProjectQuote(id: string) {
   const { supabase } = await getCondoId()
-  const { error } = await supabase.from("project_quotes").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/proyectos")
+  try {
+    const { error } = await supabase.from("project_quotes").delete().eq("id", id)
+    if (error) {
+      console.error("Error deleting project quote:", error)
+      if (error.code === "42501") {
+        throw new Error("No tienes permisos para eliminar cotizaciones.")
+      }
+      throw new Error(error.message || "Error al eliminar cotización")
+    }
+    revalidatePath("/dashboard/proyectos")
+  } catch (err) {
+    console.error("Error in deleteProjectQuote:", err)
+    throw err
+  }
 }
 
 // ===== Surveys =====
@@ -627,16 +730,28 @@ export async function markInfractionPaid(id: string) {
 
 export async function updateInfraction(formData: FormData) {
   const { supabase } = await getCondoId()
+  const id = formData.get("id") as string
+  const description = formData.get("description") as string
+  const infraction_date = formData.get("infraction_date") as string
+  const fine_amount = formData.get("fine_amount") as string
+
+  if (!id) throw new Error("ID es requerido")
+  if (!description?.trim()) throw new Error("La descripción es requerida")
+  if (!infraction_date) throw new Error("La fecha es requerida")
+
   const { error } = await supabase
     .from("infractions")
     .update({
-      description: formData.get("description") as string,
-      fine_amount: Number(formData.get("fine_amount")) || 0,
-      infraction_date: formData.get("infraction_date") as string,
-      notes: formData.get("notes") as string || null,
+      description: description.trim(),
+      fine_amount: fine_amount ? Number(fine_amount) : 0,
+      infraction_date: infraction_date,
     })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
+    .eq("id", id)
+  
+  if (error) {
+    console.error("[v0] updateInfraction error:", error)
+    throw new Error(`Error actualizando infracción: ${error.message}`)
+  }
   revalidatePath("/dashboard/infracciones")
 }
 

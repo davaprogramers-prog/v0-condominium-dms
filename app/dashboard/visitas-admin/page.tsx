@@ -1,111 +1,85 @@
-import { Metadata } from 'next'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getAdminVisits } from './actions'
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import { VisitsAdminClient } from "./visits-admin-client"
 
-export const metadata: Metadata = {
-  title: 'Visitas | Admin | Condominio',
-  description: 'Gestión de visitas del condominio',
-}
+export default async function VisitasAdminPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/login")
 
-export default async function AdminVisitasPage() {
-  const visits = await getAdminVisits()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, condo_id, role")
+    .eq("id", user.id)
+    .single()
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled':
-        return 'bg-blue-100 text-blue-800'
-      case 'completed':
-        return 'bg-green-100 text-green-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+  if (!profile?.condo_id) redirect("/dashboard")
+
+  // Check permissions
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isConcierge = profile.role === "conserje"
+  const isOwner = profile.role === "propietario"
+
+  if (!isAdmin && !isConcierge && !isOwner) {
+    redirect("/dashboard")
+  }
+
+  let visits: any[] = []
+  let houses: any[] = []
+
+  if (isAdmin || isConcierge) {
+    // Admin and Concierge see all visits in their condo
+    const { data: allVisits } = await supabase
+      .from("visits")
+      .select("*, house:houses(id, house_number)")
+      .eq("condo_id", profile.condo_id)
+      .order("visit_date", { ascending: false })
+
+    visits = allVisits || []
+
+    // Get all houses in the condo
+    const { data: allHouses } = await supabase
+      .from("houses")
+      .select("id, house_number")
+      .eq("condo_id", profile.condo_id)
+      .order("house_number", { ascending: true })
+
+    houses = allHouses || []
+  } else if (isOwner) {
+    // Owners see visits within 2 days of their properties
+    const today = new Date()
+    const twoDaysLater = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)
+
+    const { data: userHouses } = await supabase
+      .from("houses")
+      .select("id, house_number")
+      .eq("condo_id", profile.condo_id)
+      .eq("owner_id", user.id)
+
+    if (userHouses && userHouses.length > 0) {
+      const houseIds = userHouses.map((h) => h.id)
+
+      const { data: ownerVisits } = await supabase
+        .from("visits")
+        .select("*, house:houses(id, house_number)")
+        .in("house_id", houseIds)
+        .eq("condo_id", profile.condo_id)
+        .gte("visit_date", today.toISOString().split("T")[0])
+        .lte("visit_date", twoDaysLater.toISOString().split("T")[0])
+        .order("visit_date", { ascending: false })
+
+      visits = ownerVisits || []
+      houses = userHouses
     }
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b bg-background/95 sticky top-0 z-10">
-        <div className="flex items-center gap-3 h-16 px-4">
-          <Link href="/dashboard" className="md:hidden">
-            <ChevronLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-xl font-semibold">Gestión de Visitas</h1>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-4">
-          <div className="space-y-4">
-            {visits.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <p className="text-muted-foreground">No hay visitas registradas</p>
-                </CardContent>
-              </Card>
-            ) : (
-              visits.map((visit) => (
-                <Card key={visit.id} className="overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{visit.visitor_name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Casa #{visit.house?.house_number} • {visit.created_by_profile?.name}
-                        </p>
-                      </div>
-                      <Badge className={getStatusColor(visit.status)}>
-                        {visit.status === 'scheduled' && 'Programada'}
-                        {visit.status === 'completed' && 'Completada'}
-                        {visit.status === 'cancelled' && 'Cancelada'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium text-muted-foreground">Tipo de Visita</p>
-                        <p>{visit.visit_title}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-muted-foreground">Fecha y Hora</p>
-                        <p>
-                          {new Date(visit.visit_date).toLocaleDateString('es-CL')}
-                          {visit.visit_time && ` a las ${visit.visit_time.substring(0, 5)}`}
-                        </p>
-                      </div>
-                      {visit.visitor_email && (
-                        <div>
-                          <p className="font-medium text-muted-foreground">Email</p>
-                          <p>{visit.visitor_email}</p>
-                        </div>
-                      )}
-                      {visit.visitor_phone && (
-                        <div>
-                          <p className="font-medium text-muted-foreground">Teléfono</p>
-                          <p>{visit.visitor_phone}</p>
-                        </div>
-                      )}
-                    </div>
-                    {visit.description && (
-                      <div className="mt-4">
-                        <p className="font-medium text-muted-foreground text-sm">Descripción</p>
-                        <p className="text-sm">{visit.description}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <VisitsAdminClient
+      visits={visits}
+      houses={houses}
+      userRole={profile.role}
+      condoId={profile.condo_id}
+      userId={user.id}
+    />
   )
 }

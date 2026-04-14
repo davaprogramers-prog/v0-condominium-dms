@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
 export async function login(formData: FormData) {
@@ -9,10 +9,17 @@ export async function login(formData: FormData) {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   }
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error, data: authData } = await supabase.auth.signInWithPassword(data)
   if (error) {
     return redirect("/auth/login?error=" + encodeURIComponent(error.message))
   }
+
+  // Ensure user profile is set up correctly
+  if (authData?.user) {
+    const result = await ensureUserProfile(authData.user.id, authData.user.email || "")
+    console.log("[v0] Login ensureUserProfile result:", result)
+  }
+
   return redirect("/dashboard")
 }
 
@@ -53,8 +60,18 @@ export async function registerOwner(
   houseId: string
 ) {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
 
-  // Create auth user
+  // Get house details to get condo_id
+  const { data: house, error: houseError } = await supabase
+    .from("houses")
+    .select("id, condo_id")
+    .eq("id", houseId)
+    .single()
+
+  if (houseError || !house) throw new Error("Casa no válida")
+
+  // Try to sign up new user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -65,66 +82,179 @@ export async function registerOwner(
       data: {
         first_name: firstName,
         last_name: lastName,
+        role: "owner",
       },
     },
   })
 
+  // If user already exists, that's fine - we'll just ensure profile is updated
+  if (authError && authError.message.includes("already registered")) {
+    console.log("[v0] User already registered, attempting to get their auth user...")
+    
+    // User already exists, try to get their current user
+    const { data: { user: existingUser } } = await supabase.auth.getUser()
+    
+    if (existingUser?.email === email) {
+      // Logged in user - update their profile
+      console.log("[v0] Updating profile for existing logged-in user:", existingUser.id)
+      
+      const { error: updateError } = await serviceClient
+        .from("profiles")
+        .update({
+          house_id: houseId,
+          condo_id: house.condo_id,
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq("id", existingUser.id)
+      
+      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
+      
+      return existingUser
+    } else {
+      // Different user exists with this email - can't register
+      throw new Error("El email ya está registrado. Intenta iniciar sesión.")
+    }
+  }
+
   if (authError) throw authError
   if (!authData.user) throw new Error("No se pudo crear la cuenta")
 
-  // Get house details
-  const { data: house, error: houseError } = await supabase
-    .from("houses")
-    .select("id, condo_id")
-    .eq("id", houseId)
-    .single()
+  const userId = authData.user.id
 
-  if (houseError || !house) throw new Error("Casa no válida")
+  // Wait 1 second for auth to be ready
+  await new Promise(resolve => setTimeout(resolve, 1000))
 
-  // Wait a moment for the trigger to create the profile
-  await new Promise(resolve => setTimeout(resolve, 500))
-
-  // Try to update profile, if it fails try upsert
-  const { error: profileError } = await supabase
+  // Create profile with all data including condo_id using service client
+  const { error: profileError } = await serviceClient
     .from("profiles")
-    .upsert({
-      id: authData.user.id,
+    .insert({
+      id: userId,
       email,
       first_name: firstName,
       last_name: lastName,
       house_id: houseId,
       condo_id: house.condo_id,
       role: "owner",
-    }, { onConflict: "id" })
+    })
 
   if (profileError) {
-    console.error("[v0] Profile upsert error:", profileError)
-    // Retry with update after another delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    await supabase
-      .from("profiles")
-      .update({
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        house_id: houseId,
-        condo_id: house.condo_id,
-        role: "owner",
-      })
-      .eq("id", authData.user.id)
+    console.error("[v0] Profile creation error:", profileError)
+    // If insert fails due to duplicate, try update
+    if (profileError.code === "23505") {
+      const { error: updateError } = await serviceClient
+        .from("profiles")
+        .update({
+          house_id: houseId,
+          condo_id: house.condo_id,
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq("id", userId)
+      
+      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
+    } else {
+      throw new Error("Error al crear el perfil")
+    }
   }
 
-  // Also update the house with the owner's user_id
-  await supabase
-    .from("houses")
-    .update({ owner_id: authData.user.id })
-    .eq("id", houseId)
+  console.log("[v0] User registered with profile:", userId, "condo_id:", house.condo_id)
 
   return authData.user
+}
+
+export async function ensureUserProfile(userId: string, email: string) {
+  try {
+    // Use service client to bypass RLS for profile creation
+    const supabase = createServiceClient()
+
+    console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
+
+    // Buscar en public.houses por owner_email (para propietarios)
+    const { data: house, error: houseErr } = await supabase
+      .from("houses")
+      .select("id, condo_id, owner_name")
+      .eq("owner_email", email)
+      .single()
+
+    console.log("[v0] House query - found:", !!house, "error:", houseErr?.message)
+
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single()
+
+    if (existingProfile) {
+      console.log("[v0] Profile already exists for user:", userId)
+      return { success: true }
+    }
+
+    if (house) {
+      // User is a property owner - associate with house and condo
+      console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
+
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          email,
+          first_name: house.owner_name || email.split("@")[0],
+          last_name: "",
+          house_id: house.id,
+          condo_id: house.condo_id,
+          role: "owner",
+        })
+
+      if (insertError && insertError.code !== "23505") {
+        console.log("[v0] INSERT error:", insertError.message)
+        return { success: false, error: insertError.message }
+      }
+
+      return { success: true }
+    } else {
+      // No house found - user might be conserje, admin, etc.
+      // Get the condo_id from auth user metadata if available
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId)
+      const condoId = authUser?.user_metadata?.condo_id
+      const role = authUser?.user_metadata?.role || "owner"
+
+      if (condoId) {
+        // User has condo_id but no house - likely conserje, admin, etc.
+        console.log("[v0] Creating profile for non-owner user with condo_id:", condoId, "role:", role)
+        
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            email,
+            first_name: email.split("@")[0],
+            last_name: "",
+            condo_id: condoId,
+            role: role,
+          })
+
+        if (insertError && insertError.code !== "23505") {
+          console.log("[v0] INSERT error for non-owner:", insertError.message)
+          return { success: false, error: insertError.message }
+        }
+
+        return { success: true }
+      } else {
+        // No condo_id and no house - can't assign
+        console.log("[v0] No house and no condo_id - cannot auto-assign")
+        return { success: false, message: "Awaiting admin assignment" }
+      }
+    }
+  } catch (err) {
+    console.error("[v0] ensureUserProfile ERROR:", err)
+    return { success: false, error: String(err) }
+  }
 }
 
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  return redirect("/auth/login")
+  redirect("/auth/login")
 }

@@ -7,20 +7,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Edit2, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { updateHouse } from "./actions"
 
 interface EditHouseDialogProps {
   houseId: string
+  houseNumber: string | number
   ownerName: string
   ownerEmail: string
   paymentDueDay?: number
 }
 
-export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay = 5 }: EditHouseDialogProps) {
+export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, paymentDueDay = 5 }: EditHouseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -49,14 +52,21 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Edit2 className="h-4 w-4" />
+        <Button size="sm" className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300">
+          <Edit2 className="h-4 w-4" style={{ color: "#64748b" }} />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent 
+        className="border-2"
+        style={{
+          backgroundColor: dialogBgColor,
+          color: dialogTextColor,
+          borderColor: dialogBgColor
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Editar Casa</DialogTitle>
-          <DialogDescription>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Editar Casa #{houseNumber}</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -65,16 +75,17 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="owner_name">Nombre del Propietario</Label>
+            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
             <Input
               id="owner_name"
               name="owner_name"
               placeholder="Nombre completo"
               defaultValue={ownerName}
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email">Email del Propietario</Label>
+            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario</Label>
             <Input
               id="owner_email"
               name="owner_email"
@@ -82,10 +93,11 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
               placeholder="correo@ejemplo.com"
               defaultValue={ownerEmail}
               required
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="payment_due_day">Día de Vencimiento de Pago</Label>
+            <Label htmlFor="payment_due_day" style={{ color: dialogTextColor }}>Día de Vencimiento de Pago</Label>
             <Input 
               id="payment_due_day" 
               name="payment_due_day" 
@@ -94,10 +106,11 @@ export function EditHouseDialog({ houseId, ownerName, ownerEmail, paymentDueDay 
               max={28} 
               placeholder="5" 
               defaultValue={paymentDueDay}
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
-            <p className="text-xs text-muted-foreground">Día del mes para vencimiento del pago (1-28)</p>
+            <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.6 }}>Día del mes para vencimiento del pago (1-28)</p>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios
           </Button>

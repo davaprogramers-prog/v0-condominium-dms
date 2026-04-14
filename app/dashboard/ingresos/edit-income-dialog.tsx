@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Pencil, X, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { updateIncome } from "./actions"
+import { useTheme } from "@/app/dashboard/theme-context"
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
   const [previewUrl, setPreviewUrl] = useState<string>(income.receipt_url || "")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -88,21 +90,21 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Editar Ingreso</DialogTitle>
-          <DialogDescription>Actualiza los detalles del ingreso y el comprobante</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Editar Ingreso</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los detalles del ingreso y el comprobante</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto (CLP) *</Label>
+              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -111,53 +113,58 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                 defaultValue={income.amount}
                 placeholder="0.00"
                 required
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
-              <Label>Tipo de Ingreso</Label>
+              <Label style={{ color: dialogTextColor }}>Tipo de Ingreso</Label>
               <Input
                 type="text"
                 value={income.income_type === "cuota" ? "Cuota Común" : "Ingreso Variable"}
                 disabled
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Casa Asignada</Label>
+              <Label style={{ color: dialogTextColor }}>Casa Asignada</Label>
               <Input
                 type="text"
                 value={house ? `Casa #${house.house_number}` : "Sin asignar"}
                 disabled
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="incomeDate">Fecha del Ingreso</Label>
+              <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso</Label>
               <Input
                 id="incomeDate"
                 name="incomeDate"
                 type="date"
                 defaultValue={new Date(income.income_date).toISOString().split("T")[0]}
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
+            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Detalles adicionales del ingreso..."
               defaultValue={income.description}
               rows={3}
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label>Comprobante (Transferencia/Depósito)</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+            <Label style={{ color: dialogTextColor }}>Comprobante (Transferencia/Depósito)</Label>
+            <div className="border-2 border-dashed rounded-lg p-4 text-center" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
@@ -165,6 +172,7 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                       src={previewUrl}
                       alt="Preview"
                       className="max-h-40 max-w-full rounded"
+                      style={{ border: `2px solid ${inputTextColor}` }}
                     />
                     <button
                       type="button"
@@ -174,13 +182,13 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  {selectedFile && <p className="text-sm text-muted-foreground">{selectedFile.name}</p>}
+                  {selectedFile && <p className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>{selectedFile.name}</p>}
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
+                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
+                    <span className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -193,12 +201,12 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
                 </label>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs" style={{ color: inputTextColor, opacity: 0.6 }}>
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Cambios
           </Button>

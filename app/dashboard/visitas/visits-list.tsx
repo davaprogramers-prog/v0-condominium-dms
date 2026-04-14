@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/app/dashboard/theme-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar, MapPin, User, Mail, Phone, Trash2, Check, X, Loader2 } from 'lucide-react'
@@ -31,6 +32,7 @@ export function VisitsList({ visits }: VisitsListProps) {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; visit: Visit | null }>({ open: false, visit: null })
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
+  const { cardBgColor, cardTextColor, borderColor } = useTheme()
 
   async function handleDelete() {
     if (!deleteDialog.visit) return
@@ -94,11 +96,19 @@ export function VisitsList({ visits }: VisitsListProps) {
     <>
       <div className="space-y-4">
         {visits.map((visit) => (
-          <div key={visit.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+          <div 
+            key={visit.id} 
+            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+            style={{
+              backgroundColor: cardBgColor,
+              borderColor: borderColor,
+              color: cardTextColor
+            }}
+          >
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h3 className="font-semibold text-lg">{visit.visitor_name}</h3>
-                <p className="text-sm text-muted-foreground">{visit.visit_title}</p>
+                <h3 className="font-semibold text-lg" style={{ color: cardTextColor }}>{visit.visitor_name}</h3>
+                <p className="text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>{visit.visit_title}</p>
               </div>
               <Badge className={getStatusColor(visit.status)}>
                 {getStatusLabel(visit.status)}
@@ -106,11 +116,11 @@ export function VisitsList({ visits }: VisitsListProps) {
             </div>
 
             <div className="space-y-2 mb-4 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                 <MapPin className="h-4 w-4" />
                 <span>Casa #{visit.house?.house_number}</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                 <Calendar className="h-4 w-4" />
                 <span>
                   {new Date(visit.visit_date).toLocaleDateString('es-CL')}
@@ -118,24 +128,24 @@ export function VisitsList({ visits }: VisitsListProps) {
                 </span>
               </div>
               {visit.visitor_email && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                   <Mail className="h-4 w-4" />
                   <span>{visit.visitor_email}</span>
                 </div>
               )}
               {visit.visitor_phone && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2" style={{ color: cardTextColor, opacity: 0.7 }}>
                   <Phone className="h-4 w-4" />
                   <span>{visit.visitor_phone}</span>
                 </div>
               )}
               {visit.description && (
-                <p className="text-muted-foreground italic mt-2">{visit.description}</p>
+                <p style={{ color: cardTextColor, opacity: 0.7 }} className="italic mt-2">{visit.description}</p>
               )}
             </div>
 
             {visit.status === 'scheduled' && (
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${borderColor}` }}>
                 <Button
                   size="sm"
                   variant="outline"

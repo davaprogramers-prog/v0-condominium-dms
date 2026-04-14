@@ -113,10 +113,10 @@ export function CreateCondoDialog() {
           Crear Condominio
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white border-gray-200">
         <DialogHeader>
-          <DialogTitle>Crear Nuevo Condominio</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Crear Nuevo Condominio</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Ingresa los datos del nuevo condominio. El administrador se puede asignar despues.
           </DialogDescription>
         </DialogHeader>
@@ -129,41 +129,44 @@ export function CreateCondoDialog() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre del Condominio *</Label>
+            <Label htmlFor="name" className="text-gray-700">Nombre del Condominio *</Label>
             <Input
               id="name"
               name="name"
               placeholder="Ej: Condominio Los Alamos"
               required
+              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Direccion</Label>
+            <Label htmlFor="address" className="text-gray-700">Direccion</Label>
             <Textarea
               id="address"
               name="address"
               placeholder="Direccion completa del condominio"
               rows={2}
+              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="currency_symbol">Simbolo de Moneda</Label>
+            <Label htmlFor="currency_symbol" className="text-gray-700">Simbolo de Moneda</Label>
             <Input
               id="currency_symbol"
               name="currency_symbol"
               placeholder="$"
               defaultValue="$"
               maxLength={5}
+              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-600">
               Simbolo usado para mostrar valores monetarios (ej: $, USD, CLP)
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Logo del Condominio</Label>
+            <Label className="text-gray-700">Logo del Condominio</Label>
             <div className="flex items-center gap-4">
               {logoPreview ? (
                 <div className="relative">
@@ -172,12 +175,12 @@ export function CreateCondoDialog() {
                     alt="Logo preview"
                     width={80}
                     height={80}
-                    className="h-20 w-20 rounded-lg object-contain border"
+                    className="h-20 w-20 rounded-lg object-contain border border-gray-300"
                   />
                   <button
                     type="button"
                     onClick={removeLogo}
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -185,9 +188,9 @@ export function CreateCondoDialog() {
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-20 w-20 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                  className="h-20 w-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
                 >
-                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <Upload className="h-6 w-6 text-gray-400" />
                 </div>
               )}
               <input
@@ -197,17 +200,17 @@ export function CreateCondoDialog() {
                 onChange={handleLogoChange}
                 className="hidden"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-600">
                 Haz clic para subir el logo (opcional)
               </p>
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-gray-300 text-gray-700 hover:bg-gray-50">
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Crear Condominio
             </Button>

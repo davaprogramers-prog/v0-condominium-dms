@@ -451,3 +451,53 @@ CREATE POLICY "allow_authenticated_uploads" ON storage.objects FOR INSERT TO aut
 CREATE POLICY "allow_public_reads" ON storage.objects FOR SELECT TO public USING (true);
 CREATE POLICY "allow_authenticated_updates" ON storage.objects FOR UPDATE TO authenticated USING (true);
 CREATE POLICY "allow_authenticated_deletes" ON storage.objects FOR DELETE TO authenticated USING (true);
+
+-- 24. Condominium Themes
+CREATE TABLE IF NOT EXISTS public.condominium_themes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  condo_id UUID NOT NULL UNIQUE REFERENCES public.condominiums(id) ON DELETE CASCADE,
+  enable_custom_theme BOOLEAN DEFAULT false,
+  sidebar_bg_color VARCHAR(7) DEFAULT '#1e293b',
+  main_bg_color VARCHAR(7) DEFAULT '#f1f5f9',
+  card_bg_color VARCHAR(7) DEFAULT '#ffffff',
+  sidebar_text_color VARCHAR(7) DEFAULT '#ffffff',
+  main_text_color VARCHAR(7) DEFAULT '#0f172a',
+  card_text_color VARCHAR(7) DEFAULT '#0f172a',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 25. Habilitar RLS para condominium_themes
+ALTER TABLE public.condominium_themes ENABLE ROW LEVEL SECURITY;
+
+-- 26. Política de lectura para condominium_themes
+CREATE POLICY "themes_select_user" ON public.condominium_themes 
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE profiles.condo_id = condominium_themes.condo_id 
+      AND profiles.id = auth.uid()
+    )
+  );
+
+-- 27. Política de actualización para condominium_themes (solo admins)
+CREATE POLICY "themes_update_admin" ON public.condominium_themes 
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE profiles.condo_id = condominium_themes.condo_id 
+      AND profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- 28. Política de inserción para condominium_themes (solo admins)
+CREATE POLICY "themes_insert_admin" ON public.condominium_themes 
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE profiles.condo_id = condominium_themes.condo_id 
+      AND profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
+    )
+  );

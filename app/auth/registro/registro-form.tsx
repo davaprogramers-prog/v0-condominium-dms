@@ -3,11 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 import { registerOwner } from "../actions"
 
 interface House {
@@ -117,171 +113,174 @@ export function RegistroForm() {
   }
 
   return (
-    <div className="w-full max-w-md space-y-4">
+    <>
       {/* Step 1: Email Validation */}
       {step === "email" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Verificar Correo</CardTitle>
-            <CardDescription>Ingresa el correo registrado en tu propiedad</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleEmailValidation} className="space-y-4">
-              {error && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Verificar
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <form onSubmit={handleEmailValidation} className="space-y-4">
+          {error && (
+            <div className="rounded bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin inline" />}
+            Verificar
+          </button>
+        </form>
       )}
 
       {/* Step 2: House Selection */}
       {step === "select" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Selecciona tu Propiedad</CardTitle>
-            <CardDescription>Tienes múltiples propiedades registradas</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="space-y-4">
+          {error && (
+            <div className="rounded bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+          <p className="text-sm text-gray-600">Tienes múltiples propiedades. Selecciona una:</p>
+          <div className="space-y-2">
             {houses.map((house) => (
               <button
                 key={house.id}
                 onClick={() => handleHouseSelection(house.id)}
-                className="w-full rounded-lg border-2 border-muted p-4 text-left transition-all hover:border-primary hover:bg-accent"
+                className="w-full rounded border-2 border-gray-300 p-4 text-left transition-all hover:border-blue-500 hover:bg-blue-50 text-gray-900"
               >
                 <div className="font-semibold">Casa #{house.house_number}</div>
-                <div className="text-sm text-muted-foreground">{house.condoName}</div>
+                <div className="text-sm text-gray-600">{house.condoName}</div>
               </button>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Step 3: Password Setup */}
       {step === "password" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Crear Contraseña</CardTitle>
-            <CardDescription>Define tu contraseña para acceder</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordSetup} className="space-y-4">
-              {/* Show assigned property info */}
-              {selectedHouseId && houses.length > 0 && (
-                <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-3">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium text-green-800 dark:text-green-200">Propiedad Asignada:</p>
-                      <p className="text-green-700 dark:text-green-300">
-                        Casa #{houses.find(h => h.id === selectedHouseId)?.house_number} - {houses.find(h => h.id === selectedHouseId)?.condoName}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+        <form onSubmit={handlePasswordSetup} className="space-y-4">
+          {selectedHouseId && houses.length > 0 && (
+            <div className="rounded bg-green-50 p-3 border border-green-200 text-sm">
+              <p className="font-medium text-green-800">Propiedad Asignada:</p>
+              <p className="text-green-700">
+                Casa #{houses.find(h => h.id === selectedHouseId)?.house_number} - {houses.find(h => h.id === selectedHouseId)?.condoName}
+              </p>
+            </div>
+          )}
 
-              {error && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
+          {error && (
+            <div className="rounded bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Nombre</Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="Tu nombre"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Apellido</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Tu apellido"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                Nombre
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                placeholder="Tu nombre"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={loading}
+                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                Apellido
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                placeholder="Tu apellido"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                disabled={loading}
+                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  disabled={loading}
-                />
-              </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={loading}
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="passwordConfirm">Confirmar Contraseña</Label>
-                <Input
-                  id="passwordConfirm"
-                  type="password"
-                  placeholder="Repite tu contraseña"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  required
-                  minLength={6}
-                  disabled={loading}
-                />
-              </div>
+          <div>
+            <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700">
+              Confirmar Contraseña
+            </label>
+            <input
+              id="passwordConfirm"
+              type="password"
+              placeholder="Repite tu contraseña"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              required
+              minLength={6}
+              disabled={loading}
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
 
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    setStep("email")
-                    setError("")
-                  }}
-                  disabled={loading}
-                >
-                  Atrás
-                </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Crear Cuenta
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setStep("email")
+                setError("")
+              }}
+              disabled={loading}
+              className="flex-1 rounded border border-gray-300 py-2 text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50"
+            >
+              Atrás
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin inline" />}
+              Crear Cuenta
+            </button>
+          </div>
+        </form>
       )}
-    </div>
+    </>
   )
 }

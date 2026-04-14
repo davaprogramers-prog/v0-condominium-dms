@@ -38,9 +38,9 @@ export async function createConcierge(condoId: string, data: {
   // Step 1: Check if profile already exists for this email in this condo
   const { data: existingProfile } = await adminSupabase
     .from("profiles")
-    .select("id, role, condo_id")
+    .select("id, role, condo_id, email")
     .eq("email", data.email)
-    .single()
+    .maybeSingle()
 
   if (existingProfile) {
     // Profile exists
@@ -126,17 +126,17 @@ export async function createConcierge(condoId: string, data: {
     throw new Error("No se generó ID de usuario")
   }
 
-  // Step 4: Create profile for new auth user
+  // Step 4: Create or update profile for new auth user
   const { data: profileData, error: profileError } = await adminSupabase
     .from("profiles")
-    .insert({
+    .upsert({
       id: authData.user.id,
       email: data.email,
       role: "conserje",
       condo_id: condoId,
       first_name: data.firstName,
       last_name: data.lastName
-    })
+    }, { onConflict: "id" })
     .select()
     .single()
 
@@ -222,19 +222,55 @@ export async function deleteConcierge(condoId: string, profileId: string) {
     .eq("id", user.id)
     .single()
 
-  if (adminProfile?.condo_id !== condoId) {
+  if (adminProfile?.role !== "admin" && adminProfile?.role !== "super_admin") {
     throw new Error("No autorizado")
   }
 
-  const { error } = await supabase
+  if (adminProfile?.condo_id !== condoId) {
+    throw new Error("No autorizado para este condominio")
+  }
+
+  // Get the profile first to verify it belongs to this condo
+  const { data: profileData, error: profileFetchError } = await supabase
     .from("profiles")
-    .delete()
+    .select("id, condo_id, email")
     .eq("id", profileId)
     .eq("condo_id", condoId)
+    .maybeSingle()
 
-  if (error) {
-    console.error("[v0] Error deleting concierge:", error)
-    throw new Error(error.message)
+  // If profile doesn't exist, that's OK - just try to delete the auth user
+  if (profileFetchError && profileFetchError.code !== 'PGRST116') {
+    console.error("[v0] Error fetching profile:", profileFetchError)
+    throw new Error("Error al buscar conserje: " + profileFetchError.message)
+  }
+
+  // Delete profile if it exists
+  if (profileData) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", profileId)
+      .eq("condo_id", condoId)
+
+    if (profileError) {
+      console.error("[v0] Error deleting profile:", profileError)
+      throw new Error(profileError.message)
+    }
+  }
+
+  // Try to delete auth user via API call to admin function
+  try {
+    const response = await fetch("/api/admin/delete-auth-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: profileId })
+    })
+    
+    if (!response.ok) {
+      console.warn("[v0] Warning: Could not delete auth user, but profile was deleted")
+    }
+  } catch (err) {
+    console.warn("[v0] Warning: Error calling delete-auth-user API, but profile was deleted")
   }
 
   return { success: true }

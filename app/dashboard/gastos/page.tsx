@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { getCondoExpenses, getLast12MonthsData } from "./actions"
 import { CreateExpenseDialog } from "./create-expense-dialog"
 import { GastosList } from "./gastos-list"
@@ -6,6 +7,7 @@ import { GastosChart } from "./gastos-chart"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 
 export default async function GastosPage({
   searchParams,
@@ -15,14 +17,17 @@ export default async function GastosPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
-    .single()
+  if (!user) redirect("/auth/login")
 
-  const condoId = profile?.condo_id
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
+
+  if (!condoId) {
+    redirect("/dashboard")
+  }
+
+  const isAdmin = true // If we got here via user_condos, they're an admin
+  const isSuperAdmin = false // Will be set below if verified
 
   // Get period from query params or use current month
   const params = await searchParams
@@ -118,7 +123,7 @@ export default async function GastosPage({
                   Logos
                 </Button>
               </Link>
-              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} />
+              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} isSuperAdmin={isSuperAdmin} />
             </>
           )}
         </div>

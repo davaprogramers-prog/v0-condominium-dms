@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Home, Pencil } from "lucide-react"
 
@@ -35,9 +34,10 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" />Nueva Casa</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
               <DialogHeader>
-                <DialogTitle>Registrar Casa</DialogTitle>
+                <DialogTitle className="text-slate-900 dark:text-white">Registrar Nueva Casa</DialogTitle>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Agrega una nueva propiedad al condominio</p>
               </DialogHeader>
               <form
                 action={async (fd) => {
@@ -47,23 +47,23 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="house_number">Numero de Casa</Label>
-                  <Input id="house_number" name="house_number" placeholder="Ej: A-101, Casa 5..." required />
+                  <Label htmlFor="house_number" className="text-slate-900 dark:text-slate-200">Numero de Casa</Label>
+                  <Input id="house_number" name="house_number" placeholder="Ej: A-101, Casa 5..." required className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_name">Nombre del Propietario</Label>
-                  <Input id="owner_name" name="owner_name" placeholder="Nombre completo" />
+                  <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                  <Input id="owner_name" name="owner_name" placeholder="Nombre completo" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_email">Email del Propietario</Label>
-                  <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" />
+                  <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                  <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="payment_deadline_day">Día de vencimiento de pago</Label>
-                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} />
-                  <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
+                  <Label htmlFor="payment_deadline_day" className="text-slate-900 dark:text-slate-200">Día de vencimiento de pago</Label>
+                  <Input id="payment_deadline_day" name="payment_deadline_day" type="number" min={1} max={28} placeholder="5" defaultValue={5} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento (1-28)</p>
                 </div>
-                <Button type="submit">Guardar Casa</Button>
+                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Casa</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -72,9 +72,10 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
 
       {editHouse && (
         <Dialog open={!!editHouse} onOpenChange={() => setEditHouse(null)}>
-          <DialogContent>
+          <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
-              <DialogTitle>Editar Casa {editHouse.house_number as string}</DialogTitle>
+              <DialogTitle className="text-slate-900 dark:text-white">Editar Casa #{editHouse.house_number as string}</DialogTitle>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Actualiza los datos del propietario (no puedes cambiar el número de casa)</p>
             </DialogHeader>
             <form
               action={async (fd) => {
@@ -85,19 +86,19 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_name">Nombre del Propietario</Label>
-                <Input id="edit_owner_name" name="owner_name" defaultValue={(editHouse.owner_name as string) || ""} />
+                <Label htmlFor="edit_owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                <Input id="edit_owner_name" name="owner_name" defaultValue={(editHouse.owner_name as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_email">Email del Propietario</Label>
-                <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} />
+                <Label htmlFor="edit_owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_due_day">Día de vencimiento</Label>
-                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} />
-                <p className="text-xs text-muted-foreground">Día del mes para vencimiento (1-28)</p>
+                <Label htmlFor="edit_due_day" className="text-slate-900 dark:text-slate-200">Día de vencimiento</Label>
+                <Input id="edit_due_day" name="payment_deadline_day" type="number" min={1} max={28} defaultValue={(editHouse.payment_deadline_day as number) || 5} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
+                <p className="text-xs text-slate-600 dark:text-slate-400">Día del mes para vencimiento (1-28)</p>
               </div>
-              <Button type="submit">Actualizar</Button>
+              <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -115,47 +116,65 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               <p>No hay casas registradas</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Numero</TableHead>
-                    <TableHead>Propietario</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Vencimiento</TableHead>
-                    <TableHead>Estado</TableHead>
-                    {isAdmin && <TableHead className="w-12" />}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {houses.map((house) => (
-                    <TableRow key={house.id as string}>
-                      <TableCell className="font-medium">{house.house_number as string}</TableCell>
-                      <TableCell>{(house.owner_name as string) || "-"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{(house.owner_email as string) || "-"}</TableCell>
-                      <TableCell>
-                        {house.payment_deadline_day ? `Día ${house.payment_deadline_day}` : "Día 5"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={house.is_active !== false ? "default" : "secondary"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {houses.map((house, index) => {
+                const colors = [
+                  { bg: "from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30", border: "border-blue-400", title: "text-blue-900 dark:text-blue-200", text: "text-blue-700 dark:text-blue-300", badge: "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" },
+                  { bg: "from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30", border: "border-purple-400", title: "text-purple-900 dark:text-purple-200", text: "text-purple-700 dark:text-purple-300", badge: "bg-purple-200 dark:bg-purple-900 text-purple-900 dark:text-purple-200" },
+                  { bg: "from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/30", border: "border-green-400", title: "text-green-900 dark:text-green-200", text: "text-green-700 dark:text-green-300", badge: "bg-green-200 dark:bg-green-900 text-green-900 dark:text-green-200" },
+                  { bg: "from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/30", border: "border-orange-400", title: "text-orange-900 dark:text-orange-200", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-200 dark:bg-orange-900 text-orange-900 dark:text-orange-200" },
+                  { bg: "from-cyan-50 to-cyan-100 dark:from-cyan-950/30 dark:to-cyan-900/30", border: "border-cyan-400", title: "text-cyan-900 dark:text-cyan-200", text: "text-cyan-700 dark:text-cyan-300", badge: "bg-cyan-200 dark:bg-cyan-900 text-cyan-900 dark:text-cyan-200" },
+                  { bg: "from-pink-50 to-pink-100 dark:from-pink-950/30 dark:to-pink-900/30", border: "border-pink-400", title: "text-pink-900 dark:text-pink-200", text: "text-pink-700 dark:text-pink-300", badge: "bg-pink-200 dark:bg-pink-900 text-pink-900 dark:text-pink-200" },
+                ]
+                const color = colors[index % colors.length]
+                
+                return (
+                  <div key={house.id as string} className={`rounded-lg border-2 bg-gradient-to-br ${color.bg} ${color.border} p-4 hover:shadow-md transition-shadow`}>
+                    <div className="flex flex-col gap-4">
+                      {/* Header with number and status */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className={`text-sm font-semibold ${color.text}`}>Casa</p>
+                          <h3 className={`text-2xl font-bold ${color.title}`}>#{house.house_number as string}</h3>
+                        </div>
+                        <Badge className={`${color.badge} border-0`}>
                           {house.is_active !== false ? "Activa" : "Inactiva"}
                         </Badge>
-                      </TableCell>
+                      </div>
+
+                      {/* Owner information */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Propietario</p>
+                        <p className={`font-semibold ${color.title}`}>{(house.owner_name as string) || "-"}</p>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Email</p>
+                        <p className={`text-sm truncate ${color.title}`}>{(house.owner_email as string) || "-"}</p>
+                      </div>
+
+                      {/* Payment deadline */}
+                      <div>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Vencimiento</p>
+                        <p className={`font-semibold ${color.title}`}>Día {house.payment_deadline_day as number || 5}</p>
+                      </div>
+
+                      {/* Actions */}
                       {isAdmin && (
-                        <TableCell>
-                          <button
-                            type="button"
-                            onClick={() => setEditHouse(house)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                        </TableCell>
+                        <button
+                          type="button"
+                          onClick={() => setEditHouse(house)}
+                          className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${color.badge} hover:opacity-80 transition-opacity`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Editar
+                        </button>
                       )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </CardContent>

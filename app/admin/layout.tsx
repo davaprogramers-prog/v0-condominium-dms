@@ -20,12 +20,20 @@ export default async function AdminLayout({
     redirect("/auth/login")
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
+  // Try to get profile, but don't fail if it doesn't exist
+  let profile: any = null
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("role, condo_id")
+      .eq("id", user.id)
+      .single()
+    profile = data
+  } catch (e) {
+    console.error("[v0] Error fetching profile:", e)
+  }
 
+  // Check if super_admin - if not, redirect
   if (profile?.role !== "super_admin") {
     redirect("/dashboard")
   }

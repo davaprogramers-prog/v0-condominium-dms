@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { CookieOptions } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -31,5 +32,16 @@ export async function createClient() {
         },
       },
     },
+  )
+}
+
+/**
+ * Service role client that bypasses RLS
+ * Only use for administrative operations
+ */
+export function createServiceClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 }

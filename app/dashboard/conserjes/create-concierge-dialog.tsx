@@ -1,25 +1,28 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "../theme-context"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Loader2, CheckCircle2 } from "lucide-react"
+import { Plus, Loader2, CheckCircle2, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createConcierge } from "./actions"
 
 interface CreateConciergeDialogProps {
   condoId: string
+  onSuccess?: () => void
 }
 
-export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
+export function CreateConciergeDialog({ condoId, onSuccess }: CreateConciergeDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -42,12 +45,12 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
       })
 
       // Show success message
-      const message = result.alreadyExists 
+      const message = result.alreadyExists
         ? `${firstName} ${lastName} ya estaba asignado`
         : result.wasReassigned
-        ? `${firstName} ${lastName} ha sido reasignado`
-        : `${firstName} ${lastName} ha sido creado`
-      
+          ? `${firstName} ${lastName} ha sido reasignado`
+          : `${firstName} ${lastName} ha sido creado`
+
       setSuccessMessage(message)
       setSuccess(true)
 
@@ -57,6 +60,7 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
         setSuccess(false)
         setSuccessMessage("")
         router.refresh()
+        onSuccess?.()
       }, 2000)
     } catch (err: any) {
       console.error("[v0] Error creating concierge:", err)
@@ -69,17 +73,32 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button
+          style={{
+            backgroundColor: "#2563eb",
+            color: "white",
+            padding: "12px 24px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "2px solid #1d4ed8",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+            cursor: "pointer",
+            fontWeight: "600"
+          }}
+        >
+          <Users className="h-5 w-5" />
           Agregar Conserje
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
         <DialogHeader>
-          <DialogTitle>Crear Nuevo Conserje</DialogTitle>
-          <DialogDescription>Agrega un nuevo conserje para el condominio</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Crear Nuevo Conserje</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor }}>Agrega un nuevo conserje para el condominio</DialogDescription>
         </DialogHeader>
-        
+
         {success && (
           <div className="animate-in fade-in duration-300 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
@@ -97,30 +116,38 @@ export function CreateConciergeDialog({ condoId }: CreateConciergeDialogProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
-                <Input id="firstName" name="firstName" required />
+                <Label htmlFor="firstName" style={{ color: dialogTextColor }}>Nombre</Label>
+                <Input id="firstName" name="firstName" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
-                <Input id="lastName" name="lastName" required />
+                <Label htmlFor="lastName" style={{ color: dialogTextColor }}>Apellido</Label>
+                <Input id="lastName" name="lastName" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input id="email" name="email" type="email" required />
+              <Label htmlFor="email" style={{ color: dialogTextColor }}>Correo Electrónico</Label>
+              <Input id="email" name="email" type="email" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" />
+              <Label htmlFor="password" style={{ color: dialogTextColor }}>Contraseña</Label>
+              <Input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} style={{ borderColor: inputTextColor, color: inputTextColor }}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  fontWeight: "600",
+                }}
+              >
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Crear Conserje
               </Button>

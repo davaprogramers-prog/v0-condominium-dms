@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { UploadProofDialog } from "./upload-proof-dialog"
 import { ApproveProofDialog } from "./approve-proof-dialog"
+import { CreateHouseDialog } from "./create-house-dialog"
 
 interface HouseWithStatus {
   id: string
@@ -44,6 +45,7 @@ interface PropietariosClientProps {
   fixedAmount: number
   variableAmount: number
   currencySymbol: string
+  onRefresh?: () => void
 }
 
 const monthNames = [
@@ -60,6 +62,7 @@ export function PropietariosClient({
   fixedAmount,
   variableAmount,
   currencySymbol,
+  onRefresh,
 }: PropietariosClientProps) {
   const [expandedHouse, setExpandedHouse] = useState<string | null>(null)
   const [viewReceipt, setViewReceipt] = useState<{ url: string; houseName: string } | null>(null)
@@ -94,6 +97,7 @@ export function PropietariosClient({
             Estado de pagos - {periodLabel}
           </p>
         </div>
+        {isAdmin && <CreateHouseDialog condoId={condoId} onSuccess={onRefresh} />}
       </div>
 
       {/* Summary Cards */}
@@ -327,7 +331,7 @@ function HouseCard({
 
                 {/* Fines Badge */}
                 {house.totalFines > 0 && (
-                  <Badge variant="destructive">
+                  <Badge className="bg-red-600 hover:bg-red-700 text-white">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Multa: {currencySymbol}{house.totalFines.toLocaleString("es-CL")}
                   </Badge>

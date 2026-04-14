@@ -1,9 +1,14 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
+import { ThemeManagerClient } from "@/components/theme-manager-client"
+import { ThemeProvider } from "@/app/dashboard/theme-context"
+import { type CondoTheme } from "@/lib/theme-utils"
 
+// Force rebuild - v0 fix for mi-casa pages removed
 export const metadata = {
   title: "Dashboard - InteliCon",
 }
@@ -20,12 +25,9 @@ export default async function DashboardLayout({
     redirect("/auth/login")
   }
 
-  // For super_admin (davaprogramers@gmail.com), allow access without profile
-  const isSuperAdmin = user.user_metadata?.role === "super_admin"
-
   let profile: any = null
-  let profileError = null
 
+  // Try to read profile with safe fallback
   try {
     const { data: profileData, error: pError } = await supabase
       .from("profiles")
@@ -33,130 +35,121 @@ export default async function DashboardLayout({
       .eq("id", user.id)
       .single()
 
-    if (!pError && profileData) {
+    if (profileData && !pError) {
       profile = profileData
-    } else {
-      profileError = pError
     }
   } catch (e) {
     console.error("[v0] Error reading profile:", e)
-    profileError = e
+  }
+
+  // Check if super_admin from profiles table
+  const isSuperAdmin = profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin"
+  const isOwner = profile?.role === "propietario" || profile?.role === "owner"
+
+  // If admin, try to get house_id if not already set
+  if (isAdmin && !profile?.house_id) {
+    console.log("[v0] Admin without house_id, searching for assigned property")
+    const houseId = await getUserHouseId(supabase, user.id)
+    if (houseId) {
+      profile.house_id = houseId
+      console.log("[v0] Found house_id for admin:", houseId)
+    }
   }
 
   // If no profile, create fallback from metadata
   if (!profile) {
     profile = {
       role: user.user_metadata?.role || "propietario",
-      condo_id: null,
-      house_id: null,
-      first_name: user.user_metadata?.first_name || "Usuario",
-      last_name: user.user_metadata?.last_name || "Sin Apellido",
+      condo_id: user.user_metadata?.condo_id || null,
+      house_id: user.user_metadata?.house_id || null,
+      first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
+      last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
     }
+    console.log("[v0] Created fallback profile from metadata:", profile)
   }
 
-  // If no condo_id and not super_admin, allow temporary access (no redirect)
-  // This permits users to enter dashboard and see an admin message
-  if (!profile.condo_id && !isSuperAdmin && profile.role !== "admin") {
-    // For regular users without condo, we'll still show dashboard
-    // but with limited functionality until admin assigns them
-  }
-
-  // If super_admin without condo_id, redirect to admin panel to select one
-  if (profile.role === "super_admin" && !profile.condo_id) {
-    redirect("/admin")
-  }
-
-  // If propietario/owner without condo_id, try to get it from their house
-  const isOwner = profile.role === "propietario" || profile.role === "owner"
-  
-  // If owner without house_id, try to find house by email
-  if (isOwner && !profile.house_id) {
-    const { data: houseByEmail } = await supabase
-      .from("houses")
-      .select("id, condo_id")
-      .eq("owner_email", user.email)
-      .single()
-    
-    if (houseByEmail) {
-      // Update profile with house_id and condo_id
-      await supabase
-        .from("profiles")
-        .update({ 
-          house_id: houseByEmail.id,
-          condo_id: houseByEmail.condo_id 
-        })
-        .eq("id", user.id)
-      
-      profile.house_id = houseByEmail.id
-      profile.condo_id = houseByEmail.condo_id
-    }
-  }
-  
-  // If has house_id but no condo_id, get condo from house
-  if (isOwner && !profile.condo_id && profile.house_id) {
-    const { data: house } = await supabase
-      .from("houses")
-      .select("condo_id")
-      .eq("id", profile.house_id)
-      .single()
-    
-    if (house?.condo_id) {
-      // Update profile with condo_id
-      await supabase
-        .from("profiles")
-        .update({ condo_id: house.condo_id })
-        .eq("id", user.id)
-      
-      profile.condo_id = house.condo_id
-    }
-  }
-
-  // If still no condo_id and not super_admin/admin, mark as needs setup
-  // But allow access to dashboard
-  if (!profile.condo_id && profile.role !== "super_admin" && profile.role !== "admin") {
+  // If propietario/owner without condo_id, they need setup
+  // The ensureUserProfile action in login-form should have handled this
+  if (isOwner && !profile.condo_id) {
     profile.needs_setup = true
   }
 
   let condo = null
   let allCondos: { id: string; name: string }[] = []
+  let theme: CondoTheme | null = null
 
   if (profile.condo_id) {
-    const { data } = await supabase
-      .from("condominiums")
-      .select("id, name, currency_symbol, logo_url")
-      .eq("id", profile.condo_id)
-      .single()
-    condo = data
+    try {
+      const { data } = await supabase
+        .from("condominiums")
+        .select("id, name, currency_symbol, logo_url")
+        .eq("id", profile.condo_id)
+        .single()
+      condo = data
+
+      // Try to fetch condominium theme - will return null if table doesn't exist
+      const { data: themeData } = await supabase
+        .from("condominium_themes")
+        .select("*")
+        .eq("condo_id", profile.condo_id)
+        .single()
+      
+      if (themeData) {
+        theme = themeData as CondoTheme
+      }
+    } catch (e) {
+      console.log("[v0] Error fetching condo or theme:", e)
+    }
   }
 
-  // For super_admin, fetch all condos they can access
+  // For admin/super_admin, fetch their condos via user_condos
   if (profile.role === "super_admin" || profile.role === "admin") {
-    const { data: userCondos } = await supabase
-      .from("user_condos")
-      .select("condo_id, condominiums(id, name)")
-      .eq("user_id", user.id)
-    
-    if (userCondos) {
-      allCondos = userCondos
-        .filter(uc => uc.condominiums)
-        .map(uc => ({
-          id: (uc.condominiums as any).id,
-          name: (uc.condominiums as any).name
-        }))
+    try {
+      const { data: userCondos } = await supabase
+        .from("user_condos")
+        .select("condo_id, condominiums(id, name)")
+        .eq("user_id", user.id)
+      
+      if (userCondos) {
+        allCondos = userCondos
+          .filter(uc => uc.condominiums)
+          .map(uc => ({
+            id: (uc.condominiums as any).id,
+            name: (uc.condominiums as any).name
+          }))
+      }
+    } catch (e) {
+      console.log("[v0] Error fetching user condos:", e)
     }
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
-      <SidebarInset>
-        <DashboardHeader user={user} profile={profile} />
-        <main className="flex-1 p-4 md:p-6">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <ThemeProvider theme={theme}>
+      <SidebarProvider>
+        <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
+        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
+        <SidebarInset 
+          className="flex flex-col h-screen"
+          style={theme?.enable_custom_theme ? {
+            backgroundColor: theme.main_bg_color,
+            color: theme.main_text_color,
+          } : undefined}
+        >
+          <DashboardHeader user={user} profile={profile} />
+          <main 
+            className="flex-1 overflow-y-auto p-4 md:p-6"
+            style={theme?.enable_custom_theme ? {
+              backgroundColor: theme.main_bg_color,
+              color: theme.main_text_color,
+            } : undefined}
+          >
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </ThemeProvider>
   )
 }
 

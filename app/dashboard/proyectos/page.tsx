@@ -18,11 +18,23 @@ export default async function ProyectosPage() {
     .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
 
+  const { data: commonAreas } = await supabase
+    .from("common_areas")
+    .select("id, name")
+    .eq("condo_id", profile.condo_id)
+    .order("name")
+
+  const isAdmin = ["admin", "super_admin"].includes(profile.role as string)
+  const canView = true // Todos pueden ver proyectos (admins, conserjes y propietarios)
+
   return (
     <ProyectosClient
       projects={projects || []}
+      commonAreas={commonAreas || []}
       currencySymbol={(condo?.currency_symbol as string) || "$"}
-      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+      isAdmin={isAdmin}
+      canView={canView}
     />
   )
 }
+

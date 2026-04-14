@@ -60,10 +60,9 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
       <Input ref={inputRef} type="file" accept={accept} onChange={handleUpload} className="hidden" />
       <Button
         type="button"
-        variant="outline"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="w-full justify-start gap-2"
+        className="w-full justify-start gap-2 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-600"
       >
         <Upload className="h-4 w-4" />
         {uploading ? "Subiendo..." : label}
@@ -74,7 +73,7 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
         </div>
       )}
       {preview && (
-        <div className="relative rounded-lg border p-2">
+        <div className="relative rounded-lg border border-slate-300 dark:border-slate-600 p-2 bg-slate-100 dark:bg-slate-900">
           <button
             type="button"
             onClick={() => { setPreview(null); setFileName(null); onUpload("") }}
@@ -86,8 +85,8 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
             <img src={preview} alt="Preview" className="h-32 w-full rounded object-cover" />
           ) : (
             <div className="flex items-center gap-2 p-2">
-              <FileText className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{fileName || "Archivo subido"}</span>
+              <FileText className="h-8 w-8 text-slate-600 dark:text-slate-400" />
+              <span className="text-sm text-slate-600 dark:text-slate-400">{fileName || "Archivo subido"}</span>
             </div>
           )}
         </div>

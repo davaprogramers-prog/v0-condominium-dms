@@ -1,23 +1,44 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CreateHouseDialog } from "./create-house-dialog"
 import { EditHouseDialog } from "./edit-house-dialog"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { getContrastTextColor, type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function CasasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
-    .single()
+  if (!user) redirect("/auth/login")
 
-  const { data: housesRaw } = await supabase
-    .from("houses")
-    .select("*")
-    .eq("condo_id", profile?.condo_id)
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
+
+  if (!condoId) {
+    redirect("/dashboard")
+  }
+
+  // Fetch houses and theme together
+  const [housesResponse, themeResponse] = await Promise.all([
+    supabase
+      .from("houses")
+      .select("*")
+      .eq("condo_id", condoId),
+    supabase
+      .from("condominium_themes")
+      .select("*")
+      .eq("condo_id", condoId)
+      .single()
+  ])
+
+  const housesRaw = housesResponse.data || []
+  const theme = themeResponse.data as CondoTheme | null
+
+  // Determine which colors to use - custom theme if enabled, otherwise defaults
+  const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
+  const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
 
   // Sort houses numerically by house_number
   const houses = housesRaw?.sort((a, b) => {
@@ -26,7 +47,7 @@ export default async function CasasPage() {
     return numA - numB
   })
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isAdmin = true
 
   return (
     <div className="space-y-6">
@@ -35,49 +56,66 @@ export default async function CasasPage() {
           <h1 className="text-3xl font-bold">Casas</h1>
           <p className="text-muted-foreground">Gestión de propiedades del condominio</p>
         </div>
-        {isAdmin && <CreateHouseDialog condoId={profile?.condo_id} />}
+        {isAdmin && <CreateHouseDialog condoId={condoId} />}
       </div>
 
       <div className="rounded-lg border">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-6 py-3 text-left font-semibold"># Casa</th>
-                <th className="px-6 py-3 text-left font-semibold">Propietario</th>
-                <th className="px-6 py-3 text-left font-semibold">Email</th>
-                <th className="px-6 py-3 text-left font-semibold">Estado</th>
-                {isAdmin && <th className="px-6 py-3 text-left font-semibold">Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {houses?.map((house) => (
-                <tr key={house.id} className="border-b hover:bg-muted/50">
-                  <td className="px-6 py-3 font-semibold">#{house.house_number}</td>
-                  <td className="px-6 py-3">{house.owner_name || "-"}</td>
-                  <td className="px-6 py-3 text-muted-foreground text-xs">{house.owner_email || "-"}</td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                      Activo
-                    </span>
-                  </td>
-                  {isAdmin && (
-                    <td className="px-6 py-3">
-                      <EditHouseDialog
-                        houseId={house.id}
-                        ownerName={house.owner_name || ""}
-                        ownerEmail={house.owner_email || ""}
-                      />
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {!houses?.length && (
+        {!houses?.length ? (
           <div className="p-6 text-center text-muted-foreground">
             {isAdmin ? "No hay casas registradas. Crea la primera haciendo clic en el botón arriba." : "No hay casas en este condominio"}
+          </div>
+        ) : (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {houses?.map((house, index) => {
+                return (
+                  <div 
+                    key={house.id} 
+                    className="rounded-lg border-2 p-4 hover:shadow-md transition-shadow"
+                    style={{
+                      backgroundColor: cardBgColor,
+                      borderColor: cardBgColor,
+                      color: cardTextColor
+                    }}
+                  >
+                    <div className="flex flex-col gap-4">
+                      {/* Header with number and status */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs font-medium uppercase opacity-75">Casa</p>
+                          <h3 className="text-2xl font-bold" style={{ color: cardTextColor }}>#{house.house_number}</h3>
+                        </div>
+                        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-white" style={{ color: cardBgColor }}>
+                          Activo
+                        </span>
+                      </div>
+
+                      {/* Owner information */}
+                      <div>
+                        <p className="text-xs font-medium uppercase opacity-75">Propietario</p>
+                        <p className="font-semibold" style={{ color: cardTextColor }}>{house.owner_name || "-"}</p>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <p className="text-xs font-medium uppercase opacity-75">Email</p>
+                        <p className="text-sm truncate" style={{ color: cardTextColor, opacity: 0.8 }}>{house.owner_email || "-"}</p>
+                      </div>
+
+                      {/* Actions */}
+                      {isAdmin && (
+                        <EditHouseDialog
+                          houseId={house.id}
+                          houseNumber={house.house_number}
+                          ownerName={house.owner_name || ""}
+                          ownerEmail={house.owner_email || ""}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

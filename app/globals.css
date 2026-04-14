@@ -1,14 +1,11 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
-
-@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: oklch(0.985 0.002 247);
   --foreground: oklch(0.185 0.02 255);
-  --card: oklch(1 0 0);
+  --card: oklch(0.97 0.01 255);
   --card-foreground: oklch(0.185 0.02 255);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.97 0.01 255);
   --popover-foreground: oklch(0.185 0.02 255);
   --primary: oklch(0.45 0.15 255);
   --primary-foreground: oklch(0.99 0 0);
@@ -82,56 +79,56 @@
   --warning-foreground: oklch(0.25 0.06 75);
 }
 
-@theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+/* Condominium Theme Custom Variables */
+:root {
+  /* These will be overridden by CondoThemeApplier when custom theme is enabled */
+  --condo-sidebar-bg: var(--sidebar);
+  --condo-sidebar-text: var(--sidebar-foreground);
+  --condo-main-bg: var(--background);
+  --condo-main-text: var(--foreground);
+  --condo-card-bg: var(--card);
+  --condo-card-text: var(--card-foreground);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Dialog close button styling for visibility */
+[role="dialog"] [role="button"][aria-label*="Close"],
+.dialog-close-button {
+  color: #64748b;
+  opacity: 1 !important;
+  hover: #1e293b;
+}
+
+.dark [role="dialog"] [role="button"][aria-label*="Close"],
+.dark .dialog-close-button {
+  color: #cbd5e1;
+  opacity: 1 !important;
+  hover: #e2e8f0;
+}
+
+/* Custom Select Styling for Theme Application */
+.select-trigger-themed {
+  background-color: var(--input-bg, #f5f5f5) !important;
+  color: var(--input-text, #000000) !important;
+  border: 1px solid var(--input-text, #000000) !important;
+}
+
+.select-content-themed {
+  background-color: var(--input-bg, #f5f5f5) !important;
+  color: var(--input-text, #000000) !important;
+}
+
+.select-item-themed {
+  background-color: var(--input-bg, #f5f5f5) !important;
+  color: var(--input-text, #000000) !important;
+}
+
+.select-item-themed:hover,
+.select-item-themed[data-highlighted] {
+  background-color: var(--input-bg-hover, #e8e8e8) !important;
+  color: var(--input-text, #000000) !important;
 }

@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsData } from "../gastos/actions"
 import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 
 export default async function ReportesPage({
   searchParams,
@@ -14,13 +16,14 @@ export default async function ReportesPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user?.id)
-    .single()
+  if (!user) redirect("/auth/login")
 
-  const condoId = profile?.condo_id
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
+
+  if (!condoId) {
+    redirect("/dashboard")
+  }
 
   // Get period from query params or use current month
   const params = await searchParams

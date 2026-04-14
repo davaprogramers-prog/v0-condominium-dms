@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "@/app/dashboard/theme-context"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
@@ -25,6 +26,7 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputTextColor } = useTheme()
 
   const handleDelete = async () => {
     setLoading(true)
@@ -50,24 +52,43 @@ export function DeleteUserButton({ userId, userEmail }: DeleteUserButtonProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4" />
+        <Button 
+          size="sm" 
+          className="bg-red-600 text-white hover:bg-red-700 border-0"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Eliminar
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent 
+        className="max-w-sm"
+        style={{
+          backgroundColor: dialogBgColor,
+          borderColor: inputTextColor,
+          color: dialogTextColor
+        }}
+      >
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar Administrador</AlertDialogTitle>
-          <AlertDialogDescription>
-            ¿Estás seguro de eliminar a <strong>{userEmail}</strong>? 
+          <AlertDialogTitle className="text-lg" style={{ color: dialogTextColor }}>Eliminar Administrador</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm pt-2" style={{ color: dialogTextColor, opacity: 0.7 }}>
+            ¿Estás seguro de eliminar a <strong style={{ color: dialogTextColor }}>{userEmail}</strong>? 
             Esta acción no se puede deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogFooter className="gap-2 pt-4">
+          <AlertDialogCancel 
+            style={{
+              backgroundColor: dialogBgColor,
+              color: dialogTextColor,
+              borderColor: inputTextColor
+            }}
+            className="border"
+          >
+            Cancelar
+          </AlertDialogCancel>
           <Button
             onClick={handleDelete}
             disabled={loading}
-            variant="destructive"
             className="bg-red-600 text-white hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

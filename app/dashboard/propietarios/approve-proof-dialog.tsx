@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink, AlertTriangle } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface ApproveProofDialogProps {
   proof: any
@@ -34,6 +35,7 @@ export function ApproveProofDialog({
   const [action, setAction] = useState<"approve" | "reject" | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const paymentType = proof.payment_type || "gastos_comunes"
   const isGastosComunes = paymentType === "gastos_comunes"
@@ -210,9 +212,9 @@ export function ApproveProofDialog({
           Revisar Comprobante
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle style={{ color: dialogTextColor }} className="flex items-center gap-2">
             Revisar Comprobante de Pago
             {!isGastosComunes && (
               <Badge variant="destructive" className="text-xs">
@@ -221,83 +223,84 @@ export function ApproveProofDialog({
               </Badge>
             )}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
             Casa #{house.house_number} - {house.owner_name}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+            <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
               {error}
             </div>
           )}
 
           {/* Payment Type Badge */}
-          <div className={`p-2 rounded-lg text-center text-sm font-medium ${isGastosComunes ? "bg-blue-50 text-blue-700" : "bg-red-50 text-red-700"}`}>
+          <div className={`p-2 rounded-lg text-center text-sm font-medium ${isGastosComunes ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"}`}>
             {isGastosComunes ? "Comprobante de Gastos Comunes" : "Comprobante de Pago de Multas"}
           </div>
 
           {/* Receipt Image */}
           <div className="space-y-2">
-            <Label>Comprobante Enviado</Label>
+            <Label style={{ color: dialogTextColor }}>Comprobante Enviado</Label>
             {proof.receipt_url && (
               <div className="relative">
                 <img
                   src={proof.receipt_url}
                   alt="Comprobante"
-                  className="w-full max-h-48 object-contain rounded-lg border bg-muted"
+                  className="w-full max-h-48 object-contain rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800"
+                  crossOrigin="anonymous"
                 />
                 <a
                   href={proof.receipt_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute top-2 right-2 p-2 rounded-lg bg-background/80 hover:bg-background transition-colors"
+                  className="absolute top-2 right-2 p-2 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                   title="Ver en pantalla completa"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                 </a>
               </div>
             )}
             {proof.notes && (
-              <p className="text-sm text-muted-foreground">Nota: {proof.notes}</p>
+              <p style={{ color: dialogTextColor, opacity: 0.7 }} className="text-sm">Nota: {proof.notes}</p>
             )}
           </div>
 
           {/* Amount Summary */}
-          <div className={`p-3 rounded-lg space-y-1 ${isGastosComunes ? "bg-muted/50" : "bg-red-50"}`}>
+          <div className="p-3 rounded-lg space-y-1" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
             {isGastosComunes ? (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gasto Fijo</span>
-                  <span>{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Fijo</span>
+                  <span className="font-medium">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gasto Variable</span>
-                  <span>{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                  <span style={{ opacity: 0.7 }}>Gasto Variable</span>
+                  <span className="font-medium">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-sm font-medium text-red-700 mb-2">Multas Incluidas:</p>
+                <p className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">Multas Incluidas:</p>
                 {infractions.length > 0 ? (
                   infractions.map((inf: any) => (
                     <div key={inf.id} className="flex justify-between text-sm">
-                      <span className="text-red-600">{inf.description || inf.infraction_type}</span>
-                      <span className="text-red-700">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
+                      <span style={{ opacity: 0.7 }}>{inf.description || inf.infraction_type}</span>
+                      <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{(inf.fine_amount || 0).toLocaleString("es-CL")}</span>
                     </div>
                   ))
                 ) : (
                   <div className="flex justify-between text-sm">
-                    <span className="text-red-600">Multas</span>
-                    <span className="text-red-700">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
+                    <span style={{ opacity: 0.7 }}>Multas</span>
+                    <span className="font-medium text-red-700 dark:text-red-400">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</span>
                   </div>
                 )}
               </>
             )}
-            <div className="flex justify-between font-medium pt-1 border-t">
+            <div className="flex justify-between font-medium pt-1" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
               <span>Total</span>
-              <span className={isGastosComunes ? "text-primary" : "text-red-700"}>
+              <span className={isGastosComunes ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
               </span>
             </div>
@@ -306,7 +309,7 @@ export function ApproveProofDialog({
           {/* Approve Button */}
           <Button
             onClick={handleApprove}
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
             disabled={loading}
           >
             {loading && action === "approve" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -315,20 +318,19 @@ export function ApproveProofDialog({
           </Button>
 
           {/* Reject Form */}
-          <div className="pt-3 border-t">
+          <div style={{ borderColor: dialogTextColor, borderTop: `1px solid ${dialogTextColor}`, opacity: 0.3 }} className="pt-3">
             <form onSubmit={handleReject} className="space-y-2">
-              <Label htmlFor="rejection_reason" className="text-sm">Motivo de Rechazo (opcional)</Label>
+              <Label htmlFor="rejection_reason" style={{ color: dialogTextColor }} className="text-sm">Motivo de Rechazo (opcional)</Label>
               <Textarea
                 id="rejection_reason"
                 name="rejection_reason"
                 placeholder="Ej: Monto no coincide, imagen ilegible..."
                 rows={2}
-                className="text-sm"
+                style={{ borderColor: dialogTextColor, backgroundColor: dialogBgColor === "#1e293b" ? "#0f172a" : "#f8fafc", color: dialogTextColor }}
               />
               <Button
                 type="submit"
-                variant="destructive"
-                className="w-full"
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
                 disabled={loading}
               >
                 {loading && action === "reject" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

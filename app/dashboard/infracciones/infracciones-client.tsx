@@ -13,7 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2 } from "lucide-react"
+import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2, CircleAlertIcon, TriangleAlert } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
+import { Alert } from "@/components/ui/alert"
 
 interface InfraccionesClientProps {
   infractions: Record<string, unknown>[]
@@ -28,6 +30,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [filter, setFilter] = useState("todas")
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
+  const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   const pendingCount = infractions.filter((i) => !i.is_paid).length
   const paidCount = infractions.filter((i) => i.is_paid).length
@@ -36,8 +39,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const filtered = filter === "todas"
     ? infractions
     : filter === "pendientes"
-    ? infractions.filter((i) => !i.is_paid)
-    : infractions.filter((i) => i.is_paid)
+      ? infractions.filter((i) => !i.is_paid)
+      : infractions.filter((i) => i.is_paid)
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,10 +52,32 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nueva Infraccion</Button>
+
+              <Button
+                style={{
+                  backgroundColor: "#2563eb",
+                  color: "white",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #1d4ed8",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  cursor: "pointer",
+                  fontWeight: "600"
+                }}
+              >
+                <TriangleAlert className="h-5 w-5" />
+                Nueva Infraccion
+              </Button>
+
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Registrar Infraccion</DialogTitle></DialogHeader>
+            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle style={{ color: dialogTextColor }}>Registrar Infraccion</DialogTitle>
+              </DialogHeader>
               <form
                 action={async (fd) => {
                   fd.set("house_id", selectedHouse)
@@ -63,10 +88,10 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label>Casa</Label>
+                  <Label style={{ color: dialogTextColor }}>Casa</Label>
                   <Select value={selectedHouse} onValueChange={setSelectedHouse}>
-                    <SelectTrigger><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue placeholder="Seleccionar casa" /></SelectTrigger>
+                    <SelectContent className="dark:bg-slate-800 dark:text-white">
                       {houses.map((h) => (
                         <SelectItem key={h.id as string} value={h.id as string}>{h.house_number as string}</SelectItem>
                       ))}
@@ -74,24 +99,20 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_desc">Descripcion</Label>
-                  <Textarea id="inf_desc" name="description" placeholder="Detalle de la infraccion..." required />
+                  <Label htmlFor="inf_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                  <Textarea id="inf_desc" name="description" placeholder="Detalle de la infraccion..." required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="fine_amount">Multa ({currencySymbol})</Label>
-                    <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" />
+                    <Label htmlFor="fine_amount" style={{ color: dialogTextColor }}>Multa ({currencySymbol})</Label>
+                    <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="inf_date">Fecha</Label>
-                    <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                    <Label htmlFor="inf_date" style={{ color: dialogTextColor }}>Fecha</Label>
+                    <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="inf_notes">Notas</Label>
-                  <Textarea id="inf_notes" name="notes" placeholder="Notas adicionales..." />
-                </div>
-                <Button type="submit" disabled={!selectedHouse}>Registrar Infraccion</Button>
+                <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Registrar Infraccion</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -127,11 +148,11 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
               <CardDescription>{filtered.length} registros</CardDescription>
             </div>
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                <SelectItem value="pendientes">Pendientes</SelectItem>
-                <SelectItem value="pagadas">Pagadas</SelectItem>
+              <SelectTrigger className="w-36 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <SelectItem value="todas" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Todas</SelectItem>
+                <SelectItem value="pendientes" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Pendientes</SelectItem>
+                <SelectItem value="pagadas" className="text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-700">Pagadas</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -167,7 +188,12 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                         {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString()}` : "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={inf.is_paid ? "default" : "destructive"}>
+                        <Badge
+                          className={inf.is_paid
+                            ? "bg-green-600 text-white border-green-600 hover:bg-green-700"
+                            : "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
+                          }
+                        >
                           {inf.is_paid ? "Pagada" : "Pendiente"}
                         </Badge>
                       </TableCell>
@@ -175,23 +201,23 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="outline" size="sm" className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="dark:bg-slate-800 dark:text-white">
                               {!inf.is_paid && (
-                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)}>
+                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <CheckCircle className="h-4 w-4 mr-2" />Marcar pagada
                                 </DropdownMenuItem>
                               )}
                               {!inf.is_paid && (
-                                <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)}>
+                                <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <Edit2 className="h-4 w-4 mr-2" />Editar
                                 </DropdownMenuItem>
                               )}
                               {!inf.is_paid ? (
-                                <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive">
+                                <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive dark:focus:bg-slate-700">
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               ) : null}
@@ -205,8 +231,10 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
                           {/* Edit Dialog */}
                           <Dialog open={editOpen === inf.id} onOpenChange={(v) => !v && setEditOpen(null)}>
-                            <DialogContent>
-                              <DialogHeader><DialogTitle>Editar Infraccion</DialogTitle></DialogHeader>
+                            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                              <DialogHeader>
+                                <DialogTitle style={{ color: dialogTextColor }}>Editar Infraccion</DialogTitle>
+                              </DialogHeader>
                               <form
                                 action={async (fd) => {
                                   fd.set("id", inf.id as string)
@@ -216,39 +244,35 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 className="flex flex-col gap-4"
                               >
                                 <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_desc">Descripcion</Label>
-                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required />
+                                  <Label htmlFor="edit_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                                  <Textarea id="edit_desc" name="description" defaultValue={inf.description as string} required minLength={3} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_fine">Multa ({currencySymbol})</Label>
-                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} />
+                                    <Label htmlFor="edit_fine" style={{ color: dialogTextColor }}>Multa ({currencySymbol})</Label>
+                                    <Input id="edit_fine" name="fine_amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount) || 0} min="0" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="edit_date">Fecha</Label>
-                                    <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required />
+                                    <Label htmlFor="edit_date" style={{ color: dialogTextColor }}>Fecha</Label>
+                                    <Input id="edit_date" name="infraction_date" type="date" defaultValue={inf.infraction_date as string} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                  <Label htmlFor="edit_notes">Notas</Label>
-                                  <Textarea id="edit_notes" name="notes" defaultValue={(inf.notes as string) || ""} />
-                                </div>
-                                <Button type="submit">Guardar Cambios</Button>
+                                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
 
                           {/* Delete Dialog */}
                           <AlertDialog open={deleteOpen === inf.id} onOpenChange={(v) => !v && setDeleteOpen(null)}>
-                            <AlertDialogContent>
+                            <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Eliminar Infraccion</AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar Infraccion</AlertDialogTitle>
+                                <AlertDialogDescription style={{ color: dialogTextColor }}>
                                   Esta accion no se puede deshacer. Se eliminara permanentemente esta infraccion.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="flex gap-3 justify-end">
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogCancel style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>Cancelar</AlertDialogCancel>
                                 <Button
                                   onClick={() => { deleteInfraction(inf.id as string); setDeleteOpen(null) }}
                                   className="bg-red-600 text-white hover:bg-red-700"

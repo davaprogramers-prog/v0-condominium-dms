@@ -184,22 +184,22 @@ function Sidebar({
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
-          data-sidebar="sidebar"
-          data-slot="sidebar"
-          data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          side={side}
+          data-sidebar="content"
+          data-slot="sidebar-content"
+          className={cn(
+            'w-(--sidebar-width) p-0 text-sidebar-foreground [&>button]:hidden bg-slate-700',
+            className,
+          )}
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
+            <SheetTitle>Menu</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <div 
+            className="flex h-full w-full flex-col bg-slate-700" 
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
@@ -377,6 +377,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<'div'>) {
         'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
         className,
       )}
+      style={{ backgroundColor: "var(--sidebar-bg, #ffffff)", ...props.style }}
       {...props}
     />
   )

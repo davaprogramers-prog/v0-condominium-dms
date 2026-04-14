@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, Trash2, Receipt, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, Receipt, Image as ImageIcon, DollarSign } from "lucide-react"
 
 interface GastosClientProps {
   expenses: Record<string, unknown>[]
@@ -41,9 +41,30 @@ export function GastosClient({ expenses, expenseTypes, currencySymbol, isAdmin }
         </div>
         {isAdmin && (
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Nuevo Gasto</Button>
-            </DialogTrigger>
+
+
+            <Button
+              style={{
+                backgroundColor: "#2563eb",
+                color: "white",
+                padding: "12px 24px",
+                fontSize: "16px",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #1d4ed8",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                cursor: "pointer",
+                fontWeight: "600"
+              }}
+            >
+              <DollarSign className="h-5 w-5" />
+              Agregar Gasto
+            </Button>
+
+
+
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Registrar Gasto</DialogTitle>

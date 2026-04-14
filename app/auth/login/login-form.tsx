@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import { ensureUserProfile } from "@/app/auth/actions"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -21,12 +22,18 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
+
+      // Ensure user has a complete profile after login
+      if (authData.user) {
+        const profileResult = await ensureUserProfile(authData.user.id, email)
+        console.log("[v0] Profile ensured:", profileResult)
+      }
 
       toast.success("Sesion iniciada correctamente")
       router.push("/dashboard")

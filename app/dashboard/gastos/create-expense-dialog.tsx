@@ -8,10 +8,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Loader2, Upload, X, Settings, Building2 } from "lucide-react"
+import { Plus, Loader2, Upload, X, Settings, Building2, DollarSign, CreditCard, DollarSignIcon, BadgeDollarSign } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createCondoExpense } from "./actions"
 import { createClient } from "@/lib/supabase/client"
+import { useTheme } from "../theme-context"
 import {
   Select,
   SelectContent,
@@ -35,9 +36,10 @@ interface ExpenseLogo {
 interface CreateExpenseDialogProps {
   condoId: string
   expenseTypes: ExpenseType[]
+  isSuperAdmin?: boolean
 }
 
-export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDialogProps) {
+export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = false }: CreateExpenseDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -46,15 +48,24 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
   const [expenseLogos, setExpenseLogos] = useState<ExpenseLogo[]>([])
   const [selectedLogoId, setSelectedLogoId] = useState<string>("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   useEffect(() => {
     async function loadLogos() {
       const supabase = createClient()
-      const { data } = await supabase
+      // Get ALL logos regardless of condo_id (logos are global/shared)
+      const { data, error } = await supabase
         .from("expense_logos")
         .select("id, name, logo_url")
-        .eq("condo_id", condoId)
         .order("name")
+      
+      console.log("[v0] Expense logos query - returned:", data?.length || 0, "logos")
+      if (error) {
+        console.log("[v0] Logos error:", error.message, "code:", error.code)
+      }
+      if (data) {
+        console.log("[v0] Logos data:", data.map(l => ({ id: l.id, name: l.name })))
+      }
       setExpenseLogos(data || [])
     }
     if (open) {
@@ -124,35 +135,51 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button
+          style={{
+            backgroundColor: "#2563eb",
+            color: "white",
+            padding: "12px 24px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "2px solid #1d4ed8",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+            cursor: "pointer",
+            fontWeight: "600"
+          }}
+        >
+          <BadgeDollarSign className="h-5 w-5" />
           Agregar Gasto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Registrar Nuevo Gasto</DialogTitle>
-          <DialogDescription>Agrega un gasto del condominio con la boleta/factura</DialogDescription>
+          <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Gasto</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega un gasto del condominio con la boleta/factura</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Título del Gasto *</Label>
+              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
               <Input
                 id="title"
                 name="title"
                 placeholder="Ej: Limpieza áreas comunes"
                 required
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto (CLP) *</Label>
+              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -160,29 +187,31 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                 step="0.01"
                 placeholder="0.00"
                 required
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción/Detalles</Label>
+            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción/Detalles</Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Ej: Limpieza febrero - Rusbel"
               rows={2}
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Tipo de Gasto *</Label>
+              <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
               {expenseTypes.length > 0 ? (
                 <Select name="category" required>
-                  <SelectTrigger>
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                     <SelectValue placeholder="Seleccionar tipo..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                     {expenseTypes.map((type) => (
                       <SelectItem key={type.id} value={type.name}>
                         {type.name}
@@ -191,18 +220,22 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
-                  No hay tipos definidos. <a href="/dashboard/tipos-gastos" className="text-primary underline">Crear tipos de gastos</a>
+                <div style={{ backgroundColor: "#1e40af", borderColor: "#1e40af" }} className="text-sm p-3 border rounded-md">
+                  <span style={{ color: "#ffffff" }}>No hay tipos definidos. </span>
+                  <a href="/dashboard/tipos-gastos" className="text-white hover:text-blue-200 underline font-medium">
+                    Crear tipos de gastos
+                  </a>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expenseDate">Fecha del Gasto</Label>
+              <Label htmlFor="expenseDate" style={{ color: dialogTextColor }}>Fecha del Gasto</Label>
               <Input
                 id="expenseDate"
                 name="expenseDate"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
+                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
           </div>
@@ -210,18 +243,20 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
           {/* Logo Selector */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Logo del Proveedor</Label>
-              <Link 
-                href="/dashboard/gastos/logos" 
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                <Settings className="h-3 w-3" />
-                Gestionar logos
-              </Link>
+              <Label style={{ color: dialogTextColor }}>Logo del Proveedor</Label>
+              {isSuperAdmin && (
+                <Link
+                  href="/dashboard/gastos/logos"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                >
+                  <Settings className="h-3 w-3" />
+                  Gestionar logos
+                </Link>
+              )}
             </div>
             {expenseLogos.length > 0 ? (
               <Select value={selectedLogoId} onValueChange={setSelectedLogoId}>
-                <SelectTrigger>
+                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar logo (opcional)">
                     {selectedLogoId && (
                       <div className="flex items-center gap-2">
@@ -230,17 +265,17 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                           alt=""
                           width={20}
                           height={20}
-                          className="h-5 w-5 object-contain"
+                          className="h-5 w-5 object-cover rounded-full"
                         />
                         <span>{expenseLogos.find(l => l.id === selectedLogoId)?.name}</span>
                       </div>
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectItem value="none">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                      <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                       <span>Sin logo</span>
                     </div>
                   </SelectItem>
@@ -252,7 +287,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                           alt={logo.name}
                           width={20}
                           height={20}
-                          className="h-5 w-5 object-contain"
+                          className="h-5 w-5 object-cover rounded-full"
                         />
                         <span>{logo.name}</span>
                       </div>
@@ -261,23 +296,27 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                 </SelectContent>
               </Select>
             ) : (
-              <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted/50">
-                No hay logos. <Link href="/dashboard/gastos/logos" className="text-primary underline">Agregar logos</Link>
+              <div style={{ backgroundColor: "#1e40af", borderColor: "#1e40af" }} className="text-sm p-3 border rounded-md flex items-center justify-between">
+                <span style={{ color: "#ffffff" }}>No hay logos</span>
+                <Link href="/dashboard/gastos/logos" className="text-white hover:text-blue-200 underline text-xs font-medium">
+                  Agregar logos
+                </Link>
               </div>
             )}
           </div>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label>Imagen de Boleta/Factura</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+            <Label style={{ color: dialogTextColor }}>Imagen de Boleta/Factura</Label>
+            <div style={{ borderColor: inputTextColor, backgroundColor: "#ffffff" }} className="border-2 border-dashed rounded-lg p-4 text-center">
               {previewUrl ? (
                 <div className="space-y-2">
                   <div className="relative inline-block">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="max-h-40 max-w-full rounded"
+                      style={{ borderColor: inputTextColor }}
+                      className="max-h-40 max-w-full rounded border-2"
                     />
                     <button
                       type="button"
@@ -287,13 +326,13 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedFile?.name}</p>
+                  <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">{selectedFile?.name}</p>
                 </div>
               ) : (
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
+                    <Upload className="h-6 w-6" style={{ color: "#9ca3af" }} />
+                    <span style={{ color: "#6b7280" }} className="text-sm">
                       Haz clic para cargar o arrastra una imagen
                     </span>
                   </div>
@@ -306,12 +345,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes }: CreateExpenseDial
                 </label>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-xs">
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Registrar Gasto
           </Button>

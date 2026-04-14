@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { uploadExpenseLogo } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,7 +23,7 @@ interface ExpenseLogo {
 export default function ExpenseLogosPage() {
   const [logos, setLogos] = useState<ExpenseLogo[]>([])
   const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [condoId, setCondoId] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -56,19 +57,19 @@ export default function ExpenseLogosPage() {
       return
     }
 
-    const isAdminUser = profile.role === "admin" || profile.role === "super_admin"
-    setIsAdmin(isAdminUser)
+    const isSuperAdminUser = profile.role === "super_admin"
+    setIsSuperAdmin(isSuperAdminUser)
     setCondoId(profile.condo_id)
 
-    if (!isAdminUser) {
+    if (!isSuperAdminUser) {
       router.push("/dashboard")
       return
     }
 
+    // Get all logos from all condominiums (they're shared globally)
     const { data: logosData } = await supabase
       .from("expense_logos")
       .select("*")
-      .eq("condo_id", profile.condo_id)
       .order("name")
 
     setLogos(logosData || [])
@@ -88,48 +89,25 @@ export default function ExpenseLogosPage() {
   }
 
   async function handleUpload() {
-    if (!logoFile || !newLogoName.trim() || !condoId) return
+    if (!logoFile || !newLogoName.trim()) return
 
     setUploading(true)
     try {
-      const supabase = createClient()
+      const formData = new FormData()
+      formData.append("logoFile", logoFile)
+      formData.append("logoName", newLogoName.trim())
 
-      // Upload logo to storage
-      const fileExt = logoFile.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `expense-logos/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(filePath, logoFile)
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("documents")
-        .getPublicUrl(filePath)
-
-      // Create expense_logo record
-      const { data: newLogo, error: insertError } = await supabase
-        .from("expense_logos")
-        .insert({
-          condo_id: condoId,
-          name: newLogoName.trim(),
-          logo_url: publicUrl
-        })
-        .select()
-        .single()
-
-      if (insertError) throw insertError
-
+      const newLogo = await uploadExpenseLogo(formData)
+      
       setLogos([...logos, newLogo].sort((a, b) => a.name.localeCompare(b.name)))
       setDialogOpen(false)
       setNewLogoName("")
       setLogoFile(null)
       setLogoPreview(null)
     } catch (error) {
-      console.error("Error uploading logo:", error)
-      alert("Error al subir el logo")
+      console.error("[v0] Error uploading logo:", error)
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
+      alert("Error al subir el logo: " + errorMessage)
     } finally {
       setUploading(false)
     }
@@ -180,31 +158,32 @@ export default function ExpenseLogosPage() {
       <div className="flex justify-end">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-slate-700 hover:bg-slate-800 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Agregar Logo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
-              <DialogTitle>Agregar Logo de Proveedor</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-slate-900 dark:text-white">Agregar Logo de Proveedor</DialogTitle>
+              <DialogDescription className="text-slate-600 dark:text-slate-400">
                 Sube un logo y asígnale un nombre para identificar gastos
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="logo-name">Nombre del Proveedor</Label>
+                <Label htmlFor="logo-name" className="text-slate-900 dark:text-slate-200">Nombre del Proveedor</Label>
                 <Input
                   id="logo-name"
                   placeholder="Ej: CGE, Lipigas, Tottus..."
                   value={newLogoName}
                   onChange={(e) => setNewLogoName(e.target.value)}
+                  className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Logo</Label>
+                <Label className="text-slate-900 dark:text-slate-200">Logo</Label>
                 <div className="flex items-center gap-4">
                   {logoPreview ? (
                     <div className="relative">
@@ -213,7 +192,7 @@ export default function ExpenseLogosPage() {
                         alt="Preview"
                         width={80}
                         height={80}
-                        className="h-20 w-20 rounded-lg object-contain border bg-white"
+                        className="h-20 w-20 rounded-lg object-contain border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900"
                       />
                       <button
                         type="button"
@@ -222,7 +201,7 @@ export default function ExpenseLogosPage() {
                           setLogoPreview(null)
                           if (fileInputRef.current) fileInputRef.current.value = ""
                         }}
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -230,9 +209,9 @@ export default function ExpenseLogosPage() {
                   ) : (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-20 w-20 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                      className="h-20 w-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-colors bg-slate-50 dark:bg-slate-900"
                     >
-                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                     </div>
                   )}
                   <input
@@ -242,19 +221,20 @@ export default function ExpenseLogosPage() {
                     onChange={handleLogoChange}
                     className="hidden"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     PNG, JPG o GIF. Max 2MB
                   </p>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">
                   Cancelar
                 </Button>
                 <Button 
                   onClick={handleUpload} 
                   disabled={!logoFile || !newLogoName.trim() || uploading}
+                  className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white disabled:opacity-50"
                 >
                   {uploading ? (
                     <>
@@ -287,28 +267,28 @@ export default function ExpenseLogosPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {logos.map((logo) => (
-            <Card key={logo.id} className="group relative">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <div className="h-16 w-16 mb-2 flex items-center justify-center">
+            <div key={logo.id} className="group flex flex-col items-center">
+              <div className="relative mb-3">
+                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center overflow-hidden shadow-sm border-2 border-muted hover:shadow-md transition-shadow">
                   <Image
                     src={logo.logo_url}
                     alt={logo.name}
-                    width={64}
-                    height={64}
-                    className="max-h-16 max-w-16 object-contain"
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="text-sm font-medium text-center truncate w-full">
-                  {logo.name}
-                </span>
                 <button
                   onClick={() => handleDelete(logo)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-destructive/10 hover:bg-destructive/20 text-destructive"
+                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-destructive text-white hover:bg-destructive/90 shadow-sm"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </button>
-              </CardContent>
-            </Card>
+              </div>
+              <span className="text-sm font-medium text-center truncate w-full px-1">
+                {logo.name}
+              </span>
+            </div>
           ))}
         </div>
       )}

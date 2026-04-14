@@ -10,9 +10,11 @@ import { Upload, Loader2, Trash2, Building2 } from "lucide-react"
 interface CondoLogoUploaderProps {
   condoId: string
   currentLogoUrl: string | null
+  cardBgColor?: string
+  cardTextColor?: string
 }
 
-export function CondoLogoUploader({ condoId, currentLogoUrl }: CondoLogoUploaderProps) {
+export function CondoLogoUploader({ condoId, currentLogoUrl, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9" }: CondoLogoUploaderProps) {
   const [loading, setLoading] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(currentLogoUrl)
   const [error, setError] = useState<string | null>(null)

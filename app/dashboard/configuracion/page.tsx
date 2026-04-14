@@ -3,6 +3,10 @@ import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
 import { ParametersForm } from "./parameters-form"
 import { CondoLogoUploader } from "./condo-logo-uploader"
+import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
+import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
+import { ProfileSettingsFormServer } from "./profile-settings-form-server"
+import { AvatarUploadSettings } from "./avatar-upload-settings"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -14,7 +18,7 @@ export default async function ConfiguracionPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, condo_id, first_name, last_name")
+    .select("*")
     .eq("id", user.id)
     .single()
 
@@ -30,81 +34,146 @@ export default async function ConfiguracionPage() {
     .eq("condo_id", profile?.condo_id)
     .single()
 
+  const { data: themeData } = await supabase
+    .from("condominium_themes")
+    .select("*")
+    .eq("condo_id", profile?.condo_id)
+    .single()
+
+  const theme = themeData as CondoTheme | null
+  const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
+  const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
+  const inputBgColor = theme?.enable_custom_theme ? theme.input_bg_color : DEFAULT_THEME.input_bg_color
+  const inputTextColor = theme?.enable_custom_theme ? theme.input_text_color : DEFAULT_THEME.input_text_color
+
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Configuración</h1>
-        <p className="text-muted-foreground">Administra tu perfil y condominio</p>
+        <h1 className="text-3xl font-bold" style={{ color: cardTextColor }}>Mi Cuenta</h1>
+        <p style={{ color: cardTextColor, opacity: 0.7 }}>Administra tu perfil y seguridad</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Mi Perfil */}
-        <div className="rounded-lg border bg-card p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Mi Perfil</h2>
-          <div className="space-y-3 text-sm">
-            <div>
-              <p className="text-muted-foreground">Nombre</p>
-              <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Email</p>
-              <p className="font-medium text-xs">{user.email}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Rol</p>
-              <p className="font-medium capitalize">{profile?.role?.replace("_", " ")}</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Avatar y Perfil */}
+        <div 
+          className="rounded-lg border-2 p-6 space-y-4 lg:col-span-1"
+          style={{
+            backgroundColor: cardBgColor,
+            color: cardTextColor,
+            borderColor: "rgba(255,255,255,0.1)"
+          }}
+        >
+          <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Foto de Perfil</h2>
+          <AvatarUploadSettings 
+            currentAvatarUrl={profile?.avatar_url}
+            userName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario"}
+            cardBgColor={cardBgColor}
+            cardTextColor={cardTextColor}
+          />
         </div>
 
-        {/* Condominio */}
-        <div className="rounded-lg border bg-card p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Condominio</h2>
-          {condo ? (
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-muted-foreground">Nombre</p>
-                <p className="font-medium">{condo.name}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Moneda</p>
-                <p className="font-medium">{condo.currency_symbol}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Creado</p>
-                <p className="font-medium">{new Date(condo.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">No tienes un condominio asociado</p>
-          )}
+        {/* Información Personal */}
+        <div 
+          className="rounded-lg border-2 p-6 space-y-4 lg:col-span-2"
+          style={{
+            backgroundColor: cardBgColor,
+            color: cardTextColor,
+            borderColor: "rgba(255,255,255,0.1)"
+          }}
+        >
+          <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Información Personal</h2>
+          <ProfileSettingsFormServer 
+            profile={profile}
+            userEmail={user.email}
+            cardBgColor={cardBgColor}
+            cardTextColor={cardTextColor}
+          />
         </div>
       </div>
 
-      {/* Logo del Condominio - Solo Admin */}
-      {isAdmin && condo && (
-        <CondoLogoUploader 
-          condoId={condo.id} 
-          currentLogoUrl={condo.logo_url}
-        />
-      )}
-
-      {/* Parámetros del Condominio - Solo Admin */}
+      {/* Admin-only sections */}
       {isAdmin && (
-        <ParametersForm 
-          condoId={profile?.condo_id} 
-          currentParams={parameters}
-        />
+        <>
+          {/* Condominio Info */}
+          <div 
+            className="rounded-lg border-2 p-6 space-y-4"
+            style={{
+              backgroundColor: cardBgColor,
+              color: cardTextColor,
+              borderColor: "rgba(255,255,255,0.1)"
+            }}
+          >
+            <h2 className="text-xl font-semibold" style={{ color: cardTextColor }}>Condominio</h2>
+            {condo ? (
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p style={{ color: cardTextColor, opacity: 0.7 }}>Nombre</p>
+                  <p className="font-medium" style={{ color: cardTextColor }}>{condo.name}</p>
+                </div>
+                <div>
+                  <p style={{ color: cardTextColor, opacity: 0.7 }}>Moneda</p>
+                  <p className="font-medium" style={{ color: cardTextColor }}>{condo.currency_symbol}</p>
+                </div>
+                <div>
+                  <p style={{ color: cardTextColor, opacity: 0.7 }}>Creado</p>
+                  <p className="font-medium" style={{ color: cardTextColor }}>{new Date(condo.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ) : (
+              <p style={{ color: cardTextColor, opacity: 0.7 }}>No tienes un condominio asociado</p>
+            )}
+          </div>
+
+          {/* Logo del Condominio */}
+          {condo && (
+            <CondoLogoUploader 
+              condoId={condo.id} 
+              currentLogoUrl={condo.logo_url}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
+            />
+          )}
+
+          {/* Parámetros del Condominio */}
+          {condo && (
+            <ParametersForm 
+              condoId={profile?.condo_id} 
+              currentParams={parameters}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
+              inputBgColor={inputBgColor}
+              inputTextColor={inputTextColor}
+            />
+          )}
+
+          {/* Personalización de Colores */}
+          {condo && (
+            <ThemeCustomizerWrapper 
+              condoId={condo.id} 
+              currentTheme={theme}
+              isAdmin={isAdmin}
+              cardBgColor={cardBgColor}
+              cardTextColor={cardTextColor}
+            />
+          )}
+        </>
       )}
 
       {/* Sesión */}
-      <div className="rounded-lg border bg-destructive/10 p-6">
+      <div 
+        className="rounded-lg border-2 p-6"
+        style={{
+          backgroundColor: cardBgColor,
+          color: cardTextColor,
+          borderColor: "rgba(255,255,255,0.1)"
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Cerrar Sesión</h2>
-            <p className="text-sm text-muted-foreground">Termina tu sesión actual</p>
+            <h2 className="text-lg font-semibold" style={{ color: cardTextColor }}>Cerrar Sesión</h2>
+            <p className="text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>Termina tu sesión actual</p>
           </div>
           <LogoutButton />
         </div>
