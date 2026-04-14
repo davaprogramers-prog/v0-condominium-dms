@@ -12,21 +12,20 @@ export function useAsync<T>(
   immediate = true,
   dependencies: any[] = []
 ): UseAsyncState<T> {
-  const [state, setState] = useState<UseAsyncState<T>>({
+  const [state, setState] = useState<Omit<UseAsyncState<T>, 'refetch'>>({
     data: null,
     isLoading: false,
     error: null,
-    refetch: async () => {}
   })
 
   const execute = async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }))
+    setState({ data: null, isLoading: true, error: null })
     try {
       const response = await asyncFunction()
-      setState({ data: response, isLoading: false, error: null, refetch: execute })
+      setState({ data: response, isLoading: false, error: null })
       return response
     } catch (error) {
-      setState(prev => ({ ...prev, isLoading: false, error: error as Error }))
+      setState({ data: null, isLoading: false, error: error as Error })
       throw error
     }
   }
