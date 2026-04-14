@@ -326,7 +326,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   placeholder="Nombre del solicitante"
                   value={searchRequestedBy}
                   onChange={(e) => setSearchRequestedBy(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
@@ -334,7 +334,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
               <div>
                 <label className="text-sm font-medium">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}>
+                  <SelectTrigger style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}>
                     <SelectValue placeholder="Filtrar por estado" />
                   </SelectTrigger>
                   <SelectContent style={{ backgroundColor: cardBgColor }}>
@@ -353,7 +353,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
@@ -364,7 +364,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 

@@ -42,7 +42,7 @@ export function VisitsAdminClient({
   condoId,
   userId,
 }: VisitsAdminClientProps) {
-  const { cardBgColor, cardTextColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputTextColor } = useTheme()
   const [selectedHouse, setSelectedHouse] = useState<string>('all')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
@@ -130,7 +130,7 @@ export function VisitsAdminClient({
                   placeholder="Nombre del visitante"
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
@@ -180,7 +180,7 @@ export function VisitsAdminClient({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
@@ -191,7 +191,7 @@ export function VisitsAdminClient({
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: borderColor }}
+                  style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}
                 />
               </div>
 
@@ -215,7 +215,7 @@ export function VisitsAdminClient({
 
           {/* Visits List */}
           {filteredVisits.length === 0 ? (
-            <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }}>
+            <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }}>
               <CardContent className="text-center py-12">
                 <p style={{ opacity: 0.7 }}>No hay visitas que coincidan con los filtros seleccionados</p>
               </CardContent>
@@ -234,7 +234,7 @@ export function VisitsAdminClient({
                     {houseVisits.map((visit) => (
                       <Card
                         key={visit.id}
-                        style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }}
+                        style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }}
                         className="overflow-hidden"
                       >
                         <CardHeader className="pb-3">

@@ -32,7 +32,7 @@ export function VisitsList({ visits }: VisitsListProps) {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; visit: Visit | null }>({ open: false, visit: null })
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
-  const { cardBgColor, cardTextColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputTextColor } = useTheme()
 
   async function handleDelete() {
     if (!deleteDialog.visit) return
@@ -101,7 +101,7 @@ export function VisitsList({ visits }: VisitsListProps) {
             className="border rounded-lg p-4 hover:shadow-md transition-shadow"
             style={{
               backgroundColor: cardBgColor,
-              borderColor: borderColor,
+              borderColor: inputTextColor,
               color: cardTextColor
             }}
           >
@@ -145,7 +145,7 @@ export function VisitsList({ visits }: VisitsListProps) {
             </div>
 
             {visit.status === 'scheduled' && (
-              <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${borderColor}` }}>
+              <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${inputTextColor}` }}>
                 <Button
                   size="sm"
                   variant="outline"
