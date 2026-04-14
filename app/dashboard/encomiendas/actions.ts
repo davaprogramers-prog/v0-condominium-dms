@@ -45,7 +45,7 @@ export async function createParcel(data: {
       .insert({
         condo_id: data.condo_id,
         house_id: data.house_id,
-        from: data.from,
+        'from': data.from,
         status: 'received',
         received_date: utcNow,
         parcel_type: data.parcel_type,
@@ -57,22 +57,6 @@ export async function createParcel(data: {
 
     if (error) {
       throw new Error(error.message)
-    }
-
-    // Save reception photo to parcel_photos table if provided
-    if (reception_photo_url && parcel) {
-      const { error: photoError } = await supabase
-        .from('parcel_photos')
-        .insert({
-          parcel_id: parcel.id,
-          photo_url: reception_photo_url,
-          photo_type: 'recepcion_garita',
-          uploaded_by: user.id,
-        })
-
-      if (photoError) {
-        console.error('[v0] Error saving photo record:', photoError)
-      }
     }
 
     return { success: true, parcel }
@@ -123,6 +107,30 @@ export async function updateParcelStatus(data: {
     // Update parcel status
     const updateData: any = {
       status: data.new_status,  // Use 'delivered' or 'returned' directly
+    }
+
+    if (data.new_status === 'returned' && data.return_reason) {
+      updateData.return_reason = data.return_reason
+    }
+
+    if (data.new_status === 'delivered') {
+      updateData.delivered_by = user.id
+      if (photoUrl) {
+        updateData.delivery_photo_url = photoUrl
+      }
+    } else if (data.new_status === 'returned') {
+      if (photoUrl) {
+        updateData.return_photo_url = photoUrl
+      }
+    }
+
+    const { error } = await supabase
+      .from('parcels')
+      .update(updateData)
+      .eq('id', data.parcel_id)
+
+    if (error) {
+      throw new Error(error.message)
     }
 
     if (data.new_status === 'returned' && data.return_reason) {
