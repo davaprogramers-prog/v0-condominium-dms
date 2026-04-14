@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { put, getDownloadUrl } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 import { getSantiagoDateTime } from '@/lib/date-utils'
 
@@ -38,31 +37,34 @@ export async function createParcel(data: {
     let reception_photo_url = null
     if (data.receptionPhoto) {
       try {
-        console.log('[v0] Starting photo upload...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
-        // Get blob token from environment
-        const blobToken = process.env.BLOB_READ_WRITE_TOKEN
-        if (!blobToken) {
-          throw new Error('BLOB_READ_WRITE_TOKEN not configured in environment')
-        }
-        // Use condo_id/filename structure - token passed explicitly
-        const filename = `${data.condo_id}/${uuidv4()}.jpg`
-        console.log('[v0] Filename:', filename)
+        console.log('[v0] Starting photo upload to Supabase...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
+        
+        // Convert ArrayBuffer to Blob for Supabase Storage
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
-        console.log('[v0] Blob created:', { blobSize: photoBlob.size, blobType: photoBlob.type })
-        const result = await put(filename, photoBlob, {
-          access: 'private',
-          addRandomSuffix: false,
-          token: blobToken,
-        })
-        console.log('[v0] Put result:', { url: result.url, pathname: result.pathname })
-        // Store the full URL
-        reception_photo_url = result.url
+        
+        // Create file path following the pattern: parcel-photos/{condoId}/{parcelId}/{timestamp}.jpg
+        const filename = `parcel-photos/${data.condo_id}/${uuidv4()}/${Date.now()}.jpg`
+        console.log('[v0] Uploading to:', filename)
+        
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('parcels')
+          .upload(filename, photoBlob, { upsert: true })
+        
+        if (uploadError) {
+          throw new Error(`Upload error: ${uploadError.message}`)
+        }
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('parcels')
+          .getPublicUrl(uploadData.path)
+        
+        reception_photo_url = urlData.publicUrl
         console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
       } catch (photoUploadError) {
-        console.error('[v0] ERROR uploading photo:', {
-          error: photoUploadError instanceof Error ? photoUploadError.message : String(photoUploadError),
-          stack: photoUploadError instanceof Error ? photoUploadError.stack : undefined
-        })
+        console.error('[v0] ERROR uploading photo:', photoUploadError)
+        // Don't throw - parcel creation should continue even if photo upload fails
       }
     }
 
@@ -150,24 +152,31 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        // Get blob token from environment
-        const blobToken = process.env.BLOB_READ_WRITE_TOKEN
-        if (!blobToken) {
-          throw new Error('BLOB_READ_WRITE_TOKEN not configured in environment')
+        // Convert ArrayBuffer to Blob for Supabase Storage
+        const photoBlob = new Blob([data.photo], { type: 'image/jpeg' })
+        
+        // Create file path: parcel-photos/{condoId}/{parcelId}/{status}-{timestamp}.jpg
+        const filename = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('parcels')
+          .upload(filename, photoBlob, { upsert: true })
+        
+        if (uploadError) {
+          throw new Error(`Upload error: ${uploadError.message}`)
         }
-        // Use condo_id/parcel_id/filename structure - token passed explicitly
-        const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
-        const blob = new Blob([data.photo], { type: 'image/jpeg' })
-        const result = await put(filename, blob, {
-          access: 'private',
-          addRandomSuffix: false,
-          token: blobToken,
-        })
-        // Store the full URL
-        photoUrl = result.url
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('parcels')
+          .getPublicUrl(uploadData.path)
+        
+        photoUrl = urlData.publicUrl
         console.log('[v0] Photo uploaded to:', photoUrl)
       } catch (photoUploadError) {
-        console.error('[v0] Error uploading photo to Blob:', photoUploadError)
+        console.error('[v0] Error uploading photo:', photoUploadError)
+        // Don't throw - parcel status update should continue even if photo upload fails
       }
     }
 
@@ -278,13 +287,3 @@ export async function editParcelReception(data: {
   }
 }
 
-export async function getPhotoUrl(photoUrl: string): Promise<string> {
-  try {
-    // Generate a signed/authorized download URL for the private blob
-    const signedUrl = await getDownloadUrl(photoUrl)
-    return signedUrl
-  } catch (err) {
-    console.error('[v0] Error generating photo download URL:', err)
-    throw err
-  }
-}
