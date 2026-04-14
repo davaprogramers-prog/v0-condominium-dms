@@ -4,7 +4,7 @@
 -- Enable RLS
 ALTER TABLE parcels ENABLE ROW LEVEL SECURITY;
 
--- Drop all existing policies
+-- Drop all existing policies (comprehensive list)
 DROP POLICY IF EXISTS "staff_can_create_parcels" ON parcels;
 DROP POLICY IF EXISTS "staff_can_view_parcels" ON parcels;
 DROP POLICY IF EXISTS "propietario_can_view_their_parcels" ON parcels;
@@ -12,6 +12,12 @@ DROP POLICY IF EXISTS "staff_can_update_parcels" ON parcels;
 DROP POLICY IF EXISTS "Users can view parcels in their condo" ON parcels;
 DROP POLICY IF EXISTS "Conserje can create parcels" ON parcels;
 DROP POLICY IF EXISTS "Propietarios can view their house parcels" ON parcels;
+DROP POLICY IF EXISTS "parcels_insert" ON parcels;
+DROP POLICY IF EXISTS "parcels_select" ON parcels;
+DROP POLICY IF EXISTS "parcels_update" ON parcels;
+DROP POLICY IF EXISTS "parcels_delete" ON parcels;
+DROP POLICY IF EXISTS "anyone_can_view_parcels" ON parcels;
+DROP POLICY IF EXISTS "allow_all_select" ON parcels;
 
 -- Simple INSERT policy: Only staff (conserje, admin, super_admin) can create
 CREATE POLICY "parcels_insert" ON parcels
