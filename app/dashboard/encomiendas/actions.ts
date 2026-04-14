@@ -39,7 +39,12 @@ export async function createParcel(data: {
     if (data.receptionPhoto) {
       try {
         console.log('[v0] Starting photo upload...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
-        // Use simple filename without "parcels/" prefix - put() will save to the selected bucket (parcels)
+        // Get blob token from environment
+        const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+        if (!blobToken) {
+          throw new Error('BLOB_READ_WRITE_TOKEN not configured in environment')
+        }
+        // Use condo_id/filename structure - token passed explicitly
         const filename = `${data.condo_id}/${uuidv4()}.jpg`
         console.log('[v0] Filename:', filename)
         const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
@@ -47,8 +52,9 @@ export async function createParcel(data: {
         const result = await put(filename, photoBlob, {
           access: 'private',
           addRandomSuffix: false,
+          token: blobToken,
         })
-        console.log('[v0] Put result:', { url: result.url, pathname: result.pathname, size: result.size })
+        console.log('[v0] Put result:', { url: result.url, pathname: result.pathname })
         // Store the full URL
         reception_photo_url = result.url
         console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
@@ -144,12 +150,18 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        // Use simple filename without "parcels/" prefix - will save to parcels bucket
+        // Get blob token from environment
+        const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+        if (!blobToken) {
+          throw new Error('BLOB_READ_WRITE_TOKEN not configured in environment')
+        }
+        // Use condo_id/parcel_id/filename structure - token passed explicitly
         const filename = `${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
         const blob = new Blob([data.photo], { type: 'image/jpeg' })
         const result = await put(filename, blob, {
           access: 'private',
           addRandomSuffix: false,
+          token: blobToken,
         })
         // Store the full URL
         photoUrl = result.url
