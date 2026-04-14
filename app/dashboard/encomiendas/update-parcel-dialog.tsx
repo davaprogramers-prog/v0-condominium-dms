@@ -29,7 +29,7 @@ interface ParcelPhoto {
   from: string
   recipient_name: string
   parcel_type: string
-  status: 'received' | 'delivered' | 'returned'
+  status: 'recibido' | 'entregado' | 'devuelto'
   received_date: string
   house_id: string
   house?: { house_number: string }
@@ -45,7 +45,7 @@ export function UpdateParcelDialog({
   onSuccess: () => void
 }) {
   const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
-  const [newStatus, setNewStatus] = useState<'delivered' | 'returned'>('delivered')
+  const [newStatus, setNewStatus] = useState<'entregado' | 'devuelto'>('entregado')
   const [returnReason, setReturnReason] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string>('')
@@ -174,8 +174,8 @@ export function UpdateParcelDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="select-content-themed">
-                <SelectItem value="delivered" className="select-item-themed">Entregado</SelectItem>
-                <SelectItem value="returned" className="select-item-themed">Devuelto</SelectItem>
+                <SelectItem value="entregado" className="select-item-themed">Entregado</SelectItem>
+                <SelectItem value="devuelto" className="select-item-themed">Devuelto</SelectItem>
               </SelectContent>
             </Select>
           </div>
