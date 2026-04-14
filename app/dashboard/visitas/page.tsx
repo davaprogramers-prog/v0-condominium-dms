@@ -24,20 +24,29 @@ export default async function VisitasPage() {
     .eq("id", user.id)
     .single()
 
-  if (!profile || !profile.condo_id) {
+  console.log("[v0] Visitas page - user profile:", { userId: user.id, profile })
+
+  if (!profile) {
+    console.log("[v0] No profile found, redirecting")
     redirect("/dashboard")
   }
 
+  // For conserje, allow access even if condo_id is null (we'll handle it)
   const condoId = profile.condo_id
   const houseId = profile.house_id
   const role = profile.role
   const isAdmin = role === "admin" || role === "super_admin"
   const isConcierge = role === "conserje"
   
+  // If conserje without condo_id, redirect
+  if (isConcierge && !condoId) {
+    console.log("[v0] Concierge without condo_id, redirecting")
+    redirect("/dashboard")
+  }
+
   // Determine if user is viewing as admin (all visits) or as owner (only their property)
   const isViewingAsAdmin = (isAdmin || isConcierge) && !houseId
-
-  // Get all houses in the condo
+  console.log("[v0] Visitas logic:", { condoId, houseId, role, isAdmin, isConcierge, isViewingAsAdmin })
   const { data: houses } = await supabase
     .from("houses")
     .select("id, house_number")
@@ -54,6 +63,7 @@ export default async function VisitasPage() {
       .eq("condo_id", condoId)
       .order("visit_date", { ascending: false })
     
+    console.log("[v0] Admin view - fetched visits:", { condoId, count: allVisits?.length || 0 })
     visits = allVisits || []
   } else if (houseId) {
     // Owners and admin+owners see only their property's visits
@@ -64,6 +74,7 @@ export default async function VisitasPage() {
       .eq("condo_id", condoId)
       .order("visit_date", { ascending: false })
     
+    console.log("[v0] Owner view - fetched visits:", { houseId, condoId, count: userVisits?.length || 0 })
     visits = userVisits || []
   }
 
