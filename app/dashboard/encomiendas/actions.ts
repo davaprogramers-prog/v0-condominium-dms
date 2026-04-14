@@ -75,7 +75,6 @@ export async function createParcel(data: {
         status: 'recibido',
         received_date: utcNow,
         parcel_type: data.parcel_type,
-        reception_photo_url: receptionPhotoUrl,
         created_by: user.id,
       })
       .select()
@@ -92,9 +91,8 @@ export async function createParcel(data: {
         .insert({
           parcel_id: parcel.id,
           photo_url: receptionPhotoUrl,
-          photo_type: 'reception',
+          photo_type: 'recepcion_garita',
           uploaded_by: user.id,
-          uploaded_by_role: profile.role,
         })
 
       if (photoError) {
@@ -201,7 +199,7 @@ export async function updateParcelStatus(data: {
 
     // Save delivery/return photo to parcel_photos table if provided
     if (photoUrl) {
-      const photoType = data.new_status === 'entregado' ? 'delivery' : 'return'
+      const photoType = data.new_status === 'entregado' ? 'entrega_propietario' : 'devolucion'
       
       const { error: photoError } = await supabase
         .from('parcel_photos')
@@ -210,7 +208,6 @@ export async function updateParcelStatus(data: {
           photo_url: photoUrl,
           photo_type: photoType,
           uploaded_by: user.id,
-          uploaded_by_role: profile.role,
         })
 
       if (photoError) {
