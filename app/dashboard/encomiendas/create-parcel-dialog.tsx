@@ -11,6 +11,7 @@ import { Plus, Camera, Loader2 } from 'lucide-react'
 import { createParcel } from './actions'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/app/dashboard/theme-context'
+import { resizeImageIfNeeded } from '@/lib/image-utils'
 
 export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: string; houses: Array<{ id: string; house_number: string }>; onSuccess?: () => void }) {
   const [open, setOpen] = useState(false)
@@ -25,15 +26,23 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
   const [receptionPhotoPreview, setReceptionPhotoPreview] = useState<string>('')
   const router = useRouter()
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setReceptionPhoto(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setReceptionPhotoPreview(reader.result as string)
+      try {
+        // Redimensiona la imagen si es necesario
+        const resizedFile = await resizeImageIfNeeded(file, 1920, 1080)
+        setReceptionPhoto(resizedFile)
+        
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setReceptionPhotoPreview(reader.result as string)
+        }
+        reader.readAsDataURL(resizedFile)
+      } catch (err) {
+        console.error('[v0] Error processing image:', err)
+        alert('Error al procesar la imagen: ' + String(err))
       }
-      reader.readAsDataURL(file)
     }
   }
 

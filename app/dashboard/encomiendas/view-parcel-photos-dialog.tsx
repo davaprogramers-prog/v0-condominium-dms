@@ -123,29 +123,29 @@ export function ViewParcelPhotosDialog({
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-2">
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={handlePrevious}
                   disabled={photos.length <= 1}
+                  className="bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold border-2 border-amber-500"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4 mr-1" />
                   Anterior
                 </Button>
 
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-semibold text-gray-700">
                   {currentPhotoIndex + 1} de {photos.length}
                 </span>
 
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={handleNext}
                   disabled={photos.length <= 1}
+                  className="bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold border-2 border-amber-500"
                 >
                   Siguiente
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
 
