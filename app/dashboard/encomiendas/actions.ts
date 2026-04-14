@@ -39,21 +39,34 @@ export async function createParcel(data: {
       try {
         console.log('[v0] Starting photo upload to Supabase...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
         
-        // Convert ArrayBuffer to Blob for Supabase Storage
-        const photoBlob = new Blob([data.receptionPhoto], { type: 'image/jpeg' })
+        // Convert ArrayBuffer to File for Supabase Storage
+        const photoFile = new File([data.receptionPhoto], `reception-${Date.now()}.jpg`, { type: 'image/jpeg' })
         
-        // Create file path following the pattern: parcel-photos/{condoId}/{parcelId}/{timestamp}.jpg
-        const filename = `parcel-photos/${data.condo_id}/${uuidv4()}/${Date.now()}.jpg`
+        // Create file path: parcel-photos/{condoId}/{timestamp}.jpg
+        const filename = `parcel-photos/${data.condo_id}/${uuidv4()}.jpg`
         console.log('[v0] Uploading to:', filename)
         
         // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('parcels')
-          .upload(filename, photoBlob, { upsert: true })
+          .upload(filename, photoFile, { upsert: true })
         
         if (uploadError) {
           throw new Error(`Upload error: ${uploadError.message}`)
         }
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('parcels')
+          .getPublicUrl(uploadData.path)
+        
+        photoUrl = urlData.publicUrl
+        console.log('[v0] Photo uploaded to:', photoUrl)
+      } catch (photoUploadError) {
+        console.error('[v0] Error uploading photo:', photoUploadError)
+        // Don't throw - parcel status update should continue even if photo upload fails
+      }
+    }
         
         // Get public URL
         const { data: urlData } = supabase.storage
@@ -152,8 +165,8 @@ export async function updateParcelStatus(data: {
     let photoUrl = null
     if (data.photo) {
       try {
-        // Convert ArrayBuffer to Blob for Supabase Storage
-        const photoBlob = new Blob([data.photo], { type: 'image/jpeg' })
+        // Convert ArrayBuffer to File for Supabase Storage
+        const photoFile = new File([data.photo], `${data.new_status}-${Date.now()}.jpg`, { type: 'image/jpeg' })
         
         // Create file path: parcel-photos/{condoId}/{parcelId}/{status}-{timestamp}.jpg
         const filename = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
@@ -161,7 +174,7 @@ export async function updateParcelStatus(data: {
         // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('parcels')
-          .upload(filename, photoBlob, { upsert: true })
+          .upload(filename, photoFile, { upsert: true })
         
         if (uploadError) {
           throw new Error(`Upload error: ${uploadError.message}`)
