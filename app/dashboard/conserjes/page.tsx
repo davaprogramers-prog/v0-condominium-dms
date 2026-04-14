@@ -59,7 +59,7 @@ export default function ConserjesPage() {
     fetchCondoId()
   }, [])
 
-  const { data: concierges = [], isLoading, refetch } = useAsync(() => {
+  const { data: concierges = [], isLoading } = useAsync(() => {
     if (!condoId) return Promise.resolve([])
     return getConcierges(condoId)
   }, true, [condoId])
