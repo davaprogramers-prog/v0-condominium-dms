@@ -9,7 +9,7 @@ export async function createParcel(data: {
   house_id: string
   parcel_type: string
   from: string
-  receptionPhoto?: ArrayBuffer
+  receptionPhotoUrl?: string
 }) {
   try {
     const supabase = await createClient()
@@ -33,40 +33,8 @@ export async function createParcel(data: {
       throw new Error('Rol no autorizado')
     }
 
-    // Upload reception photo if provided
-    let reception_photo_url = null
-    if (data.receptionPhoto) {
-      try {
-        console.log('[v0] Starting photo upload to Supabase...', { photoSize: data.receptionPhoto.byteLength, condoId: data.condo_id })
-        
-        // Convert ArrayBuffer to File for Supabase Storage
-        const photoFile = new File([data.receptionPhoto], `reception-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        
-        // Create file path: parcel-photos/{condoId}/{timestamp}.jpg
-        const filename = `parcel-photos/${data.condo_id}/${uuidv4()}.jpg`
-        console.log('[v0] Uploading to:', filename)
-        
-        // Upload to Supabase Storage using 'receipts' bucket which has proper RLS policies
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('receipts')
-          .upload(filename, photoFile, { upsert: true })
-        
-        if (uploadError) {
-          throw new Error(`Upload error: ${uploadError.message}`)
-        }
-        
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(uploadData.path)
-        
-        reception_photo_url = urlData.publicUrl
-        console.log('[v0] Photo uploaded successfully to:', reception_photo_url)
-      } catch (photoUploadError) {
-        console.error('[v0] ERROR uploading photo:', photoUploadError)
-        // Don't throw - parcel creation should continue even if photo upload fails
-      }
-    }
+    // Use reception photo URL if provided (uploaded from client)
+    let reception_photo_url = data.receptionPhotoUrl || null
 
     // Create parcel in database
     // Use UTC timestamp in ISO format - Supabase will store it as-is
@@ -117,7 +85,7 @@ export async function updateParcelStatus(data: {
   parcel_id: string
   new_status: 'delivered' | 'returned'
   return_reason?: string
-  photo?: ArrayBuffer
+  photoUrl?: string
 }) {
   try {
     const supabase = await createClient()
@@ -148,37 +116,8 @@ export async function updateParcelStatus(data: {
       throw new Error('Encomienda no encontrada')
     }
 
-    // Upload photo if provided
-    let photoUrl = null
-    if (data.photo) {
-      try {
-        // Convert ArrayBuffer to File for Supabase Storage
-        const photoFile = new File([data.photo], `${data.new_status}-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        
-        // Create file path: parcel-photos/{condoId}/{parcelId}/{status}-{timestamp}.jpg
-        const filename = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
-        
-        // Upload to Supabase Storage using 'receipts' bucket which has proper RLS policies
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('receipts')
-          .upload(filename, photoFile, { upsert: true })
-        
-        if (uploadError) {
-          throw new Error(`Upload error: ${uploadError.message}`)
-        }
-        
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(uploadData.path)
-        
-        photoUrl = urlData.publicUrl
-        console.log('[v0] Photo uploaded to:', photoUrl)
-      } catch (photoUploadError) {
-        console.error('[v0] Error uploading photo:', photoUploadError)
-        // Don't throw - parcel status update should continue even if photo upload fails
-      }
-    }
+    // Use delivery/return photo URL if provided (uploaded from client)
+    let photoUrl = data.photoUrl || null
 
     // Update parcel status
     const updateData: any = {

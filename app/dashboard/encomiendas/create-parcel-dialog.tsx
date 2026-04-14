@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,11 +46,43 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
     setLoading(true)
     try {
+      let receptionPhotoUrl: string | null = null
+
+      // Upload photo to Supabase Storage from client if provided
+      if (receptionPhoto) {
+        console.log('[v0] Uploading photo from client...')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('No autenticado')
+
+        // Upload to receipts bucket
+        const filePath = `parcel-photos/${condoId}/${Date.now()}.jpg`
+        console.log('[v0] Uploading to:', filePath)
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(filePath, receptionPhoto, { upsert: true })
+
+        if (uploadError) {
+          console.error('[v0] Upload error:', uploadError)
+          throw uploadError
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('receipts')
+          .getPublicUrl(uploadData.path)
+
+        receptionPhotoUrl = urlData.publicUrl
+        console.log('[v0] Photo uploaded successfully to:', receptionPhotoUrl)
+      }
+
+      // Call server action to create parcel with photo URL
       const result = await createParcel({
         ...formData,
         condo_id: condoId,
-        receptionPhoto: receptionPhoto ? await receptionPhoto.arrayBuffer() : undefined,
-      })
+        receptionPhotoUrl: receptionPhotoUrl,
+      } as any)
 
       if (result.success) {
         setFormData({
@@ -66,6 +99,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
         alert('Error: ' + result.error)
       }
     } catch (err) {
+      console.error('[v0] Error:', err)
       alert('Error al crear encomienda: ' + String(err))
     } finally {
       setLoading(false)
