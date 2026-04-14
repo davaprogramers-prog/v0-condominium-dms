@@ -16,7 +16,7 @@ import { resizeImageIfNeeded } from '@/lib/image-utils'
 export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: string; houses: Array<{ id: string; house_number: string }>; onSuccess?: () => void }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor } = useTheme()
   const [formData, setFormData] = useState({
     house_id: '',
     parcel_type: 'paquete',
@@ -195,7 +195,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                       setReceptionPhotoPreview('')
                     }}
                     className="text-sm hover:underline"
-                    style={{ color: primaryColor || '#0066cc' }}
+                    style={{ color: '#0066cc' }}
                   >
                     Cambiar foto
                   </button>
