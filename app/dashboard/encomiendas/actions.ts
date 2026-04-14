@@ -9,7 +9,7 @@ export async function createParcel(data: {
   house_id: string
   parcel_type: string
   from: string
-  receptionPhoto?: number[]  // ArrayBuffer serialized as number array
+  receptionPhotoBase64?: string
   receptionPhotoFileName?: string
 }) {
   try {
@@ -34,46 +34,34 @@ export async function createParcel(data: {
       throw new Error('Rol no autorizado')
     }
 
-    // Upload reception photo if provided (using service role permissions)
+    // Upload reception photo if provided
     let receptionPhotoUrl: string | null = null
-    if (data.receptionPhoto && data.receptionPhoto.length > 0) {
+    if (data.receptionPhotoBase64) {
       try {
-        console.log('[v0] Uploading photo from server with service role...', { photoSize: data.receptionPhoto.length, fileName: data.receptionPhotoFileName })
-        
-        // Convert number array back to Buffer
-        const photoBuffer = Buffer.from(data.receptionPhoto)
-        console.log('[v0] Buffer created, size:', photoBuffer.length)
+        // Convert Base64 to Buffer
+        const photoBuffer = Buffer.from(data.receptionPhotoBase64, 'base64')
         
         // Create file path with original filename extension or jpg
         const ext = data.receptionPhotoFileName?.split('.').pop() || 'jpg'
         const filePath = `parcel-photos/${data.condo_id}/${Date.now()}.${ext}`
-        
-        console.log('[v0] Uploading to:', filePath)
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('parcels')
           .upload(filePath, photoBuffer, { upsert: true })
 
         if (uploadError) {
-          console.error('[v0] Upload failed:', uploadError)
           throw new Error(`Upload error: ${uploadError.message}`)
         }
 
-        console.log('[v0] Upload success, path:', uploadData.path)
-
-        // Get public URL from parcels bucket
+        // Get public URL
         const { data: urlData } = supabase.storage
           .from('parcels')
           .getPublicUrl(uploadData.path)
 
         receptionPhotoUrl = urlData.publicUrl
-        console.log('[v0] Photo uploaded successfully to:', receptionPhotoUrl)
       } catch (photoUploadError) {
         console.error('[v0] Error uploading photo:', photoUploadError)
-        // Don't throw - parcel creation should continue even if photo upload fails
       }
-    } else {
-      console.log('[v0] No photo provided or empty array')
     }
 
     // Create parcel in database
@@ -99,8 +87,7 @@ export async function createParcel(data: {
 
     // Save reception photo to parcel_photos table if provided
     if (receptionPhotoUrl && parcel) {
-      console.log('[v0] Saving photo record to parcel_photos table with URL:', receptionPhotoUrl)
-      const { error: photoError } = await supabase
+      await supabase
         .from('parcel_photos')
         .insert({
           parcel_id: parcel.id,
@@ -108,15 +95,6 @@ export async function createParcel(data: {
           photo_type: 'recepcion_garita',
           uploaded_by: user.id,
         })
-
-      if (photoError) {
-        console.error('[v0] Error saving photo record:', photoError)
-        // Don't throw - parcel was created successfully
-      } else {
-        console.log('[v0] Photo record saved successfully')
-      }
-    } else {
-      console.log('[v0] Skipping photo record - URL or parcel missing', { hasUrl: !!receptionPhotoUrl, hasParcel: !!parcel })
     }
 
     return { success: true, parcel }
