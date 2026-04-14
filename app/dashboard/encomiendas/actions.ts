@@ -9,7 +9,7 @@ export async function createParcel(data: {
   house_id: string
   parcel_type: string
   from: string
-  receptionPhotoUrl?: string
+  receptionPhoto?: File
 }) {
   try {
     const supabase = await createClient()
@@ -33,7 +33,37 @@ export async function createParcel(data: {
       throw new Error('Rol no autorizado')
     }
 
-    // Create parcel in database with photo URL if provided
+    // Upload reception photo if provided (using service role permissions)
+    let receptionPhotoUrl: string | null = null
+    if (data.receptionPhoto) {
+      try {
+        console.log('[v0] Uploading photo from server with service role...')
+        
+        // Upload to documents bucket using service role (bypasses RLS)
+        const filePath = `parcel-photos/${data.condo_id}/${Date.now()}.jpg`
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, data.receptionPhoto, { upsert: true })
+
+        if (uploadError) {
+          throw new Error(`Upload error: ${uploadError.message}`)
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(uploadData.path)
+
+        receptionPhotoUrl = urlData.publicUrl
+        console.log('[v0] Photo uploaded successfully to:', receptionPhotoUrl)
+      } catch (photoUploadError) {
+        console.error('[v0] Error uploading photo:', photoUploadError)
+        // Don't throw - parcel creation should continue even if photo upload fails
+      }
+    }
+
+    // Create parcel in database
     const utcNow = new Date().toISOString().split('.')[0]
     
     const { data: parcel, error } = await supabase
@@ -45,7 +75,7 @@ export async function createParcel(data: {
         status: 'recibido',
         received_date: utcNow,
         parcel_type: data.parcel_type,
-        reception_photo_url: data.receptionPhotoUrl || null,
+        reception_photo_url: receptionPhotoUrl,
         created_by: user.id,
       })
       .select()
@@ -53,6 +83,23 @@ export async function createParcel(data: {
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    // Save reception photo to parcel_photos table if provided
+    if (receptionPhotoUrl && parcel) {
+      const { error: photoError } = await supabase
+        .from('parcel_photos')
+        .insert({
+          parcel_id: parcel.id,
+          photo_url: receptionPhotoUrl,
+          photo_type: 'recepcion_garita',
+          uploaded_by: user.id,
+        })
+
+      if (photoError) {
+        console.error('[v0] Error saving photo record:', photoError)
+        // Don't throw - parcel was created successfully
+      }
     }
 
     return { success: true, parcel }
@@ -66,7 +113,7 @@ export async function updateParcelStatus(data: {
   parcel_id: string
   new_status: 'entregado' | 'devuelto'
   return_reason?: string
-  photoUrl?: string
+  photoFile?: File
 }) {
   try {
     const supabase = await createClient()
@@ -97,21 +144,48 @@ export async function updateParcelStatus(data: {
       throw new Error('Encomienda no encontrada')
     }
 
-    // Update parcel status and photo URLs
+    // Upload delivery/return photo if provided
+    let photoUrl: string | null = null
+    if (data.photoFile) {
+      try {
+        console.log('[v0] Uploading delivery photo from server with service role...')
+        
+        const filePath = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, data.photoFile, { upsert: true })
+
+        if (uploadError) {
+          throw new Error(`Upload error: ${uploadError.message}`)
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(uploadData.path)
+
+        photoUrl = urlData.publicUrl
+        console.log('[v0] Delivery photo uploaded successfully to:', photoUrl)
+      } catch (photoUploadError) {
+        console.error('[v0] Error uploading delivery photo:', photoUploadError)
+        // Don't throw - status update should continue
+      }
+    }
+
+    // Update parcel status
     const updateData: any = {
       status: data.new_status,
     }
 
-    if (data.new_status === 'devuelto' && data.return_reason) {
-      updateData.return_reason = data.return_reason
-    }
-
-    // Add delivery or return photo URL to update
-    if (data.photoUrl) {
-      if (data.new_status === 'entregado') {
-        updateData.delivery_photo_url = data.photoUrl
-      } else if (data.new_status === 'devuelto') {
-        updateData.return_photo_url = data.photoUrl
+    if (data.new_status === 'entregado' && photoUrl) {
+      updateData.delivery_photo_url = photoUrl
+    } else if (data.new_status === 'devuelto') {
+      if (data.return_reason) {
+        updateData.return_reason = data.return_reason
+      }
+      if (photoUrl) {
+        updateData.return_photo_url = photoUrl
       }
     }
 
@@ -122,6 +196,25 @@ export async function updateParcelStatus(data: {
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    // Save delivery/return photo to parcel_photos table if provided
+    if (photoUrl) {
+      const photoType = data.new_status === 'entregado' ? 'entrega_propietario' : 'devolucion'
+      
+      const { error: photoError } = await supabase
+        .from('parcel_photos')
+        .insert({
+          parcel_id: data.parcel_id,
+          photo_url: photoUrl,
+          photo_type: photoType,
+          uploaded_by: user.id,
+        })
+
+      if (photoError) {
+        console.error('[v0] Error saving photo record:', photoError)
+        // Don't throw - parcel was updated successfully
+      }
     }
 
     return { success: true }
