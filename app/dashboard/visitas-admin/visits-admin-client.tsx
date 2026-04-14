@@ -141,24 +141,24 @@ export function VisitsAdminClient({
                   <Select value={selectedHouse} onValueChange={setSelectedHouse}>
                     <SelectTrigger 
                       style={{ 
-                        backgroundColor: cardBgColor, 
-                        color: cardTextColor, 
-                        borderColor: borderColor,
-                        border: `1px solid ${borderColor}`
+                        backgroundColor: "#fefce1",
+                        color: "#1e293b",
+                        borderColor: "#f59e0b",
+                        border: `2px solid #f59e0b`
                       }}
-                      className="rounded-md"
+                      className="rounded-md font-semibold"
                     >
                       <SelectValue placeholder="Todas las propiedades" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-300 rounded-md shadow-lg">
-                      <SelectItem value="all" className="text-gray-800 hover:bg-blue-100">
+                    <SelectContent className="bg-yellow-50 border-2 border-yellow-400 rounded-md shadow-lg">
+                      <SelectItem value="all" className="text-gray-800 hover:bg-yellow-100 font-medium">
                         Todas las propiedades
                       </SelectItem>
                       {houses.map((house) => (
                         <SelectItem 
                           key={house.id} 
                           value={house.id}
-                          className="text-gray-800 hover:bg-blue-100"
+                          className="text-gray-800 hover:bg-yellow-100 font-medium"
                         >
                           Casa #{house.house_number}
                         </SelectItem>
