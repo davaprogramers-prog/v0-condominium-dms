@@ -155,6 +155,7 @@ const adminWithPropertyMenuItems = [
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
       { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
+      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
     ]
   },
   {
