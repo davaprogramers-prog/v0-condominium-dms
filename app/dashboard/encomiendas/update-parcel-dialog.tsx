@@ -45,7 +45,7 @@ export function UpdateParcelDialog({
   onClose: () => void
   onSuccess: () => void
 }) {
-  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor } = useTheme()
   const [newStatus, setNewStatus] = useState<'entregado' | 'devuelto'>('entregado')
   const [returnReason, setReturnReason] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
