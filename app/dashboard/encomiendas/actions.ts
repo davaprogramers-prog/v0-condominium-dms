@@ -9,7 +9,8 @@ export async function createParcel(data: {
   house_id: string
   parcel_type: string
   from: string
-  receptionPhoto?: File
+  receptionPhoto?: number[]  // ArrayBuffer serialized as number array
+  receptionPhotoFileName?: string
 }) {
   try {
     const supabase = await createClient()
@@ -35,16 +36,22 @@ export async function createParcel(data: {
 
     // Upload reception photo if provided (using service role permissions)
     let receptionPhotoUrl: string | null = null
-    if (data.receptionPhoto) {
+    if (data.receptionPhoto && data.receptionPhoto.length > 0) {
       try {
-        console.log('[v0] Uploading photo from server with service role...')
+        console.log('[v0] Uploading photo from server with service role...', { photoSize: data.receptionPhoto.length })
         
-        // Upload to documents bucket using service role (bypasses RLS)
-        const filePath = `parcel-photos/${data.condo_id}/${Date.now()}.jpg`
+        // Convert number array back to Buffer
+        const photoBuffer = Buffer.from(data.receptionPhoto)
+        
+        // Create file path with original filename extension or jpg
+        const ext = data.receptionPhotoFileName?.split('.').pop() || 'jpg'
+        const filePath = `parcel-photos/${data.condo_id}/${Date.now()}.${ext}`
+        
+        console.log('[v0] Uploading to:', filePath)
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('documents')
-          .upload(filePath, data.receptionPhoto, { upsert: true })
+          .upload(filePath, photoBuffer, { upsert: true })
 
         if (uploadError) {
           throw new Error(`Upload error: ${uploadError.message}`)

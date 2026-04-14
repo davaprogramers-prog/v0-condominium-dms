@@ -46,14 +46,19 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
 
     setLoading(true)
     try {
-      let receptionPhotoUrl: string | null = null
+      // Convert File to ArrayBuffer if provided (for server action serialization)
+      let photoArrayBuffer: ArrayBuffer | null = null
+      if (receptionPhoto) {
+        photoArrayBuffer = await receptionPhoto.arrayBuffer()
+        console.log('[v0] Converted photo to ArrayBuffer, size:', photoArrayBuffer.byteLength)
+      }
 
-      // Call server action to create parcel with photo file
-      // The server action will handle the upload with service role permissions
+      // Call server action to create parcel with photo ArrayBuffer
       const result = await createParcel({
         ...formData,
         condo_id: condoId,
-        receptionPhoto: receptionPhoto,
+        receptionPhoto: photoArrayBuffer ? Array.from(new Uint8Array(photoArrayBuffer)) : undefined,
+        receptionPhotoFileName: receptionPhoto?.name,
       } as any)
 
       if (result.success) {
