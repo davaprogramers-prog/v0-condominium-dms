@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 
 import { put } from '@vercel/blob';
-import fs from 'fs';
 
 async function testBlobUpload() {
   try {
     console.log('[v0] Starting blob upload test to parcels bucket...');
+    
+    // Token passed as argument or from env
+    const token = process.argv[2] || process.env.BLOB_READ_WRITE_TOKEN;
+    console.log('[v0] Token provided:', !!token);
+    if (!token) {
+      throw new Error('No BLOB_READ_WRITE_TOKEN provided. Pass as argument: node 117-test-blob-upload.mjs <token>');
+    }
     
     // Create a test image (small 1x1 white PNG)
     const pngBuffer = Buffer.from([
@@ -21,16 +27,16 @@ async function testBlobUpload() {
     ]);
     
     console.log('[v0] Created test PNG buffer, size:', pngBuffer.length, 'bytes');
-    console.log('[v0] BLOB_READ_WRITE_TOKEN exists:', !!process.env.BLOB_READ_WRITE_TOKEN);
-    console.log('[v0] Token prefix:', process.env.BLOB_READ_WRITE_TOKEN?.substring(0, 20) + '...');
+    console.log('[v0] Token prefix:', token.substring(0, 25) + '...');
     
-    // Try uploading with simple filename (should go to default bucket)
-    const filename1 = `test-default-${Date.now()}.png`;
-    console.log('[v0] Attempting upload to default bucket with filename:', filename1);
+    // Test 1: Upload with simple filename to default bucket
+    const filename1 = `test-${Date.now()}.png`;
+    console.log('\n[v0] Test 1: Uploading to default bucket with filename:', filename1);
     
     const result1 = await put(filename1, pngBuffer, {
       access: 'private',
       addRandomSuffix: false,
+      token: token,
     });
     
     console.log('[v0] ✅ Default bucket upload SUCCESS');
@@ -38,22 +44,23 @@ async function testBlobUpload() {
     console.log('[v0]   Pathname:', result1.pathname);
     console.log('[v0]   Size:', result1.size);
     
-    // Now try with condo folder prefix
-    const filename2 = `test-condo/test-${Date.now()}.png`;
-    console.log('\n[v0] Attempting upload with condo folder prefix:', filename2);
+    // Test 2: Upload with folder structure
+    const filename2 = `test-condo/condo-123/test-${Date.now()}.png`;
+    console.log('\n[v0] Test 2: Uploading with folder structure:', filename2);
     
     const result2 = await put(filename2, pngBuffer, {
       access: 'private',
       addRandomSuffix: false,
+      token: token,
     });
     
-    console.log('[v0] ✅ Condo folder upload SUCCESS');
+    console.log('[v0] ✅ Folder structure upload SUCCESS');
     console.log('[v0]   URL:', result2.url);
     console.log('[v0]   Pathname:', result2.pathname);
     
-    console.log('\n[v0] 🎉 All blob uploads successful!');
-    console.log('[v0] Files are stored in the default/main bucket');
-    console.log('[v0] The "parcels" bucket shown in Vercel UI might be a separate bucket that needs different token');
+    console.log('\n[v0] ✅✅✅ FINAL RESULT: All blob uploads successful!');
+    console.log('[v0] Files ARE being stored successfully in Vercel Blob');
+    console.log('[v0] Copy the URL structure from above to use in your application');
     
   } catch (error) {
     console.error('[v0] ❌ Blob upload FAILED');
