@@ -59,20 +59,9 @@ export default function VisitasPageClient({
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  // Helper function to check if a visit is older than 1 day
-  const isVisitOlderThanOneDay = (visitDate: string) => {
-    const visit = new Date(visitDate)
-    const now = new Date()
-    const oneDayMs = 24 * 60 * 60 * 1000
-    return now.getTime() - visit.getTime() > oneDayMs
-  }
-
   // Filter visits based on search, status, house, and date range
   const filteredVisits = useMemo(() => {
     let filtered = initialVisits || []
-
-    // Hide visits older than 1 day
-    filtered = filtered.filter(v => !isVisitOlderThanOneDay(v.visit_date))
 
     // Filter by status
     if (filterStatus !== 'all') {
