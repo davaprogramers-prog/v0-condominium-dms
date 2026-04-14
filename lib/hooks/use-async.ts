@@ -4,6 +4,7 @@ interface UseAsyncState<T> {
   data: T | null
   isLoading: boolean
   error: Error | null
+  refetch: () => Promise<T | void>
 }
 
 export function useAsync<T>(
@@ -15,16 +16,17 @@ export function useAsync<T>(
     data: null,
     isLoading: false,
     error: null,
+    refetch: async () => {}
   })
 
   const execute = async () => {
-    setState({ data: null, isLoading: true, error: null })
+    setState(prev => ({ ...prev, isLoading: true, error: null }))
     try {
       const response = await asyncFunction()
-      setState({ data: response, isLoading: false, error: null })
+      setState({ data: response, isLoading: false, error: null, refetch: execute })
       return response
     } catch (error) {
-      setState({ data: null, isLoading: false, error: error as Error })
+      setState(prev => ({ ...prev, isLoading: false, error: error as Error }))
       throw error
     }
   }
@@ -35,5 +37,8 @@ export function useAsync<T>(
     }
   }, dependencies)
 
-  return state
+  return {
+    ...state,
+    refetch: execute
+  }
 }
