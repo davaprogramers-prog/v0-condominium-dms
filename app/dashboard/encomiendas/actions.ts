@@ -108,7 +108,8 @@ export async function updateParcelStatus(data: {
   parcel_id: string
   new_status: 'entregado' | 'devuelto'
   return_reason?: string
-  photoFile?: File
+  photoBase64?: string
+  photoFileName?: string
 }) {
   try {
     const supabase = await createClient()
@@ -141,15 +142,20 @@ export async function updateParcelStatus(data: {
 
     // Upload delivery/return photo if provided
     let photoUrl: string | null = null
-    if (data.photoFile) {
+    if (data.photoBase64) {
       try {
         console.log('[v0] Uploading delivery photo from server with service role...')
         
-        const filePath = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.jpg`
+        // Convert Base64 to Buffer
+        const photoBuffer = Buffer.from(data.photoBase64, 'base64')
+        
+        // Create file path with original filename extension or jpg
+        const ext = data.photoFileName?.split('.').pop() || 'jpg'
+        const filePath = `parcel-photos/${profile.condo_id}/${data.parcel_id}/${data.new_status}-${Date.now()}.${ext}`
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('parcels')
-          .upload(filePath, data.photoFile, { upsert: true })
+          .upload(filePath, photoBuffer, { upsert: true })
 
         if (uploadError) {
           throw new Error(`Upload error: ${uploadError.message}`)

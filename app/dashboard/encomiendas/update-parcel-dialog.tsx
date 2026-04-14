@@ -22,6 +22,7 @@ import { Camera, Loader2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { updateParcelStatus } from './actions'
 import { useTheme } from '@/app/dashboard/theme-context'
+import { resizeImageIfNeeded } from '@/lib/image-utils'
 
 interface ParcelPhoto {
   id: string
@@ -55,15 +56,23 @@ export function UpdateParcelDialog({
   const [cameraActive, setCameraActive] = useState(false)
   const router = useRouter()
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setPhoto(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string)
+      try {
+        // Redimensiona la imagen si es necesario
+        const resizedFile = await resizeImageIfNeeded(file, 1920, 1080)
+        setPhoto(resizedFile)
+        
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setPhotoPreview(reader.result as string)
+        }
+        reader.readAsDataURL(resizedFile)
+      } catch (err) {
+        console.error('[v0] Error processing image:', err)
+        alert('Error al procesar la imagen: ' + String(err))
       }
-      reader.readAsDataURL(file)
     }
   }
 
@@ -113,20 +122,32 @@ export function UpdateParcelDialog({
       return
     }
 
-    if (newStatus === 'returned' && !returnReason) {
+    if (newStatus === 'devuelto' && !returnReason) {
       alert('Por favor ingresa el motivo de devolución')
       return
     }
 
     setLoading(true)
     try {
-      const photoBuffer = await photo.arrayBuffer()
+      // Convert file to Base64 for consistent handling with reception photos
+      const base64String = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const result = reader.result as string
+          // Extract just the base64 part (remove "data:image/...;base64," prefix)
+          const base64 = result.split(',')[1] || result
+          resolve(base64)
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(photo)
+      })
 
       const result = await updateParcelStatus({
         parcel_id: parcel.id,
         new_status: newStatus,
-        return_reason: newStatus === 'returned' ? returnReason : undefined,
-        photo: photoBuffer,
+        return_reason: newStatus === 'devuelto' ? returnReason : undefined,
+        photoBase64: base64String,
+        photoFileName: photo.name,
       })
 
       if (result.success) {
