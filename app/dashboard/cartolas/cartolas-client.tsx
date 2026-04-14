@@ -21,7 +21,7 @@ interface CartolasClientProps {
 export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
-  const { cardBgColor, cardTextColor, borderColor, inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,7 +92,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
         )}
       </div>
 
-      <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, borderWidth: "1px", color: cardTextColor }}>
+        <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, borderWidth: "1px", color: cardTextColor }}>
         <CardHeader>
           <CardTitle className="text-base" style={{ color: cardTextColor }}>Historial de Cartolas</CardTitle>
           <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Archivos PDF de cartolas bancarias del condominio</CardDescription>
@@ -107,7 +107,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow style={{ borderColor: borderColor }}>
+                  <TableRow style={{ borderColor: inputTextColor }}>
                     <TableHead style={{ color: cardTextColor }}>Titulo</TableHead>
                     <TableHead style={{ color: cardTextColor }}>Fecha</TableHead>
                     <TableHead style={{ color: cardTextColor }}>Notas</TableHead>
@@ -117,7 +117,7 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 </TableHeader>
                 <TableBody>
                   {statements.map((stmt) => (
-                    <TableRow key={stmt.id as string} style={{ borderColor: borderColor }}>
+                    <TableRow key={stmt.id as string} style={{ borderColor: inputTextColor }}>
                       <TableCell className="font-medium" style={{ color: cardTextColor }}>{stmt.title as string}</TableCell>
                       <TableCell className="text-sm" style={{ color: cardTextColor }}>{stmt.statement_date as string}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm" style={{ color: cardTextColor, opacity: 0.7 }}>
