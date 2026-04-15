@@ -106,27 +106,27 @@ export default function SelectCondominiumClient({
                   
                   {/* Content centered */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                    {/* Logo */}
-                    {condo.logo_url ? (
-                      <div className="relative w-24 h-24 mb-4">
+                    {/* Logo - Circular container */}
+                    <div 
+                      className="rounded-full flex items-center justify-center overflow-hidden mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0"
+                      style={{
+                        width: '120px',
+                        height: '120px',
+                        backgroundColor: theme?.main_bg_color || '#0f172a'
+                      }}
+                    >
+                      {condo.logo_url ? (
                         <Image
                           src={condo.logo_url}
                           alt={condo.name}
-                          fill
-                          className="object-contain filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300"
+                          width={120}
+                          height={120}
+                          className="object-cover w-full h-full"
                         />
-                      </div>
-                    ) : (
-                      <div 
-                        className="w-24 h-24 rounded-full flex items-center justify-center ring-2 transition-transform group-hover:scale-110 mb-4"
-                        style={{
-                          backgroundColor: theme?.main_bg_color || '#0f172a',
-                          color: textColor
-                        }}
-                      >
-                        <span className="text-4xl font-bold">🏢</span>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-4xl">🏢</span>
+                      )}
+                    </div>
 
                     {/* Condominium Name */}
                     <h2 
@@ -179,12 +179,20 @@ export default function SelectCondominiumClient({
         {/* Header */}
         <div className="text-center mb-16">
           {currentCondo.logo_url && (
-            <div className="relative w-20 h-20 mx-auto mb-6">
+            <div 
+              className="rounded-full mx-auto mb-6 overflow-hidden shadow-lg flex items-center justify-center"
+              style={{
+                width: '80px',
+                height: '80px',
+                backgroundColor: theme?.main_bg_color || '#0f172a'
+              }}
+            >
               <Image
                 src={currentCondo.logo_url}
                 alt={currentCondo.name}
-                fill
-                className="object-contain"
+                width={80}
+                height={80}
+                className="object-cover w-full h-full"
               />
             </div>
           )}
