@@ -65,16 +65,12 @@ export default async function DashboardPage() {
         .eq("id", user.id)
         .single()
 
-      console.log("[v0] Dashboard profile fetch - data:", profileData, "error:", error)
-
       if (profileData && !error) {
         profile = profileData
       }
     } catch (e) {
-      console.log("[v0] Error fetching profile:", e)
+      // Profile fetch failed, will use fallback
     }
-    
-    console.log("[v0] Dashboard - user.id:", user.id, "profile:", profile, "role:", profile?.role)
 
     // If no profile, create fallback from metadata (same as layout)
     if (!profile) {
@@ -85,7 +81,6 @@ export default async function DashboardPage() {
         first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
         last_name: user.user_metadata?.last_name || "",
       }
-      console.log("[v0] Created fallback profile from metadata in dashboard page:", profile)
     }
 
     // Determine role - default to propietario if not found
