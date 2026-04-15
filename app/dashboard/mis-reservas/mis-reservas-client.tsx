@@ -222,7 +222,7 @@ export function MisReservasClient({
                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         <SelectValue placeholder="Selecciona propiedad" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         {allHouses.map(h => (
                           <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
                         ))}
@@ -237,7 +237,7 @@ export function MisReservasClient({
                     <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                       <SelectValue placeholder="Selecciona área" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                       {areas.map(area => (
                         <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
                       ))}
@@ -410,7 +410,7 @@ export function MisReservasClient({
                                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                                         <SelectValue />
                                       </SelectTrigger>
-                                      <SelectContent>
+                                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                                         {allHouses.map(h => (
                                           <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
                                         ))}
