@@ -193,8 +193,20 @@ export async function createReservation(data: CreateReservationData) {
     }
   }
 
-  // Create reservation
-  const { error } = await supabase.from("area_reservations").insert({
+  // Verify user has permission for this house
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("house_id, role")
+    .eq("id", user.id)
+    .single()
+  
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin" || profile?.role === "conserje"
+  if (!isAdmin && profile?.house_id !== data.house_id) {
+    throw new Error("No tienes permisos para crear reservas para esta propiedad.")
+  }
+
+  // Create reservation using service client to bypass RLS (we already validated permissions above)
+  const { error } = await serviceClient.from("area_reservations").insert({
     area_id: data.area_id,
     house_id: data.house_id,
     condo_id: data.condo_id,
@@ -207,10 +219,6 @@ export async function createReservation(data: CreateReservationData) {
   })
 
   if (error) {
-    // Handle RLS permission errors with friendly message
-    if (error.code === "42501") {
-      throw new Error("No tienes permisos para crear esta reserva. Verifica que estés asignado a una propiedad.")
-    }
     throw new Error(error.message || "Error al crear la reserva")
   }
   
