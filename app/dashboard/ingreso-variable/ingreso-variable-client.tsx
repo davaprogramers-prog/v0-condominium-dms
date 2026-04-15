@@ -177,7 +177,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </span>
                   </div>
 
-                  <div className={textColor}>
+                  <div className={String(textColor) || ""}>
                     <p className="text-xs opacity-75">Monto</p>
                     <p className="text-2xl font-bold">
                       ${Number(income.amount).toLocaleString("es-CL", {
