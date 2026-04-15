@@ -248,7 +248,7 @@ export function MisReservasClient({
                 Nueva Reserva
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg" style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
               <DialogHeader>
                 <DialogTitle style={{ color: dialogTextColor }}>Nueva Reserva</DialogTitle>
               </DialogHeader>
@@ -474,9 +474,9 @@ export function MisReservasClient({
                                 <Edit2 className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
-                              <DialogHeader>
-                                <DialogTitle style={{ color: dialogTextColor }}>Editar Reserva</DialogTitle>
+<DialogContent className="max-h-[90vh] overflow-y-auto" style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: dialogTextColor }}>Editar Reserva</DialogTitle>
                               </DialogHeader>
                               <form action={(fd) => handleUpdateReservation(fd, reservation.id)} className="flex flex-col gap-4">
                                 <div className="p-3 rounded-lg" style={{ backgroundColor: inputBgColor }}>
