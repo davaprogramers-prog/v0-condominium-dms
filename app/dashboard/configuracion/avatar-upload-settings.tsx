@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Camera, Upload, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { put, del } from "@vercel/blob"
 
 interface AvatarUploadSettingsProps {
   currentAvatarUrl?: string
@@ -35,6 +36,11 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
+
+      // Delete from Blob if URL exists
+      if (currentAvatarUrl && currentAvatarUrl.includes("blob.vercel-storage.com")) {
+        await del(currentAvatarUrl)
+      }
 
       const { error: updateError } = await supabase
         .from("profiles")
@@ -71,25 +77,15 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      const fileExt = file.name.split(".").pop()
-      const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from("receipts")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: true,
-        })
+      // Upload to Vercel Blob
+      const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
+        access: "public",
+      })
 
-      if (uploadError) throw uploadError
-      
-      const { data: urlData } = supabase.storage
-        .from("receipts")
-        .getPublicUrl(fileName)
-
+      // Update profile with Blob URL
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: urlData.publicUrl })
+        .update({ avatar_url: blob.url })
         .eq("id", user.id)
       
       if (updateError) throw updateError

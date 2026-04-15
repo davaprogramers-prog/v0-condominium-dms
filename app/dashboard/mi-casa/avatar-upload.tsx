@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Camera, Upload, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { put } from "@vercel/blob"
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string
@@ -49,31 +50,15 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      // Upload to Supabase Storage using receipts bucket (which already exists)
-      const fileExt = file.name.split(".").pop()
-      const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from("receipts")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: true,
-        })
+      // Upload to Vercel Blob
+      const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
+        access: "public",
+      })
 
-      if (uploadError) {
-        console.error("[v0] Upload error:", uploadError)
-        throw uploadError
-      }
-      
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("receipts")
-        .getPublicUrl(fileName)
-
-      // Update profile
+      // Update profile with Blob URL
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: urlData.publicUrl })
+        .update({ avatar_url: blob.url })
         .eq("id", user.id)
       
       if (updateError) {
