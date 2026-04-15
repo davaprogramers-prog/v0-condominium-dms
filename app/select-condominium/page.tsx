@@ -57,6 +57,14 @@ export default async function SelectCondominiumPage() {
     )
   }
   
+  // Get themes for all condominiums
+  const { data: themes } = await supabase
+    .from('condominium_themes')
+    .select('*')
+    .in('condo_id', condominiums.map(c => c.id))
+  
+  const themeMap = new Map(themes?.map(t => [t.condo_id, t]) || [])
+  
   console.log("[v0] Showing selector for", condominiums.length, "condominiums")
-  return <SelectCondominiumClient condominiums={condominiums} />
+  return <SelectCondominiumClient condominiums={condominiums} themes={themeMap} />
 }
