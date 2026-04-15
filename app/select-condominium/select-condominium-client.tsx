@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { CondominiumWithProperties } from '@/lib/supabase/owner-utils'
+import { getContrastTextColor } from '@/lib/theme-utils'
 
 interface CondominiumTheme {
   id: string
@@ -22,25 +24,6 @@ interface SelectCondominiumClientProps {
   themes: Map<string, CondominiumTheme>
 }
 
-// Generate avatar initials from name
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map(word => word.charAt(0).toUpperCase())
-    .join('')
-}
-
-// Get contrasting text color based on background
-function getContrastColor(bgColor: string): string {
-  const hex = bgColor.replace('#', '')
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000
-  return brightness > 155 ? '#000000' : '#ffffff'
-}
-
 export default function SelectCondominiumClient({
   condominiums,
   themes
@@ -48,12 +31,10 @@ export default function SelectCondominiumClient({
   const router = useRouter()
   const supabase = createClient()
   const [selectedCondo, setSelectedCondo] = useState<string | null>(null)
-  const [selectedProperty, setSelectedProperty] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const handleSelectCondo = (condoId: string) => {
     setSelectedCondo(condoId)
-    setSelectedProperty(null)
   }
 
   const handleSelectProperty = async (propertyId: string) => {
@@ -88,95 +69,84 @@ export default function SelectCondominiumClient({
     : null
 
   if (!selectedCondo) {
-    // Condominium Selection (Netflix-style grid)
-    const gridColsClass = 
-      condominiums.length === 1 ? 'justify-items-center' :
-      condominiums.length === 2 ? 'lg:grid-cols-2 justify-center' :
-      condominiums.length === 3 ? 'lg:grid-cols-3' :
-      'lg:grid-cols-4'
+    // Condominium Selection Grid
+    const itemCount = condominiums.length
+    const isSingle = itemCount === 1
+    const isDouble = itemCount === 2
+    const gridCols = isSingle ? 'grid-cols-1' : isDouble ? 'grid-cols-2' : itemCount === 3 ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+    const maxWidth = isSingle || isDouble ? 'max-w-2xl' : isDouble ? 'max-w-4xl' : 'max-w-6xl'
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 py-12">
-        <div className="w-full max-w-7xl">
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 py-12">
+        <div className={`w-full ${maxWidth} mx-auto`}>
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-white mb-3">¿A cuál condominio deseas ingresar?</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">¿A cuál condominio deseas ingresar?</h1>
             <p className="text-slate-400 text-lg">Selecciona uno de tus condominios para continuar</p>
           </div>
 
           {/* Condominiums Grid - Centered */}
-          <div className="flex justify-center">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridColsClass} gap-8 w-full`}>
-              {condominiums.map((condo) => {
-                const theme = themes.get(condo.id)
-                const bgColor = theme?.sidebar_bg_color || '#1e293b'
-                const textColor = getContrastColor(bgColor)
-                const initials = getInitials(condo.name)
+          <div className={`grid ${gridCols} gap-8 justify-center`}>
+            {condominiums.map((condo) => {
+              const theme = themes.get(condo.id)
+              const bgColor = theme?.card_bg_color || '#1e293b'
+              const textColor = theme?.card_text_color || getContrastTextColor(bgColor)
 
-                return (
-                  <button
-                    key={condo.id}
-                    onClick={() => handleSelectCondo(condo.id)}
-                    className="group relative h-72 rounded-xl overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 shadow-xl hover:shadow-2xl"
-                    style={{
-                      backgroundColor: bgColor,
-                      borderColor: textColor + '33',
-                      borderWidth: '1px'
-                    }}
-                  >
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 group-hover:to-black/70 transition-all" />
-                    
-                    {/* Content centered */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                      {/* Logo/Avatar Circle */}
-                      <div 
-                        className="mb-6 w-24 h-24 rounded-full flex items-center justify-center ring-2 ring-offset-2 transition-transform group-hover:scale-110"
-                        style={{
-                          backgroundColor: textColor === '#000000' ? '#e2e8f0' : '#1e293b',
-                          ringColor: textColor,
-                          color: textColor === '#000000' ? '#1e293b' : '#e2e8f0'
-                        }}
-                      >
-                        <span className="text-4xl font-bold">{initials}</span>
+              return (
+                <button
+                  key={condo.id}
+                  onClick={() => handleSelectCondo(condo.id)}
+                  className="group relative rounded-xl overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xl hover:shadow-2xl h-80"
+                  style={{
+                    backgroundColor: bgColor
+                  }}
+                >
+                  {/* Overlay gradient on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 group-hover:to-black/60 transition-all" />
+                  
+                  {/* Content centered */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                    {/* Logo */}
+                    {condo.logo_url ? (
+                      <div className="relative w-24 h-24 mb-4">
+                        <Image
+                          src={condo.logo_url}
+                          alt={condo.name}
+                          fill
+                          className="object-contain filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300"
+                        />
                       </div>
-
-                      {/* Condominium Name */}
-                      <h2 
-                        className="text-3xl font-bold mb-2 group-hover:scale-105 transition-transform"
-                        style={{ color: textColor }}
-                      >
-                        {condo.name}
-                      </h2>
-
-                      {/* Properties count */}
-                      <p 
-                        className="text-sm mb-6 opacity-75 group-hover:opacity-100 transition-opacity"
-                        style={{ color: textColor }}
-                      >
-                        {condo.properties.length} propiedad{condo.properties.length !== 1 ? 'es' : ''}
-                      </p>
-
-                      {/* Select Button */}
-                      <button
-                        className="mt-auto px-6 py-2 rounded-lg font-semibold transition-all opacity-0 group-hover:opacity-100 ring-2"
+                    ) : (
+                      <div 
+                        className="w-24 h-24 rounded-full flex items-center justify-center ring-2 transition-transform group-hover:scale-110 mb-4"
                         style={{
-                          backgroundColor: textColor === '#000000' ? '#3b82f6' : '#60a5fa',
-                          color: '#ffffff',
-                          ringColor: textColor
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleSelectCondo(condo.id)
+                          backgroundColor: theme?.main_bg_color || '#0f172a',
+                          color: textColor
                         }}
                       >
-                        Seleccionar
-                      </button>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+                        <span className="text-4xl font-bold">🏢</span>
+                      </div>
+                    )}
+
+                    {/* Condominium Name */}
+                    <h2 
+                      className="text-2xl md:text-3xl font-bold group-hover:scale-105 transition-transform"
+                      style={{ color: textColor }}
+                    >
+                      {condo.name}
+                    </h2>
+
+                    {/* Properties count */}
+                    <p 
+                      className="text-sm opacity-75 group-hover:opacity-100 transition-opacity"
+                      style={{ color: textColor }}
+                    >
+                      {condo.properties.length} propiedad{condo.properties.length !== 1 ? 'es' : ''}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -186,19 +156,18 @@ export default function SelectCondominiumClient({
   // Property Selection
   if (!currentCondo) return null
 
-  const gridColsClass = 
-    currentCondo.properties.length === 1 ? 'justify-items-center' :
-    currentCondo.properties.length === 2 ? 'lg:grid-cols-2 justify-center' :
-    currentCondo.properties.length === 3 ? 'lg:grid-cols-3' :
-    'lg:grid-cols-4'
-
   const theme = themes.get(currentCondo.id)
-  const bgColor = theme?.sidebar_bg_color || '#1e293b'
-  const textColor = getContrastColor(bgColor)
+  const bgColor = theme?.card_bg_color || '#1e293b'
+  const textColor = theme?.card_text_color || getContrastTextColor(bgColor)
+  const itemCount = currentCondo.properties.length
+  const isSingle = itemCount === 1
+  const isDouble = itemCount === 2
+  const gridCols = isSingle ? 'grid-cols-1' : isDouble ? 'grid-cols-2' : itemCount === 3 ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+  const maxWidth = isSingle || isDouble ? 'max-w-2xl' : isDouble ? 'max-w-4xl' : 'max-w-6xl'
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 py-12">
-      <div className="w-full max-w-7xl">
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 py-12">
+      <div className={`w-full ${maxWidth} mx-auto`}>
         {/* Back Button */}
         <button
           onClick={() => setSelectedCondo(null)}
@@ -209,78 +178,66 @@ export default function SelectCondominiumClient({
 
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-2">{currentCondo.name}</h1>
+          {currentCondo.logo_url && (
+            <div className="relative w-20 h-20 mx-auto mb-6">
+              <Image
+                src={currentCondo.logo_url}
+                alt={currentCondo.name}
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{currentCondo.name}</h1>
           <p className="text-slate-400 text-lg">Selecciona una propiedad para ingresar</p>
         </div>
 
         {/* Properties Grid - Centered */}
-        <div className="flex justify-center">
-          <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridColsClass} gap-8 w-full`}>
-            {currentCondo.properties.map((property) => (
-              <button
-                key={property.id}
-                onClick={() => handleSelectProperty(property.id)}
-                disabled={loading}
-                className="group relative h-72 rounded-xl overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-green-500 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style={{
-                  backgroundColor: bgColor,
-                  borderColor: textColor + '33',
-                  borderWidth: '1px'
-                }}
-              >
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 group-hover:to-black/70 transition-all" />
-                
-                {/* Content centered */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  {/* Property Icon/Avatar */}
-                  <div 
-                    className="mb-6 w-24 h-24 rounded-full flex items-center justify-center ring-2 ring-offset-2 transition-transform group-hover:scale-110"
-                    style={{
-                      backgroundColor: textColor === '#000000' ? '#e2e8f0' : '#1e293b',
-                      ringColor: textColor,
-                      color: textColor === '#000000' ? '#1e293b' : '#e2e8f0'
-                    }}
-                  >
-                    <span className="text-4xl font-bold">🏠</span>
-                  </div>
-
-                  {/* Property Number */}
-                  <h2 
-                    className="text-3xl font-bold mb-2 group-hover:scale-105 transition-transform"
-                    style={{ color: textColor }}
-                  >
-                    Casa {property.house_number}
-                  </h2>
-
-                  {/* Condominium info */}
-                  <p 
-                    className="text-sm opacity-75 group-hover:opacity-100 transition-opacity"
-                    style={{ color: textColor }}
-                  >
-                    {currentCondo.name}
-                  </p>
-
-                  {/* Enter Button */}
-                  <button
-                    className="mt-auto px-6 py-2 rounded-lg font-semibold transition-all opacity-0 group-hover:opacity-100 ring-2 disabled:opacity-50"
-                    style={{
-                      backgroundColor: textColor === '#000000' ? '#10b981' : '#34d399',
-                      color: '#ffffff',
-                      ringColor: textColor
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSelectProperty(property.id)
-                    }}
-                    disabled={loading}
-                  >
-                    {loading ? 'Ingresando...' : 'Ingresar'}
-                  </button>
+        <div className={`grid ${gridCols} gap-8 justify-center`}>
+          {currentCondo.properties.map((property) => (
+            <button
+              key={property.id}
+              onClick={() => handleSelectProperty(property.id)}
+              disabled={loading}
+              className="group relative rounded-xl overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 h-80"
+              style={{
+                backgroundColor: bgColor
+              }}
+            >
+              {/* Overlay gradient on hover */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 group-hover:to-black/60 transition-all" />
+              
+              {/* Content centered */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                {/* Property Icon */}
+                <div 
+                  className="w-24 h-24 rounded-full flex items-center justify-center ring-2 transition-transform group-hover:scale-110"
+                  style={{
+                    backgroundColor: theme?.main_bg_color || '#0f172a',
+                    color: textColor
+                  }}
+                >
+                  <span className="text-4xl">🏠</span>
                 </div>
-              </button>
-            ))}
-          </div>
+
+                {/* Property Number */}
+                <h2 
+                  className="text-2xl md:text-3xl font-bold group-hover:scale-105 transition-transform"
+                  style={{ color: textColor }}
+                >
+                  Casa {property.house_number}
+                </h2>
+
+                {/* Status text */}
+                <p 
+                  className="text-sm opacity-75 group-hover:opacity-100 transition-opacity"
+                  style={{ color: textColor }}
+                >
+                  Lista para acceder
+                </p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>

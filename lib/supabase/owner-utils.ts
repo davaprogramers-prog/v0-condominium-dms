@@ -127,6 +127,7 @@ export interface CondominiumProperty {
 export interface CondominiumWithProperties {
   id: string
   name: string
+  logo_url: string | null
   properties: CondominiumProperty[]
 }
 
@@ -141,7 +142,7 @@ export async function getUserAllCondominiums(
     // The houses table has owner_email, owner_name, and condo_id
     const { data: houses, error: housesError } = await supabase
       .from("houses")
-      .select("id, house_number, condo_id, condominiums(id, name)")
+      .select("id, house_number, condo_id, condominiums(id, name, logo_url)")
       .eq("owner_email", userEmail)
     
     console.log("[v0] Houses query result:", { houses, housesError })
@@ -174,6 +175,7 @@ export async function getUserAllCondominiums(
         condominiumMap.set(condominiumId, {
           id: condominiumId,
           name: condominiumData.name || 'Condominio',
+          logo_url: condominiumData.logo_url || null,
           properties: []
         })
       }
