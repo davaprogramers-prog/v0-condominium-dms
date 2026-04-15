@@ -1,10 +1,11 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { MisReservasClient } from "./mis-reservas-client"
 
 export default async function MisReservasPage() {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
@@ -31,10 +32,10 @@ export default async function MisReservasPage() {
     .eq("is_reservable", true)
     .order("name")
 
-  // Get user's reservations (or all if admin)
+  // Get user's reservations (or all if admin) - use service client to bypass RLS
   const today = new Date().toISOString().split("T")[0]
   
-  let reservationsQuery = supabase
+  let reservationsQuery = serviceClient
     .from("area_reservations")
     .select(`
       *,
