@@ -1,4 +1,3 @@
-import { put } from '@vercel/blob'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -15,6 +14,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verify file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 5MB' },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -25,26 +32,53 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload new avatar to Vercel Blob with private access
-    // Since Blob store is configured as private, we use private access
-    // and generate a signed URL for temporary access
-    const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
-      access: 'private',
+    // Delete old avatar if it exists
+    if (oldUrl && oldUrl.includes('/storage/v1/object/public/avatars/')) {
+      try {
+        const oldPath = oldUrl.split('/storage/v1/object/public/avatars/')[1]
+        if (oldPath) {
+          await supabase.storage
+            .from('avatars')
+            .remove([oldPath])
+        }
+      } catch (e) {
+        console.log('[v0] Could not delete old avatar:', e)
+      }
+    }
+
+    // Upload new avatar to Supabase Storage
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('[v0] Supabase upload error:', uploadError)
+      return NextResponse.json(
+        { error: `Upload failed: ${uploadError.message}` },
+        { status: 500 }
+      )
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(fileName)
+
+    console.log('[v0] Avatar uploaded successfully to Supabase Storage:', urlData.publicUrl)
+
+    return NextResponse.json({
+      url: urlData.publicUrl,
     })
-
-    // Generate a signed URL for 24 hours
-    const signedUrl = await blob.getSignedUrl()
-
-    console.log('[v0] Avatar uploaded to private Blob store')
-    console.log('[v0] Base URL:', blob.url)
-    console.log('[v0] Signed URL:', signedUrl)
-
-    // Return the signed URL which will be valid for 24 hours
-    return NextResponse.json({ url: signedUrl })
   } catch (error) {
-    console.error('[v0] Avatar upload API error:', error)
+    console.error('[v0] Avatar upload error:', error)
     return NextResponse.json(
-      { error: String(error) },
+      { error: `Upload failed: ${String(error)}` },
       { status: 500 }
     )
   }
