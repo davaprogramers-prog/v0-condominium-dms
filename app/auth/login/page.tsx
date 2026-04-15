@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { ensureUserProfile } from "@/app/auth/actions"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -19,7 +20,7 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -29,7 +30,20 @@ export default function LoginPage() {
         return
       }
 
-      router.push("/dashboard")
+      if (authData.user) {
+        // Ensure user has a complete profile and get their info
+        const profileResult = await ensureUserProfile(authData.user.id, email)
+        console.log("[v0] Profile ensured:", profileResult)
+        
+        // Check if user is a propietario with multiple properties
+        if (profileResult.role === 'propietario' && profileResult.hasMultipleProperties) {
+          console.log("[v0] User has multiple properties - redirecting to selector")
+          router.push("/select-condominium")
+        } else {
+          console.log("[v0] User is not propietario with multiple properties - redirecting to dashboard")
+          router.push("/dashboard")
+        }
+      }
     } catch (err) {
       setError("Error al iniciar sesión. Intenta de nuevo.")
     } finally {
