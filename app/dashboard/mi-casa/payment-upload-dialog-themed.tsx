@@ -45,11 +45,11 @@ export function PaymentUploadDialogThemedWrapper({ condoId, houseId, currencySym
         .getPublicUrl(fileName)
 
       const { data: { user } } = await supabase.auth.getUser()
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user?.id)
-        .single()
+      if (!user) {
+        alert("Error: Usuario no autenticado")
+        setLoading(false)
+        return
+      }
 
       const { data: parameters } = await supabase
         .from("parameters")
@@ -98,6 +98,7 @@ export function PaymentUploadDialogThemedWrapper({ condoId, houseId, currencySym
           period_year: parameters.current_year,
           receipt_url: publicUrl,
           status: "pending",
+          uploaded_by: user.id,
         }
 
         if (fixedIncome) {
