@@ -22,19 +22,22 @@ export default async function AdminLayout({
 
   // Try to get profile, but don't fail if it doesn't exist
   let profile: any = null
-  try {
-    const { data } = await supabase
-      .from("profiles")
-      .select("role, condo_id")
-      .eq("id", user.id)
-      .single()
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role, condo_id")
+    .eq("id", user.id)
+    .single()
+  
+  if (data) {
     profile = data
-  } catch (e) {
-    console.error("[v0] Error fetching profile:", e)
   }
 
+  console.log("[v0] Admin layout - profile:", profile, "error:", error)
+
   // Check if super_admin - if not, redirect
-  if (profile?.role !== "super_admin") {
+  // Also check user metadata as fallback
+  const isSuperAdmin = profile?.role === "super_admin" || user.user_metadata?.role === "super_admin"
+  if (!isSuperAdmin) {
     redirect("/dashboard")
   }
 
