@@ -233,12 +233,13 @@ export async function createReservation(data: CreateReservationData) {
 
 export async function updateReservation(data: UpdateReservationData, isAdminOrConcierge: boolean = false) {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
 
-  // Get the reservation
-  const { data: reservation, error: reservationError } = await supabase
+  // Get the reservation using service client to bypass RLS
+  const { data: reservation, error: reservationError } = await serviceClient
     .from("area_reservations")
     .select("*, common_areas(*)")
     .eq("id", data.reservation_id)
@@ -294,8 +295,8 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
     }
   }
 
-  // Update reservation
-  const { error } = await supabase
+  // Update reservation using service client
+  const { error } = await serviceClient
     .from("area_reservations")
     .update({
       start_time: data.start_time,
@@ -315,12 +316,13 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
 
 export async function cancelReservation(reservationId: string, isAdminOrConcierge: boolean = false) {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
 
-  // Get the reservation
-  const { data: reservation, error: reservationError } = await supabase
+  // Get the reservation using service client to bypass RLS
+  const { data: reservation, error: reservationError } = await serviceClient
     .from("area_reservations")
     .select("*, common_areas(*)")
     .eq("id", reservationId)
@@ -341,8 +343,8 @@ export async function cancelReservation(reservationId: string, isAdminOrConcierg
     }
   }
 
-  // Cancel reservation (soft delete by changing status)
-  const { error } = await supabase
+  // Cancel reservation (soft delete by changing status) - use service client
+  const { error } = await serviceClient
     .from("area_reservations")
     .update({
       status: "cancelled",
