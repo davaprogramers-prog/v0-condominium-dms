@@ -206,11 +206,11 @@ export default async function MiCasaPage() {
                       <td className="px-6 py-3">{condo?.currency_symbol}{income.amount}</td>
                       <td className="px-6 py-3">
                         {hasReceipt ? (
-                          <span className="text-xs" style={{ color: "#000000" }}>
+                          <span className="text-xs" style={{ color: cardTextColor }}>
                             {proofs.length} comprobante(s)
                           </span>
                         ) : (
-                          <span className="text-xs opacity-50">Sin comprobante</span>
+                          <span className="text-xs opacity-50" style={{ color: cardTextColor }}>Sin comprobante</span>
                         )}
                       </td>
                       <td className="px-6 py-3">
