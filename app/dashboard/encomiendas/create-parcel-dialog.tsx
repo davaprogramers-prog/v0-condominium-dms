@@ -58,10 +58,18 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
       // Convert File to Base64 string if provided
       let photoBase64: string | undefined
       if (receptionPhoto) {
-        const arrayBuffer = await receptionPhoto.arrayBuffer()
-        const uint8Array = new Uint8Array(arrayBuffer)
-        const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array))
-        photoBase64 = btoa(binaryString)
+        // Use FileReader to convert to Base64 - handles large files without stack overflow
+        photoBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            const result = reader.result as string
+            // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+            const base64 = result.split(',')[1]
+            resolve(base64)
+          }
+          reader.onerror = reject
+          reader.readAsDataURL(receptionPhoto)
+        })
       }
 
       // Call server action to create parcel with photo Base64
