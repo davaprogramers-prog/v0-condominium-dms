@@ -35,6 +35,7 @@ export function PaymentUploadDialogThemedWrapper({ condoId, houseId, currencySym
 
       if (uploadError) {
         console.error("[v0] Upload error:", uploadError)
+        alert("Error al subir archivo: " + uploadError.message)
         setLoading(false)
         return
       }
