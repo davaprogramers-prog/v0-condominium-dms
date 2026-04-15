@@ -176,7 +176,8 @@ export async function ensureUserProfile(userId: string, email: string) {
       .select("id, condo_id, owner_name")
       .eq("owner_email", email)
 
-    console.log("[v0] Houses query - found:", houses?.length || 0, "error:", housesErr?.message)
+    console.log("[v0] Houses query - found:", houses?.length || 0, "houses:", houses?.map(h => ({ id: h.id, condo_id: h.condo_id })), "error:", housesErr?.message)
+    console.log("[v0] DEBUG: hasMultipleProperties should be:", (houses?.length || 0) > 1)
 
     // Check if profile already exists
     const { data: existingProfile } = await supabase
@@ -186,8 +187,9 @@ export async function ensureUserProfile(userId: string, email: string) {
       .single()
 
     if (existingProfile) {
-      console.log("[v0] Profile already exists for user:", userId, "role:", existingProfile.role)
-      // Return existing profile info
+      console.log("[v0] Profile already exists for user:", userId, "role:", existingProfile.role, "current condo_id:", existingProfile.condo_id)
+      console.log("[v0] RETURNING with hasMultipleProperties:", (houses?.length || 0) > 1)
+      // Return existing profile info BUT include hasMultipleProperties based on actual houses count
       return { success: true, role: existingProfile.role, hasMultipleProperties: (houses?.length || 0) > 1 }
     }
 
@@ -213,6 +215,7 @@ export async function ensureUserProfile(userId: string, email: string) {
         return { success: false, error: insertError.message }
       }
 
+      console.log("[v0] NEW PROFILE CREATED - hasMultipleProperties:", houses.length > 1)
       return { success: true, role: "propietario", hasMultipleProperties: houses.length > 1 }
     } else {
       // No house found - user might be conserje, admin, etc.
