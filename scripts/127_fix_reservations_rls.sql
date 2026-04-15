@@ -1,7 +1,7 @@
 -- Fix RLS policies for area_reservations table
 -- The issue is that propietarios cannot see their own reservations
 
--- Drop existing policies
+-- Drop ALL existing policies (old and new names)
 DROP POLICY IF EXISTS "reservations_owner_select" ON public.area_reservations;
 DROP POLICY IF EXISTS "reservations_owner_insert" ON public.area_reservations;
 DROP POLICY IF EXISTS "reservations_owner_update" ON public.area_reservations;
@@ -17,6 +17,15 @@ DROP POLICY IF EXISTS "Propietario view condo area_reservations" ON public.area_
 DROP POLICY IF EXISTS "Propietario create own area_reservations" ON public.area_reservations;
 DROP POLICY IF EXISTS "Propietario update own area_reservations" ON public.area_reservations;
 DROP POLICY IF EXISTS "Propietario delete own area_reservations" ON public.area_reservations;
+-- Drop new policy names too
+DROP POLICY IF EXISTS "super_admin_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "admin_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "concierge_select_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "concierge_update_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "owner_select_all_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "owner_insert_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "owner_update_reservations" ON public.area_reservations;
+DROP POLICY IF EXISTS "owner_delete_reservations" ON public.area_reservations;
 
 -- Super admin: full access
 CREATE POLICY "super_admin_reservations" ON public.area_reservations
