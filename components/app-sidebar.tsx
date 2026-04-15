@@ -372,19 +372,19 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
                 router.push("/select-condominium")
                 if (isMobile) setOpenMobile(false)
               }}
-              className="flex-shrink-0 hover:opacity-90 transition-all hover:scale-110 relative group"
+              className="flex-shrink-0 hover:opacity-90 transition-all hover:scale-110 relative"
             >
               <Image
                 src="/swap-property-icon.png"
                 alt="Cambiar propiedad"
                 width={32}
                 height={32}
-                className="w-8 h-8 rounded-full"
+                className="w-8 h-8 rounded-full peer"
                 style={{ transform: "scaleX(-1)" }}
               />
               
-              {/* Tooltip */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50" style={{ transform: "translateX(-50%)" }}>
+              {/* Tooltip - only shows on peer hover */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 peer-hover:opacity-100 transition-opacity pointer-events-none z-50" style={{ transform: "translateX(-50%)" }}>
                 Cambiar propiedad
               </div>
             </button>
