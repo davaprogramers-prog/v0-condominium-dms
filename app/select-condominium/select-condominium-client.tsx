@@ -179,14 +179,14 @@ export default function SelectCondominiumClient({
         {/* Header */}
         <div className="text-center mb-16">
           <div className="flex items-center justify-center gap-4 mb-6">
-            {/* Back/Change Icon */}
+            {/* Back/Change Icon - More prominent */}
             <button
               onClick={() => setSelectedCondo(null)}
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors group"
+              className="p-3 hover:bg-blue-600 bg-blue-500 rounded-full transition-all hover:scale-110 group shadow-lg"
               title="Cambiar condominio"
             >
               <svg 
-                className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" 
+                className="w-7 h-7 text-white" 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -194,7 +194,7 @@ export default function SelectCondominiumClient({
                 <path 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
-                  strokeWidth={2} 
+                  strokeWidth={2.5} 
                   d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" 
                 />
               </svg>
