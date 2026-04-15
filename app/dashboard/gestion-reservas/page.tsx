@@ -37,16 +37,14 @@ export default async function GestionReservasPage() {
     .order("name")
 
   // Get ALL reservations for the condo (past and future) - use service client to bypass RLS
-  const { data: reservations } = await serviceClient
+  const { data: reservations, error: reservationsError } = await serviceClient
     .from("area_reservations")
     .select(`
       *,
       common_areas(name, photo_url, max_hours_per_reservation, min_hours_to_modify, reception_time_minutes, delivery_time_minutes, opening_time, closing_time),
-      houses(house_number),
-      profiles:created_by(full_name, email)
+      houses(house_number)
     `)
     .eq("condo_id", condoId)
-    .in("status", ["confirmed", "pending", "rejected", "cancelled"])
     .order("reservation_date", { ascending: false })
     .order("start_time", { ascending: true })
 
