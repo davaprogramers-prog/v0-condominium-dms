@@ -298,7 +298,7 @@ export function ApproveProofDialog({
                 )}
               </>
             )}
-            <div className="flex justify-between font-medium pt-1" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+            <div className="flex justify-between font-medium pt-1" style={{ borderTop: `1px solid ${cardTextColor}` }}>
               <span>Total</span>
               <span className={isGastosComunes ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
