@@ -35,9 +35,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upload new avatar to Vercel Blob
+    // Upload new avatar to Vercel Blob with public access
+    // Note: Even though Blob store is private, we use public access for avatars
+    // so they can be displayed without additional auth
     const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
-      access: 'private',
+      access: 'public',
     })
 
     return NextResponse.json({ url: blob.url })

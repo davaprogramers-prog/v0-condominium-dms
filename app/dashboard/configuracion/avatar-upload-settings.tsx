@@ -100,6 +100,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       }
 
       const { url } = await response.json()
+      console.log("[v0] Avatar uploaded successfully, URL:", url)
 
       // Update profile with Blob URL
       const { error: updateError } = await supabase
@@ -109,6 +110,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       
       if (updateError) throw updateError
 
+      console.log("[v0] Profile updated with avatar URL")
       setOpen(false)
       setPreviewUrl(null)
       setSelectedFile(null)
