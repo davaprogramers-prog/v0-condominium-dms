@@ -36,8 +36,8 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
   const router = useRouter()
   const { theme } = useTheme()
   
-  const dialogBgColor = theme?.dialogBgColor || "#ffffff"
-  const dialogTextColor = theme?.dialogTextColor || "#000000"
+  const dialogBgColor = theme?.dialog_bg_color || "#ffffff"
+  const dialogTextColor = theme?.dialog_text_color || "#000000"
 
   const handleDelete = async () => {
     setDeleting(true)

@@ -111,7 +111,7 @@ export function MisReservasClient({
       if (result.area) {
         setStartTime(result.area.opening_time || "08:00")
         const openHour = parseInt((result.area.opening_time || "08:00").split(":")[0])
-        const maxHours = result.area.max_hours_per_reservation || 2
+        const maxHours = result.area.max_hours || 2
         setEndTime(`${String(openHour + maxHours).padStart(2, "0")}:00`)
       }
     }
