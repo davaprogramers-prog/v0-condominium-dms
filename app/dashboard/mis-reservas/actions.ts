@@ -200,7 +200,13 @@ export async function createReservation(data: CreateReservationData) {
     status: "confirmed",
   })
 
-  if (error) throw error
+  if (error) {
+    // Handle RLS permission errors with friendly message
+    if (error.code === "42501") {
+      throw new Error("No tienes permisos para crear esta reserva. Verifica que estés asignado a una propiedad.")
+    }
+    throw new Error(error.message || "Error al crear la reserva")
+  }
   
   revalidatePath("/dashboard/mis-reservas")
   revalidatePath("/dashboard/areas-comunes")
