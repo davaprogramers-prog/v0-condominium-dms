@@ -144,7 +144,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pending">Pendientes</SelectItem>
                   <SelectItem value="confirmed">Confirmadas</SelectItem>
@@ -159,7 +159,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                   <SelectItem value="all">Todas</SelectItem>
                   {areas.map(area => (
                     <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
@@ -173,7 +173,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                   <SelectItem value="all">Todas</SelectItem>
                   {allHouses.map(h => (
                     <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
@@ -349,15 +349,15 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  {allHouses.map(h => (
-                                    <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                  {allHouses.map(h => (
+                    <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
                               <div className="flex flex-col gap-2">
                                 <Label>Hora Inicio</Label>
                                 <Input 
@@ -407,7 +407,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                           <AlertDialogHeader>
                             <AlertDialogTitle>Cancelar Reserva</AlertDialogTitle>
                             <AlertDialogDescription className="opacity-70">
-                              Esta acción cancelará la reserva de Casa #{reservation.houses?.house_number} para {reservation.common_areas?.name}.
+                              Esta acción cancelar�� la reserva de Casa #{reservation.houses?.house_number} para {reservation.common_areas?.name}.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <div className="flex gap-3 justify-end">
