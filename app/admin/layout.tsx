@@ -32,8 +32,6 @@ export default async function AdminLayout({
     profile = data
   }
 
-  console.log("[v0] Admin layout - profile:", profile, "error:", error)
-
   // Check if super_admin - if not, redirect
   // Also check user metadata as fallback
   const isSuperAdmin = profile?.role === "super_admin" || user.user_metadata?.role === "super_admin"
