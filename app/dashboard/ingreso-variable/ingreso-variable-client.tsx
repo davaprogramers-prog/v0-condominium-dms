@@ -12,8 +12,17 @@ import { FileUpload } from "@/components/file-upload"
 import { Plus, TrendingUp, Trash2, ExternalLink } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
+interface VariableIncome {
+  id: string
+  amount: number
+  description: string
+  receipt_url?: string
+  source?: string
+  house_number?: string | number
+}
+
 interface IngresoVariableClientProps {
-  incomes: Record<string, unknown>[]
+  incomes: VariableIncome[]
   currencySymbol: string
   isAdmin: boolean
 }
@@ -150,10 +159,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sortedIncomes.map((income) => {
-            const statusInfo = getVariableIncomeStatus(income)
-            const status = statusInfo.status
-            const color = statusInfo.color
-            const textColor = (statusInfo.textColor as string) || ""
+            const { status, color, textColor } = getVariableIncomeStatus(income)
 
             return (
               <div
