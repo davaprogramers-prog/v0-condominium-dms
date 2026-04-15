@@ -253,7 +253,7 @@ export function MisReservasClient({
                 <DialogTitle style={{ color: dialogTextColor }}>Nueva Reserva</DialogTitle>
               </DialogHeader>
               <form action={handleCreateReservation} className="flex flex-col gap-4">
-                {isAdminOrConcierge && (
+                {isAdminOrConcierge ? (
                   <div className="flex flex-col gap-2">
                     <Label style={{ color: dialogTextColor }}>Propiedad</Label>
                     <Select name="house_id" defaultValue={houseId || ""}>
@@ -267,6 +267,18 @@ export function MisReservasClient({
                       </SelectContent>
                     </Select>
                   </div>
+                ) : (
+                  <>
+                    <input type="hidden" name="house_id" value={houseId || ""} />
+                    {house && (
+                      <div className="flex flex-col gap-1">
+                        <Label style={{ color: dialogTextColor }}>Propiedad</Label>
+                        <div className="p-2 rounded-lg text-sm font-medium" style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                          Casa #{house.house_number}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="flex flex-col gap-2">
