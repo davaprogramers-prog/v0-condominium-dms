@@ -79,6 +79,7 @@ export default async function DashboardLayout({
   let condo = null
   let allCondos: { id: string; name: string }[] = []
   let theme: CondoTheme | null = null
+  let hasMultipleProperties = false
 
   if (profile.condo_id) {
     try {
@@ -101,6 +102,22 @@ export default async function DashboardLayout({
       }
     } catch (e) {
       console.log("[v0] Error fetching condo or theme:", e)
+    }
+  }
+
+  // For owners, check if they have multiple properties across all condos
+  if (isOwner && user.email) {
+    try {
+      const { data: houses } = await supabase
+        .from("houses")
+        .select("id, condo_id")
+        .eq("owner_email", user.email)
+      
+      if (houses && houses.length > 1) {
+        hasMultipleProperties = true
+      }
+    } catch (e) {
+      console.log("[v0] Error checking properties:", e)
     }
   }
 
@@ -129,7 +146,7 @@ export default async function DashboardLayout({
     <ThemeProvider theme={theme}>
       <SidebarProvider>
         <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
-        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
+        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} hasMultipleProperties={hasMultipleProperties} />
         <SidebarInset 
           className="flex flex-col h-screen"
           style={theme?.enable_custom_theme ? {
