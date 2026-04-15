@@ -130,18 +130,59 @@ export async function createReservation(data: CreateReservationData) {
     .eq("reservation_date", data.reservation_date)
     .eq("status", "confirmed")
 
-  // Check for conflicts
+  // Check for conflicts and suggest available times
   if (existingReservations && existingReservations.length > 0) {
+    const receptionMin = area.reception_time_minutes || 30
+    const deliveryMin = area.delivery_time_minutes || 30
+    const maxHours = area.max_hours_per_reservation || 2
+    
     for (const existing of existingReservations) {
       if (timesOverlap(
         data.start_time,
         data.end_time,
         existing.start_time,
         existing.end_time,
-        area.reception_time_minutes || 30,
-        area.delivery_time_minutes || 30
+        receptionMin,
+        deliveryMin
       )) {
-        throw new Error("El horario solicitado tiene conflicto con otra reserva existente")
+        // Calculate suggested times
+        const toMinutes = (time: string) => {
+          const [h, m] = time.split(":").map(Number)
+          return h * 60 + m
+        }
+        const formatTime = (mins: number) => {
+          const h = Math.floor(mins / 60)
+          const m = mins % 60
+          return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+        }
+        
+        const existingStartMin = toMinutes(existing.start_time)
+        const existingEndMin = toMinutes(existing.end_time)
+        const openMin = toMinutes(area.opening_time || "08:00")
+        let closeMin = toMinutes(area.closing_time || "22:00")
+        if (closeMin === 0) closeMin = 24 * 60
+        
+        // Suggest time before the existing reservation
+        const suggestEndBefore = existingStartMin - receptionMin
+        const suggestStartBefore = Math.max(openMin, suggestEndBefore - (maxHours * 60))
+        
+        // Suggest time after the existing reservation
+        const suggestStartAfter = existingEndMin + deliveryMin
+        const suggestEndAfter = Math.min(closeMin, suggestStartAfter + (maxHours * 60))
+        
+        let suggestions = `\n\nHorarios disponibles sugeridos:`
+        if (suggestEndBefore > openMin && (suggestEndBefore - suggestStartBefore) >= 60) {
+          suggestions += `\n- Antes: ${formatTime(suggestStartBefore)} a ${formatTime(suggestEndBefore)}`
+        }
+        if (suggestStartAfter < closeMin && (suggestEndAfter - suggestStartAfter) >= 60) {
+          suggestions += `\n- Después: ${formatTime(suggestStartAfter)} a ${formatTime(suggestEndAfter)}`
+        }
+        
+        throw new Error(
+          `El horario solicitado no está disponible.\n` +
+          `Ya existe una reserva de ${existing.start_time.substring(0,5)} a ${existing.end_time.substring(0,5)}.` +
+          suggestions
+        )
       }
     }
   }

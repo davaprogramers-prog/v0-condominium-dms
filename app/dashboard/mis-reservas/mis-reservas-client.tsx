@@ -76,6 +76,7 @@ export function MisReservasClient({
   const [existingSlots, setExistingSlots] = useState<any[]>([])
   const [areaConfig, setAreaConfig] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { cardBgColor, cardTextColor, dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleAreaChange = async (areaId: string) => {
@@ -123,14 +124,15 @@ export function MisReservasClient({
         end_time: formData.get("end_time") as string,
         notes: formData.get("notes") as string || undefined,
       })
-      setOpenNew(false)
-      setSelectedArea("")
-      setSelectedDate("")
-      setExistingSlots([])
+    setOpenNew(false)
+    setSelectedArea("")
+    setSelectedDate("")
+    setExistingSlots([])
+    setErrorMessage(null)
     } catch (error: any) {
-      alert(error.message || "Error al crear la reserva")
+    setErrorMessage(error.message || "Error al crear la reserva")
     } finally {
-      setLoading(false)
+    setLoading(false)
     }
   }
 
@@ -203,7 +205,7 @@ export function MisReservasClient({
         </div>
         
         {areas.length > 0 && (houseId || isAdminOrConcierge) && (
-          <Dialog open={openNew} onOpenChange={setOpenNew}>
+          <Dialog open={openNew} onOpenChange={(open) => { setOpenNew(open); if (open) setErrorMessage(null); }}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <Plus className="h-4 w-4 mr-2" />
@@ -316,6 +318,30 @@ export function MisReservasClient({
                     style={{ backgroundColor: inputBgColor, color: inputTextColor }}
                   />
                 </div>
+
+                {errorMessage && (
+                  <div className="p-3 rounded-lg border border-red-400" style={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}>
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex flex-col gap-1">
+                        {errorMessage.split('\n').map((line, i) => (
+                          <p key={i} className={`text-sm ${i === 0 ? 'font-semibold text-red-600' : 'text-red-500'}`}>
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 text-red-500 hover:text-red-700"
+                      onClick={() => setErrorMessage(null)}
+                    >
+                      Cerrar
+                    </Button>
+                  </div>
+                )}
 
                 <Button type="submit" disabled={loading || !selectedArea || !selectedDate} className="bg-blue-600 hover:bg-blue-700 text-white">
                   {loading ? "Creando..." : "Crear Reserva"}
