@@ -86,7 +86,7 @@ const adminMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
       { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
@@ -157,8 +157,8 @@ const adminWithPropertyMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
   {
