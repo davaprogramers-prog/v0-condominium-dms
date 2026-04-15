@@ -204,7 +204,7 @@ export function UpdateParcelDialog({
           </div>
 
           {/* Return Reason - Only show if returning */}
-          {newStatus === 'returned' && (
+          {newStatus === 'devuelto' && (
             <div className="space-y-2">
               <Label htmlFor="reason" style={{ color: cardTextColor || '#000000' }}>Motivo de Devolución</Label>
               <Textarea
@@ -220,7 +220,7 @@ export function UpdateParcelDialog({
 
           {/* Photo Section */}
           <div className="space-y-2">
-            <Label style={{ color: cardTextColor || '#000000' }}>Foto de {newStatus === 'delivered' ? 'Entrega' : 'Devolución'}</Label>
+            <Label style={{ color: cardTextColor || '#000000' }}>Foto de {newStatus === 'entregado' ? 'Entrega' : 'Devolución'}</Label>
 
             {photoPreview ? (
               <div className="relative rounded-lg border p-4" style={{ borderColor: cardTextColor || '#ccc' }}>
