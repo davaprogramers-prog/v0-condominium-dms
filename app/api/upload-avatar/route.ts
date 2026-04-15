@@ -1,6 +1,29 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+async function ensureAvatarsBucket(supabase: any) {
+  try {
+    // Check if bucket exists
+    const { data: buckets } = await supabase.storage.listBuckets()
+    const avatarsBucketExists = buckets?.some((b: any) => b.name === 'avatars')
+
+    if (!avatarsBucketExists) {
+      console.log('[v0] Creating avatars bucket...')
+      const { data, error } = await supabase.storage.createBucket('avatars', {
+        public: true,
+      })
+      if (error) {
+        console.error('[v0] Error creating bucket:', error)
+        throw error
+      }
+      console.log('[v0] Avatars bucket created successfully')
+    }
+  } catch (error) {
+    console.error('[v0] Error ensuring avatars bucket:', error)
+    throw error
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -31,6 +54,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    // Ensure the avatars bucket exists
+    await ensureAvatarsBucket(supabase)
 
     // Delete old avatar if it exists
     if (oldUrl && oldUrl.includes('/storage/v1/object/public/avatars/')) {
