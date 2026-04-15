@@ -196,7 +196,7 @@ export function UploadProofDialog({
                 ))}
               </>
             )}
-            <div className="flex justify-between font-medium pt-2" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+            <div className="flex justify-between font-medium pt-2" style={{ borderTop: `1px solid ${cardTextColor}` }}>
               <span>Total a Pagar</span>
               <span className={paymentType === "multas" ? "text-red-700 dark:text-red-400" : "text-blue-700 dark:text-blue-400"}>
                 {currencySymbol}{totalAmount.toLocaleString("es-CL")}
