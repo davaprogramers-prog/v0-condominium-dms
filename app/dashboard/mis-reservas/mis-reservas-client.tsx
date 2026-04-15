@@ -475,22 +475,24 @@ export function MisReservasClient({
                        reservation.status === "rejected" ? "Rechazada" : reservation.status}
                     </Badge>
                     
-                    {/* Admin/Conserje Actions for Pending Reservations */}
-                    {isAdminOrConcierge && reservation.status === "pending" && (
+                    {/* Admin/Conserje Actions for Pending/Confirmed Reservations */}
+                    {isAdminOrConcierge && (reservation.status === "pending" || reservation.status === "confirmed") && (
                       <div className="flex gap-1">
-                        <Button 
-                          size="sm" 
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={async () => {
-                            try {
-                              await confirmReservation(reservation.id)
-                            } catch (error: any) {
-                              alert(error.message)
-                            }
-                          }}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
+                        {reservation.status === "pending" && (
+                          <Button 
+                            size="sm" 
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={async () => {
+                              try {
+                                await confirmReservation(reservation.id)
+                              } catch (error: any) {
+                                alert(error.message)
+                              }
+                            }}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        )}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button size="sm" variant="destructive">
