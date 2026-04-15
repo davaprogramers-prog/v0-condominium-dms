@@ -197,6 +197,7 @@ const adminWithPropertyMenuItems = [
   {
     section: "Gestión",
     items: [
+    { title: "Casas", href: "/dashboard/casas", icon: Home },
     { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
     ]
