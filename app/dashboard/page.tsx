@@ -65,12 +65,16 @@ export default async function DashboardPage() {
         .eq("id", user.id)
         .single()
 
+      console.log("[v0] Dashboard profile fetch - data:", profileData, "error:", error)
+
       if (profileData && !error) {
         profile = profileData
       }
     } catch (e) {
       console.log("[v0] Error fetching profile:", e)
     }
+    
+    console.log("[v0] Dashboard - user.id:", user.id, "profile:", profile, "role:", profile?.role)
 
     // If no profile, create fallback from metadata (same as layout)
     if (!profile) {
