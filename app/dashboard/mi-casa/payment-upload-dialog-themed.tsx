@@ -113,7 +113,7 @@ export function PaymentUploadDialogThemedWrapper({ condoId, houseId, currencySym
 
         if (insertError) {
           console.error("[v0] Insert error:", insertError)
-          alert("Error al guardar el comprobante.")
+          alert("Error al guardar el comprobante: " + insertError.message)
           setLoading(false)
           return
         }
