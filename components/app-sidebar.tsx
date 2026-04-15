@@ -330,39 +330,73 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
           borderColor: sidebarTextColor || "#000000",
         }}
       >
-        <button 
-          onClick={() => {
-            if (shouldGoToSelector) {
-              router.push("/select-condominium")
-            } else {
-              router.push("/dashboard")
-            }
-            if (isMobile) setOpenMobile(false)
-          }}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer w-full text-left"
-          title={shouldGoToSelector ? "Cambiar condominio o propiedad" : "Ir a dashboard"}
-        >
-          {condo?.logo_url ? (
-            <Image
-              src={String(condo.logo_url)}
-              alt={String(condo.name || "Logo")}
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain"
-            />
-          ) : (
-            <Image
-              src="/logo.png"
-              alt="InteliCon"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain"
-            />
+        <div className="flex items-center gap-2 w-full">
+          <button 
+            onClick={() => {
+              if (shouldGoToSelector) {
+                router.push("/select-condominium")
+              } else {
+                router.push("/dashboard")
+              }
+              if (isMobile) setOpenMobile(false)
+            }}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer flex-1 text-left"
+            title={shouldGoToSelector ? "Cambiar condominio o propiedad" : "Ir a dashboard"}
+          >
+            {condo?.logo_url ? (
+              <Image
+                src={String(condo.logo_url)}
+                alt={String(condo.name || "Logo")}
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg object-contain flex-shrink-0"
+              />
+            ) : (
+              <Image
+                src="/logo.png"
+                alt="InteliCon"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg object-contain flex-shrink-0"
+              />
+            )}
+            <span className="text-sm font-semibold truncate" style={{ color: sidebarTextColor || "#000000" }}>
+              {condo ? String(condo.name) : "Sin condominio"}
+            </span>
+          </button>
+
+          {/* Change Property Indicator */}
+          {shouldGoToSelector && (
+            <button
+              onClick={() => {
+                router.push("/select-condominium")
+                if (isMobile) setOpenMobile(false)
+              }}
+              className="flex-shrink-0 p-1.5 rounded-full hover:opacity-90 transition-all hover:scale-110 relative group"
+              style={{ backgroundColor: "#FF9500" }}
+              title="Cambiar condominio o propiedad"
+            >
+              <svg 
+                className="w-4 h-4 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2.5} 
+                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" 
+                />
+              </svg>
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Cambiar propiedad
+              </div>
+            </button>
           )}
-          <span className="text-sm font-semibold truncate max-w-[140px]" style={{ color: sidebarTextColor || "#000000" }}>
-            {condo ? String(condo.name) : "Sin condominio"}
-          </span>
-        </button>
+        </div>
         
         {/* Condo Selector for admins with multiple condos */}
         {canSwitchCondo && (
