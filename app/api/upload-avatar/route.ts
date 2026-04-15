@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Upload new avatar to Vercel Blob
     const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
-      access: 'public',
+      access: 'private',
     })
 
     return NextResponse.json({ url: blob.url })
