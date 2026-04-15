@@ -114,3 +114,81 @@ export async function getUserHouseId(
   return null
 }
 
+/**
+ * Get all condominiums for a user (multi-property support)
+ * Returns array of condominiums with their properties for the user
+ */
+export interface CondominiumProperty {
+  id: string
+  house_number: string | number
+  condo_id: string
+}
+
+export interface CondominiumWithProperties {
+  id: string
+  name: string
+  properties: CondominiumProperty[]
+}
+
+export async function getUserAllCondominiums(
+  supabase: SupabaseClient,
+  userEmail: string
+): Promise<CondominiumWithProperties[]> {
+  try {
+    console.log("[v0] Getting all condominiums for user:", userEmail)
+    
+    // Get all houses owned by this user via house_owners table
+    const { data: houseOwners, error: hoError } = await supabase
+      .from("house_owners")
+      .select("house_id, houses(id, house_number, condo_id, condominiums(id, name))")
+      .eq("email", userEmail)
+    
+    console.log("[v0] House owners query result:", { houseOwners, hoError })
+    
+    if (hoError) {
+      console.log("[v0] Error getting house owners:", hoError)
+      return []
+    }
+    
+    if (!houseOwners || houseOwners.length === 0) {
+      console.log("[v0] No house owners found for email:", userEmail)
+      return []
+    }
+    
+    // Group properties by condominium
+    const condominiumMap = new Map<string, CondominiumWithProperties>()
+    
+    houseOwners.forEach((owner: any) => {
+      const house = owner.houses
+      if (!house) return
+      
+      const condominiumId = house.condo_id
+      const condominiumData = house.condominiums
+      
+      if (!condominiumId || !condominiumData) return
+      
+      if (!condominiumMap.has(condominiumId)) {
+        condominiumMap.set(condominiumId, {
+          id: condominiumId,
+          name: condominiumData.name || 'Condominio',
+          properties: []
+        })
+      }
+      
+      const condo = condominiumMap.get(condominiumId)!
+      condo.properties.push({
+        id: house.id,
+        house_number: house.house_number,
+        condo_id: condominiumId
+      })
+    })
+    
+    const result = Array.from(condominiumMap.values())
+    console.log("[v0] User condominiums:", result)
+    return result
+  } catch (e) {
+    console.log("[v0] Error getting all condominiums:", e)
+    return []
+  }
+}
+

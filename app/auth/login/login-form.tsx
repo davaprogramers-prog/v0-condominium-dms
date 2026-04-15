@@ -33,10 +33,18 @@ export function LoginForm() {
       if (authData.user) {
         const profileResult = await ensureUserProfile(authData.user.id, email)
         console.log("[v0] Profile ensured:", profileResult)
+        
+        // Check if user is a propietario (owner) and if they have multiple properties
+        if (profileResult.role === 'propietario') {
+          // Redirect to condominium selector
+          router.push("/select-condominium")
+        } else {
+          // Admin or conserje go directly to dashboard
+          router.push("/dashboard")
+        }
       }
 
       toast.success("Sesion iniciada correctamente")
-      router.push("/dashboard")
     } catch (error) {
       console.error("Login error:", error)
       toast.error(error instanceof Error ? error.message : "Error al iniciar sesion")

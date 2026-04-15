@@ -188,7 +188,7 @@ export async function ensureUserProfile(userId: string, email: string) {
 
     if (existingProfile) {
       console.log("[v0] Profile already exists for user:", userId)
-      return { success: true }
+      return { success: true, role: existingProfile.role }
     }
 
     if (house) {
@@ -204,7 +204,7 @@ export async function ensureUserProfile(userId: string, email: string) {
           last_name: "",
           house_id: house.id,
           condo_id: house.condo_id,
-          role: "owner",
+          role: "propietario",
         })
 
       if (insertError && insertError.code !== "23505") {
@@ -212,13 +212,13 @@ export async function ensureUserProfile(userId: string, email: string) {
         return { success: false, error: insertError.message }
       }
 
-      return { success: true }
+      return { success: true, role: "propietario" }
     } else {
       // No house found - user might be conserje, admin, etc.
       // Get the condo_id from auth user metadata if available
       const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId)
       const condoId = authUser?.user_metadata?.condo_id
-      const role = authUser?.user_metadata?.role || "owner"
+      const role = authUser?.user_metadata?.role || "propietario"
 
       if (condoId) {
         // User has condo_id but no house - likely conserje, admin, etc.
@@ -240,7 +240,7 @@ export async function ensureUserProfile(userId: string, email: string) {
           return { success: false, error: insertError.message }
         }
 
-        return { success: true }
+        return { success: true, role: role }
       } else {
         // No condo_id and no house - can't assign
         console.log("[v0] No house and no condo_id - cannot auto-assign")
