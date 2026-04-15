@@ -73,15 +73,16 @@ export default function VisitasPageClient({
       filtered = filtered.filter(v => selectedHouses.has(v.house_id))
     }
 
-    // Filter by date range
+    // Filter by date range - use local timezone for date comparisons
     if (dateFrom) {
-      filtered = filtered.filter(v => new Date(v.visit_date) >= new Date(dateFrom))
+      const [year, month, day] = dateFrom.split('-').map(Number)
+      const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+      filtered = filtered.filter(v => new Date(v.visit_date) >= fromDate)
     }
     if (dateTo) {
-      // Add 1 day to include the entire end date
-      const endDate = new Date(dateTo)
-      endDate.setDate(endDate.getDate() + 1)
-      filtered = filtered.filter(v => new Date(v.visit_date) < endDate)
+      const [year, month, day] = dateTo.split('-').map(Number)
+      const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+      filtered = filtered.filter(v => new Date(v.visit_date) <= toDate)
     }
 
     // Filter by search query (search in visitor name, title, email, phone)
