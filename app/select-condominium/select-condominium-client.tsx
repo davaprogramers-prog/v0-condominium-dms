@@ -178,24 +178,49 @@ export default function SelectCondominiumClient({
 
         {/* Header */}
         <div className="text-center mb-16">
-          {currentCondo.logo_url && (
-            <div 
-              className="rounded-full mx-auto mb-6 overflow-hidden shadow-lg flex items-center justify-center"
-              style={{
-                width: '80px',
-                height: '80px',
-                backgroundColor: theme?.main_bg_color || '#0f172a'
-              }}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            {/* Back/Change Icon */}
+            <button
+              onClick={() => setSelectedCondo(null)}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors group"
+              title="Cambiar condominio"
             >
-              <Image
-                src={currentCondo.logo_url}
-                alt={currentCondo.name}
-                width={80}
-                height={80}
-                className="object-cover w-full h-full"
-              />
-            </div>
-          )}
+              <svg 
+                className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" 
+                />
+              </svg>
+            </button>
+
+            {/* Logo */}
+            {currentCondo.logo_url && (
+              <div 
+                className="rounded-full overflow-hidden shadow-lg flex items-center justify-center flex-shrink-0"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  backgroundColor: theme?.main_bg_color || '#0f172a'
+                }}
+              >
+                <Image
+                  src={currentCondo.logo_url}
+                  alt={currentCondo.name}
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            )}
+          </div>
+          
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{currentCondo.name}</h1>
           <p className="text-slate-400 text-lg">Selecciona una propiedad para ingresar</p>
         </div>
