@@ -164,13 +164,27 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           variant="outline"
                           size="sm"
                           onClick={() => closeSurvey(survey.id as string)}
+                          style={{ 
+                            backgroundColor: inputBgColor, 
+                            color: inputTextColor, 
+                            borderColor: inputTextColor + "60"
+                          }}
                         >
                           Cerrar
                         </Button>
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            style={{ 
+                              backgroundColor: inputBgColor, 
+                              color: inputTextColor, 
+                              borderColor: inputTextColor + "60"
+                            }}
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

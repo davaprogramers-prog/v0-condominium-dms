@@ -782,6 +782,7 @@ export async function createRental(formData: FormData) {
 // ===== Common Areas =====
 export async function createCommonArea(formData: FormData) {
   const { supabase, condoId } = await getCondoId()
+  const isReservable = formData.get("is_reservable") === "true"
   const { error } = await supabase.from("common_areas").insert({
     condo_id: condoId,
     name: formData.get("name") as string,
@@ -790,6 +791,13 @@ export async function createCommonArea(formData: FormData) {
     is_paid: formData.get("is_paid") === "true",
     usage_fee: Number(formData.get("usage_fee")) || 0,
     maintenance_responsible: formData.get("maintenance_responsible") as string || null,
+    is_reservable: isReservable,
+    max_hours_per_reservation: isReservable ? Number(formData.get("max_hours_per_reservation")) || 2 : null,
+    reception_time_minutes: isReservable ? Number(formData.get("reception_time_minutes")) || 30 : null,
+    delivery_time_minutes: isReservable ? Number(formData.get("delivery_time_minutes")) || 30 : null,
+    min_hours_to_modify: isReservable ? Number(formData.get("min_hours_to_modify")) || 12 : null,
+    opening_time: isReservable ? (formData.get("opening_time") as string) || "08:00" : null,
+    closing_time: isReservable ? (formData.get("closing_time") as string) || "22:00" : null,
   })
   if (error) throw error
   revalidatePath("/dashboard/areas-comunes")
@@ -797,6 +805,7 @@ export async function createCommonArea(formData: FormData) {
 
 export async function updateCommonArea(formData: FormData) {
   const { supabase } = await getCondoId()
+  const isReservable = formData.get("is_reservable") === "true"
   const { error } = await supabase
     .from("common_areas")
     .update({
@@ -806,6 +815,13 @@ export async function updateCommonArea(formData: FormData) {
       is_paid: formData.get("is_paid") === "true",
       usage_fee: Number(formData.get("usage_fee")) || 0,
       maintenance_responsible: formData.get("maintenance_responsible") as string || null,
+      is_reservable: isReservable,
+      max_hours_per_reservation: isReservable ? Number(formData.get("max_hours_per_reservation")) || 2 : null,
+      reception_time_minutes: isReservable ? Number(formData.get("reception_time_minutes")) || 30 : null,
+      delivery_time_minutes: isReservable ? Number(formData.get("delivery_time_minutes")) || 30 : null,
+      min_hours_to_modify: isReservable ? Number(formData.get("min_hours_to_modify")) || 12 : null,
+      opening_time: isReservable ? (formData.get("opening_time") as string) || "08:00" : null,
+      closing_time: isReservable ? (formData.get("closing_time") as string) || "22:00" : null,
     })
     .eq("id", formData.get("id") as string)
   if (error) throw error

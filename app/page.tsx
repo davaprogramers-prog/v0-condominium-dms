@@ -5,31 +5,40 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-end">
           <div className="flex items-center gap-3">
-            <Image 
-              src="/logo.png" 
-              alt="InteliCon Logo" 
-              width={150} 
-              height={50}
-              className="h-14 w-auto"
-              priority
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="/auth/login" className="px-6 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors duration-200">
+            <a 
+              href="/auth/login" 
+              className="px-6 py-2.5 text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
+            >
               Iniciar Sesión
             </a>
-            <a href="/auth/registro" className="relative px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl overflow-hidden group transition-all duration-300 hover:scale-105">
-              <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-              <span className="relative flex items-center gap-2">
-                Registrarse
-              </span>
+            <a 
+              href="/auth/registro" 
+              className="px-6 py-2.5 text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2"
+              style={{ backgroundColor: "#0d3068", color: "#fefce1", borderColor: "#fefce1" }}
+            >
+              Registrarse
             </a>
           </div>
         </div>
       </nav>
+      
+      {/* Floating Logo */}
+      <div className="fixed top-4 left-4 sm:left-8 z-50">
+        <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-100">
+          <Image 
+            src="/logo.png" 
+            alt="InteliCon Logo" 
+            width={150} 
+            height={50}
+            className="h-12 w-auto"
+            priority
+          />
+        </div>
+      </div>
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
@@ -75,40 +84,59 @@ export default function Page() {
               {
                 icon: BarChart3,
                 title: "Reportes Financieros",
-                description: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos"
+                description: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos",
+                color: "#3B82F6",
+                bgColor: "rgba(59, 130, 246, 0.15)"
               },
               {
                 icon: Home,
                 title: "Control por Casa",
-                description: "Cards de estado por casa, histórico de pagos y comprobantes de depósito"
+                description: "Cards de estado por casa, histórico de pagos y comprobantes de depósito",
+                color: "#10B981",
+                bgColor: "rgba(16, 185, 129, 0.15)"
               },
               {
                 icon: Vote,
                 title: "Encuestas en Vivo",
-                description: "Votaciones en tiempo real con resultados visibles al instante"
+                description: "Votaciones en tiempo real con resultados visibles al instante",
+                color: "#8B5CF6",
+                bgColor: "rgba(139, 92, 246, 0.15)"
               },
               {
                 icon: FileText,
                 title: "Gestión de Documentos",
-                description: "Almacena reglamentos, sanciones, partes y cualquier documentación"
+                description: "Almacena reglamentos, sanciones, partes y cualquier documentación",
+                color: "#F59E0B",
+                bgColor: "rgba(245, 158, 11, 0.15)"
               },
               {
                 icon: ShieldCheck,
                 title: "Exoneraciones",
-                description: "Gestiona exoneraciones permanentes o temporales por servicios"
+                description: "Gestiona exoneraciones permanentes o temporales por servicios",
+                color: "#14B8A6",
+                bgColor: "rgba(20, 184, 166, 0.15)"
               },
               {
                 icon: Building2,
                 title: "Proyectos de Mejora",
-                description: "Crea proyectos con cotizaciones, fotos y seguimiento de estado"
+                description: "Crea proyectos con cotizaciones, fotos y seguimiento de estado",
+                color: "#EC4899",
+                bgColor: "rgba(236, 72, 153, 0.15)"
               },
             ].map((feature) => (
-              <div key={feature.title} className="group p-6 bg-background border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition">
-                  <feature.icon className="w-6 h-6 text-primary" />
+              <div 
+                key={feature.title} 
+                className="group p-6 bg-background border-2 border-border/50 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                style={{ borderColor: `${feature.color}30` }}
+              >
+                <div 
+                  className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
+                  style={{ backgroundColor: feature.bgColor }}
+                >
+                  <feature.icon className="w-7 h-7" style={{ color: feature.color }} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -117,12 +145,18 @@ export default function Page() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-8 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 rounded-3xl p-12 backdrop-blur-sm">
-          <h2 className="text-3xl font-bold text-foreground">¿Listo para transformar tu administración?</h2>
-          <p className="text-lg text-muted-foreground">Únete a cientos de condominios que ya confían en InteliCon</p>
-          <a href="/auth/registro" className="inline-block relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105">
-            <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="relative">Comenzar prueba gratuita</span>
+        <div 
+          className="max-w-4xl mx-auto text-center space-y-8 border-2 rounded-3xl p-12"
+          style={{ backgroundColor: "#b4d9fe", borderColor: "#0d3068" }}
+        >
+          <h2 className="text-3xl font-bold" style={{ color: "#0d3068" }}>¿Listo para transformar tu administración?</h2>
+          <p className="text-lg" style={{ color: "#0d3068", opacity: 0.8 }}>Únete a cientos de condominios que ya confían en InteliCon</p>
+          <a 
+            href="/auth/registro" 
+            className="inline-block px-8 py-3.5 rounded-full font-semibold text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
+          >
+            Comenzar prueba gratuita
           </a>
         </div>
       </section>

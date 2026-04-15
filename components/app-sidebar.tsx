@@ -44,6 +44,7 @@ import {
   Users,
   ChevronDown,
   Calendar,
+  CalendarDays,
   Package,
 } from "lucide-react"
 import Link from "next/link"
@@ -54,23 +55,52 @@ import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
 const iconColorMap: Record<string, string> = {
+  // Dashboard
   "dashboard": "#60A5FA",      // Azul brillante
-  "usuarios": "#D946EF",       // Púrpura vibrante  
-  "gastos": "#FF8C42",         // Naranja fuerte
-  "ingresos": "#34D399",       // Verde brillante
-  "propietarios": "#F472B6",   // Rosa vibrante
   "reportes": "#22D3EE",       // Cyan brillante
-  "documentos": "#FBBF24",     // Ámbar brillante
-  "encuestas": "#818CF8",      // Índigo brillante
   "balance": "#1ECB7F",        // Esmeralda vibrante
-  "alertas": "#F87171",        // Rojo brillante
-  "areas-comunes": "#D946EF",  // Púrpura vibrante
+  
+  // Mi Propiedad
   "mi-casa": "#60A5FA",        // Azul brillante
-  "cartolas": "#22D3EE",       // Cyan brillante
+  "mis-reservas": "#F59E0B",   // Ámbar cálido
+  "mis-visitas": "#EC4899",    // Rosa vibrante
+  "mis-encomiendas": "#8B5CF6", // Violeta brillante
+  
+  // Gestión
+  "casas": "#10B981",          // Esmeralda
+  "usuarios": "#D946EF",       // Púrpura vibrante  
+  "areas-comunes": "#06B6D4",  // Cyan vibrante
+  
+  // Configuraciones
+  "tipos-gastos": "#F97316", // Naranja brillante
+  "tipos-exoneraciones": "#14B8A6", // Teal vibrante
+  
+  // Finanzas
+  "propietarios": "#F472B6",   // Rosa vibrante
+  "gastos": "#EF4444",         // Rojo para gastos
+  "ingresos": "#22C55E",       // Verde para ingresos
+  "ingreso-variable": "#A855F7", // Púrpura
+  "ingresos-multas": "#F59E0B", // Ámbar
+  "cartolas": "#0EA5E9",       // Sky blue
+  
+  // Regulaciones
+  "infracciones": "#EF4444",   // Rojo alerta
+  "exoneraciones": "#14B8A6",  // Teal
+  
+  // Administración
+  "conserjes": "#8B5CF6",      // Violeta
+  "gestion-reservas": "#F59E0B", // Ámbar
+  "visitas": "#EC4899",        // Rosa
+  "visitas-admin": "#EC4899",  // Rosa
+  "encomiendas": "#3B82F6",    // Azul
+  "solicitudes-materiales": "#06B6D4", // Cyan
+  "encuestas": "#818CF8",      // Índigo brillante
   "proyectos": "#FBBF24",      // Ámbar brillante
+  "documentos": "#F97316",     // Naranja
+  
+  // Sistema
   "configuracion": "#A78BFA",  // Púrpura claro
-  "visitas": "#F472B6",        // Rosa vibrante
-  "encomiendas": "#3B82F6",    // Azul para paquetes
+  "alertas": "#F87171",        // Rojo brillante
 }
 
 const adminMenuItems = [
@@ -83,19 +113,20 @@ const adminMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Gestión",
     items: [
-      { title: "Casas", href: "/dashboard/casas", icon: Home },
-      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Casas", href: "/dashboard/casas", icon: Home },
+    { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
     ]
   },
   {
@@ -127,6 +158,7 @@ const adminMenuItems = [
     section: "Administración",
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
       { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
@@ -154,21 +186,23 @@ const adminWithPropertyMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Gestión",
     items: [
-      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Casas", href: "/dashboard/casas", icon: Home },
+    { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
     ]
-  },
-  {
+    },
+    {
     section: "Configuraciones",
     items: [
       { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
@@ -197,6 +231,7 @@ const adminWithPropertyMenuItems = [
     section: "Administración",
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
       { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
@@ -223,12 +258,13 @@ const ownerMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Condominio",
@@ -247,12 +283,13 @@ const conciergeMenuItems = [
   {
     section: "Conserje",
     items: [
-      { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
+    { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
+    { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
+    { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
-  }
+    }
 ]
 
 interface AppSidebarProps {

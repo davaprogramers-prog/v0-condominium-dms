@@ -141,7 +141,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                 <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="dark:bg-slate-800 dark:text-white">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                   <SelectItem value="cuota">Cuota Común</SelectItem>
                   <SelectItem value="variable">Ingreso Variable</SelectItem>
                 </SelectContent>
@@ -156,7 +156,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                 <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar casa..." />
                 </SelectTrigger>
-                <SelectContent className="dark:bg-slate-800 dark:text-white">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                   <SelectItem value="none">Sin asignar</SelectItem>
                   {houses.map((house) => (
                     <SelectItem key={house.id} value={house.id}>

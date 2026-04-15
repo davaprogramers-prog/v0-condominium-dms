@@ -13,6 +13,7 @@ import {
 import { Camera, Upload, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { resizeImageIfNeeded } from "@/lib/image-utils"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string
@@ -27,6 +28,13 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const { theme } = useTheme()
+
+  // Theme colors
+  const dialogBgColor = theme?.dialog_bg_color || "#ffffff"
+  const dialogTextColor = theme?.dialog_text_color || "#000000"
+  const inputBgColor = theme?.input_bg_color || "#f5f5f5"
+  const inputTextColor = theme?.input_text_color || "#000000"
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -119,7 +127,7 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
               className="h-16 w-16 rounded-full object-cover border-2 border-muted"
             />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-lg font-semibold text-white">
               {initials}
             </div>
           )}
@@ -128,9 +136,12 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
           </div>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md" 
+        style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}
+      >
         <DialogHeader>
-          <DialogTitle>Cambiar foto de perfil</DialogTitle>
+          <DialogTitle style={{ color: dialogTextColor }}>Cambiar foto de perfil</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-4">
           {/* Preview */}
@@ -148,7 +159,7 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
                 className="h-32 w-32 rounded-full object-cover border-2 border-muted"
               />
             ) : (
-              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary text-3xl font-semibold text-primary-foreground">
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-blue-600 text-3xl font-semibold text-white">
                 {initials}
               </div>
             )}
@@ -161,6 +172,11 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
               variant="outline"
               onClick={() => cameraInputRef.current?.click()}
               disabled={loading}
+              style={{ 
+                backgroundColor: inputBgColor, 
+                color: inputTextColor,
+                borderColor: dialogTextColor + "40"
+              }}
             >
               <Camera className="mr-2 h-4 w-4" />
               Tomar foto
@@ -179,6 +195,11 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
+              style={{ 
+                backgroundColor: inputBgColor, 
+                color: inputTextColor,
+                borderColor: dialogTextColor + "40"
+              }}
             >
               <Upload className="mr-2 h-4 w-4" />
               Subir imagen
@@ -192,13 +213,17 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
             />
           </div>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.7 }}>
             Formatos: JPG, PNG, WebP | Máximo 5MB
           </p>
 
           {/* Confirm button */}
           {previewUrl && (
-            <Button onClick={handleUpload} disabled={loading} className="w-full">
+            <Button 
+              onClick={handleUpload} 
+              disabled={loading} 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

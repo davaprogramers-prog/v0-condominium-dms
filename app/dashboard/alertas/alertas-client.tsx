@@ -108,7 +108,7 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                     <Label style={{ color: dialogTextColor }}>Prioridad</Label>
                     <Select value={priority} onValueChange={setPriority}>
                       <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
-                      <SelectContent>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                         <SelectItem value="baja">Baja</SelectItem>
                         <SelectItem value="media">Media</SelectItem>
                         <SelectItem value="alta">Alta</SelectItem>
@@ -228,15 +228,15 @@ export function AlertasClient({ alerts, isAdmin }: AlertasClientProps) {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col gap-2">
                             <Label style={{ color: dialogTextColor }}>Prioridad</Label>
-                            <Select value={editPriority} onValueChange={setEditPriority}>
-                              <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="baja">Baja</SelectItem>
-                                <SelectItem value="media">Media</SelectItem>
-                                <SelectItem value="alta">Alta</SelectItem>
-                                <SelectItem value="urgente">Urgente</SelectItem>
-                              </SelectContent>
-                            </Select>
+<Select value={editPriority} onValueChange={setEditPriority}>
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                        <SelectItem value="baja">Baja</SelectItem>
+                        <SelectItem value="media">Media</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="urgente">Urgente</SelectItem>
+                      </SelectContent>
+                    </Select>
                           </div>
                           <div className="flex flex-col gap-2">
                             <Label htmlFor="edit_expires" style={{ color: dialogTextColor }}>Expira (opcional)</Label>

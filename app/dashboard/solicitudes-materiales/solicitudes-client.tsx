@@ -334,10 +334,10 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
               <div>
                 <label className="text-sm font-medium">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: inputTextColor }}>
+                  <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                     <SelectValue placeholder="Filtrar por estado" />
                   </SelectTrigger>
-                  <SelectContent style={{ backgroundColor: cardBgColor }}>
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                     <SelectItem value="pending">Pendiente</SelectItem>
                     <SelectItem value="approved">Aprobada</SelectItem>
                     <SelectItem value="completed">Completada</SelectItem>
