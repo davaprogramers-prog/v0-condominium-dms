@@ -295,8 +295,12 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
     }
   }
 
-  // If admin has property assigned, use the menu with "Mi casa", otherwise use regular admin menu
-  const menuSections = !hasCondo && isAdmin
+  // Super admin always sees full admin menu, regardless of condo assignment
+  // Regular admin without condo sees limited menu
+  // Admin with property sees admin menu + Mi Casa
+  const menuSections = isSuperAdmin
+    ? adminMenuItems
+    : !hasCondo && isAdmin
     ? [
         {
           section: "Configuración",
