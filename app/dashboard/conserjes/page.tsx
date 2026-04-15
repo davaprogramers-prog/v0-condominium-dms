@@ -25,7 +25,7 @@ export default function ConserjesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ firstName: "", lastName: "" })
   const [isSaving, setIsSaving] = useState(false)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   // Get condo_id and role from authenticated user
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function ConserjesPage() {
 
   if (!canManageConcierges) {
     return (
-      <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="p-12 text-center">
+      <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-12 text-center">
         <User className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ color: cardTextColor }} />
         <p style={{ color: cardTextColor, opacity: 0.7 }}>No tienes permisos para gestionar conserjes</p>
       </Card>
@@ -152,14 +152,14 @@ export default function ConserjesPage() {
             ))}
           </div>
         ) : !concierges || concierges.length === 0 ? (
-          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="p-12 text-center">
+          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-12 text-center">
             <User className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ color: cardTextColor }} />
             <p style={{ color: cardTextColor, opacity: 0.7 }}>No hay conserjes registrados aún</p>
           </Card>
         ) : (
           <div className="grid gap-4">
             {concierges.map((concierge: any) => (
-              <Card key={concierge.id} style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="p-6">
+              <Card key={concierge.id} style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">

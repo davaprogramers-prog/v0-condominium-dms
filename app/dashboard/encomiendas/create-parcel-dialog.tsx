@@ -16,7 +16,7 @@ import { resizeImageIfNeeded } from '@/lib/image-utils'
 export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: string; houses: Array<{ id: string; house_number: string }>; onSuccess?: () => void }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor, primaryColor } = useTheme()
+  const { cardBgColor, cardTextColor, inputBgColor, inputTextColor } = useTheme()
   const [formData, setFormData] = useState({
     house_id: '',
     parcel_type: 'paquete',
@@ -195,7 +195,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
                       setReceptionPhotoPreview('')
                     }}
                     className="text-sm hover:underline"
-                    style={{ color: primaryColor || '#0066cc' }}
+                    style={{ color: '#0066cc' }}
                   >
                     Cambiar foto
                   </button>
@@ -203,7 +203,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
               ) : (
                 <label className="cursor-pointer block">
                   <div className="flex flex-col items-center gap-2 py-6">
-                    <Camera className="h-8 w-8" style={{ color: primaryColor || '#0066cc' }} />
+                    <Camera className="h-8 w-8" style={{ color: '#0066cc' }} />
                     <span style={{ color: cardTextColor || '#000000' }}>Tomar o subir foto</span>
                   </div>
                   <input
@@ -234,7 +234,7 @@ export function CreateParcelDialog({ condoId, houses, onSuccess }: { condoId: st
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading} style={{ backgroundColor: primaryColor || '#0066cc' }}>
+            <Button type="submit" disabled={loading} style={{ backgroundColor: '#0066cc' }}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar Encomienda
             </Button>

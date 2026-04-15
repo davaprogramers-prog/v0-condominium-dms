@@ -4,6 +4,7 @@ interface UseAsyncState<T> {
   data: T | null
   isLoading: boolean
   error: Error | null
+  refetch: () => Promise<T | void>
 }
 
 export function useAsync<T>(
@@ -11,7 +12,7 @@ export function useAsync<T>(
   immediate = true,
   dependencies: any[] = []
 ): UseAsyncState<T> {
-  const [state, setState] = useState<UseAsyncState<T>>({
+  const [state, setState] = useState<Omit<UseAsyncState<T>, 'refetch'>>({
     data: null,
     isLoading: false,
     error: null,
@@ -35,5 +36,8 @@ export function useAsync<T>(
     }
   }, dependencies)
 
-  return state
+  return {
+    ...state,
+    refetch: execute
+  }
 }

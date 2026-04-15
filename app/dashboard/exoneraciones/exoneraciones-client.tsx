@@ -35,7 +35,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
   const [editingType, setEditingType] = useState<string | null>(null)
   const [deletingExemption, setDeletingExemption] = useState<string | null>(null)
   const [deletingType, setDeletingType] = useState<string | null>(null)
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor, borderColor } = useTheme()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleDeleteExemption = async (id: string) => {
     setDeletingExemption(id)
@@ -190,7 +190,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           <TabsTrigger value="types">Tipos ({exemptionTypes.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="exemptions">
-          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
+          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="border">
             <CardHeader>
               <CardTitle className="text-base" style={{ color: cardTextColor }}>Exoneraciones Activas</CardTitle>
               <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Casas con exoneracion de gasto comun</CardDescription>
@@ -205,7 +205,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow style={{ borderColor: borderColor }}>
+                      <TableRow style={{ borderColor: inputTextColor }}>
                         <TableHead style={{ color: cardTextColor }}>Casa</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Tipo</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Porcentaje</TableHead>
@@ -220,7 +220,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                       {exemptions.map((ex) => {
                         const isActive = ex.is_permanent || !ex.end_date || new Date(ex.end_date as string) >= new Date()
                         return (
-                          <TableRow key={ex.id as string} style={{ borderColor: borderColor }}>
+                          <TableRow key={ex.id as string} style={{ borderColor: inputTextColor }}>
                             <TableCell className="font-medium" style={{ color: cardTextColor }}>
                               {(ex.houses as Record<string, unknown>)?.house_number as string || "?"}
                             </TableCell>
@@ -266,7 +266,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           </Card>
         </TabsContent>
         <TabsContent value="types">
-          <Card style={{ backgroundColor: cardBgColor, borderColor: borderColor, color: cardTextColor }} className="border">
+          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="border">
             <CardHeader>
               <CardTitle className="text-base" style={{ color: cardTextColor }}>Tipos de Exoneracion</CardTitle>
             </CardHeader>
@@ -276,7 +276,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
               ) : (
                 <div className="flex flex-col gap-2">
                   {exemptionTypes.map((t) => (
-                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: borderColor, backgroundColor: `${cardBgColor}88` }}>
+                    <div key={t.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: inputTextColor, backgroundColor: `${cardBgColor}88` }}>
                       <div>
                         <p className="text-sm font-medium" style={{ color: cardTextColor }}>{t.name as string}</p>
                         {t.description ? <p className="text-xs" style={{ color: cardTextColor, opacity: 0.7 }}>{t.description as string}</p> : null}
