@@ -263,9 +263,9 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 <SelectValue />
               </SelectTrigger>
               <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
-                <SelectItem value="admin" style={{ color: inputTextColor }}>Administrador</SelectItem>
-                <SelectItem value="conserje" style={{ color: inputTextColor }}>Conserje</SelectItem>
-                <SelectItem value="propietario" style={{ color: inputTextColor }}>Propietario</SelectItem>
+                <SelectItem value="admin">Administrador</SelectItem>
+                <SelectItem value="conserje">Conserje</SelectItem>
+                <SelectItem value="propietario">Propietario</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -292,7 +292,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 </SelectTrigger>
                 <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id} style={{ color: inputTextColor }}>
+                    <SelectItem key={house.id} value={house.id}>
                       Casa {house.house_number}
                     </SelectItem>
                   ))}
