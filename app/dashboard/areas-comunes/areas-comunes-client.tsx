@@ -91,7 +91,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
               </Button>
             </DialogTrigger>
             <DialogContent
-              className="border-2"
+              className="border-2 max-h-[90vh] overflow-y-auto"
               style={{
                 backgroundColor: dialogBgColor,
                 color: dialogTextColor,
@@ -279,7 +279,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                         </Button>
                       </DialogTrigger>
                       <DialogContent
-                        className="border-2"
+                        className="border-2 max-h-[90vh] overflow-y-auto"
                         style={{
                           backgroundColor: dialogBgColor,
                           color: dialogTextColor,
