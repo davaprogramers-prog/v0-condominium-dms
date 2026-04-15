@@ -14,11 +14,11 @@ import { useTheme } from "@/app/dashboard/theme-context"
 
 interface VariableIncome {
   id: string
-  amount: number
   description: string
-  receipt_url?: string
+  income_date: string
+  amount: number | string
   source?: string
-  house_number?: string | number
+  receipt_url?: string
 }
 
 interface IngresoVariableClientProps {
