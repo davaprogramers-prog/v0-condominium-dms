@@ -35,12 +35,12 @@ export default function LoginPage() {
         const profileResult = await ensureUserProfile(authData.user.id, email)
         console.log("[v0] Profile ensured:", profileResult)
         
-        // Check if user is a propietario with multiple properties
-        if (profileResult.role === 'propietario' && profileResult.hasMultipleProperties) {
+        // Check if user is an owner with multiple properties
+        if ((profileResult.role === 'propietario' || profileResult.role === 'owner') && profileResult.hasMultipleProperties) {
           console.log("[v0] User has multiple properties - redirecting to selector")
           router.push("/select-condominium")
         } else {
-          console.log("[v0] User is not propietario with multiple properties - redirecting to dashboard")
+          console.log("[v0] User is not owner with multiple properties - redirecting to dashboard")
           router.push("/dashboard")
         }
       }
