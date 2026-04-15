@@ -387,7 +387,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                               />
                             </div>
 
-                            <Button type="submit" disabled={loading}>
+                            <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                               Guardar Cambios
                             </Button>
                           </form>
