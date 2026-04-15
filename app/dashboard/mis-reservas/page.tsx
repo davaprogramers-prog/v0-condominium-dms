@@ -1,3 +1,4 @@
+// Mis Reservas Page - Reservation management for residents
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
