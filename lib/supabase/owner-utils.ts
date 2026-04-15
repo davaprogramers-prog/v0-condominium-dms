@@ -137,35 +137,38 @@ export async function getUserAllCondominiums(
   try {
     console.log("[v0] Getting all condominiums for user:", userEmail)
     
-    // Get all houses owned by this user via house_owners table
-    const { data: houseOwners, error: hoError } = await supabase
-      .from("house_owners")
-      .select("house_id, houses(id, house_number, condo_id, condominiums(id, name))")
-      .eq("email", userEmail)
+    // Query houses table directly by owner_email
+    // The houses table has owner_email, owner_name, and condo_id
+    const { data: houses, error: housesError } = await supabase
+      .from("houses")
+      .select("id, house_number, condo_id, condominiums(id, name)")
+      .eq("owner_email", userEmail)
     
-    console.log("[v0] House owners query result:", { houseOwners, hoError })
+    console.log("[v0] Houses query result:", { houses, housesError })
     
-    if (hoError) {
-      console.log("[v0] Error getting house owners:", hoError)
+    if (housesError) {
+      console.log("[v0] Error getting houses:", housesError)
       return []
     }
     
-    if (!houseOwners || houseOwners.length === 0) {
-      console.log("[v0] No house owners found for email:", userEmail)
+    if (!houses || houses.length === 0) {
+      console.log("[v0] No houses found for owner email:", userEmail)
       return []
     }
     
     // Group properties by condominium
     const condominiumMap = new Map<string, CondominiumWithProperties>()
     
-    houseOwners.forEach((owner: any) => {
-      const house = owner.houses
-      if (!house) return
-      
+    houses.forEach((house: any) => {
       const condominiumId = house.condo_id
       const condominiumData = house.condominiums
       
-      if (!condominiumId || !condominiumData) return
+      console.log("[v0] Processing house:", { id: house.id, number: house.house_number, condoId: condominiumId, condoData: condominiumData })
+      
+      if (!condominiumId || !condominiumData) {
+        console.log("[v0] Skipping house - missing condo data")
+        return
+      }
       
       if (!condominiumMap.has(condominiumId)) {
         condominiumMap.set(condominiumId, {
@@ -184,7 +187,7 @@ export async function getUserAllCondominiums(
     })
     
     const result = Array.from(condominiumMap.values())
-    console.log("[v0] User condominiums:", result)
+    console.log("[v0] Final user condominiums:", result)
     return result
   } catch (e) {
     console.log("[v0] Error getting all condominiums:", e)

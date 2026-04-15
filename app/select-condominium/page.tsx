@@ -11,18 +11,25 @@ export default async function SelectCondominiumPage() {
   // Get current user
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   
+  console.log("[v0] SelectCondominiumPage - user:", user?.email, "error:", userError)
+  
   if (userError || !user) {
+    console.log("[v0] No user found, redirecting to login")
     redirect('/auth/login')
   }
   
   // Get all condominiums for this user
   const condominiums = await getUserAllCondominiums(supabase, user.email || '')
   
+  console.log("[v0] Found condominiums:", condominiums.length, condominiums)
+  
   // If only one condominium, redirect directly to dashboard
   if (condominiums.length === 1) {
     const singleCondo = condominiums[0]
+    console.log("[v0] Only one condominium found, auto-selecting:", singleCondo.id)
+    
     // Update user profile with this condo
-    await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({
         condo_id: singleCondo.id,
@@ -30,11 +37,13 @@ export default async function SelectCondominiumPage() {
       })
       .eq('id', user.id)
     
+    console.log("[v0] Profile update result:", { error: updateError })
     redirect('/dashboard')
   }
   
   // If no condominiums found, something is wrong
   if (condominiums.length === 0) {
+    console.log("[v0] No condominiums found for user")
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -48,5 +57,6 @@ export default async function SelectCondominiumPage() {
     )
   }
   
+  console.log("[v0] Showing selector for", condominiums.length, "condominiums")
   return <SelectCondominiumClient condominiums={condominiums} />
 }
