@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+      <nav className="fixed top-0 w-full z-50 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image 
@@ -18,14 +18,19 @@ export default function Page() {
             />
           </div>
           <div className="flex items-center gap-3">
-            <a href="/auth/login" className="px-6 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors duration-200">
+            <a 
+              href="/auth/login" 
+              className="px-6 py-2.5 text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
+            >
               Iniciar Sesión
             </a>
-            <a href="/auth/registro" className="relative px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl overflow-hidden group transition-all duration-300 hover:scale-105">
-              <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-              <span className="relative flex items-center gap-2">
-                Registrarse
-              </span>
+            <a 
+              href="/auth/registro" 
+              className="px-6 py-2.5 text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2"
+              style={{ backgroundColor: "#0d3068", color: "#fefce1", borderColor: "#fefce1" }}
+            >
+              Registrarse
             </a>
           </div>
         </div>
@@ -136,12 +141,18 @@ export default function Page() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-8 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 rounded-3xl p-12 backdrop-blur-sm">
-          <h2 className="text-3xl font-bold text-foreground">¿Listo para transformar tu administración?</h2>
-          <p className="text-lg text-muted-foreground">Únete a cientos de condominios que ya confían en InteliCon</p>
-          <a href="/auth/registro" className="inline-block relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105">
-            <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="relative">Comenzar prueba gratuita</span>
+        <div 
+          className="max-w-4xl mx-auto text-center space-y-8 border-2 rounded-3xl p-12"
+          style={{ backgroundColor: "#b4d9fe", borderColor: "#0d3068" }}
+        >
+          <h2 className="text-3xl font-bold" style={{ color: "#0d3068" }}>¿Listo para transformar tu administración?</h2>
+          <p className="text-lg" style={{ color: "#0d3068", opacity: 0.8 }}>Únete a cientos de condominios que ya confían en InteliCon</p>
+          <a 
+            href="/auth/registro" 
+            className="inline-block px-8 py-3.5 rounded-full font-semibold text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
+          >
+            Comenzar prueba gratuita
           </a>
         </div>
       </section>
