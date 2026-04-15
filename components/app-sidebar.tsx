@@ -98,7 +98,7 @@ const adminMenuItems = [
     { title: "Casas", href: "/dashboard/casas", icon: Home },
     { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
     ]
   },
   {
@@ -170,7 +170,7 @@ const adminWithPropertyMenuItems = [
     items: [
     { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
     ]
     },
     {
@@ -256,7 +256,7 @@ const conciergeMenuItems = [
     { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
     { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
     { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
     }
