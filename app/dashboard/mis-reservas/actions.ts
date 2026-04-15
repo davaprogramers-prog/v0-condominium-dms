@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 interface CreateReservationData {
@@ -122,8 +122,9 @@ export async function createReservation(data: CreateReservationData) {
   )
   if (!validation.valid) throw new Error(validation.error)
 
-  // Check for existing reservations on that date
-  const { data: existingReservations } = await supabase
+  // Check for existing reservations on that date (use service client to bypass RLS)
+  const serviceClient = createServiceClient()
+  const { data: existingReservations } = await serviceClient
     .from("area_reservations")
     .select("*")
     .eq("area_id", data.area_id)
@@ -251,8 +252,9 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
   )
   if (!validation.valid) throw new Error(validation.error)
 
-  // Check for conflicts with other reservations (excluding current one)
-  const { data: existingReservations } = await supabase
+  // Check for conflicts with other reservations (excluding current one) - use service client
+  const serviceClient = createServiceClient()
+  const { data: existingReservations } = await serviceClient
     .from("area_reservations")
     .select("*")
     .eq("area_id", reservation.area_id)
