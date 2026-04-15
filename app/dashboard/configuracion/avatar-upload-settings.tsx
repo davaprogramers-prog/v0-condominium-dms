@@ -13,6 +13,7 @@ import {
 import { Camera, Upload, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { put, del } from "@vercel/blob"
+import { resizeImageIfNeeded } from "@/lib/image-utils"
 
 interface AvatarUploadSettingsProps {
   currentAvatarUrl?: string
@@ -25,6 +26,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -55,19 +57,28 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
     }
   }
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string)
+      try {
+        // Redimensiona la imagen si es necesario (máximo 600x600)
+        const resizedFile = await resizeImageIfNeeded(file, 600, 600)
+        setSelectedFile(resizedFile)
+        
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string)
+        }
+        reader.readAsDataURL(resizedFile)
+      } catch (error) {
+        console.error("[v0] Error processing image:", error)
+        alert("Error al procesar la imagen: " + String(error))
       }
-      reader.readAsDataURL(file)
     }
   }
 
   const handleUpload = async () => {
-    const file = fileInputRef.current?.files?.[0] || cameraInputRef.current?.files?.[0]
+    const file = selectedFile || fileInputRef.current?.files?.[0] || cameraInputRef.current?.files?.[0]
     if (!file) return
 
     setLoading(true)
@@ -92,6 +103,7 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
 
       setOpen(false)
       setPreviewUrl(null)
+      setSelectedFile(null)
       router.refresh()
     } catch (error) {
       console.error("[v0] Avatar upload error:", error)
