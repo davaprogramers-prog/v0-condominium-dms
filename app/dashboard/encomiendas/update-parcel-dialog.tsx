@@ -24,16 +24,18 @@ import { updateParcelStatus } from './actions'
 import { useTheme } from '@/app/dashboard/theme-context'
 import { resizeImageIfNeeded } from '@/lib/image-utils'
 
-interface ParcelPhoto {
+interface Parcel {
   id: string
-  tracking: string
-  from: string
-  recipient_name: string
+  tracking?: string
+  from_sender: string
+  recipient_name?: string
   parcel_type: string
   status: 'recibido' | 'entregado' | 'devuelto'
   received_date: string
+  delivered_date?: string
   house_id: string
   house?: { house_number: string }
+  return_reason?: string
 }
 
 export function UpdateParcelDialog({
@@ -41,7 +43,7 @@ export function UpdateParcelDialog({
   onClose,
   onSuccess,
 }: {
-  parcel: ParcelPhoto
+  parcel: Parcel
   onClose: () => void
   onSuccess: () => void
 }) {
