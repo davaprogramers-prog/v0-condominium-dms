@@ -31,10 +31,10 @@ export function AvatarUpload({ currentAvatarUrl, userName }: AvatarUploadProps) 
   const { theme } = useTheme()
 
   // Theme colors
-  const dialogBgColor = theme?.dialogBgColor || "#ffffff"
-  const dialogTextColor = theme?.dialogTextColor || "#000000"
-  const inputBgColor = theme?.inputBgColor || "#f5f5f5"
-  const inputTextColor = theme?.inputTextColor || "#000000"
+  const dialogBgColor = theme?.dialog_bg_color || "#ffffff"
+  const dialogTextColor = theme?.dialog_text_color || "#000000"
+  const inputBgColor = theme?.input_bg_color || "#f5f5f5"
+  const inputTextColor = theme?.input_text_color || "#000000"
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
