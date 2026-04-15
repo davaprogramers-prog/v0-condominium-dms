@@ -226,14 +226,14 @@ const ownerMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
   {
     section: "Condominio",
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
