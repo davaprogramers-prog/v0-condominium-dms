@@ -271,7 +271,6 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
   if (!validation.valid) throw new Error(validation.error)
 
   // Check for conflicts with other reservations (excluding current one) - use service client
-  const serviceClient = createServiceClient()
   const { data: existingReservations } = await serviceClient
     .from("area_reservations")
     .select("*")
