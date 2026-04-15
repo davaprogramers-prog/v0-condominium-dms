@@ -98,7 +98,6 @@ const adminMenuItems = [
     { title: "Casas", href: "/dashboard/casas", icon: Home },
     { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
     ]
   },
   {
@@ -130,6 +129,7 @@ const adminMenuItems = [
     section: "Administración",
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
       { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
@@ -170,7 +170,6 @@ const adminWithPropertyMenuItems = [
     items: [
     { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-    { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
     ]
     },
     {
@@ -202,6 +201,7 @@ const adminWithPropertyMenuItems = [
     section: "Administración",
     items: [
       { title: "Conserjes", href: "/dashboard/conserjes", icon: Users },
+      { title: "Reservas", href: "/dashboard/gestion-reservas", icon: CalendarDays },
       { title: "Visitas", href: "/dashboard/visitas-admin", icon: Calendar },
       { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Solicitudes de Materiales", href: "/dashboard/solicitudes-materiales", icon: Receipt },
