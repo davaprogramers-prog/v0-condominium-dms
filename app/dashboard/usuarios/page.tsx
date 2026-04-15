@@ -32,7 +32,7 @@ export default async function UsuariosPage() {
   const isSuperAdmin = profile.role === "super_admin"
 
   // Get condos for super_admin selector
-  let condos = []
+  let condos: Array<{id: string; name: string}> = []
   if (isSuperAdmin) {
     const { data: condosData } = await supabase
       .from("condominiums")
