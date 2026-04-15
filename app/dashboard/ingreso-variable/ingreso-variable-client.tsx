@@ -153,7 +153,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
             const statusInfo = getVariableIncomeStatus(income)
             const status = statusInfo.status
             const color = statusInfo.color
-            const textColor = statusInfo.textColor
+            const textColor = (statusInfo.textColor as string) || ""
 
             return (
               <div
