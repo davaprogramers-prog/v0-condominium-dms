@@ -44,6 +44,7 @@ import {
   Users,
   ChevronDown,
   Calendar,
+  CalendarDays,
   Package,
 } from "lucide-react"
 import Link from "next/link"
@@ -83,19 +84,21 @@ const adminMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Gestión",
     items: [
-      { title: "Casas", href: "/dashboard/casas", icon: Home },
-      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Casas", href: "/dashboard/casas", icon: Home },
+    { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     ]
   },
   {
@@ -154,21 +157,23 @@ const adminWithPropertyMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Gestión",
     items: [
-      { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Usuarios", href: "/dashboard/usuarios", icon: Users },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     ]
-  },
-  {
+    },
+    {
     section: "Configuraciones",
     items: [
       { title: "Tipos de Gastos", href: "/dashboard/tipos-gastos", icon: Tag },
@@ -223,12 +228,13 @@ const ownerMenuItems = [
     ]
   },
   {
-    section: "Mi Propiedad",
-    items: [
-      { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
-      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
-    ]
+  section: "Mi Propiedad",
+  items: [
+    { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+    { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
+  ]
   },
   {
     section: "Condominio",
@@ -247,12 +253,13 @@ const conciergeMenuItems = [
   {
     section: "Conserje",
     items: [
-      { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
-      { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-      { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
+    { title: "Visitas", href: "/dashboard/visitas", icon: Calendar },
+    { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
+    { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
+    { title: "Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
+    { title: "Alertas", href: "/dashboard/alertas", icon: AlertTriangle },
     ]
-  }
+    }
 ]
 
 interface AppSidebarProps {

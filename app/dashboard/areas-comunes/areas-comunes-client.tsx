@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileUpload } from "@/components/file-upload"
-import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2, AreaChart, Popsicle, PlusCircle, MapPlus } from "lucide-react"
+import { Plus, MapPin, Wrench, DollarSign, Edit2, Trash2, AreaChart, Popsicle, PlusCircle, MapPlus, Clock, Calendar } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useTheme } from "@/app/dashboard/theme-context"
 import { Area } from "recharts"
@@ -28,11 +28,14 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
   const [editPhotoUrl, setEditPhotoUrl] = useState("")
   const [isPaid, setIsPaid] = useState(false)
   const [editIsPaid, setEditIsPaid] = useState(false)
+  const [isReservable, setIsReservable] = useState(true)
+  const [editIsReservable, setEditIsReservable] = useState(true)
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
 
   const handleEditClick = (area: Record<string, unknown>) => {
     setEditPhotoUrl((area.photo_url as string) || "")
     setEditIsPaid((area.is_paid as boolean) || false)
+    setEditIsReservable((area.is_reservable as boolean) ?? true)
     setOpenEdit(area.id as string)
   }
 
@@ -49,6 +52,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       fd.set("id", areaId)
       fd.set("photo_url", editPhotoUrl)
       fd.set("is_paid", editIsPaid.toString())
+      fd.set("is_reservable", editIsReservable.toString())
       await updateCommonArea(fd)
       setOpenEdit(null)
     } catch (error) {
@@ -99,10 +103,12 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                 action={async (fd) => {
                   fd.set("photo_url", photoUrl)
                   fd.set("is_paid", isPaid.toString())
+                  fd.set("is_reservable", isReservable.toString())
                   await createCommonArea(fd)
                   setOpenNew(false)
                   setPhotoUrl("")
                   setIsPaid(false)
+                  setIsReservable(true)
                 }}
                 className="flex flex-col gap-4"
               >
@@ -142,6 +148,60 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                   <Label htmlFor="maintenance_responsible" style={{ color: dialogTextColor }}>Responsable de mantenimiento</Label>
                   <Input id="maintenance_responsible" name="maintenance_responsible" placeholder="Persona o empresa" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                 </div>
+
+                {/* Configuración de Reservas */}
+                <div className="border-t pt-4 mt-2" style={{ borderColor: inputTextColor }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Checkbox 
+                        id="is_reservable" 
+                        checked={isReservable} 
+                        onCheckedChange={(checked) => setIsReservable(checked === true)} 
+                        className="w-5 h-5 border-2" 
+                      />
+                      <Label htmlFor="is_reservable" style={{ color: dialogTextColor }}>Permitir reservas</Label>
+                    </div>
+                    <Badge className="bg-white text-slate-900 border font-semibold">
+                      {isReservable ? "Reservable" : "Sin reservas"}
+                    </Badge>
+                  </div>
+
+                  {isReservable && (
+                    <div className="flex flex-col gap-4 p-3 rounded-lg" style={{ backgroundColor: inputBgColor }}>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="max_hours" style={{ color: dialogTextColor, fontSize: "12px" }}>Max. horas por reserva</Label>
+                          <Input id="max_hours" name="max_hours_per_reservation" type="number" min="1" max="24" defaultValue="2" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="min_hours_modify" style={{ color: dialogTextColor, fontSize: "12px" }}>Horas límite para modificar</Label>
+                          <Input id="min_hours_modify" name="min_hours_to_modify" type="number" min="1" max="48" defaultValue="12" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="reception_time" style={{ color: dialogTextColor, fontSize: "12px" }}>Tiempo recepción (min)</Label>
+                          <Input id="reception_time" name="reception_time_minutes" type="number" min="0" max="120" defaultValue="30" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="delivery_time" style={{ color: dialogTextColor, fontSize: "12px" }}>Tiempo entrega (min)</Label>
+                          <Input id="delivery_time" name="delivery_time_minutes" type="number" min="0" max="120" defaultValue="30" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="opening_time" style={{ color: dialogTextColor, fontSize: "12px" }}>Hora apertura</Label>
+                          <Input id="opening_time" name="opening_time" type="time" defaultValue="08:00" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="closing_time" style={{ color: dialogTextColor, fontSize: "12px" }}>Hora cierre</Label>
+                          <Input id="closing_time" name="closing_time" type="time" defaultValue="22:00" style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Área</Button>
               </form>
             </DialogContent>
@@ -301,6 +361,60 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
                               style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                             />
                           </div>
+
+                          {/* Configuración de Reservas - Editar */}
+                          <div className="border-t pt-4 mt-2" style={{ borderColor: inputTextColor }}>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <Checkbox 
+                                  id="edit_is_reservable" 
+                                  checked={editIsReservable} 
+                                  onCheckedChange={(checked) => setEditIsReservable(checked === true)} 
+                                  className="w-5 h-5 border-2" 
+                                />
+                                <Label htmlFor="edit_is_reservable" style={{ color: dialogTextColor }}>Permitir reservas</Label>
+                              </div>
+                              <Badge className="bg-white text-slate-900 border font-semibold">
+                                {editIsReservable ? "Reservable" : "Sin reservas"}
+                              </Badge>
+                            </div>
+
+                            {editIsReservable && (
+                              <div className="flex flex-col gap-4 p-3 rounded-lg" style={{ backgroundColor: inputBgColor }}>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Max. horas por reserva</Label>
+                                    <Input name="max_hours_per_reservation" type="number" min="1" max="24" defaultValue={(area.max_hours_per_reservation as number) || 2} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Horas límite para modificar</Label>
+                                    <Input name="min_hours_to_modify" type="number" min="1" max="48" defaultValue={(area.min_hours_to_modify as number) || 12} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Tiempo recepción (min)</Label>
+                                    <Input name="reception_time_minutes" type="number" min="0" max="120" defaultValue={(area.reception_time_minutes as number) || 30} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Tiempo entrega (min)</Label>
+                                    <Input name="delivery_time_minutes" type="number" min="0" max="120" defaultValue={(area.delivery_time_minutes as number) || 30} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Hora apertura</Label>
+                                    <Input name="opening_time" type="time" defaultValue={(area.opening_time as string) || "08:00"} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <Label style={{ color: dialogTextColor, fontSize: "12px" }}>Hora cierre</Label>
+                                    <Input name="closing_time" type="time" defaultValue={(area.closing_time as string) || "22:00"} style={{ borderColor: inputTextColor, backgroundColor: dialogBgColor, color: inputTextColor }} />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
                           <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Guardar Cambios</Button>
                         </form>
                       </DialogContent>

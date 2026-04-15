@@ -1,0 +1,356 @@
+"use server"
+
+import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
+
+interface CreateReservationData {
+  area_id: string
+  house_id: string
+  condo_id: string
+  reservation_date: string
+  start_time: string
+  end_time: string
+  notes?: string
+}
+
+interface UpdateReservationData {
+  reservation_id: string
+  start_time: string
+  end_time: string
+  notes?: string
+}
+
+// Helper to check if times overlap considering reception/delivery buffer
+function timesOverlap(
+  newStart: string,
+  newEnd: string,
+  existingStart: string,
+  existingEnd: string,
+  receptionMinutes: number,
+  deliveryMinutes: number
+): boolean {
+  // Convert times to minutes for easier comparison
+  const toMinutes = (time: string) => {
+    const [h, m] = time.split(":").map(Number)
+    return h * 60 + m
+  }
+
+  // Calculate effective times with buffer
+  const newStartMin = toMinutes(newStart) - receptionMinutes
+  const newEndMin = toMinutes(newEnd) + deliveryMinutes
+  const existingStartMin = toMinutes(existingStart) - receptionMinutes
+  const existingEndMin = toMinutes(existingEnd) + deliveryMinutes
+
+  // Check for overlap
+  return newStartMin < existingEndMin && newEndMin > existingStartMin
+}
+
+// Helper to check if user can modify reservation (time limit check)
+function canModifyReservation(
+  reservationDate: string,
+  startTime: string,
+  minHoursToModify: number
+): boolean {
+  const now = new Date()
+  const reservationDateTime = new Date(`${reservationDate}T${startTime}`)
+  const hoursUntilReservation = (reservationDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+  return hoursUntilReservation >= minHoursToModify
+}
+
+// Helper to validate reservation hours
+function validateReservationHours(
+  startTime: string,
+  endTime: string,
+  maxHours: number,
+  openingTime: string,
+  closingTime: string
+): { valid: boolean; error?: string } {
+  const toMinutes = (time: string) => {
+    const [h, m] = time.split(":").map(Number)
+    return h * 60 + m
+  }
+
+  const startMin = toMinutes(startTime)
+  const endMin = toMinutes(endTime)
+  const openMin = toMinutes(openingTime)
+  const closeMin = toMinutes(closingTime)
+
+  if (startMin >= endMin) {
+    return { valid: false, error: "La hora de inicio debe ser anterior a la hora de fin" }
+  }
+
+  if (startMin < openMin || endMin > closeMin) {
+    return { valid: false, error: `El horario debe estar entre ${openingTime} y ${closingTime}` }
+  }
+
+  const durationHours = (endMin - startMin) / 60
+  if (durationHours > maxHours) {
+    return { valid: false, error: `La reserva no puede exceder ${maxHours} horas` }
+  }
+
+  return { valid: true }
+}
+
+export async function createReservation(data: CreateReservationData) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get area configuration
+  const { data: area, error: areaError } = await supabase
+    .from("common_areas")
+    .select("*")
+    .eq("id", data.area_id)
+    .single()
+
+  if (areaError || !area) throw new Error("Área no encontrada")
+  if (!area.is_reservable) throw new Error("Esta área no permite reservas")
+
+  // Validate hours
+  const validation = validateReservationHours(
+    data.start_time,
+    data.end_time,
+    area.max_hours_per_reservation || 2,
+    area.opening_time || "08:00",
+    area.closing_time || "22:00"
+  )
+  if (!validation.valid) throw new Error(validation.error)
+
+  // Check for existing reservations on that date
+  const { data: existingReservations } = await supabase
+    .from("area_reservations")
+    .select("*")
+    .eq("area_id", data.area_id)
+    .eq("reservation_date", data.reservation_date)
+    .eq("status", "confirmed")
+
+  // Check for conflicts
+  if (existingReservations && existingReservations.length > 0) {
+    for (const existing of existingReservations) {
+      if (timesOverlap(
+        data.start_time,
+        data.end_time,
+        existing.start_time,
+        existing.end_time,
+        area.reception_time_minutes || 30,
+        area.delivery_time_minutes || 30
+      )) {
+        throw new Error("El horario solicitado tiene conflicto con otra reserva existente")
+      }
+    }
+  }
+
+  // Create reservation
+  const { error } = await supabase.from("area_reservations").insert({
+    area_id: data.area_id,
+    house_id: data.house_id,
+    condo_id: data.condo_id,
+    reservation_date: data.reservation_date,
+    start_time: data.start_time,
+    end_time: data.end_time,
+    notes: data.notes || null,
+    created_by: user.id,
+    status: "confirmed",
+  })
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+export async function updateReservation(data: UpdateReservationData, isAdminOrConcierge: boolean = false) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get the reservation
+  const { data: reservation, error: reservationError } = await supabase
+    .from("area_reservations")
+    .select("*, common_areas(*)")
+    .eq("id", data.reservation_id)
+    .single()
+
+  if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+
+  const area = reservation.common_areas
+
+  // Check modification time limit for non-admin users
+  if (!isAdminOrConcierge) {
+    if (!canModifyReservation(
+      reservation.reservation_date,
+      reservation.start_time,
+      area.min_hours_to_modify || 12
+    )) {
+      throw new Error(`No puedes modificar la reserva con menos de ${area.min_hours_to_modify || 12} horas de anticipación`)
+    }
+  }
+
+  // Validate hours
+  const validation = validateReservationHours(
+    data.start_time,
+    data.end_time,
+    area.max_hours_per_reservation || 2,
+    area.opening_time || "08:00",
+    area.closing_time || "22:00"
+  )
+  if (!validation.valid) throw new Error(validation.error)
+
+  // Check for conflicts with other reservations (excluding current one)
+  const { data: existingReservations } = await supabase
+    .from("area_reservations")
+    .select("*")
+    .eq("area_id", reservation.area_id)
+    .eq("reservation_date", reservation.reservation_date)
+    .eq("status", "confirmed")
+    .neq("id", data.reservation_id)
+
+  if (existingReservations && existingReservations.length > 0) {
+    for (const existing of existingReservations) {
+      if (timesOverlap(
+        data.start_time,
+        data.end_time,
+        existing.start_time,
+        existing.end_time,
+        area.reception_time_minutes || 30,
+        area.delivery_time_minutes || 30
+      )) {
+        throw new Error("El nuevo horario tiene conflicto con otra reserva existente")
+      }
+    }
+  }
+
+  // Update reservation
+  const { error } = await supabase
+    .from("area_reservations")
+    .update({
+      start_time: data.start_time,
+      end_time: data.end_time,
+      notes: data.notes || null,
+      modified_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", data.reservation_id)
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+export async function cancelReservation(reservationId: string, isAdminOrConcierge: boolean = false) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get the reservation
+  const { data: reservation, error: reservationError } = await supabase
+    .from("area_reservations")
+    .select("*, common_areas(*)")
+    .eq("id", reservationId)
+    .single()
+
+  if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+
+  const area = reservation.common_areas
+
+  // Check modification time limit for non-admin users
+  if (!isAdminOrConcierge) {
+    if (!canModifyReservation(
+      reservation.reservation_date,
+      reservation.start_time,
+      area.min_hours_to_modify || 12
+    )) {
+      throw new Error(`No puedes cancelar la reserva con menos de ${area.min_hours_to_modify || 12} horas de anticipación`)
+    }
+  }
+
+  // Cancel reservation (soft delete by changing status)
+  const { error } = await supabase
+    .from("area_reservations")
+    .update({
+      status: "cancelled",
+      modified_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reservationId)
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+// Admin function to change house for a reservation
+export async function changeReservationHouse(reservationId: string, newHouseId: string) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get user role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+    throw new Error("No tienes permisos para realizar esta acción")
+  }
+
+  const { error } = await supabase
+    .from("area_reservations")
+    .update({
+      house_id: newHouseId,
+      modified_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reservationId)
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+// Get available time slots for a specific date and area
+export async function getAvailableSlots(areaId: string, date: string) {
+  const supabase = await createClient()
+
+  // Get area configuration
+  const { data: area } = await supabase
+    .from("common_areas")
+    .select("*")
+    .eq("id", areaId)
+    .single()
+
+  if (!area) return { slots: [], area: null }
+
+  // Get existing reservations for that date
+  const { data: reservations } = await supabase
+    .from("area_reservations")
+    .select("*, houses(house_number)")
+    .eq("area_id", areaId)
+    .eq("reservation_date", date)
+    .eq("status", "confirmed")
+    .order("start_time", { ascending: true })
+
+  return {
+    slots: reservations || [],
+    area: {
+      opening_time: area.opening_time || "08:00",
+      closing_time: area.closing_time || "22:00",
+      max_hours: area.max_hours_per_reservation || 2,
+      reception_minutes: area.reception_time_minutes || 30,
+      delivery_minutes: area.delivery_time_minutes || 30,
+    }
+  }
+}
