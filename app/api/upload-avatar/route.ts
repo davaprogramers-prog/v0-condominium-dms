@@ -1,15 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function ensureAvatarsBucket(supabase: any) {
+async function ensureAvatarsBucket(supabaseAdmin: any) {
   try {
     // Check if bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets()
+    const { data: buckets } = await supabaseAdmin.storage.listBuckets()
     const avatarsBucketExists = buckets?.some((b: any) => b.name === 'avatars')
 
     if (!avatarsBucketExists) {
       console.log('[v0] Creating avatars bucket...')
-      const { data, error } = await supabase.storage.createBucket('avatars', {
+      const { data, error } = await supabaseAdmin.storage.createBucket('avatars', {
         public: true,
       })
       if (error) {
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    // Get authenticated user
+    const supabase = await createServerClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -55,15 +57,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use admin client for storage operations (bypasses RLS)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
+
     // Ensure the avatars bucket exists
-    await ensureAvatarsBucket(supabase)
+    await ensureAvatarsBucket(supabaseAdmin)
 
     // Delete old avatar if it exists
     if (oldUrl && oldUrl.includes('/storage/v1/object/public/avatars/')) {
       try {
         const oldPath = oldUrl.split('/storage/v1/object/public/avatars/')[1]
         if (oldPath) {
-          await supabase.storage
+          await supabaseAdmin.storage
             .from('avatars')
             .remove([oldPath])
         }
@@ -72,11 +80,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upload new avatar to Supabase Storage
+    // Upload new avatar to Supabase Storage using admin client
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}-${Date.now()}.${fileExt}`
 
-    const { data, error: uploadError } = await supabase.storage
+    const { data, error: uploadError } = await supabaseAdmin.storage
       .from('avatars')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -92,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseAdmin.storage
       .from('avatars')
       .getPublicUrl(fileName)
 
