@@ -1,19 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Calendar, Clock, CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, AlertCircle, X, Plus, User, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import { useTheme } from '@/app/dashboard/theme-context'
-import { VisitsList } from './visits-list'
-import { CreateVisitDialog } from './create-visit-dialog'
+import { CreateVisitDialog } from '../visitas/create-visit-dialog'
 
 interface Visit {
   id: string
@@ -26,54 +19,36 @@ interface Visit {
   description?: string
   status: 'scheduled' | 'completed' | 'cancelled'
   house_id: string
-  house?: {
-    id: string
-    house_number: string
-  }
 }
 
-interface VisitasPageClientProps {
-  initialVisits: Visit[]
-  isViewingAsAdmin: boolean
-  isAdmin: boolean
-  isConcierge: boolean
-  houseId?: string
-  houses: Array<{ id: string; house_number: string }>
+interface MisVisitasClientProps {
+  visits: Visit[]
+  houseId: string
   condoId: string
+  houseNumber: string
 }
 
-export default function VisitasPageClient({
-  initialVisits,
-  isViewingAsAdmin,
-  isAdmin,
-  isConcierge,
+export default function MisVisitasClient({
+  visits,
   houseId,
-  houses,
   condoId,
-}: VisitasPageClientProps) {
-  const { inputBgColor, inputTextColor } = useTheme()
+  houseNumber,
+}: MisVisitasClientProps) {
+  const { cardBgColor, cardTextColor } = useTheme()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all')
-  const [selectedHouses, setSelectedHouses] = useState<Set<string>>(new Set())
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  // Filter visits based on search, status, house, and date range
+  // Filter visits
   const filteredVisits = useMemo(() => {
-    let filtered = initialVisits || []
+    let filtered = visits || []
 
-    // Filter by status
     if (filterStatus !== 'all') {
       filtered = filtered.filter(v => v.status === filterStatus)
     }
 
-    // Filter by selected houses
-    if (selectedHouses.size > 0) {
-      filtered = filtered.filter(v => selectedHouses.has(v.house_id))
-    }
-
-    // Filter by date range - use local timezone for date comparisons
     if (dateFrom) {
       const [year, month, day] = dateFrom.split('-').map(Number)
       const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
@@ -85,7 +60,6 @@ export default function VisitasPageClient({
       filtered = filtered.filter(v => new Date(v.visit_date) <= toDate)
     }
 
-    // Filter by search query (search in visitor name, title, email, phone)
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(v =>
@@ -97,52 +71,65 @@ export default function VisitasPageClient({
     }
 
     return filtered
-  }, [initialVisits, searchQuery, filterStatus, selectedHouses, dateFrom, dateTo])
+  }, [visits, searchQuery, filterStatus, dateFrom, dateTo])
 
-  // Calculate counts based on all visits (not just visible/recent ones)
-  const scheduledCount = initialVisits.filter(v => v.status === 'scheduled').length
-  const completedCount = initialVisits.filter(v => v.status === 'completed').length
-  const cancelledCount = initialVisits.filter(v => v.status === 'cancelled').length
-  const totalCount = initialVisits.length
-
-  const toggleHouse = (houseId: string) => {
-    const newSelected = new Set(selectedHouses)
-    if (newSelected.has(houseId)) {
-      newSelected.delete(houseId)
-    } else {
-      newSelected.add(houseId)
-    }
-    setSelectedHouses(newSelected)
-  }
+  const scheduledCount = visits.filter(v => v.status === 'scheduled').length
+  const completedCount = visits.filter(v => v.status === 'completed').length
+  const cancelledCount = visits.filter(v => v.status === 'cancelled').length
+  const totalCount = visits.length
 
   const clearFilters = () => {
     setSearchQuery('')
     setFilterStatus('all')
-    setSelectedHouses(new Set())
     setDateFrom('')
     setDateTo('')
   }
 
-  const hasActiveFilters = searchQuery || filterStatus !== 'all' || selectedHouses.size > 0 || dateFrom || dateTo
+  const hasActiveFilters = searchQuery || filterStatus !== 'all' || dateFrom || dateTo
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">Programada</Badge>
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Completada</Badge>
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">Cancelada</Badge>
+      default:
+        return <Badge variant="outline">{status}</Badge>
+    }
+  }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('es-CL', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Calendar className="h-8 w-8 text-blue-500" />
-            {isViewingAsAdmin ? 'Visitas del Condominio' : 'Mis Visitas'}
+            Mis Visitas
           </h1>
           <p className="text-muted-foreground mt-1">
-            {isViewingAsAdmin ? 'Gestiona todas las visitas del condominio' : 'Registra y gestiona las visitas a tu propiedad'}
+            Visitas programadas para Casa #{houseNumber}
           </p>
         </div>
-        {houseId && <CreateVisitDialog houses={houses || []} houseId={houseId} />}
+        <CreateVisitDialog 
+          houses={[{ id: houseId, house_number: houseNumber }]} 
+          houseId={houseId} 
+        />
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -183,7 +170,6 @@ export default function VisitasPageClient({
 
       {/* Filters */}
       <div className="space-y-4 bg-secondary/20 p-4 rounded-lg border">
-        {/* First Row: Search and Dates */}
         <div className="flex flex-col gap-3">
           <Input
             placeholder="Buscar visitante, correo, teléfono..."
@@ -223,7 +209,7 @@ export default function VisitasPageClient({
           </div>
         </div>
 
-        {/* Second Row: Status Buttons */}
+        {/* Status Buttons */}
         <div className="flex gap-2 flex-wrap">
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
@@ -260,62 +246,75 @@ export default function VisitasPageClient({
             Canceladas ({cancelledCount})
           </Button>
         </div>
+      </div>
 
-        {/* Third Row: Property Filter Dropdown (if viewing as admin) */}
-        {isViewingAsAdmin && houses && houses.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
-            <span className="text-sm font-medium text-muted-foreground">Propiedades:</span>
-            <div className="flex gap-2 items-center w-full sm:w-auto">
-              <Select
-                value={selectedHouses.size === 0 ? 'all' : Array.from(selectedHouses)[0]}
-                onValueChange={(value) => {
-                  if (value === 'all') {
-                    setSelectedHouses(new Set())
-                  } else {
-                    setSelectedHouses(new Set([value]))
-                  }
-                }}
+      {/* Visits List */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Visitas Registradas</h2>
+        {filteredVisits.length === 0 ? (
+          <div className="rounded-lg border bg-card p-8 text-center">
+            <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No hay visitas registradas</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Registra una nueva visita usando el botón de arriba
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredVisits.map((visit) => (
+              <div
+                key={visit.id}
+                className="rounded-lg border p-4 hover:bg-accent/50 transition-colors"
+                style={{ backgroundColor: cardBgColor, color: cardTextColor }}
               >
-                <SelectTrigger 
-                  className="w-full sm:w-56 bg-popover"
-                  style={{
-                    backgroundColor: inputBgColor,
-                    color: inputTextColor,
-                  }}
-                >
-                  <SelectValue placeholder="Seleccionar propiedad..." />
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    '--select-bg': inputBgColor,
-                    '--select-text': inputTextColor,
-                  } as React.CSSProperties}
-                >
-                  <SelectItem value="all">Todas las propiedades</SelectItem>
-                  {houses.map(house => (
-                    <SelectItem key={house.id} value={house.id}>
-                      Casa #{house.house_number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedHouses.size > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedHouses(new Set())}
-                  className="text-xs"
-                >
-                  Limpiar
-                </Button>
-              )}
-            </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{visit.visit_title}</h3>
+                      {getStatusBadge(visit.status)}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {visit.visitor_name}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {formatDate(visit.visit_date)}
+                      </span>
+                      {visit.visit_time && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {visit.visit_time}
+                        </span>
+                      )}
+                    </div>
+                    {(visit.visitor_email || visit.visitor_phone) && (
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                        {visit.visitor_email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-4 w-4" />
+                            {visit.visitor_email}
+                          </span>
+                        )}
+                        {visit.visitor_phone && (
+                          <span className="flex items-center gap-1">
+                            <Phone className="h-4 w-4" />
+                            {visit.visitor_phone}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {visit.description && (
+                      <p className="text-sm text-muted-foreground">{visit.description}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-
-      {/* Content */}
-      <VisitsList visits={filteredVisits} />
     </div>
   )
 }

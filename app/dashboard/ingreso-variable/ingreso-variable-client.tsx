@@ -12,8 +12,17 @@ import { FileUpload } from "@/components/file-upload"
 import { Plus, TrendingUp, Trash2, ExternalLink } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
+interface VariableIncome {
+  id: string
+  description: string
+  income_date: string
+  amount: number | string
+  source?: string
+  receipt_url?: string
+}
+
 interface IngresoVariableClientProps {
-  incomes: Record<string, unknown>[]
+  incomes: VariableIncome[]
   currencySymbol: string
   isAdmin: boolean
 }
@@ -174,7 +183,6 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </span>
                   </div>
 
-                  {/* Amount */}
                   <div className={textColor}>
                     <p className="text-xs opacity-75">Monto</p>
                     <p className="text-2xl font-bold">
@@ -185,14 +193,12 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </p>
                   </div>
 
-                  {/* Source */}
                   {income.source && (
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium">Fuente:</span> {income.source as string}
                     </p>
                   )}
 
-                  {/* Receipt Button */}
                   {income.receipt_url && (
                     <button
                       onClick={() => setSelectedImage({
@@ -205,7 +211,6 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </button>
                   )}
 
-                  {/* Actions */}
                   {isAdmin && (
                     <div className="flex gap-2 pt-2">
                       <Button

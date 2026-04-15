@@ -26,7 +26,14 @@ export async function createParcel(data: {
       .eq('id', user.id)
       .single()
 
-    if (!profile || profile.condo_id !== data.condo_id) {
+    if (!profile) {
+      throw new Error('Perfil no encontrado')
+    }
+
+    // Super admin can create parcels in any condo
+    // Other roles must belong to the same condo
+    const isSuperAdmin = profile.role === 'super_admin'
+    if (!isSuperAdmin && profile.condo_id !== data.condo_id) {
       throw new Error('No autorizado')
     }
 
@@ -136,7 +143,9 @@ export async function updateParcelStatus(data: {
       .eq('id', data.parcel_id)
       .single()
 
-    if (!parcel || parcel.condo_id !== profile.condo_id) {
+    // Super admin can update parcels in any condo
+    const isSuperAdmin = profile.role === 'super_admin'
+    if (!parcel || (!isSuperAdmin && parcel.condo_id !== profile.condo_id)) {
       throw new Error('Encomienda no encontrada')
     }
 
@@ -248,7 +257,9 @@ export async function editParcelReception(data: {
       .eq('id', data.parcel_id)
       .single()
 
-    if (!parcel || parcel.condo_id !== profile.condo_id) {
+    // Super admin can edit parcels in any condo
+    const isSuperAdmin = profile.role === 'super_admin'
+    if (!parcel || (!isSuperAdmin && parcel.condo_id !== profile.condo_id)) {
       throw new Error('Encomienda no encontrada')
     }
 

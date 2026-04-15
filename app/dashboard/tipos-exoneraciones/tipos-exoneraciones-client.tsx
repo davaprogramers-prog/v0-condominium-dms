@@ -106,7 +106,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   </div>
                 </div>
                 {isAdmin ? (
-                  <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${cardTextColor}`, borderOpacity: 0.3 }}>
+                  <div className="flex gap-2 pt-3" style={{ borderTop: `1px solid ${cardTextColor}` }}>
                     <Dialog open={editOpen === type.id} onOpenChange={(v) => !v && setEditOpen(null)}>
                       <DialogTrigger asChild>
                         <Button size="sm" className="flex-1" style={{ backgroundColor: cardBgColor === "#1e293b" ? "#f1f5f9" : "#1e293b", color: cardBgColor === "#1e293b" ? "#1e293b" : "#f1f5f9" }} onClick={() => setEditOpen(type.id as string)}>

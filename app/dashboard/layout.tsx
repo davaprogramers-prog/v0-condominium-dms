@@ -47,13 +47,11 @@ export default async function DashboardLayout({
   const isAdmin = profile?.role === "admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
 
-  // If admin, try to get house_id if not already set
+  // If admin, try to get house_id if not already set (they might be owner of a property)
   if (isAdmin && !profile?.house_id) {
-    console.log("[v0] Admin without house_id, searching for assigned property")
-    const houseId = await getUserHouseId(supabase, user.id)
+    const houseId = await getUserHouseId(supabase, user.id, user.email || undefined)
     if (houseId) {
       profile.house_id = houseId
-      console.log("[v0] Found house_id for admin:", houseId)
     }
   }
 
@@ -67,7 +65,6 @@ export default async function DashboardLayout({
       last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
     }
-    console.log("[v0] Created fallback profile from metadata:", profile)
   }
 
   // If propietario/owner without condo_id, they need setup
@@ -79,6 +76,7 @@ export default async function DashboardLayout({
   let condo = null
   let allCondos: { id: string; name: string }[] = []
   let theme: CondoTheme | null = null
+  let hasMultipleProperties = false
 
   if (profile.condo_id) {
     try {
@@ -101,6 +99,22 @@ export default async function DashboardLayout({
       }
     } catch (e) {
       console.log("[v0] Error fetching condo or theme:", e)
+    }
+  }
+
+  // For owners, check if they have multiple properties across all condos
+  if (isOwner && user.email) {
+    try {
+      const { data: houses } = await supabase
+        .from("houses")
+        .select("id, condo_id")
+        .eq("owner_email", user.email)
+      
+      if (houses && houses.length > 1) {
+        hasMultipleProperties = true
+      }
+    } catch (e) {
+      console.log("[v0] Error checking properties:", e)
     }
   }
 
@@ -129,7 +143,7 @@ export default async function DashboardLayout({
     <ThemeProvider theme={theme}>
       <SidebarProvider>
         <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
-        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} />
+        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} hasMultipleProperties={hasMultipleProperties} />
         <SidebarInset 
           className="flex flex-col h-screen"
           style={theme?.enable_custom_theme ? {

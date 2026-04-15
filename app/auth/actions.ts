@@ -171,13 +171,13 @@ export async function ensureUserProfile(userId: string, email: string) {
     console.log("[v0] ensureUserProfile START - userId:", userId, "email:", email)
 
     // Buscar en public.houses por owner_email (para propietarios)
-    const { data: house, error: houseErr } = await supabase
+    const { data: houses, error: housesErr } = await supabase
       .from("houses")
       .select("id, condo_id, owner_name")
       .eq("owner_email", email)
-      .single()
 
-    console.log("[v0] House query - found:", !!house, "error:", houseErr?.message)
+    console.log("[v0] Houses query - found:", houses?.length || 0, "houses:", houses?.map(h => ({ id: h.id, condo_id: h.condo_id })), "error:", housesErr?.message)
+    console.log("[v0] DEBUG: hasMultipleProperties should be:", (houses?.length || 0) > 1)
 
     // Check if profile already exists
     const { data: existingProfile } = await supabase
@@ -187,24 +187,27 @@ export async function ensureUserProfile(userId: string, email: string) {
       .single()
 
     if (existingProfile) {
-      console.log("[v0] Profile already exists for user:", userId)
-      return { success: true }
+      console.log("[v0] Profile already exists for user:", userId, "role:", existingProfile.role, "current condo_id:", existingProfile.condo_id)
+      console.log("[v0] RETURNING with hasMultipleProperties:", (houses?.length || 0) > 1)
+      // Return existing profile info BUT include hasMultipleProperties based on actual houses count
+      return { success: true, role: existingProfile.role, hasMultipleProperties: (houses?.length || 0) > 1 }
     }
 
-    if (house) {
-      // User is a property owner - associate with house and condo
-      console.log("[v0] House data:", { id: house.id, condo_id: house.condo_id, owner_name: house.owner_name })
+    if (houses && houses.length > 0) {
+      // User is a property owner - associate with first house and condo
+      const firstHouse = houses[0]
+      console.log("[v0] First house data:", { id: firstHouse.id, condo_id: firstHouse.condo_id, owner_name: firstHouse.owner_name })
 
       const { error: insertError } = await supabase
         .from("profiles")
         .insert({
           id: userId,
           email,
-          first_name: house.owner_name || email.split("@")[0],
+          first_name: firstHouse.owner_name || email.split("@")[0],
           last_name: "",
-          house_id: house.id,
-          condo_id: house.condo_id,
-          role: "owner",
+          house_id: firstHouse.id,
+          condo_id: firstHouse.condo_id,
+          role: "propietario",
         })
 
       if (insertError && insertError.code !== "23505") {
@@ -212,13 +215,14 @@ export async function ensureUserProfile(userId: string, email: string) {
         return { success: false, error: insertError.message }
       }
 
-      return { success: true }
+      console.log("[v0] NEW PROFILE CREATED - hasMultipleProperties:", houses.length > 1)
+      return { success: true, role: "propietario", hasMultipleProperties: houses.length > 1 }
     } else {
       // No house found - user might be conserje, admin, etc.
       // Get the condo_id from auth user metadata if available
       const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId)
       const condoId = authUser?.user_metadata?.condo_id
-      const role = authUser?.user_metadata?.role || "owner"
+      const role = authUser?.user_metadata?.role || "propietario"
 
       if (condoId) {
         // User has condo_id but no house - likely conserje, admin, etc.
@@ -240,7 +244,7 @@ export async function ensureUserProfile(userId: string, email: string) {
           return { success: false, error: insertError.message }
         }
 
-        return { success: true }
+        return { success: true, role: role }
       } else {
         // No condo_id and no house - can't assign
         console.log("[v0] No house and no condo_id - cannot auto-assign")

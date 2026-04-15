@@ -12,24 +12,10 @@ export default async function MiCasaPage() {
 
   if (!user) redirect("/auth/login")
 
-  console.log("[v0] MiCasaPage - userId:", user.id, "email:", user.email)
-
-  const condoId = await getUserCondoId(supabase, user.id)
-  const houseId = await getUserHouseId(supabase, user.id)
-
-  console.log("[v0] MiCasaPage - condoId:", condoId, "houseId:", houseId)
-
-  // Also check what's in profiles directly
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("id, house_id, condo_id, role")
-    .eq("id", user.id)
-    .single()
-  
-  console.log("[v0] MiCasaPage - direct profile query:", profileData)
+  const condoId = await getUserCondoId(supabase, user.id, user.email || undefined)
+  const houseId = await getUserHouseId(supabase, user.id, user.email || undefined)
 
   if (!houseId) {
-    console.log("[v0] No houseId found, redirecting to dashboard")
     redirect("/dashboard")
   }
 
@@ -95,7 +81,7 @@ export default async function MiCasaPage() {
   const theme = themeData as CondoTheme | null
   const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
   const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
-  const parameterBgColor = theme?.enable_custom_theme ? theme.parameter_bg_color : "#fef3c7"
+  const parameterBgColor = theme?.enable_custom_theme ? theme.input_bg_color : "#fef3c7"
 
   const currentMonthIncomes = incomes?.filter(i => {
     return i.period_month === parameters?.current_month && 
@@ -142,7 +128,7 @@ export default async function MiCasaPage() {
           </div>
         </div>
         <PaymentUploadDialogThemedWrapper 
-          condoId={condoId} 
+          condoId={condoId || ""}
           houseId={houseId}
           currencySymbol={condo?.currency_symbol}
         />
@@ -220,11 +206,11 @@ export default async function MiCasaPage() {
                       <td className="px-6 py-3">{condo?.currency_symbol}{income.amount}</td>
                       <td className="px-6 py-3">
                         {hasReceipt ? (
-                          <span className="text-xs" style={{ color: "#000000" }}>
+                          <span className="text-xs" style={{ color: cardTextColor }}>
                             {proofs.length} comprobante(s)
                           </span>
                         ) : (
-                          <span className="text-xs opacity-50">Sin comprobante</span>
+                          <span className="text-xs opacity-50" style={{ color: cardTextColor }}>Sin comprobante</span>
                         )}
                       </td>
                       <td className="px-6 py-3">

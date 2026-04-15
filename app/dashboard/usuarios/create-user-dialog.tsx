@@ -191,9 +191,9 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 <SelectTrigger id="condo_id" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar condominio..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   {condos?.map((condo) => (
-                    <SelectItem key={condo.id} value={condo.id} className="dark:text-white">
+                    <SelectItem key={condo.id} value={condo.id} style={{ color: inputTextColor }}>
                       {condo.name}
                     </SelectItem>
                   ))}
@@ -262,10 +262,10 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
               <SelectTrigger id="role" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
-                <SelectItem value="admin" className="dark:text-white">Administrador</SelectItem>
-                <SelectItem value="conserje" className="dark:text-white">Conserje</SelectItem>
-                <SelectItem value="propietario" className="dark:text-white">Propietario</SelectItem>
+              <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                <SelectItem value="admin">Administrador</SelectItem>
+                <SelectItem value="conserje">Conserje</SelectItem>
+                <SelectItem value="propietario">Propietario</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -290,9 +290,9 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 <SelectTrigger id="house_id" disabled={loadingHouses} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder={loadingHouses ? "Cargando..." : "Seleccionar propiedad..."} />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700">
+                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id} className="dark:text-white">
+                    <SelectItem key={house.id} value={house.id}>
                       Casa {house.house_number}
                     </SelectItem>
                   ))}

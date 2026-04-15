@@ -124,7 +124,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
 
     // Extract requested_by_name from first line
     let requested_by_name = ''
-    let itemsText = []
+    let itemsText: string[] = []
 
     lines.forEach((line: string) => {
       if (line.includes('Solicitado por:')) {

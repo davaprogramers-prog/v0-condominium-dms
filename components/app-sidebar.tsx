@@ -86,6 +86,8 @@ const adminMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
   {
@@ -155,8 +157,8 @@ const adminWithPropertyMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
-      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
   {
@@ -224,14 +226,14 @@ const ownerMenuItems = [
     section: "Mi Propiedad",
     items: [
       { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+      { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
+      { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
     ]
   },
   {
     section: "Condominio",
     items: [
       { title: "Áreas Comunes", href: "/dashboard/areas-comunes", icon: MapPin },
-      { title: "Mis Visitas", href: "/dashboard/visitas", icon: Calendar },
-      { title: "Encomiendas", href: "/dashboard/encomiendas", icon: Package },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
       { title: "Encuestas", href: "/dashboard/encuestas", icon: Vote },
       { title: "Proyectos", href: "/dashboard/proyectos", icon: Hammer },
@@ -258,9 +260,10 @@ interface AppSidebarProps {
   profile: Record<string, unknown> | null
   condo: Record<string, unknown> | null
   allCondos?: { id: string; name: string }[]
+  hasMultipleProperties?: boolean
 }
 
-export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarProps) {
+export function AppSidebar({ user, profile, condo, allCondos = [], hasMultipleProperties = false }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [switching, setSwitching] = useState(false)
@@ -273,6 +276,9 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
   const hasCondo = !!profile?.condo_id
   const hasProperty = !!profile?.house_id
   const canSwitchCondo = allCondos.length > 1
+  
+  // Determine if clicking the logo should go to select-condominium
+  const shouldGoToSelector = isOwner && hasMultipleProperties
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -291,8 +297,12 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
     }
   }
 
-  // If admin has property assigned, use the menu with "Mi casa", otherwise use regular admin menu
-  const menuSections = !hasCondo && isAdmin
+  // Super admin always sees full admin menu, regardless of condo assignment
+  // Regular admin without condo sees limited menu
+  // Admin with property sees admin menu + Mi Casa
+  const menuSections = isSuperAdmin
+    ? adminMenuItems
+    : !hasCondo && isAdmin
     ? [
         {
           section: "Configuración",
@@ -326,28 +336,66 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
           borderColor: sidebarTextColor || "#000000",
         }}
       >
-        <Link href="/dashboard" className="flex items-center gap-3" onClick={handleNavClick}>
-          {condo?.logo_url ? (
-            <Image
-              src={String(condo.logo_url)}
-              alt={String(condo.name || "Logo")}
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain"
-            />
-          ) : (
-            <Image
-              src="/logo.png"
-              alt="InteliCon"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain"
-            />
+        <div className="flex items-center gap-2 w-full">
+          <button 
+            onClick={() => {
+              if (shouldGoToSelector) {
+                router.push("/select-condominium")
+              } else {
+                router.push("/dashboard")
+              }
+              if (isMobile) setOpenMobile(false)
+            }}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer flex-1 text-left"
+            title={shouldGoToSelector ? "Cambiar condominio o propiedad" : "Ir a dashboard"}
+          >
+            {condo?.logo_url ? (
+              <Image
+                src={String(condo.logo_url)}
+                alt={String(condo.name || "Logo")}
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg object-contain flex-shrink-0"
+              />
+            ) : (
+              <Image
+                src="/logo.png"
+                alt="InteliCon"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg object-contain flex-shrink-0"
+              />
+            )}
+            <span className="text-sm font-semibold truncate" style={{ color: sidebarTextColor || "#000000" }}>
+              {condo ? String(condo.name) : "Sin condominio"}
+            </span>
+          </button>
+
+          {/* Change Property Indicator */}
+          {shouldGoToSelector && (
+            <button
+              onClick={() => {
+                router.push("/select-condominium")
+                if (isMobile) setOpenMobile(false)
+              }}
+              className="flex-shrink-0 hover:opacity-90 transition-all hover:scale-110 relative"
+            >
+              <Image
+                src="/swap-property-icon.png"
+                alt="Cambiar propiedad"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full peer"
+                style={{ transform: "scaleX(-1)" }}
+              />
+              
+              {/* Tooltip - only shows on peer hover */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 peer-hover:opacity-100 transition-opacity pointer-events-none z-50" style={{ transform: "translateX(-50%)" }}>
+                Cambiar propiedad
+              </div>
+            </button>
           )}
-          <span className="text-sm font-semibold truncate max-w-[140px]" style={{ color: sidebarTextColor || "#000000" }}>
-            {condo ? String(condo.name) : "Sin condominio"}
-          </span>
-        </Link>
+        </div>
         
         {/* Condo Selector for admins with multiple condos */}
         {canSwitchCondo && (
@@ -480,9 +528,15 @@ export function AppSidebar({ user, profile, condo, allCondos = [] }: AppSidebarP
               <span className="text-xs font-medium" style={{ color: sidebarTextColor || "#000000" }}>
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs" style={{ color: sidebarTextColor || "#000000", opacity: 0.7 }}>
-                {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
-              </span>
+<span className="text-xs" style={{ color: sidebarTextColor || "#000000", opacity: 0.7 }}>
+{isSuperAdmin 
+  ? "Super Admin" 
+  : isAdmin 
+    ? (hasProperty ? "Administrador - Propietario" : "Administrador")
+    : isConcierge 
+      ? (hasProperty ? "Conserje - Propietario" : "Conserje")
+      : "Propietario"}
+</span>
             </div>
           </div>
           <Link

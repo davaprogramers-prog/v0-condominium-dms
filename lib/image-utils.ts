@@ -75,7 +75,7 @@ export async function resizeImageIfNeeded(
             resolve(newFile)
           },
           'image/jpeg',
-          0.95 // Calidad JPEG 95%
+          0.75 // Calidad JPEG 75% para mejor compresión
         )
       }
 
