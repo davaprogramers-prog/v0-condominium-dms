@@ -72,15 +72,15 @@ const iconColorMap: Record<string, string> = {
   "areas-comunes": "#06B6D4",  // Cyan vibrante
   
   // Configuraciones
-  "tipos-de-gastos": "#F97316", // Naranja brillante
-  "tipos-de-exoneraciones": "#14B8A6", // Teal vibrante
+  "tipos-gastos": "#F97316", // Naranja brillante
+  "tipos-exoneraciones": "#14B8A6", // Teal vibrante
   
   // Finanzas
   "propietarios": "#F472B6",   // Rosa vibrante
   "gastos": "#EF4444",         // Rojo para gastos
   "ingresos": "#22C55E",       // Verde para ingresos
-  "ingresos-variables": "#A855F7", // Púrpura
-  "ingresos-por-multas": "#F59E0B", // Ámbar
+  "ingreso-variable": "#A855F7", // Púrpura
+  "ingresos-multas": "#F59E0B", // Ámbar
   "cartolas": "#0EA5E9",       // Sky blue
   
   // Regulaciones
