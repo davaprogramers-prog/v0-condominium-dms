@@ -95,7 +95,7 @@ export default async function MiCasaPage() {
   const theme = themeData as CondoTheme | null
   const cardBgColor = theme?.enable_custom_theme ? theme.card_bg_color : DEFAULT_THEME.card_bg_color
   const cardTextColor = theme?.enable_custom_theme ? theme.card_text_color : DEFAULT_THEME.card_text_color
-  const parameterBgColor = theme?.enable_custom_theme ? theme.parameter_bg_color : "#fef3c7"
+  const parameterBgColor = theme?.enable_custom_theme ? theme.input_bg_color : "#fef3c7"
 
   const currentMonthIncomes = incomes?.filter(i => {
     return i.period_month === parameters?.current_month && 
@@ -142,7 +142,7 @@ export default async function MiCasaPage() {
           </div>
         </div>
         <PaymentUploadDialogThemedWrapper 
-          condoId={condoId} 
+          condoId={condoId || ""}
           houseId={houseId}
           currencySymbol={condo?.currency_symbol}
         />
