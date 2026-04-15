@@ -68,6 +68,8 @@ export default function SelectCondominiumClient({
     ? condominiums.find(c => c.id === selectedCondo)
     : null
 
+  console.log("[v0-client] selectedCondo:", selectedCondo, "currentCondo:", currentCondo?.name)
+
   if (!selectedCondo) {
     // Condominium Selection Grid
     const itemCount = condominiums.length
