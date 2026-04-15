@@ -174,7 +174,6 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </span>
                   </div>
 
-                  {/* Amount */}
                   <div className={textColor}>
                     <p className="text-xs opacity-75">Monto</p>
                     <p className="text-2xl font-bold">
@@ -185,14 +184,12 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </p>
                   </div>
 
-                  {/* Source */}
                   {income.source && (
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium">Fuente:</span> {income.source as string}
                     </p>
                   )}
 
-                  {/* Receipt Button */}
                   {income.receipt_url && (
                     <button
                       onClick={() => setSelectedImage({
@@ -205,7 +202,6 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                     </button>
                   )}
 
-                  {/* Actions */}
                   {isAdmin && (
                     <div className="flex gap-2 pt-2">
                       <Button
