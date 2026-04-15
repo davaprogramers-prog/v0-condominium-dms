@@ -44,7 +44,7 @@ export default async function MisReservasPage() {
       houses(house_number)
     `)
     .eq("condo_id", condoId)
-    .eq("status", "confirmed")
+    .in("status", ["confirmed", "pending", "rejected"])
     .gte("reservation_date", today)
     .order("reservation_date", { ascending: true })
     .order("start_time", { ascending: true })

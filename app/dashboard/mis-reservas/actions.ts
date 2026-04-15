@@ -129,12 +129,32 @@ export async function createReservation(data: CreateReservationData) {
 
   // Check for existing reservations on that date (use service client to bypass RLS)
   const serviceClient = createServiceClient()
+  
+  // Check if this house already has a reservation for this date (any area)
+  const { data: houseReservations } = await serviceClient
+    .from("area_reservations")
+    .select("*, common_areas(name)")
+    .eq("house_id", data.house_id)
+    .eq("reservation_date", data.reservation_date)
+    .in("status", ["confirmed", "pending"])
+  
+  if (houseReservations && houseReservations.length > 0) {
+    const existing = houseReservations[0]
+    const areaName = existing.common_areas?.name || "un área común"
+    throw new Error(
+      `Tu propiedad ya tiene una reserva para este día.\n` +
+      `Reserva existente: ${areaName} de ${existing.start_time.substring(0,5)} a ${existing.end_time.substring(0,5)}.\n` +
+      `Solo se permite una reserva por día por propiedad.`
+    )
+  }
+  
+  // Check for time conflicts in this specific area (including pending reservations)
   const { data: existingReservations } = await serviceClient
     .from("area_reservations")
     .select("*")
     .eq("area_id", data.area_id)
     .eq("reservation_date", data.reservation_date)
-    .eq("status", "confirmed")
+    .in("status", ["confirmed", "pending"])
 
   // Check for conflicts and suggest available times
   if (existingReservations && existingReservations.length > 0) {
@@ -210,6 +230,7 @@ export async function createReservation(data: CreateReservationData) {
   }
 
   // Create reservation using service client to bypass RLS (we already validated permissions above)
+  // Status is "pending" - requires admin/conserje confirmation
   const { error } = await serviceClient.from("area_reservations").insert({
     area_id: data.area_id,
     house_id: data.house_id,
@@ -219,7 +240,7 @@ export async function createReservation(data: CreateReservationData) {
     end_time: data.end_time,
     notes: data.notes || null,
     created_by: user.id,
-    status: "confirmed",
+    status: "pending",
   })
 
   if (error) {
@@ -347,6 +368,105 @@ export async function cancelReservation(reservationId: string, isAdminOrConcierg
     .from("area_reservations")
     .update({
       status: "cancelled",
+      modified_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reservationId)
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+// Admin/Conserje function to confirm a pending reservation
+export async function confirmReservation(reservationId: string) {
+  const supabase = await createClient()
+  const serviceClient = createServiceClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get user role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+    throw new Error("No tienes permisos para confirmar reservas")
+  }
+
+  // Get the reservation
+  const { data: reservation, error: reservationError } = await serviceClient
+    .from("area_reservations")
+    .select("*")
+    .eq("id", reservationId)
+    .single()
+
+  if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+
+  if (reservation.status !== "pending") {
+    throw new Error("Solo se pueden confirmar reservas pendientes")
+  }
+
+  // Confirm reservation
+  const { error } = await serviceClient
+    .from("area_reservations")
+    .update({
+      status: "confirmed",
+      modified_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reservationId)
+
+  if (error) throw error
+  
+  revalidatePath("/dashboard/mis-reservas")
+  revalidatePath("/dashboard/areas-comunes")
+  return { success: true }
+}
+
+// Admin/Conserje function to reject a reservation with reason
+export async function rejectReservation(reservationId: string, reason: string) {
+  const supabase = await createClient()
+  const serviceClient = createServiceClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  // Get user role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+    throw new Error("No tienes permisos para rechazar reservas")
+  }
+
+  if (!reason || reason.trim().length === 0) {
+    throw new Error("Debes indicar la razón del rechazo")
+  }
+
+  // Get the reservation
+  const { data: reservation, error: reservationError } = await serviceClient
+    .from("area_reservations")
+    .select("*")
+    .eq("id", reservationId)
+    .single()
+
+  if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+
+  // Reject reservation - change status to "rejected" and store reason in notes
+  const { error } = await serviceClient
+    .from("area_reservations")
+    .update({
+      status: "rejected",
+      notes: `RECHAZADA: ${reason}${reservation.notes ? `\n\nNota original: ${reservation.notes}` : ""}`,
       modified_by: user.id,
       updated_at: new Date().toISOString(),
     })

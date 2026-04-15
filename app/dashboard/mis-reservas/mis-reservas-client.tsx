@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Calendar, Clock, MapPin, Plus, Edit2, Trash2, AlertTriangle, Home } from "lucide-react"
+import { Calendar, Clock, MapPin, Plus, Edit2, Trash2, AlertTriangle, Home, Check, X, Ban } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
-import { createReservation, updateReservation, cancelReservation, changeReservationHouse, getAvailableSlots } from "./actions"
+import { createReservation, updateReservation, cancelReservation, changeReservationHouse, getAvailableSlots, confirmReservation, rejectReservation } from "./actions"
 
 interface Area {
   id: string
@@ -461,12 +461,82 @@ export function MisReservasClient({
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Badge variant={canModify(reservation) ? "default" : "secondary"} className={canModify(reservation) ? "bg-green-600" : "bg-gray-500"}>
-                      {canModify(reservation) ? "Modificable" : "No modificable"}
+                    {/* Status Badge */}
+                    <Badge 
+                      variant="default" 
+                      className={
+                        reservation.status === "confirmed" ? "bg-green-600" :
+                        reservation.status === "pending" ? "bg-yellow-500 text-black" :
+                        reservation.status === "rejected" ? "bg-red-600" : "bg-gray-500"
+                      }
+                    >
+                      {reservation.status === "confirmed" ? "Confirmada" :
+                       reservation.status === "pending" ? "Pendiente" :
+                       reservation.status === "rejected" ? "Rechazada" : reservation.status}
                     </Badge>
                     
+                    {/* Admin/Conserje Actions for Pending Reservations */}
+                    {isAdminOrConcierge && reservation.status === "pending" && (
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={async () => {
+                            try {
+                              await confirmReservation(reservation.id)
+                            } catch (error: any) {
+                              alert(error.message)
+                            }
+                          }}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              <Ban className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle style={{ color: dialogTextColor }}>Rechazar Reserva</AlertDialogTitle>
+                              <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
+                                Indica la razón por la cual se rechaza esta reserva. El propietario verá este mensaje.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <form 
+                              onSubmit={async (e) => {
+                                e.preventDefault()
+                                const formData = new FormData(e.currentTarget)
+                                const reason = formData.get("reason") as string
+                                try {
+                                  await rejectReservation(reservation.id, reason)
+                                } catch (error: any) {
+                                  alert(error.message)
+                                }
+                              }}
+                              className="flex flex-col gap-3"
+                            >
+                              <Textarea 
+                                name="reason" 
+                                placeholder="Ej: Mantenimiento programado, daño en el área, etc."
+                                required
+                                style={{ backgroundColor: inputBgColor, color: inputTextColor }}
+                              />
+                              <div className="flex gap-3 justify-end">
+                                <AlertDialogCancel type="button">Cancelar</AlertDialogCancel>
+                                <Button type="submit" variant="destructive">
+                                  Rechazar Reserva
+                                </Button>
+                              </div>
+                            </form>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2">
-                      {canModify(reservation) && (
+                      {canModify(reservation) && reservation.status !== "rejected" && (
                         <>
                           <Dialog open={openEdit === reservation.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                             <DialogTrigger asChild>
@@ -474,9 +544,9 @@ export function MisReservasClient({
                                 <Edit2 className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-<DialogContent className="max-h-[90vh] overflow-y-auto" style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
-              <DialogHeader>
-                <DialogTitle style={{ color: dialogTextColor }}>Editar Reserva</DialogTitle>
+                            <DialogContent className="max-h-[90vh] overflow-y-auto" style={{ backgroundColor: dialogBgColor, color: dialogTextColor }}>
+                              <DialogHeader>
+                                <DialogTitle style={{ color: dialogTextColor }}>Editar Reserva</DialogTitle>
                               </DialogHeader>
                               <form action={(fd) => handleUpdateReservation(fd, reservation.id)} className="flex flex-col gap-4">
                                 <div className="p-3 rounded-lg" style={{ backgroundColor: inputBgColor }}>
@@ -565,7 +635,12 @@ export function MisReservasClient({
                       )}
                     </div>
 
-                    {!canModify(reservation) && (
+                    {reservation.status === "rejected" ? (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <Ban className="h-3 w-3" />
+                        Reserva no permitida
+                      </p>
+                    ) : !canModify(reservation) && (
                       <p className="text-xs opacity-60 flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
                         Menos de {reservation.common_areas?.min_hours_to_modify || 12}h
