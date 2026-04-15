@@ -5,18 +5,8 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image 
-              src="/logo.png" 
-              alt="InteliCon Logo" 
-              width={150} 
-              height={50}
-              className="h-14 w-auto"
-              priority
-            />
-          </div>
+      <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-end">
           <div className="flex items-center gap-3">
             <a 
               href="/auth/login" 
@@ -35,6 +25,20 @@ export default function Page() {
           </div>
         </div>
       </nav>
+      
+      {/* Floating Logo */}
+      <div className="fixed top-4 left-4 sm:left-8 z-50">
+        <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-100">
+          <Image 
+            src="/logo.png" 
+            alt="InteliCon Logo" 
+            width={150} 
+            height={50}
+            className="h-12 w-auto"
+            priority
+          />
+        </div>
+      </div>
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
