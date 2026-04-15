@@ -169,11 +169,15 @@ export async function createReservation(data: CreateReservationData) {
         if (closeMin === 0) closeMin = 24 * 60
         
         // Suggest time before the existing reservation
-        const suggestEndBefore = existingStartMin - receptionMin
+        // New reservation must end early enough so that: endTime + deliveryMin <= existingStartMin - receptionMin
+        // So: endTime <= existingStartMin - receptionMin - deliveryMin
+        const suggestEndBefore = existingStartMin - receptionMin - deliveryMin
         const suggestStartBefore = Math.max(openMin, suggestEndBefore - (maxHours * 60))
         
         // Suggest time after the existing reservation
-        const suggestStartAfter = existingEndMin + deliveryMin
+        // New reservation must start late enough so that: startTime - receptionMin >= existingEndMin + deliveryMin
+        // So: startTime >= existingEndMin + deliveryMin + receptionMin
+        const suggestStartAfter = existingEndMin + deliveryMin + receptionMin
         const suggestEndAfter = Math.min(closeMin, suggestStartAfter + (maxHours * 60))
         
         let suggestions = `\n\nHorarios disponibles sugeridos:`
