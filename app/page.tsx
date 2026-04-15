@@ -75,40 +75,59 @@ export default function Page() {
               {
                 icon: BarChart3,
                 title: "Reportes Financieros",
-                description: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos"
+                description: "Comparativas por mes, trimestre, semestre y año con gráficos interactivos",
+                color: "#3B82F6",
+                bgColor: "rgba(59, 130, 246, 0.15)"
               },
               {
                 icon: Home,
                 title: "Control por Casa",
-                description: "Cards de estado por casa, histórico de pagos y comprobantes de depósito"
+                description: "Cards de estado por casa, histórico de pagos y comprobantes de depósito",
+                color: "#10B981",
+                bgColor: "rgba(16, 185, 129, 0.15)"
               },
               {
                 icon: Vote,
                 title: "Encuestas en Vivo",
-                description: "Votaciones en tiempo real con resultados visibles al instante"
+                description: "Votaciones en tiempo real con resultados visibles al instante",
+                color: "#8B5CF6",
+                bgColor: "rgba(139, 92, 246, 0.15)"
               },
               {
                 icon: FileText,
                 title: "Gestión de Documentos",
-                description: "Almacena reglamentos, sanciones, partes y cualquier documentación"
+                description: "Almacena reglamentos, sanciones, partes y cualquier documentación",
+                color: "#F59E0B",
+                bgColor: "rgba(245, 158, 11, 0.15)"
               },
               {
                 icon: ShieldCheck,
                 title: "Exoneraciones",
-                description: "Gestiona exoneraciones permanentes o temporales por servicios"
+                description: "Gestiona exoneraciones permanentes o temporales por servicios",
+                color: "#14B8A6",
+                bgColor: "rgba(20, 184, 166, 0.15)"
               },
               {
                 icon: Building2,
                 title: "Proyectos de Mejora",
-                description: "Crea proyectos con cotizaciones, fotos y seguimiento de estado"
+                description: "Crea proyectos con cotizaciones, fotos y seguimiento de estado",
+                color: "#EC4899",
+                bgColor: "rgba(236, 72, 153, 0.15)"
               },
             ].map((feature) => (
-              <div key={feature.title} className="group p-6 bg-background border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition">
-                  <feature.icon className="w-6 h-6 text-primary" />
+              <div 
+                key={feature.title} 
+                className="group p-6 bg-background border-2 border-border/50 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                style={{ borderColor: `${feature.color}30` }}
+              >
+                <div 
+                  className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
+                  style={{ backgroundColor: feature.bgColor }}
+                >
+                  <feature.icon className="w-7 h-7" style={{ color: feature.color }} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
