@@ -22,6 +22,7 @@ import {
 import { useRouter } from "next/navigation"
 import { deleteUser } from "./actions"
 import { EditUserDialog } from "./edit-user-dialog"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface UserActionsMenuProps {
   user: any
@@ -33,6 +34,10 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
+  const { theme } = useTheme()
+  
+  const dialogBgColor = theme?.dialogBgColor || "#ffffff"
+  const dialogTextColor = theme?.dialogTextColor || "#000000"
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -53,19 +58,23 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300">
-            <MoreHorizontal className="h-4 w-4" style={{ color: "#64748b" }} />
+          <Button size="sm" variant="outline" style={{ borderColor: dialogTextColor + "40" }}>
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)} className="dark:text-white">
+        <DropdownMenuContent 
+          align="end" 
+          className="border-2"
+          style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}
+        >
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)} style={{ color: dialogTextColor }}>
             <Edit2 className="h-4 w-4 mr-2" />
             Editar
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowDeleteAlert(true)}
-            className="text-destructive dark:text-red-400"
+            className="text-red-500"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Eliminar
@@ -81,15 +90,18 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
       />
 
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-        <AlertDialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
+        <AlertDialogContent 
+          className="border-2"
+          style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900 dark:text-white">Eliminar usuario</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+            <AlertDialogTitle style={{ color: dialogTextColor }}>Eliminar usuario</AlertDialogTitle>
+            <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
               ¿Estás seguro que deseas eliminar a {user.first_name} {user.last_name}? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2 pt-4 justify-end">
-            <AlertDialogCancel className="bg-slate-200 text-slate-900 hover:bg-slate-300 border-0">
+            <AlertDialogCancel style={{ color: dialogTextColor, borderColor: dialogTextColor }}>
               Cancelar
             </AlertDialogCancel>
             <Button
