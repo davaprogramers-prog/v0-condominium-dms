@@ -150,7 +150,10 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sortedIncomes.map((income) => {
-            const { status, color, textColor } = getVariableIncomeStatus(income)
+            const statusInfo = getVariableIncomeStatus(income)
+            const status = statusInfo.status
+            const color = statusInfo.color
+            const textColor = statusInfo.textColor
 
             return (
               <div
