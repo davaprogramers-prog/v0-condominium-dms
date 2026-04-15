@@ -1,4 +1,4 @@
-import { put, del } from '@vercel/blob'
+import { put } from '@vercel/blob'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -25,24 +25,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Delete old avatar if it exists and is from Blob
-    if (oldUrl && oldUrl.includes('blob.vercel-storage.com')) {
-      try {
-        await del(oldUrl)
-      } catch (error) {
-        console.error('[v0] Error deleting old avatar:', error)
-        // Continue even if delete fails
-      }
-    }
-
-    // Upload new avatar to Vercel Blob with public access
-    // Note: Even though Blob store is private, we use public access for avatars
-    // so they can be displayed without additional auth
+    // Upload new avatar to Vercel Blob with private access
+    // Since Blob store is configured as private, we use private access
+    // and generate a signed URL for temporary access
     const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
-      access: 'public',
+      access: 'private',
     })
 
-    return NextResponse.json({ url: blob.url })
+    // Generate a signed URL for 24 hours
+    const signedUrl = await blob.getSignedUrl()
+
+    console.log('[v0] Avatar uploaded to private Blob store')
+    console.log('[v0] Base URL:', blob.url)
+    console.log('[v0] Signed URL:', signedUrl)
+
+    // Return the signed URL which will be valid for 24 hours
+    return NextResponse.json({ url: signedUrl })
   } catch (error) {
     console.error('[v0] Avatar upload API error:', error)
     return NextResponse.json(
