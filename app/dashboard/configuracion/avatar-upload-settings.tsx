@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { Camera, Upload, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { put, del } from "@vercel/blob"
 import { resizeImageIfNeeded } from "@/lib/image-utils"
 
 interface AvatarUploadSettingsProps {
@@ -38,11 +37,6 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
-
-      // Delete from Blob if URL exists
-      if (currentAvatarUrl && currentAvatarUrl.includes("blob.vercel-storage.com")) {
-        await del(currentAvatarUrl)
-      }
 
       const { error: updateError } = await supabase
         .from("profiles")
@@ -79,12 +73,8 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
 
   const handleUpload = async () => {
     const file = selectedFile || fileInputRef.current?.files?.[0] || cameraInputRef.current?.files?.[0]
-    if (!file) {
-      console.log("[v0] No file selected")
-      return
-    }
+    if (!file) return
 
-    console.log("[v0] Starting avatar upload, file size:", (file.size / 1024).toFixed(2), "KB, type:", file.type)
     setLoading(true)
     const supabase = createClient()
 
@@ -92,33 +82,39 @@ export function AvatarUploadSettings({ currentAvatarUrl, userName, cardBgColor =
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      console.log("[v0] User authenticated:", user.id)
+      // Upload via API route
+      const formData = new FormData()
+      formData.append("file", file)
+      if (currentAvatarUrl) {
+        formData.append("oldUrl", currentAvatarUrl)
+      }
 
-      // Upload to Vercel Blob
-      console.log("[v0] Uploading to Vercel Blob...")
-      const blob = await put(`avatars/${user.id}-${Date.now()}`, file, {
-        access: "public",
+      const response = await fetch("/api/upload-avatar", {
+        method: "POST",
+        body: formData,
       })
 
-      console.log("[v0] Blob upload successful:", blob.url)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Error al subir la imagen")
+      }
+
+      const { url } = await response.json()
 
       // Update profile with Blob URL
-      console.log("[v0] Updating profile with blob URL...")
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: blob.url })
+        .update({ avatar_url: url })
         .eq("id", user.id)
       
       if (updateError) throw updateError
 
-      console.log("[v0] Profile updated successfully")
       setOpen(false)
       setPreviewUrl(null)
       setSelectedFile(null)
       router.refresh()
     } catch (error) {
       console.error("[v0] Avatar upload error:", error)
-      console.error("[v0] Error details:", JSON.stringify(error, null, 2))
       alert("Error al subir la imagen: " + String(error))
     } finally {
       setLoading(false)
