@@ -76,6 +76,7 @@ export async function getUserCondoId(
 
 /**
  * Get the house_id for an owner, avoiding RLS issues
+ * Checks: profiles.house_id -> houses.owner_email -> house_owners.email
  */
 export async function getUserHouseId(
   supabase: SupabaseClient,
@@ -83,23 +84,41 @@ export async function getUserHouseId(
   userEmail?: string
 ): Promise<string | null> {
   try {
+    // 1. First check profiles.house_id
     const { data: profile } = await supabase
       .from("profiles")
-      .select("house_id")
+      .select("house_id, email")
       .eq("id", userId)
       .limit(1)
 
     if (profile && profile.length > 0 && profile[0]?.house_id) {
+      console.log("[v0] Found house_id in profile:", profile[0].house_id)
       return profile[0].house_id
     }
 
-    // If no profile house_id but we have email, try searching via house_owners table
-    if (userEmail) {
-      console.log("[v0] Searching house_owners by email for house_id:", userEmail)
+    // Get email from profile if not provided
+    const email = userEmail || (profile && profile[0]?.email)
+    
+    if (email) {
+      // 2. Check houses table by owner_email
+      console.log("[v0] Searching houses by owner_email:", email)
+      const { data: houses } = await supabase
+        .from("houses")
+        .select("id")
+        .eq("owner_email", email)
+        .limit(1)
+      
+      if (houses && houses.length > 0 && houses[0]?.id) {
+        console.log("[v0] Found house_id via houses.owner_email:", houses[0].id)
+        return houses[0].id
+      }
+
+      // 3. Check house_owners table by email
+      console.log("[v0] Searching house_owners by email for house_id:", email)
       const { data: houseOwners } = await supabase
         .from("house_owners")
         .select("house_id")
-        .eq("email", userEmail)
+        .eq("email", email)
         .limit(1)
       
       if (houseOwners && houseOwners.length > 0 && houseOwners[0]?.house_id) {

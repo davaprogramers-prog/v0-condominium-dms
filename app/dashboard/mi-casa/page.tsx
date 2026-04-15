@@ -12,24 +12,10 @@ export default async function MiCasaPage() {
 
   if (!user) redirect("/auth/login")
 
-  console.log("[v0] MiCasaPage - userId:", user.id, "email:", user.email)
-
-  const condoId = await getUserCondoId(supabase, user.id)
-  const houseId = await getUserHouseId(supabase, user.id)
-
-  console.log("[v0] MiCasaPage - condoId:", condoId, "houseId:", houseId)
-
-  // Also check what's in profiles directly
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("id, house_id, condo_id, role")
-    .eq("id", user.id)
-    .single()
-  
-  console.log("[v0] MiCasaPage - direct profile query:", profileData)
+  const condoId = await getUserCondoId(supabase, user.id, user.email || undefined)
+  const houseId = await getUserHouseId(supabase, user.id, user.email || undefined)
 
   if (!houseId) {
-    console.log("[v0] No houseId found, redirecting to dashboard")
     redirect("/dashboard")
   }
 
