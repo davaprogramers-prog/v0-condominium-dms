@@ -73,14 +73,19 @@ function validateReservationHours(
   const startMin = toMinutes(startTime)
   const endMin = toMinutes(endTime)
   const openMin = toMinutes(openingTime)
-  const closeMin = toMinutes(closingTime)
+  let closeMin = toMinutes(closingTime)
+  
+  // Handle midnight (00:00) as end of day (24:00 = 1440 minutes)
+  if (closeMin === 0) {
+    closeMin = 24 * 60 // 1440 minutes = midnight
+  }
 
   if (startMin >= endMin) {
     return { valid: false, error: "La hora de inicio debe ser anterior a la hora de fin" }
   }
 
   if (startMin < openMin || endMin > closeMin) {
-    return { valid: false, error: `El horario debe estar entre ${openingTime} y ${closingTime}` }
+    return { valid: false, error: `El horario debe estar entre ${openingTime} y ${closingTime === "00:00" ? "24:00" : closingTime}` }
   }
 
   const durationHours = (endMin - startMin) / 60
