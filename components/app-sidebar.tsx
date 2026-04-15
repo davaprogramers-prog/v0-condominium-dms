@@ -55,23 +55,52 @@ import { switchCondo } from "@/app/dashboard/actions"
 import type { User } from "@supabase/supabase-js"
 
 const iconColorMap: Record<string, string> = {
+  // Dashboard
   "dashboard": "#60A5FA",      // Azul brillante
-  "usuarios": "#D946EF",       // Púrpura vibrante  
-  "gastos": "#FF8C42",         // Naranja fuerte
-  "ingresos": "#34D399",       // Verde brillante
-  "propietarios": "#F472B6",   // Rosa vibrante
   "reportes": "#22D3EE",       // Cyan brillante
-  "documentos": "#FBBF24",     // Ámbar brillante
-  "encuestas": "#818CF8",      // Índigo brillante
   "balance": "#1ECB7F",        // Esmeralda vibrante
-  "alertas": "#F87171",        // Rojo brillante
-  "areas-comunes": "#D946EF",  // Púrpura vibrante
+  
+  // Mi Propiedad
   "mi-casa": "#60A5FA",        // Azul brillante
-  "cartolas": "#22D3EE",       // Cyan brillante
+  "mis-reservas": "#F59E0B",   // Ámbar cálido
+  "mis-visitas": "#EC4899",    // Rosa vibrante
+  "mis-encomiendas": "#8B5CF6", // Violeta brillante
+  
+  // Gestión
+  "casas": "#10B981",          // Esmeralda
+  "usuarios": "#D946EF",       // Púrpura vibrante  
+  "areas-comunes": "#06B6D4",  // Cyan vibrante
+  
+  // Configuraciones
+  "tipos-de-gastos": "#F97316", // Naranja brillante
+  "tipos-de-exoneraciones": "#14B8A6", // Teal vibrante
+  
+  // Finanzas
+  "propietarios": "#F472B6",   // Rosa vibrante
+  "gastos": "#EF4444",         // Rojo para gastos
+  "ingresos": "#22C55E",       // Verde para ingresos
+  "ingresos-variables": "#A855F7", // Púrpura
+  "ingresos-por-multas": "#F59E0B", // Ámbar
+  "cartolas": "#0EA5E9",       // Sky blue
+  
+  // Regulaciones
+  "infracciones": "#EF4444",   // Rojo alerta
+  "exoneraciones": "#14B8A6",  // Teal
+  
+  // Administración
+  "conserjes": "#8B5CF6",      // Violeta
+  "gestion-reservas": "#F59E0B", // Ámbar
+  "visitas": "#EC4899",        // Rosa
+  "visitas-admin": "#EC4899",  // Rosa
+  "encomiendas": "#3B82F6",    // Azul
+  "solicitudes-materiales": "#06B6D4", // Cyan
+  "encuestas": "#818CF8",      // Índigo brillante
   "proyectos": "#FBBF24",      // Ámbar brillante
+  "documentos": "#F97316",     // Naranja
+  
+  // Sistema
   "configuracion": "#A78BFA",  // Púrpura claro
-  "visitas": "#F472B6",        // Rosa vibrante
-  "encomiendas": "#3B82F6",    // Azul para paquetes
+  "alertas": "#F87171",        // Rojo brillante
 }
 
 const adminMenuItems = [
