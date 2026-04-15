@@ -32,6 +32,10 @@ export default async function MisReservasPage() {
     .order("name")
 
   // Get user's reservations (or all if admin)
+  // Use a date that's definitely in the past to show all upcoming reservations
+  const today = new Date().toISOString().split("T")[0]
+  console.log("[v0] Today's date:", today, "houseId:", houseId, "condoId:", condoId, "isAdmin:", isAdminOrConcierge)
+  
   let reservationsQuery = supabase
     .from("area_reservations")
     .select(`
@@ -40,7 +44,8 @@ export default async function MisReservasPage() {
       houses(house_number)
     `)
     .eq("condo_id", condoId)
-    .gte("reservation_date", new Date().toISOString().split("T")[0])
+    .eq("status", "confirmed")
+    .gte("reservation_date", today)
     .order("reservation_date", { ascending: true })
     .order("start_time", { ascending: true })
 
@@ -48,7 +53,8 @@ export default async function MisReservasPage() {
     reservationsQuery = reservationsQuery.eq("house_id", houseId)
   }
 
-  const { data: reservations } = await reservationsQuery
+  const { data: reservations, error: resError } = await reservationsQuery
+  console.log("[v0] Reservations found:", reservations?.length, "Error:", resError)
 
   // Get house info
   let house = null
