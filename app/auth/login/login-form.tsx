@@ -34,12 +34,14 @@ export function LoginForm() {
         const profileResult = await ensureUserProfile(authData.user.id, email)
         console.log("[v0] Profile ensured:", profileResult)
         
-        // Check if user is a propietario (owner) and if they have multiple properties
-        if (profileResult.role === 'propietario') {
+        // Check if user is a propietario (owner) with multiple properties
+        if (profileResult.role === 'propietario' && profileResult.hasMultipleProperties) {
+          console.log("[v0] User has multiple properties - redirecting to selector")
           // Redirect to condominium selector
           router.push("/select-condominium")
         } else {
-          // Admin or conserje go directly to dashboard
+          console.log("[v0] User has single/no properties or is not propietario - redirecting to dashboard")
+          // Single property, admin or conserje go directly to dashboard
           router.push("/dashboard")
         }
       }
