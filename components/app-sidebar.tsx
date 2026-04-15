@@ -373,7 +373,6 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
                 if (isMobile) setOpenMobile(false)
               }}
               className="flex-shrink-0 hover:opacity-90 transition-all hover:scale-110 relative group"
-              title="Cambiar condominio o propiedad"
             >
               <Image
                 src="/swap-property-icon.png"
