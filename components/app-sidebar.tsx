@@ -528,9 +528,15 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
               <span className="text-xs font-medium" style={{ color: sidebarTextColor || "#000000" }}>
                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}` : user.email}
               </span>
-              <span className="text-xs" style={{ color: sidebarTextColor || "#000000", opacity: 0.7 }}>
-                {isSuperAdmin ? "Super Admin" : isAdmin ? "Administrador" : "Propietario"}
-              </span>
+<span className="text-xs" style={{ color: sidebarTextColor || "#000000", opacity: 0.7 }}>
+{isSuperAdmin 
+  ? "Super Admin" 
+  : isAdmin 
+    ? (hasProperty ? "Administrador - Propietario" : "Administrador")
+    : isConcierge 
+      ? (hasProperty ? "Conserje - Propietario" : "Conserje")
+      : "Propietario"}
+</span>
             </div>
           </div>
           <Link
