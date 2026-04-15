@@ -77,7 +77,29 @@ export function MisReservasClient({
   const [areaConfig, setAreaConfig] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [startTime, setStartTime] = useState("08:00")
+  const [endTime, setEndTime] = useState("10:00")
   const { cardBgColor, cardTextColor, dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+
+  // Generate time options in 30-minute intervals
+  const generateTimeOptions = (openTime?: string, closeTime?: string) => {
+    const options: string[] = []
+    const [openH, openM] = (openTime || "00:00").split(":").map(Number)
+    let [closeH, closeM] = (closeTime || "24:00").split(":").map(Number)
+    if (closeH === 0 && closeM === 0) closeH = 24 // Handle midnight
+    
+    const startMin = openH * 60 + openM
+    const endMin = closeH * 60 + closeM
+    
+    for (let min = startMin; min <= endMin; min += 30) {
+      const h = Math.floor(min / 60)
+      const m = min % 60
+      if (h < 24) {
+        options.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`)
+      }
+    }
+    return options
+  }
 
   const handleAreaChange = async (areaId: string) => {
     setSelectedArea(areaId)
@@ -85,6 +107,13 @@ export function MisReservasClient({
       const result = await getAvailableSlots(areaId, selectedDate)
       setExistingSlots(result.slots)
       setAreaConfig(result.area)
+      // Set default times based on area config
+      if (result.area) {
+        setStartTime(result.area.opening_time || "08:00")
+        const openHour = parseInt((result.area.opening_time || "08:00").split(":")[0])
+        const maxHours = result.area.max_hours_per_reservation || 2
+        setEndTime(`${String(openHour + maxHours).padStart(2, "0")}:00`)
+      }
     }
   }
 
@@ -205,7 +234,14 @@ export function MisReservasClient({
         </div>
         
         {areas.length > 0 && (houseId || isAdminOrConcierge) && (
-          <Dialog open={openNew} onOpenChange={(open) => { setOpenNew(open); if (open) setErrorMessage(null); }}>
+          <Dialog open={openNew} onOpenChange={(open) => { 
+              setOpenNew(open); 
+              if (open) { 
+                setErrorMessage(null); 
+                setStartTime("08:00"); 
+                setEndTime("10:00"); 
+              } 
+            }}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <Plus className="h-4 w-4 mr-2" />
@@ -289,24 +325,31 @@ export function MisReservasClient({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <Label style={{ color: dialogTextColor }}>Hora Inicio</Label>
-                    <Input
-                      type="time"
-                      name="start_time"
-                      defaultValue={areaConfig?.opening_time || "08:00"}
-                      style={{ backgroundColor: inputBgColor, color: inputTextColor }}
-                    />
+                    <input type="hidden" name="start_time" value={startTime} />
+                    <Select value={startTime} onValueChange={setStartTime}>
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                        <SelectValue placeholder="Selecciona hora" />
+                      </SelectTrigger>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                        {generateTimeOptions(areaConfig?.opening_time, areaConfig?.closing_time).map(time => (
+                          <SelectItem key={time} value={time}>{time}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label style={{ color: dialogTextColor }}>Hora Fin</Label>
-                    <Input
-                      type="time"
-                      name="end_time"
-                      defaultValue={areaConfig ? 
-                        `${String(parseInt(areaConfig.opening_time.split(":")[0]) + areaConfig.max_hours).padStart(2, "0")}:00` 
-                        : "10:00"
-                      }
-                      style={{ backgroundColor: inputBgColor, color: inputTextColor }}
-                    />
+                    <input type="hidden" name="end_time" value={endTime} />
+                    <Select value={endTime} onValueChange={setEndTime}>
+                      <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                        <SelectValue placeholder="Selecciona hora" />
+                      </SelectTrigger>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                        {generateTimeOptions(areaConfig?.opening_time, areaConfig?.closing_time).map(time => (
+                          <SelectItem key={time} value={time}>{time}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

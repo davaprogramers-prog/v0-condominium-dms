@@ -75,6 +75,11 @@ function validateReservationHours(
   const openMin = toMinutes(openingTime)
   let closeMin = toMinutes(closingTime)
   
+  // Validate 30-minute intervals
+  if (startMin % 30 !== 0 || endMin % 30 !== 0) {
+    return { valid: false, error: "Los horarios deben ser en intervalos de 30 minutos (ej: 10:00, 10:30, 11:00)" }
+  }
+  
   // Handle midnight (00:00) as end of day (24:00 = 1440 minutes)
   if (closeMin === 0) {
     closeMin = 24 * 60 // 1440 minutes = midnight
