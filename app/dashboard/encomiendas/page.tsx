@@ -161,19 +161,20 @@ export default function ParcelPage() {
       filtered = filtered.filter(p => p.house_id === selectedHouseId)
     }
 
-    // Filter by date range - use local timezone for date comparisons
+    // Filter by date range - compare only the date portion (YYYY-MM-DD)
     if (dateFrom) {
-      // Parse as local date at start of day (00:00:00)
-      const [year, month, day] = dateFrom.split('-').map(Number)
-      const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
-      filtered = filtered.filter(p => new Date(p.received_date) >= fromDate)
+      filtered = filtered.filter(p => {
+        // Extract just the date part from received_date (handles both ISO and datetime formats)
+        const parcelDate = p.received_date.substring(0, 10)
+        return parcelDate >= dateFrom
+      })
     }
 
     if (dateTo) {
-      // Parse as local date at end of day (23:59:59.999)
-      const [year, month, day] = dateTo.split('-').map(Number)
-      const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
-      filtered = filtered.filter(p => new Date(p.received_date) <= toDate)
+      filtered = filtered.filter(p => {
+        const parcelDate = p.received_date.substring(0, 10)
+        return parcelDate <= dateTo
+      })
     }
 
     setParcels(filtered)
