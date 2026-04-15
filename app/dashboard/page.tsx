@@ -101,18 +101,22 @@ export default async function DashboardPage() {
       }
     }
 
-    // If admin/super_admin without condo_id, show admin setup message
-    if ((role === "admin" || role === "super_admin") && !condoId) {
+    // If regular admin without condo_id, show admin setup message
+    // Super admin can access everything without needing a condo_id
+    if (role === "admin" && !condoId) {
       return (
         <div className="space-y-6">
           <div className="rounded-lg border bg-card p-6">
             <h1 className="text-3xl font-bold mb-2">Bienvenido, {firstName}</h1>
-            <p className="text-muted-foreground mb-4">{role === "super_admin" ? "Super Administrador" : "Administrador"}</p>
+            <p className="text-muted-foreground mb-4">Administrador</p>
             <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
           </div>
         </div>
       )
     }
+
+    // Super admin without condo_id still gets full admin dashboard
+    const isSuperAdmin = role === "super_admin"
 
     // Fetch condo info (only if user has a condo assigned)
     let condo: any = null
@@ -171,7 +175,9 @@ export default async function DashboardPage() {
           <div className="flex flex-col gap-4">
             <div className="space-y-1">
               <h1 className="text-3xl font-bold">Bienvenido, {firstName}</h1>
-              <p className="text-muted-foreground">{condo?.name || "Condominio"}</p>
+              <p className="text-muted-foreground">
+                {isSuperAdmin ? "Super Administrador - Todos los condominios" : condo?.name || "Condominio"}
+              </p>
             </div>
             <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
               <Button variant="outline" size="sm" className="w-full sm:w-fit">
