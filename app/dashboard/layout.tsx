@@ -141,8 +141,9 @@ export default async function DashboardLayout({
 
   return (
     <ThemeProvider theme={theme}>
-      <SidebarProvider className="flex-row-reverse">
+      <SidebarProvider>
         <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
+        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} hasMultipleProperties={hasMultipleProperties} />
         <SidebarInset 
           className="flex flex-col h-screen"
           style={theme?.enable_custom_theme ? {
@@ -161,7 +162,6 @@ export default async function DashboardLayout({
             {children}
           </main>
         </SidebarInset>
-        <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} hasMultipleProperties={hasMultipleProperties} />
       </SidebarProvider>
     </ThemeProvider>
   )

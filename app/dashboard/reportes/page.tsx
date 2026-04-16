@@ -4,8 +4,9 @@ import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsDa
 import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
-import { getCondoTheme } from "@/app/actions/theme-actions"
-import { ReportesHeader } from "./reportes-header"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default async function ReportesPage({
   searchParams,
@@ -96,19 +97,44 @@ export default async function ReportesPage({
     { nombre: "Gastos", valor: totalExpenses, fill: "#ef4444" },
   ]
 
+  const monthName = new Date(year, month - 1).toLocaleDateString("es-CL", {
+    month: "long",
+    year: "numeric",
+  })
+
   return (
     <div className="space-y-6">
-      {/* Header with Month Navigation - Client Component */}
-      <ReportesHeader 
-        year={year}
-        month={month}
-        prevMonth={prevMonth}
-        prevYear={prevYear}
-        nextMonth={nextMonth}
-        nextYear={nextYear}
-        canGoNext={canGoNext}
-        theme={theme}
-      />
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold">Reportes de Finanzas</h1>
+        <p className="text-muted-foreground">Análisis completo de ingresos y gastos</p>
+      </div>
+
+      {/* Month Navigation */}
+      <div className="flex flex-wrap items-center gap-4 bg-muted/50 rounded-lg p-4">
+        <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
+          <Button variant="outline" size="sm">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Anterior
+          </Button>
+        </Link>
+        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
+          {monthName}
+        </span>
+        {canGoNext ? (
+          <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
+            <Button variant="outline" size="sm">
+              Siguiente
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </Link>
+        ) : (
+          <Button variant="outline" size="sm" disabled>
+            Siguiente
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        )}
+      </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
