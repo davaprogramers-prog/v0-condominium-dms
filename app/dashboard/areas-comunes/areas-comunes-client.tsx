@@ -62,12 +62,10 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Areas Comunes</h1>
-          <p className="text-sm text-muted-foreground">{areas.length} areas registradas</p>
-        </div>
-        {isAdmin && (
+      <p className="text-muted-foreground text-sm">{areas.length} áreas registradas</p>
+
+      {isAdmin && (
+        <div className="flex items-center justify-end">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
               <Button

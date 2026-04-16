@@ -17,12 +17,10 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Tipos de Gastos</h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Categorias para clasificar los gastos del condominio</p>
-        </div>
-        {isAdmin && (
+      <p className="text-muted-foreground text-sm">Categorías para clasificar los gastos del condominio</p>
+
+      {isAdmin && (
+        <div className="flex items-center justify-end">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
 
@@ -61,8 +59,8 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {types.length === 0 ? (
           <div className="col-span-full rounded-lg border-2 p-12 text-center" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
