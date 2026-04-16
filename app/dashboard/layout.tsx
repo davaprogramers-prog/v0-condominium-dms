@@ -141,7 +141,7 @@ export default async function DashboardLayout({
 
   return (
     <ThemeProvider theme={theme}>
-      <SidebarProvider>
+      <SidebarProvider className="flex-row-reverse">
         <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
         <SidebarInset 
           className="flex flex-col h-screen"
