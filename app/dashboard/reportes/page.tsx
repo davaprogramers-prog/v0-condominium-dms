@@ -124,6 +124,8 @@ export default async function ReportesPage({
         )}
       </div>
 
+      <p className="text-muted-foreground text-sm">Análisis completo de ingresos y gastos</p>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-lg border bg-card p-6">

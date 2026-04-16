@@ -142,6 +142,8 @@ export default async function BalancePage({
         )}
       </div>
 
+      <p className="text-muted-foreground text-sm">Resumen financiero del condominio</p>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Saldo Anterior */}
