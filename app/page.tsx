@@ -41,7 +41,7 @@ export default function Page() {
       </div>
 
       {/* Hero Section */}
-      <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="pt-40 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center space-y-6 sm:space-y-8">
           {/* App Store Badges */}
           <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 mb-2">
