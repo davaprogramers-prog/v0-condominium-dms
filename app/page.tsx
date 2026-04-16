@@ -5,19 +5,19 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:gap-3 pr-0 sm:pr-auto">
-          <div className="w-full sm:w-auto flex flex-col gap-2 ml-28 sm:ml-0">
+      <nav className="fixed top-0 w-screen z-40 border-b border-border/50 overflow-hidden" style={{ backgroundColor: "#0d3068" }}>
+        <div className="w-full h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row sm:items-center sm:justify-end px-4 sm:px-6 lg:px-8 gap-2 sm:gap-3">
+          <div className="flex flex-col gap-2 ml-auto pr-2">
             <a 
               href="/auth/login" 
-              className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
+              className="px-3 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center whitespace-nowrap"
               style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
             >
               Iniciar Sesión
             </a>
             <a 
               href="/auth/registro" 
-              className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 text-center"
+              className="px-3 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 text-center whitespace-nowrap"
               style={{ backgroundColor: "#0d3068", color: "#fefce1", borderColor: "#fefce1" }}
             >
               Registrarse
