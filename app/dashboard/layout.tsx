@@ -145,7 +145,7 @@ export default async function DashboardLayout({
         <ThemeManagerClient theme={theme} condoId={profile.condo_id} />
         <AppSidebar user={user} profile={profile} condo={condo} allCondos={allCondos} hasMultipleProperties={hasMultipleProperties} />
         <SidebarInset 
-          className="flex flex-col h-screen"
+          className="flex flex-col h-screen overflow-x-hidden"
           style={theme?.enable_custom_theme ? {
             backgroundColor: theme.main_bg_color,
             color: theme.main_text_color,
@@ -153,7 +153,7 @@ export default async function DashboardLayout({
         >
           <DashboardHeader user={user} profile={profile} />
           <main 
-            className="flex-1 overflow-y-auto p-4 md:p-6"
+            className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 w-full max-w-full"
             style={theme?.enable_custom_theme ? {
               backgroundColor: theme.main_bg_color,
               color: theme.main_text_color,
