@@ -119,6 +119,8 @@ export default async function BalancePage({
 
   return (
     <div className="space-y-6">
+      <p className="text-muted-foreground text-sm">Resumen financiero del condominio</p>
+
       {/* Month Navigation */}
       <div className="flex items-center justify-center gap-4">
         <Link href={`/dashboard/balance?mes=${prevMonth}&año=${prevYear}`}>
@@ -141,8 +143,6 @@ export default async function BalancePage({
           </Button>
         )}
       </div>
-
-      <p className="text-muted-foreground text-sm">Resumen financiero del condominio</p>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

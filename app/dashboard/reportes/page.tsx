@@ -101,6 +101,8 @@ export default async function ReportesPage({
 
   return (
     <div className="space-y-6">
+      <p className="text-muted-foreground text-sm">Análisis completo de ingresos y gastos</p>
+
       {/* Month Navigation */}
       <div className="flex items-center justify-center gap-4">
         <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
@@ -123,8 +125,6 @@ export default async function ReportesPage({
           </Button>
         )}
       </div>
-
-      <p className="text-muted-foreground text-sm">Análisis completo de ingresos y gastos</p>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
