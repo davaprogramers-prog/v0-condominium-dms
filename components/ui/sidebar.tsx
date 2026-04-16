@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
-import Image from 'next/image'
 
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -273,12 +272,12 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <Image
+      <img
         src="/sidebar-toggle-icon.jpg"
         alt="Toggle Sidebar"
-        width={32}
-        height={32}
-        className="object-contain"
+        width="32"
+        height="32"
+        className="object-contain w-full h-full"
       />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
