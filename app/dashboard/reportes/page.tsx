@@ -31,9 +31,6 @@ export default async function ReportesPage({
   const year = parseInt(params.año as string) || now.getFullYear()
   const month = parseInt(params.mes as string) || now.getMonth() + 1
 
-  // Get theme
-  const theme = await getCondoTheme(condoId)
-
   // Get expenses, income, and 12-month historical data
   let expenses: any[] = []
   let income: any[] = []
