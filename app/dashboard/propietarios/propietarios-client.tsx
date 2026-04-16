@@ -292,23 +292,25 @@ function HouseCard({
       <Card className={`${borderClass} transition-all hover:shadow-md`}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer pb-3">
-            <div className="flex flex-col gap-3">
-              {/* Primera fila: Casa, Propietario y Estado */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-muted flex-shrink-0">
-                    <Home className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg truncate">Casa #{house.house_number}</CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
-                      <User className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{house.owner_name}</span>
-                    </div>
+            <div className="flex flex-col gap-2">
+              {/* Primera fila: Casa y Propietario */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-muted flex-shrink-0">
+                  <Home className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-lg truncate">Casa #{house.house_number}</CardTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
+                    <User className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{house.owner_name}</span>
                   </div>
                 </div>
-                {/* Status Badge para mobile */}
-                <div className="flex-shrink-0 ml-2">
+              </div>
+
+              {/* Segunda fila: Estado, Total y Chevron - Justificado */}
+              <div className="flex items-center justify-between gap-2">
+                {/* Status Badge */}
+                <div className="flex-shrink-0">
                   {house.isPaidComplete ? (
                     <Badge className="bg-green-500 text-white text-xs">Pagado</Badge>
                   ) : proofStatus === "pending" ? (
@@ -319,26 +321,20 @@ function HouseCard({
                     <Badge variant="outline" className="text-muted-foreground text-xs">Pendiente</Badge>
                   )}
                 </div>
-              </div>
 
-              {/* Segunda fila: Multas, Total y Chevron */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {/* Fines Badge */}
-                  {house.totalFines > 0 && (
-                    <Badge className="bg-red-600 hover:bg-red-700 text-white text-xs flex-shrink-0">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      Multa: {currencySymbol}{house.totalFines.toLocaleString("es-CL")}
-                    </Badge>
-                  )}
-                </div>
+                {/* Fines Badge if applicable */}
+                {house.totalFines > 0 && (
+                  <Badge className="bg-red-600 hover:bg-red-700 text-white text-xs flex-shrink-0">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Multa: {currencySymbol}{house.totalFines.toLocaleString("es-CL")}
+                  </Badge>
+                )}
 
-                {/* Total */}
-                <div className="text-right flex-shrink-0">
+                {/* Total y Chevron */}
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <p className="font-bold text-lg whitespace-nowrap">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</p>
+                  {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
-
-                {isExpanded ? <ChevronUp className="h-5 w-5 flex-shrink-0" /> : <ChevronDown className="h-5 w-5 flex-shrink-0" />}
               </div>
             </div>
           </CardHeader>
