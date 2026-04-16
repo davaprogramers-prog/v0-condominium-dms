@@ -89,16 +89,15 @@ export function PropietariosClient({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Propietarios</h1>
-          <p className="text-muted-foreground text-sm">
-            Estado de pagos - {periodLabel}
-          </p>
+      <p className="text-muted-foreground text-sm">
+        Estado de pagos - {periodLabel}
+      </p>
+
+      {isAdmin && (
+        <div className="flex items-center justify-center">
+          <CreateHouseDialog condoId={condoId} onSuccess={onRefresh} />
         </div>
-        {isAdmin && <CreateHouseDialog condoId={condoId} onSuccess={onRefresh} />}
-      </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
