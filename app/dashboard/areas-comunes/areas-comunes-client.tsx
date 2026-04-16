@@ -204,8 +204,8 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
 
       {areas.length === 0 ? (
         <div className="rounded-lg border-2 p-12 text-center" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>
