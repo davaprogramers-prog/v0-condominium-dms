@@ -6,8 +6,8 @@ export default function Page() {
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row items-center sm:justify-end gap-2 sm:gap-3">
-          <div className="w-full sm:w-auto flex flex-col gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:gap-3 pr-0 sm:pr-auto">
+          <div className="w-full sm:w-auto flex flex-col gap-2 ml-28 sm:ml-0">
             <a 
               href="/auth/login" 
               className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
