@@ -101,12 +101,6 @@ export default async function ReportesPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Reportes de Finanzas</h1>
-        <p className="text-muted-foreground">Análisis completo de ingresos y gastos</p>
-      </div>
-
       {/* Month Navigation */}
       <div className="flex items-center justify-center gap-4">
         <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
