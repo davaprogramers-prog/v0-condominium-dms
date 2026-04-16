@@ -35,8 +35,17 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [showUpdateBanner, setShowUpdateBanner] = useState(false)
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Wait for client-side hydration before checking PWA state
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
+    // Only run on client after hydration
+    if (!isClient) return
+    
     // Verificar si ya está instalada como PWA
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
     const isIOSStandalone = (window.navigator as any).standalone === true
@@ -106,7 +115,7 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
     }
-  }, [])
+  }, [isClient])
 
   const installApp = useCallback(async () => {
     if (!deferredPrompt) return
