@@ -11,7 +11,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dashboard/reportes": "Reportes de Finanzas",
   "/dashboard/balance": "Balance",
-  "/dashboard/gastos": "Gastos",
+  "/dashboard/gastos": "Gastos y Egresos",
   "/dashboard/tipos-gastos": "Tipos de Gastos",
   "/dashboard/casas": "Casas",
   "/dashboard/usuarios": "Usuarios",
@@ -32,7 +32,6 @@ const pageTitles: Record<string, string> = {
 
 // Pages that should show period selector
 const pagesWithPeriod = [
-  "/dashboard/gastos",
   "/dashboard/ingresos",
   "/dashboard/ingreso-variable",
   "/dashboard/cartolas",
