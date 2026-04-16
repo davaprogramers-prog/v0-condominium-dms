@@ -18,6 +18,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/propietarios": "Propietarios",
   "/dashboard/ingresos": "Ingresos",
   "/dashboard/ingreso-variable": "Ingresos Variables",
+  "/dashboard/ingresos-multas": "Ingresos por Multas",
   "/dashboard/exoneraciones": "Exoneraciones",
   "/dashboard/tipos-exoneraciones": "Tipos de Exoneraciones",
   "/dashboard/proyectos": "Proyectos",
