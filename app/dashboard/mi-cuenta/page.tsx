@@ -159,90 +159,87 @@ export default function MiCuentaPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 w-full max-w-full">
-      <div className="w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold break-words" style={{ color: cardTextColor }}>Mi Cuenta</h1>
-        <p className="text-sm sm:text-base text-muted-foreground break-words" style={{ color: cardTextColor }}>Administra tu información personal y seguridad</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold" style={{ color: cardTextColor }}>Mi Cuenta</h1>
+        <p className="text-muted-foreground" style={{ color: cardTextColor }}>Administra tu información personal y seguridad</p>
       </div>
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded flex items-center gap-2 text-sm sm:text-base">
-          <CheckCircle2 className="h-4 sm:h-5 w-4 sm:w-5 flex-shrink-0" />
-          <span className="break-words">{success}</span>
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+          <span>{success}</span>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded flex items-center gap-2 text-sm sm:text-base">
-          <AlertCircle className="h-4 sm:h-5 w-4 sm:w-5 flex-shrink-0" />
-          <span className="break-words">{error}</span>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
       {/* Profile Information */}
       <Card style={{ backgroundColor: cardBgColor || undefined }}>
-        <CardHeader className="p-3 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl break-words" style={{ color: cardTextColor }}>
-            <User className="h-4 sm:h-5 w-4 sm:w-5 flex-shrink-0" />
-            <span>Información Personal</span>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2" style={{ color: cardTextColor }}>
+            <User className="h-5 w-5" />
+            Información Personal
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm break-words" style={{ color: cardTextColor }}>
+          <CardDescription style={{ color: cardTextColor }}>
             Actualiza tu nombre y datos de contacto
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          <form onSubmit={handleUpdateProfile} className="space-y-3 sm:space-y-4 w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 w-full">
-              <div className="space-y-2 w-full min-w-0">
-                <Label htmlFor="firstName" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Nombre</Label>
+        <CardContent>
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" style={{ color: cardTextColor }}>Nombre</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   disabled={saving}
-                  className="text-xs sm:text-sm w-full truncate"
                   style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
-              <div className="space-y-2 w-full min-w-0">
-                <Label htmlFor="lastName" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Apellido</Label>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" style={{ color: cardTextColor }}>Apellido</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   disabled={saving}
-                  className="text-xs sm:text-sm w-full truncate"
                   style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
             </div>
 
-            <div className="space-y-2 w-full min-w-0">
-              <Label htmlFor="email" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Correo Electrónico</Label>
-              <div className="flex items-center gap-2 w-full min-w-0">
-                <Mail className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground flex-shrink-0" />
+            <div className="space-y-2">
+              <Label htmlFor="email" style={{ color: cardTextColor }}>Correo Electrónico</Label>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   value={email}
                   disabled
-                  className="text-xs sm:text-sm w-full truncate"
                   style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground break-words" style={{ color: cardTextColor }}>
+              <p className="text-xs text-muted-foreground" style={{ color: cardTextColor }}>
                 El correo electrónico no puede ser modificado
               </p>
             </div>
 
-            <div className="space-y-2 w-full">
-              <Label className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Rol</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md text-xs sm:text-sm break-words" style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+            <div className="space-y-2">
+              <Label style={{ color: cardTextColor }}>Rol</Label>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-md" style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                 <span className="capitalize">{profile?.role || "Usuario"}</span>
               </div>
             </div>
 
-            <Button type="submit" disabled={saving} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white text-xs sm:text-sm py-2 sm:py-3">
-              {saving && <Loader2 className="h-3 sm:h-4 w-3 sm:w-4 mr-2 animate-spin" />}
+            <Button type="submit" disabled={saving} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Guardar Cambios
             </Button>
           </form>
@@ -251,20 +248,20 @@ export default function MiCuentaPage() {
 
       {/* Change Password */}
       <Card style={{ backgroundColor: cardBgColor || undefined }}>
-        <CardHeader className="p-3 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl break-words" style={{ color: cardTextColor }}>
-            <Key className="h-4 sm:h-5 w-4 sm:w-5 flex-shrink-0" />
-            <span>Cambiar Contraseña</span>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2" style={{ color: cardTextColor }}>
+            <Key className="h-5 w-5" />
+            Cambiar Contrasena
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm break-words" style={{ color: cardTextColor }}>
+          <CardDescription style={{ color: cardTextColor }}>
             Actualiza tu contraseña para mantener tu cuenta segura
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          <form onSubmit={handleChangePassword} className="space-y-3 sm:space-y-4 w-full">
-            <div className="space-y-2 w-full">
-              <Label htmlFor="currentPassword" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Contraseña Actual</Label>
-              <div className="relative w-full">
+        <CardContent>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword" style={{ color: cardTextColor }}>Contraseña Actual</Label>
+              <div className="relative">
                 <Input
                   id="currentPassword"
                   type={showPassword ? "text" : "password"}
@@ -272,21 +269,21 @@ export default function MiCuentaPage() {
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
                   disabled={savingPassword}
-                  className="pr-10 text-xs sm:text-sm w-full"
+                  className="pr-10"
                   style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground flex-shrink-0"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-3 sm:h-4 w-3 sm:w-4" /> : <Eye className="h-3 sm:h-4 w-3 sm:w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="space-y-2 w-full">
-              <Label htmlFor="newPassword" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Nueva Contraseña</Label>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword" style={{ color: cardTextColor }}>Nueva Contraseña</Label>
               <Input
                 id="newPassword"
                 type={showPassword ? "text" : "password"}
@@ -295,13 +292,12 @@ export default function MiCuentaPage() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 disabled={savingPassword}
-                className="text-xs sm:text-sm w-full"
                 style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
 
-            <div className="space-y-2 w-full">
-              <Label htmlFor="confirmPassword" className="text-xs sm:text-sm" style={{ color: cardTextColor }}>Confirmar Nueva Contraseña</Label>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" style={{ color: cardTextColor }}>Confirmar Nueva Contraseña</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
@@ -310,14 +306,13 @@ export default function MiCuentaPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={savingPassword}
-                className="text-xs sm:text-sm w-full"
                 style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
             </div>
 
-            <Button type="submit" disabled={savingPassword} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white text-xs sm:text-sm py-2 sm:py-3">
-              {savingPassword && <Loader2 className="h-3 sm:h-4 w-3 sm:w-4 mr-2 animate-spin" />}
-              Cambiar Contraseña
+            <Button type="submit" disabled={savingPassword} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+              {savingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Cambiar Contraseña
             </Button>
           </form>
         </CardContent>
