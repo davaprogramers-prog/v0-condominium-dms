@@ -20,7 +20,7 @@ export function TiposGastosClient({ types, isAdmin }: { types: Record<string, un
       <p className="text-muted-foreground text-sm">Categorías para clasificar los gastos del condominio</p>
 
       {isAdmin && (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-center">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
 

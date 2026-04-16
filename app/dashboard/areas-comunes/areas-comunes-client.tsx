@@ -65,7 +65,7 @@ export function AreasComunesClient({ areas, currencySymbol, isAdmin }: AreasComu
       <p className="text-muted-foreground text-sm">{areas.length} áreas registradas</p>
 
       {isAdmin && (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-center">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
               <Button

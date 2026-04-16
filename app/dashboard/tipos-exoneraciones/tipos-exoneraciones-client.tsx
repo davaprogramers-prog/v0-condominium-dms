@@ -26,7 +26,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
       <p className="text-muted-foreground text-sm">{exemptionTypes.length} tipos registrados</p>
 
       {isAdmin && (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-center">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
 
