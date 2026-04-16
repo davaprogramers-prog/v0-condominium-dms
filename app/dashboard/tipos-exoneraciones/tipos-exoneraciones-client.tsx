@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, ShieldOff, Edit2, Trash2, EyeOff } from "lucide-react"
+import { Plus, ShieldOff, Edit2, Trash2, Shield } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface TiposExoneracionesClientProps {
@@ -46,7 +46,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   fontWeight: "600"
                 }}
               >
-                <EyeOff className="h-5 w-5" />
+                <Shield className="h-5 w-5" />
                 Nuevo Tipo de Exoneraciones
               </Button>
 
