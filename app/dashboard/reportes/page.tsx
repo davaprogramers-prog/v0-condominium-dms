@@ -108,11 +108,10 @@ export default async function ReportesPage({
       </div>
 
       {/* Month Navigation */}
-      <div className="flex flex-wrap items-center gap-4 bg-muted/50 rounded-lg p-4">
+      <div className="flex items-center justify-center gap-4">
         <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
-          <Button variant="outline" size="sm">
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Anterior
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
           </Button>
         </Link>
         <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
@@ -120,15 +119,13 @@ export default async function ReportesPage({
         </span>
         {canGoNext ? (
           <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
-            <Button variant="outline" size="sm">
-              Siguiente
-              <ChevronRight className="h-4 w-4 ml-1" />
+            <Button variant="outline" size="icon">
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         ) : (
-          <Button variant="outline" size="sm" disabled>
-            Siguiente
-            <ChevronRight className="h-4 w-4 ml-1" />
+          <Button variant="outline" size="icon" disabled>
+            <ChevronRight className="h-4 w-4" />
           </Button>
         )}
       </div>

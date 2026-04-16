@@ -32,7 +32,6 @@ const pageTitles: Record<string, string> = {
 // Pages that should show period selector
 const pagesWithPeriod = [
   "/dashboard/gastos",
-  "/dashboard/reportes",
   "/dashboard/balance",
   "/dashboard/ingresos",
   "/dashboard/ingreso-variable",
