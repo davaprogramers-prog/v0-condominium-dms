@@ -218,18 +218,18 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       Nueva Solicitud
                     </Button>
                   </DialogTrigger>
-                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-4xl mx-auto">
-                    <DialogHeader className="flex justify-between items-center">
+                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-2xl mx-auto" showCloseButton={false}>
+                    <DialogHeader className="flex justify-between items-center px-1.25 py-2">
                       <DialogTitle style={{ color: dialogTextColor }}>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="text-foreground hover:text-foreground/80 bg-slate-200 hover:bg-slate-300 rounded-full w-8 h-8 flex items-center justify-center"
-                        aria-label="Cerrar"
+                        className="ml-2 inline-flex items-center justify-center rounded-md bg-slate-200 hover:bg-slate-300 text-slate-900 transition-colors w-8 h-8 flex-shrink-0"
+                        aria-label="Cerrar diálogo"
                       >
-                        ✕
+                        <span className="text-lg font-bold">✕</span>
                       </button>
                     </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-6 px-2">
+                    <form onSubmit={handleSubmit} className="space-y-4 px-1.25">
                       <div className="max-w-lg mx-auto w-full">
                         <Label htmlFor="title" style={{ color: dialogTextColor }}>Título</Label>
                         <Input
@@ -273,7 +273,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                           </Button>
                         </div>
 
-                        <div style={{ backgroundColor: inputBgColor, borderColor: inputTextColor }} className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-4">
+                        <div style={{ backgroundColor: inputBgColor, borderColor: inputTextColor }} className="space-y-2 max-h-64 overflow-y-auto border rounded-lg p-1.25">
                           {formData.items.map((item, index) => (
                             <div key={index} className="flex gap-3 items-end">
                               <div className="w-24">
@@ -314,8 +314,8 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                         </div>
                       </div>
 
-                      <div className="flex justify-center mt-8">
-                        <Button type="submit" disabled={isSubmitting} className="max-w-lg w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+                      <div className="flex justify-center mt-6">
+                        <Button type="submit" disabled={isSubmitting} className="max-w-sm w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
                           {isSubmitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
                         </Button>
                       </div>
