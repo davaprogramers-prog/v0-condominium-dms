@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Plus, Loader2 } from "lucide-react"
 import { createHouse } from "./actions"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface CreateHouseDialogProps {
   condoId: string
@@ -28,6 +29,7 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const [formData, setFormData] = useState({
     houseNumber: "",
@@ -97,23 +99,26 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
           Crear Casa
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-sky-50 border-2 border-sky-300">
-        <DialogHeader className="border-b-2 border-sky-200 pb-4">
-          <DialogTitle className="text-2xl font-bold text-gray-900">Crear Nueva Casa</DialogTitle>
-          <DialogDescription className="text-gray-700 mt-2">
+      <DialogContent 
+        className="max-w-md"
+        style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: inputTextColor, borderWidth: "1px" }}
+      >
+        <DialogHeader className="pb-4" style={{ borderBottomColor: inputTextColor, borderBottomWidth: "1px" }}>
+          <DialogTitle className="text-2xl font-bold" style={{ color: dialogTextColor }}>Crear Nueva Casa</DialogTitle>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }} className="mt-2">
             Agrega una nueva propiedad al condominio
           </DialogDescription>
         </DialogHeader>
 
         {success && (
-          <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 text-green-800 font-semibold flex items-start gap-3">
+          <div className="rounded-lg p-4 flex items-start gap-3" style={{ backgroundColor: "#dcfce7", borderColor: "#22c55e", borderWidth: "2px", color: "#166534" }}>
             <span className="text-xl">✓</span>
             <span>{successMessage}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 text-red-800 font-semibold flex items-start gap-3">
+          <div className="rounded-lg p-4 flex items-start gap-3" style={{ backgroundColor: "#fee2e2", borderColor: "#ef4444", borderWidth: "2px", color: "#991b1b" }}>
             <span className="text-xl">✕</span>
             <span>{error}</span>
           </div>
@@ -121,7 +126,7 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <Label htmlFor="houseNumber" className="text-gray-800 font-bold mb-2 block text-sm">
+            <Label htmlFor="houseNumber" className="font-bold mb-2 block text-sm" style={{ color: dialogTextColor }}>
               Número de Casa
             </Label>
             <Input
@@ -131,12 +136,17 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.houseNumber}
               onChange={handleInputChange}
               disabled={loading || success}
-              className="border-2 border-amber-400 bg-amber-50 text-gray-900 placeholder-gray-600 focus:ring-2 focus:ring-amber-300 focus:border-amber-500 font-medium"
+              style={{
+                borderColor: inputTextColor,
+                backgroundColor: inputBgColor,
+                color: inputTextColor,
+              }}
+              className="border-2 focus:ring-2 focus:border-opacity-80 font-medium"
             />
           </div>
 
           <div>
-            <Label htmlFor="ownerName" className="text-gray-800 font-bold mb-2 block text-sm">
+            <Label htmlFor="ownerName" className="font-bold mb-2 block text-sm" style={{ color: dialogTextColor }}>
               Nombre del Propietario
             </Label>
             <Input
@@ -146,12 +156,17 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.ownerName}
               onChange={handleInputChange}
               disabled={loading || success}
-              className="border-2 border-amber-400 bg-amber-50 text-gray-900 placeholder-gray-600 focus:ring-2 focus:ring-amber-300 focus:border-amber-500 font-medium"
+              style={{
+                borderColor: inputTextColor,
+                backgroundColor: inputBgColor,
+                color: inputTextColor,
+              }}
+              className="border-2 focus:ring-2 focus:border-opacity-80 font-medium"
             />
           </div>
 
           <div>
-            <Label htmlFor="ownerEmail" className="text-gray-800 font-bold mb-2 block text-sm">
+            <Label htmlFor="ownerEmail" className="font-bold mb-2 block text-sm" style={{ color: dialogTextColor }}>
               Email del Propietario
             </Label>
             <Input
@@ -162,24 +177,31 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
               value={formData.ownerEmail}
               onChange={handleInputChange}
               disabled={loading || success}
-              className="border-2 border-amber-400 bg-amber-50 text-gray-900 placeholder-gray-600 focus:ring-2 focus:ring-amber-300 focus:border-amber-500 font-medium"
+              style={{
+                borderColor: inputTextColor,
+                backgroundColor: inputBgColor,
+                color: inputTextColor,
+              }}
+              className="border-2 focus:ring-2 focus:border-opacity-80 font-medium"
             />
           </div>
 
-          <div className="flex gap-3 justify-end pt-4 border-t-2 border-sky-200">
+          <div className="flex gap-3 justify-end pt-4" style={{ borderTopColor: inputTextColor, borderTopWidth: "1px" }}>
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="px-6 text-gray-700 border-2 border-gray-400 hover:bg-gray-100 font-semibold"
+              style={{ borderColor: inputTextColor, color: dialogTextColor }}
+              className="px-6 border-2 font-semibold"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={loading || success}
-              className="px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              className="px-6 text-white font-bold"
+              style={{ backgroundColor: "#2563eb" }}
             >
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Crear Casa
