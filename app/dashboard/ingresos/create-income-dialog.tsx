@@ -29,7 +29,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
   const [error, setError] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [incomeType, setIncomeType] = useState<"cuota" | "variable">("cuota")
+  const [incomeType, setIncomeType] = useState<"fixed" | "variable">("fixed")
   const router = useRouter()
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
@@ -77,7 +77,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
 
       setOpen(false)
       clearFile()
-      setIncomeType("cuota")
+      setIncomeType("fixed")
       router.refresh()
     } catch (err) {
       console.error("[v0] Error in income form:", err)
@@ -138,12 +138,12 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
               </div>
               <div className="space-y-2">
                 <Label htmlFor="incomeType" style={{ color: dialogTextColor }}>Tipo*</Label>
-                <Select value={incomeType} onValueChange={(val) => setIncomeType(val as "cuota" | "variable")}>
+                <Select value={incomeType} onValueChange={(val) => setIncomeType(val as "fixed" | "variable")}>
                   <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                    <SelectItem value="cuota">Cuota Común</SelectItem>
+                    <SelectItem value="fixed">Cuota Común</SelectItem>
                     <SelectItem value="variable">Ingreso Variable</SelectItem>
                   </SelectContent>
                 </Select>
