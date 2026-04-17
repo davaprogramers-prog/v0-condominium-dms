@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CartolasClient } from "./cartolas-client"
 import { CreateCartolasDialog } from "./create-cartolas-dialog"
+import { Landmark } from "lucide-react"
 
 export default async function CartolasPage() {
   const supabase = await createClient()
@@ -21,9 +22,19 @@ export default async function CartolasPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* Header with Title and Icon */}
+      <div className="flex items-center gap-2">
+        <Landmark className="h-6 w-6 text-slate-700 dark:text-slate-300 flex-shrink-0" />
         <h1 className="text-3xl font-bold">Cartolas Bancarias</h1>
-        <p className="text-muted-foreground">Histórico de cartolas bancarias del condominio</p>
+      </div>
+
+      {/* Dividing Line */}
+      <div className="h-px bg-border" />
+
+      {/* Subtitle with Icon */}
+      <div className="flex items-center gap-2">
+        <Landmark className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <p className="text-muted-foreground text-sm">Histórico de cartolas bancarias del condominio</p>
       </div>
 
       {/* Upload Cartolas Button - Centered */}
