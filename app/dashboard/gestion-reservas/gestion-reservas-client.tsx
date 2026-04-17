@@ -120,13 +120,11 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <p className="text-sm font-semibold text-black">
-            Administrar todas las reservas del condominio
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <p className="text-sm font-semibold text-black">
+          Administrar todas las reservas del condominio
+        </p>
       </div>
 
       {/* Filters */}
