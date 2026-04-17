@@ -44,12 +44,14 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Infracciones</h1>
-          <p className="text-sm text-muted-foreground">{pendingCount} pendientes, {paidCount} pagadas</p>
-        </div>
-        {isAdmin && (
+      {/* Summary Info */}
+      <div className="text-sm text-muted-foreground">
+        {pendingCount} pendientes, {paidCount} pagadas
+      </div>
+
+      {/* New Infraction Button - Centered */}
+      {isAdmin && (
+        <div className="flex items-center justify-center">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
 
@@ -116,8 +118,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-center gap-4 flex-wrap">
         <Select value={filter} onValueChange={setFilter}>
