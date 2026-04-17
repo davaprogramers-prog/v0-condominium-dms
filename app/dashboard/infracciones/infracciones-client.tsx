@@ -121,17 +121,6 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-4 flex-wrap">
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
-            <SelectItem value="pendientes">Pendientes</SelectItem>
-            <SelectItem value="pagadas">Pagadas</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="p-4">
