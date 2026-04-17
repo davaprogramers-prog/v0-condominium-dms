@@ -128,13 +128,17 @@ export default function LoginPage() {
 
       {/* Footer */}
       <div className="mt-8 text-center text-xs text-gray-500 space-y-2">
-        <div>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           <Link href="/support" className="hover:text-blue-600 transition-colors">
             Soporte
           </Link>
-          <span className="mx-2">•</span>
+          <span>•</span>
           <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">
             Políticas de Privacidad
+          </Link>
+          <span>•</span>
+          <Link href="/terms" className="hover:text-blue-600 transition-colors">
+            Términos de Servicio
           </Link>
         </div>
       </div>
