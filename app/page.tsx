@@ -168,12 +168,14 @@ export default function Page() {
       <footer className="border-t border-border bg-background/50 py-8 px-4 sm:px-6 lg:px-8 mt-auto">
         <div className="max-w-6xl mx-auto text-center text-sm text-muted-foreground space-y-4">
           <p>© 2026 InteliCon. Todos los derechos reservados.</p>
-          <div className="flex items-center justify-center gap-4 text-xs">
+          <div className="flex items-center justify-center gap-4 text-xs flex-wrap">
             <a href="/" className="hover:text-foreground transition-colors">Inicio</a>
             <span>•</span>
             <a href="/support" className="hover:text-foreground transition-colors">Soporte</a>
             <span>•</span>
             <a href="/privacy-policy" className="hover:text-foreground transition-colors">Políticas de Privacidad</a>
+            <span>•</span>
+            <a href="/terms" className="hover:text-foreground transition-colors">Términos de Servicio</a>
           </div>
         </div>
       </footer>
