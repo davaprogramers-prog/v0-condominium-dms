@@ -414,20 +414,20 @@ export default function ParcelPage() {
           <div className="space-y-3">
             {parcels.map((parcel) => (
               <div key={parcel.id} className={`rounded-lg border p-4 ${getStatusColor(parcel.status)}`}>
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     <div className="mt-1 flex-shrink-0">{getStatusIcon(parcel.status)}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold">{parcel.parcel_type}</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                        <h3 className="font-semibold truncate">{parcel.parcel_type}</h3>
                         {isConserje && parcel.house && (
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
                             Casa #{parcel.house.house_number}
                           </span>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground truncate">De: {parcel.from_sender}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
                         {typeof parcel.received_date === 'string'
                           ? parcel.received_date.split('T').join(' ').slice(0, 19)
                           : new Date(parcel.received_date).toISOString().split('T').join(' ').slice(0, 19)
@@ -435,7 +435,7 @@ export default function ParcelPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:flex-shrink-0 justify-start lg:justify-end">
                     <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-white/50 whitespace-nowrap">
                       {getStatusLabel(parcel.status)}
                     </span>
