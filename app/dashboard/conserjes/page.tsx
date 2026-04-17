@@ -143,8 +143,8 @@ export default function ConserjesPage() {
         </div>
       )}
 
-
-      {isLoading ? (
+      <div className="mt-8">
+        {isLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="p-6">
@@ -200,6 +200,7 @@ export default function ConserjesPage() {
           ))}
         </div>
       )}
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={editingId !== null} onOpenChange={(open) => !open && setEditingId(null)}>
