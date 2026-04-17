@@ -14,6 +14,25 @@ interface CreateVariableIncomeDialogProps {
   condoId: string
 }
 
+// Map Supabase error codes to user-friendly messages
+function getErrorMessage(err: any): string {
+  if (typeof err === "string") return err
+  
+  if (err?.code === "42501") {
+    return "No tienes permisos para crear ingresos variables. Contacta al administrador del sistema."
+  }
+  
+  if (err?.message?.includes("42501")) {
+    return "No tienes permisos para crear ingresos variables. Contacta al administrador del sistema."
+  }
+  
+  if (err?.message) {
+    return err.message
+  }
+  
+  return "Error al crear el ingreso variable. Intenta nuevamente."
+}
+
 export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -44,7 +63,8 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
       setReceiptUrl("")
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear ingreso variable")
+      const friendlyError = getErrorMessage(err)
+      setError(friendlyError)
     } finally {
       setLoading(false)
     }
@@ -123,8 +143,12 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
             />
           </div>
           <input type="hidden" name="receipt_url" value={receiptUrl} />
-          {error && <p style={{ color: "#ef4444" }} className="text-sm">{error}</p>}
-          <Button type="submit" disabled={loading} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+          {error && (
+            <div className="rounded-lg p-3 text-sm" style={{ backgroundColor: "#fee2e2", color: "#991b1b", borderColor: "#ef4444", borderWidth: "1px" }}>
+              {error}
+            </div>
+          )}
+          <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Guardar Ingreso
           </Button>
