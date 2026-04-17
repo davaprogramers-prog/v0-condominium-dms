@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js"
 /**
  * Get the condo_id for a user, avoiding RLS issues
  * Works for both owners (via profiles or via their house) and admins
+ * For super_admin without condo_id, returns the first condominium
  */
 export async function getUserCondoId(
   supabase: SupabaseClient,
@@ -13,7 +14,7 @@ export async function getUserCondoId(
     // Try to get from profiles first (for owners and any user)
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("condo_id, house_id")
+      .select("condo_id, house_id, role")
       .eq("id", userId)
       .limit(1)
 
@@ -40,8 +41,23 @@ export async function getUserCondoId(
           console.log("[v0] Found condo_id via house:", house[0].condo_id)
           return house[0].condo_id
         }
-      } else {
-        console.log("[v0] Profile has no house_id:", profile[0])
+      }
+      
+      // If super_admin with no condo_id, get the first condominium
+      if (profile[0]?.role === "super_admin" || profile[0]?.role === "admin") {
+        console.log("[v0] User is admin/super_admin without condo_id, fetching first condominium")
+        const { data: condos, error: condoError } = await supabase
+          .from("condominiums")
+          .select("id")
+          .limit(1)
+          .order("created_at", { ascending: true })
+        
+        console.log("[v0] First condominium query result:", { condos, condoError })
+        
+        if (condos && condos.length > 0 && condos[0]?.id) {
+          console.log("[v0] Found first condominium for admin:", condos[0].id)
+          return condos[0].id
+        }
       }
     } else {
       console.log("[v0] No profile found for user:", userId)
