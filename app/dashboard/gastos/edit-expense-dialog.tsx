@@ -111,157 +111,161 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Editar Gasto</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los detalles del gasto y la boleta/factura</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 px-2 space-y-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Ej: Reparación puerta"
+                  defaultValue={expense.title}
+                  required
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  defaultValue={expense.amount}
+                  placeholder="0.00"
+                  required
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="Ej: Reparación puerta"
-                defaultValue={expense.title}
-                required
+              <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Detalles adicionales del gasto..."
+                defaultValue={expense.description}
+                rows={3}
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                defaultValue={expense.amount}
-                placeholder="0.00"
-                required
-                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
+                <Select name="category" defaultValue={expense.category || ""}>
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+                    <SelectValue placeholder="Seleccionar tipo..." />
+                  </SelectTrigger>
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
+                    {expenseTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                    {!expenseTypes.find(t => t.name === expense.category) && expense.category && (
+                      <SelectItem value={expense.category}>
+                        {expense.category}
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expenseDate" style={{ color: dialogTextColor }}>Fecha del Gasto</Label>
+                <Input
+                  id="expenseDate"
+                  name="expenseDate"
+                  type="date"
+                  defaultValue={new Date(expense.expense_date).toISOString().split("T")[0]}
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Detalles adicionales del gasto..."
-              defaultValue={expense.description}
-              rows={3}
-              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+            {/* Logo Selector */}
             <div className="space-y-2">
-              <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
-              <Select name="category" defaultValue={expense.category || ""}>
+              <Label style={{ color: dialogTextColor }}>Logo del Proveedor</Label>
+              <Select value={selectedLogoId || "none"} onValueChange={(val) => setSelectedLogoId(val === "none" ? "" : val)}>
                 <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
-                  <SelectValue placeholder="Seleccionar tipo..." />
+                  <SelectValue placeholder="Seleccionar logo..." />
                 </SelectTrigger>
                 <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
-                  {expenseTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.name}>
-                      {type.name}
+                  <SelectItem value="none">Sin logo</SelectItem>
+                  {expenseLogos.map((logo) => (
+                    <SelectItem key={logo.id} value={logo.id}>
+                      {logo.name}
                     </SelectItem>
                   ))}
-                  {!expenseTypes.find(t => t.name === expense.category) && expense.category && (
-                    <SelectItem value={expense.category}>
-                      {expense.category}
-                    </SelectItem>
-                  )}
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Receipt Upload */}
             <div className="space-y-2">
-              <Label htmlFor="expenseDate" style={{ color: dialogTextColor }}>Fecha del Gasto</Label>
-              <Input
-                id="expenseDate"
-                name="expenseDate"
-                type="date"
-                defaultValue={new Date(expense.expense_date).toISOString().split("T")[0]}
-                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-              />
-            </div>
-          </div>
-
-          {/* Logo Selector */}
-          <div className="space-y-2">
-            <Label style={{ color: dialogTextColor }}>Logo del Proveedor</Label>
-            <Select value={selectedLogoId || "none"} onValueChange={(val) => setSelectedLogoId(val === "none" ? "" : val)}>
-              <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
-                <SelectValue placeholder="Seleccionar logo..." />
-              </SelectTrigger>
-              <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
-                <SelectItem value="none">Sin logo</SelectItem>
-                {expenseLogos.map((logo) => (
-                  <SelectItem key={logo.id} value={logo.id}>
-                    {logo.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Receipt Upload */}
-          <div className="space-y-2">
-            <Label style={{ color: dialogTextColor }}>Imagen de Boleta/Factura</Label>
-            <div style={{ borderColor: inputTextColor, backgroundColor: inputBgColor === "#f8fafc" ? "#f1f5f9" : "#0f172a" }} className="border-2 border-dashed rounded-lg p-4 text-center">
-              {previewUrl ? (
-                <div className="space-y-2">
-                  <div className="relative inline-block">
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      style={{ borderColor: inputTextColor }}
-                      className="max-h-40 max-w-full rounded border-2"
+              <Label style={{ color: dialogTextColor }}>Imagen de Boleta/Factura</Label>
+              <div style={{ borderColor: inputTextColor, backgroundColor: inputBgColor === "#f8fafc" ? "#f1f5f9" : "#0f172a" }} className="border-2 border-dashed rounded-lg p-4 text-center">
+                {previewUrl ? (
+                  <div className="space-y-2">
+                    <div className="relative inline-block">
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        style={{ borderColor: inputTextColor }}
+                        className="max-h-40 max-w-full rounded border-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={clearFile}
+                        className="absolute top-1 right-1 bg-destructive rounded-full p-1"
+                      >
+                        <X className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
+                    {selectedFile && <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">{selectedFile.name}</p>}
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
+                      <span style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">
+                        Haz clic para cargar o arrastra una imagen
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
                     />
-                    <button
-                      type="button"
-                      onClick={clearFile}
-                      className="absolute top-1 right-1 bg-destructive rounded-full p-1"
-                    >
-                      <X className="h-4 w-4 text-white" />
-                    </button>
-                  </div>
-                  {selectedFile && <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">{selectedFile.name}</p>}
-                </div>
-              ) : (
-                <label className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
-                    <span style={{ color: inputTextColor, opacity: 0.7 }} className="text-sm">
-                      Haz clic para cargar o arrastra una imagen
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </label>
-              )}
+                  </label>
+                )}
+              </div>
+              <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-xs">
+                Formatos: JPG, PNG. Máx 5MB
+              </p>
             </div>
-            <p style={{ color: inputTextColor, opacity: 0.7 }} className="text-xs">
-              Formatos: JPG, PNG. Máx 5MB
-            </p>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Guardar Cambios
-          </Button>
+          <div className="border-t mt-4 pt-4" style={{ borderColor: inputTextColor }}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Guardar Cambios
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
