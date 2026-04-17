@@ -143,7 +143,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                    <SelectItem value="fixed">Cuota Común</SelectItem>
+                    <SelectItem value="fixed">Ingreso</SelectItem>
                     <SelectItem value="variable">Ingreso Variable</SelectItem>
                   </SelectContent>
                 </Select>
