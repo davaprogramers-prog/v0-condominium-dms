@@ -193,7 +193,7 @@ export default function ParcelPage() {
       .order('created_at', { ascending: false })
 
     console.log('[v0] loadPhotosForParcel query:', { parcelId, photosData, error })
-    
+
     return (photosData || []).map(photo => ({
       id: photo.id,
       photo_url: photo.photo_url,
@@ -250,14 +250,15 @@ export default function ParcelPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Encomiendas</h1>
-          <p className="text-muted-foreground">
-            {isConserje ? 'Gestiona las encomiendas del condominio' : 'Tus paquetes y entregas'}
-          </p>
-        </div>
-        {isConserje && <CreateParcelDialog condoId={condoId} houses={houses} onSuccess={handleRefresh} />}
+      <div>
+        <p className="text-muted-foreground mb-4">
+          {isConserje ? 'Gestiona las encomiendas del condominio' : 'Tus paquetes y entregas'}
+        </p>
+        {isConserje && (
+          <div className="flex justify-center">
+            <CreateParcelDialog condoId={condoId} houses={houses} onSuccess={handleRefresh} />
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -309,7 +310,7 @@ export default function ParcelPage() {
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-wrap">
           {/* Status Filter */}
           <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
-            <SelectTrigger 
+            <SelectTrigger
               className="w-full lg:w-48"
               style={{
                 backgroundColor: inputBgColor,
@@ -334,7 +335,7 @@ export default function ParcelPage() {
           {/* Property Filter (Conserjes only) */}
           {isConserje && (
             <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
-              <SelectTrigger 
+              <SelectTrigger
                 className="w-full lg:w-48"
                 style={{
                   backgroundColor: inputBgColor,

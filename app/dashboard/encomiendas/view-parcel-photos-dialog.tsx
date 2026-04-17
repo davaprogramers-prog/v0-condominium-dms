@@ -157,11 +157,10 @@ export function ViewParcelPhotosDialog({
                     <button
                       key={photo.id}
                       onClick={() => setCurrentPhotoIndex(index)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                        index === currentPhotoIndex
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${index === currentPhotoIndex
                           ? 'border-blue-500 bg-blue-100'
                           : 'border-gray-300 hover:border-blue-300'
-                      }`}
+                        }`}
                     >
                       <img
                         src={photo.photo_url}

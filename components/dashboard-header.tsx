@@ -28,6 +28,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/conserjes": "Gestión de Conserjes",
   "/dashboard/gestion-reservas": "Gestión de Reservas",
   "/dashboard/visitas-admin": "Gestión de Visitas",
+  "/dashboard/encomiendas": "Encomiendas",
   "/dashboard/configuracion": "Configuración",
   "/dashboard/alertas": "Alertas",
 }
