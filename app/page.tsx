@@ -171,6 +171,8 @@ export default function Page() {
           <div className="flex items-center justify-center gap-4 text-xs">
             <a href="/" className="hover:text-foreground transition-colors">Inicio</a>
             <span>•</span>
+            <a href="/support" className="hover:text-foreground transition-colors">Soporte</a>
+            <span>•</span>
             <a href="/privacy-policy" className="hover:text-foreground transition-colors">Políticas de Privacidad</a>
           </div>
         </div>

@@ -127,10 +127,16 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-center text-xs text-gray-500">
-        <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">
-          Políticas de Privacidad
-        </Link>
+      <div className="mt-8 text-center text-xs text-gray-500 space-y-2">
+        <div>
+          <Link href="/support" className="hover:text-blue-600 transition-colors">
+            Soporte
+          </Link>
+          <span className="mx-2">•</span>
+          <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">
+            Políticas de Privacidad
+          </Link>
+        </div>
       </div>
     </div>
   )
