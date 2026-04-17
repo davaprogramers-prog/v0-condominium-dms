@@ -8,11 +8,11 @@ export default function SupportPage() {
   const faqs = [
     {
       question: "¿Cómo registro mi condominio en la plataforma?",
-      answer: "Para registrar tu condominio, accede a la página de inicio y haz clic en 'Registrarse'. Completa el formulario con los datos de tu condominio y un administrador. Recibirás un email de confirmación para verificar tu cuenta."
+      answer: "Para registrar tu condominio, envía un correo a publicidad@dmsinnova.cl indicando tus datos. Nuestro equipo de asesoría se pondrá en contacto contigo para guiarte en el proceso de registro y asegurar que recibas un mejor servicio personalizado."
     },
     {
       question: "¿Cómo agrego usuarios a mi condominio?",
-      answer: "Una vez en el dashboard, ve a la sección 'Usuarios'. Haz clic en el botón 'Nuevo Usuario' y completa los datos del usuario. Puedes asignar diferentes roles (administrador, contador, propietario) según las necesidades."
+      answer: "Una vez en el dashboard, ve a la sección 'Usuarios'. Haz clic en el botón 'Nuevo Usuario' y completa los datos del usuario. Puedes asignar diferentes roles (administrador, conserje, propietario) según las necesidades."
     },
     {
       question: "¿Cómo registro los gastos del condominio?",
@@ -24,19 +24,15 @@ export default function SupportPage() {
     },
     {
       question: "¿Puedo exportar la información?",
-      answer: "Sí. La mayoría de las secciones permiten exportar datos. Busca el botón de exportación en la parte superior de las tablas o reportes para descargar en formato Excel o PDF."
+      answer: "Actualmente, la exportación de datos está en desarrollo. Si necesitas exportar información específica, por favor solicita asesoría escribiendo a publicidad@dmsinnova.cl y nuestro equipo te ayudará. Implementaremos esta funcionalidad próximamente."
     },
     {
       question: "¿Cómo restablezco mi contraseña?",
       answer: "En la página de login, haz clic en '¿Olvidé mi contraseña?'. Ingresa tu email registrado y recibirás un enlace para restablecer tu contraseña. El enlace es válido por 24 horas."
     },
     {
-      question: "¿Con qué frecuencia se realizan copias de seguridad?",
-      answer: "Realizamos copias de seguridad automáticas diarias de toda la información. Tu data está completamente protegida y encriptada en servidores seguros."
-    },
-    {
       question: "¿Puedo cambiar mi rol de usuario?",
-      answer: "Los roles se asignan por el administrador del condominio. Si necesitas cambiar de rol, contacta al administrador de tu condominio para que realice el cambio en la sección de 'Usuarios'."
+      answer: "Por políticas de diseño, los roles no pueden ser cambiados una vez asignados. Si necesitas acceso a funciones de otro rol, debes registrarte con otro correo electrónico. Contacta al administrador de tu condominio para que cree una nueva cuenta con el rol requerido."
     }
   ]
 
@@ -135,12 +131,12 @@ export default function SupportPage() {
             <p className="text-muted-foreground">
               Si tu consulta no está en las preguntas frecuentes, no dudes en contactarnos. Nuestro equipo de soporte estará encantado de ayudarte a resolver cualquier problema o duda que tengas sobre la plataforma.
             </p>
-            <a
-              href="mailto:soporte@dmsinnova.cl"
+            <Link
+              href="/contact"
               className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Enviar Consulta
-            </a>
+            </Link>
           </div>
 
           {/* Footer Links */}
