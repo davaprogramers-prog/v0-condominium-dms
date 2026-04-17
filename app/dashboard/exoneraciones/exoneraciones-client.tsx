@@ -304,7 +304,6 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           </Card>
         </TabsContent>
       </Tabs>
-      )}
 
     </div>
   )
