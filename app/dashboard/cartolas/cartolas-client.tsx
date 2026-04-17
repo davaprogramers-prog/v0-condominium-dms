@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Landmark, ExternalLink } from "lucide-react"
 
@@ -12,11 +12,7 @@ interface CartolasClientProps {
 export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Historial de Cartolas</CardTitle>
-        <CardDescription>Archivos PDF de cartolas bancarias del condominio</CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {statements.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
             <Landmark className="h-10 w-10" />
