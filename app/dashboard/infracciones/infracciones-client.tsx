@@ -44,15 +44,11 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Infracciones</h1>
-          <p className="text-sm text-muted-foreground">{pendingCount} pendientes, {paidCount} pagadas</p>
-        </div>
-        {isAdmin && (
+      {/* Add Infraction Button - Centered */}
+      {isAdmin && (
+        <div className="flex items-center justify-center">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-
               <Button
                 style={{
                   backgroundColor: "#2563eb",
@@ -72,7 +68,6 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                 <TriangleAlert className="h-5 w-5" />
                 Nueva Infraccion
               </Button>
-
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>
@@ -117,6 +112,17 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
             </DialogContent>
           </Dialog>
         )}
+
+      {/* Filter and Status */}
+      <div className="flex items-center justify-center gap-4 flex-wrap">
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas</SelectItem>
+            <SelectItem value="pendientes">Pendientes</SelectItem>
+            <SelectItem value="pagadas">Pagadas</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

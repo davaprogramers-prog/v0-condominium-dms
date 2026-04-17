@@ -23,11 +23,16 @@ export default async function ExoneracionesPage() {
   ])
 
   return (
-    <ExoneracionesClient
-      exemptions={exemptions || []}
-      exemptionTypes={exemptionTypes || []}
-      houses={houses || []}
-      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
-    />
+    <div className="space-y-6">
+      <p className="text-muted-foreground text-sm">Exoneraciones y condonaciones del condominio</p>
+
+      {/* Exoneraciones Client Content */}
+      <ExoneracionesClient
+        exemptions={exemptions || []}
+        exemptionTypes={exemptionTypes || []}
+        houses={houses || []}
+        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+      />
+    </div>
   )
 }
