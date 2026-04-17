@@ -21,7 +21,10 @@ export default async function CartolasPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground text-sm">Histórico de cartolas bancarias del condominio</p>
+      <div>
+        <h1 className="text-3xl font-bold">Cartolas Bancarias</h1>
+        <p className="text-muted-foreground">Histórico de cartolas bancarias del condominio</p>
+      </div>
 
       {/* Upload Cartolas Button - Centered */}
       {isAdmin && (
