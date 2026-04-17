@@ -130,15 +130,15 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
       </div>
 
       {/* Filters */}
-      <Card className="mb-2 mx-auto max-w-screen-lg md:max-w-none" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
-        <CardContent className="pt-6">
+      <Card className="mb-6 w-full" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
+        <CardContent className="pt-6 px-6">
           <div className="flex items-center gap-4 mb-8">
             <Filter className="h-4 w-4" />
             <span className="font-medium">Filtros</span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
-            <div>
-              <Label className="text-xs">Estado</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full">
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Estado</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todos" />
@@ -152,8 +152,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Área Común</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Área Común</Label>
               <Select value={filterArea} onValueChange={setFilterArea}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
@@ -166,8 +166,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Propiedad</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Propiedad</Label>
               <Select value={filterHouse} onValueChange={setFilterHouse}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
@@ -180,8 +180,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Fecha</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Fecha</Label>
               <Input
                 type="date"
                 value={searchDate}
