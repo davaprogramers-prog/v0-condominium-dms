@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CartolasClient } from "./cartolas-client"
+import { CreateCartolasDialog } from "./create-cartolas-dialog"
 
 export default async function CartolasPage() {
   const supabase = await createClient()
@@ -16,10 +17,24 @@ export default async function CartolasPage() {
     .eq("condo_id", profile.condo_id)
     .order("statement_date", { ascending: false })
 
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+
   return (
-    <CartolasClient
-      statements={statements || []}
-      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
-    />
+    <div className="space-y-6">
+      <p className="text-muted-foreground text-sm">Histórico de cartolas bancarias del condominio</p>
+
+      {/* Upload Cartolas Button - Centered */}
+      {isAdmin && (
+        <div className="flex items-center justify-center">
+          <CreateCartolasDialog condoId={profile.condo_id} />
+        </div>
+      )}
+
+      {/* Cartolas Client Content */}
+      <CartolasClient
+        statements={statements || []}
+        isAdmin={isAdmin}
+      />
+    </div>
   )
 }
