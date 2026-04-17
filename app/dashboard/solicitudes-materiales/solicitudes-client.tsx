@@ -194,7 +194,6 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                 <Link href="/dashboard" className="md:hidden">
                   <ChevronLeft className="h-5 w-5" />
                 </Link>
-                <h1 className="text-xl font-semibold">Solicitudes de Materiales</h1>
               </div>
               {(isAdmin || userRole === 'conserje') && (
                 <Dialog open={openCreate} onOpenChange={setOpenCreate}>
@@ -385,7 +384,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
               </div>
             </div>
           </div>
-          
+
           {/* Solicitudes list */}
           <div className="space-y-4">
             {filteredSolicitudes.length === 0 ? (
