@@ -26,14 +26,17 @@ const pageTitles: Record<string, string> = {
   "/dashboard/documentos": "Documentos",
   "/dashboard/infracciones": "Infracciones",
   "/dashboard/areas-comunes": "Áreas Comunes",
-  "/dashboard/cartolas": "Cartolas",
+  "/dashboard/cartolas": "Cartolas Bancarias",
   "/dashboard/configuracion": "Configuración",
   "/dashboard/alertas": "Alertas",
 }
 
 // Pages that should show period selector
 const pagesWithPeriod: string[] = [
-  // Pages with month/year filtering go here
+  "/dashboard/ingresos",
+  "/dashboard/ingreso-variable",
+  "/dashboard/ingresos-multas",
+  "/dashboard/infracciones",
 ]
 
 export function DashboardHeader({ user, profile }: { user: User; profile: Record<string, unknown> | null }) {
