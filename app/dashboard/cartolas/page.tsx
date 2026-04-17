@@ -22,15 +22,6 @@ export default async function CartolasPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Title and Icon */}
-      <div className="flex items-center gap-2">
-        <Landmark className="h-6 w-6 text-slate-700 dark:text-slate-300 flex-shrink-0" />
-        <h1 className="text-3xl font-bold">Cartolas Bancarias</h1>
-      </div>
-
-      {/* Dividing Line */}
-      <div className="h-px bg-border" />
-
       {/* Subtitle with Icon */}
       <div className="flex items-center gap-2">
         <Landmark className="h-4 w-4 text-muted-foreground flex-shrink-0" />
