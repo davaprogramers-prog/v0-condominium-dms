@@ -232,7 +232,7 @@ export default function PrivacyPolicyPage() {
               Si tienes preguntas, inquietudes o solicitudes relacionadas con esta Política de Privacidad o nuestras prácticas de privacidad, por favor contacta con nosotros en:
             </p>
             <div className="bg-secondary/30 p-6 rounded-lg space-y-2 mt-4">
-              <p className="text-foreground"><strong>Email:</strong> <a href="mailto:privacy@intelicon.com" className="text-blue-600 hover:underline">privacy@intelicon.com</a></p>
+              <p className="text-foreground"><strong>Email:</strong> <a href="mailto:publicidad@dmsinnova.cl" className="text-blue-600 hover:underline">publicidad@dmsinnova.cl</a></p>
               <p className="text-foreground"><strong>Dirección:</strong> InteliCon, Gestión de Condominios, Chile</p>
               <p className="text-muted-foreground text-sm mt-4">
                 Responderemos a tus solicitudes dentro de 30 días hábiles.
