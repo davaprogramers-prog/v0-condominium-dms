@@ -72,9 +72,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
         <p className="text-sm text-muted-foreground">{exemptions.length} exoneraciones registradas</p>
       </div>
 
-      {mounted && (
-      {/* Centered Buttons */}
-      {isAdmin && (
+      {mounted && isAdmin && (
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Dialog open={openType} onOpenChange={setOpenType}>
               <DialogTrigger asChild>

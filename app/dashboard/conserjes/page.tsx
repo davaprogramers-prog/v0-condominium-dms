@@ -198,7 +198,6 @@ export default function ConserjesPage() {
             ))}
           </div>
         )}
-      </div>
 
       {/* Edit Dialog */}
       <Dialog open={editingId !== null} onOpenChange={(open) => !open && setEditingId(null)}>
