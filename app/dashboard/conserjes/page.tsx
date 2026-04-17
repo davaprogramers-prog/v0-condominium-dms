@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Trash2, Mail, User, Edit2 } from "lucide-react"
+import { Trash2, Mail, User, Edit2, Space } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { deleteConcierge } from "./actions"
 import { useState, useEffect } from "react"
@@ -33,7 +33,7 @@ export default function ConserjesPage() {
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         if (!user) {
           setLoadingCondo(false)
           return
@@ -87,7 +87,7 @@ export default function ConserjesPage() {
 
   async function handleSaveEdit() {
     if (!condoId || !editingId) return
-    
+
     setIsSaving(true)
     try {
       await updateConcierge(condoId, editingId, {
@@ -134,46 +134,47 @@ export default function ConserjesPage() {
   return (
     <>
       <div>
-        <h1 className="text-3xl font-bold">Gestión de Conserjes</h1>
         <p className="text-muted-foreground">Administra los conserjes del condominio</p>
       </div>
 
-      {canManageConcierges && <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />}
+      {canManageConcierges && (
+        <div className="flex items-center justify-center">
+          <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />
+        </div>
+      )}
 
-        {isLoading ? (
-          <div className="grid gap-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="p-6">
-                <Skeleton className="h-6 w-1/3 mb-4" />
-                <Skeleton className="h-4 w-1/2" />
-              </Card>
-            ))}
-          </div>
-        ) : !concierges || concierges.length === 0 ? (
-          <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-12 text-center">
-            <User className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ color: cardTextColor }} />
-            <p style={{ color: cardTextColor, opacity: 0.7 }}>No hay conserjes registrados aún</p>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {concierges.map((concierge: any) => (
-              <Card key={concierge.id} style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <User className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg" style={{ color: cardTextColor }}>
-                        {concierge.first_name} {concierge.last_name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm mt-2" style={{ color: cardTextColor, opacity: 0.7 }}>
-                        <Mail className="h-4 w-4" />
-                        <span>ID: {concierge.id.slice(0, 8)}</span>
-                      </div>
-                    </div>
+
+      {isLoading ? (
+        <div className="grid gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="p-6">
+              <Skeleton className="h-6 w-1/3 mb-4" />
+              <Skeleton className="h-4 w-1/2" />
+            </Card>
+          ))}
+        </div>
+      ) : !concierges || concierges.length === 0 ? (
+        <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-12 text-center">
+          <User className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ color: cardTextColor }} />
+          <p style={{ color: cardTextColor, opacity: 0.7 }}>No hay conserjes registrados aún</p>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {concierges.map((concierge: any) => (
+            <Card key={concierge.id} style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: cardTextColor }}>
+                    {concierge.first_name} {concierge.last_name}
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm mt-2" style={{ color: cardTextColor, opacity: 0.7 }}>
+                    <Mail className="h-4 w-4" />
+                    <span>ID: {concierge.id.slice(0, 8)}</span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-3">
                     <Button
                       variant="outline"
                       size="sm"
@@ -194,10 +195,11 @@ export default function ConserjesPage() {
                     </Button>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={editingId !== null} onOpenChange={(open) => !open && setEditingId(null)}>
@@ -205,7 +207,7 @@ export default function ConserjesPage() {
           <DialogHeader>
             <DialogTitle style={{ color: dialogTextColor }}>Editar Conserje</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
               <Label htmlFor="firstName" style={{ color: dialogTextColor }}>Nombre</Label>
               <Input
