@@ -8,7 +8,7 @@ export async function createCondoIncome(
   formData: {
     houseId?: string
     amount: number
-    incomeType: "cuota" | "variable"
+    incomeType: "fixed" | "variable"
     incomeDate: string
     description?: string
     receiptUrl?: string
