@@ -32,8 +32,8 @@ const pageTitles: Record<string, string> = {
 }
 
 // Pages that should show period selector
-const pagesWithPeriod = [
-  "/dashboard/cartolas",
+const pagesWithPeriod: string[] = [
+  // Pages with month/year filtering go here
 ]
 
 export function DashboardHeader({ user, profile }: { user: User; profile: Record<string, unknown> | null }) {
