@@ -110,12 +110,13 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
           Agregar Ingreso
         </Button>
       </DialogTrigger>
-      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Ingreso</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega ingresos por cuotas o ingresos variables con comprobante</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 px-2 space-y-4">
           {error && (
             <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
               {error}
@@ -233,11 +234,14 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
+          </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Registrar Ingreso
-          </Button>
+          <div className="border-t mt-4 pt-4" style={{ borderColor: inputTextColor }}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Registrar Ingreso
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

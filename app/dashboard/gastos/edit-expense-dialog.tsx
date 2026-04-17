@@ -126,7 +126,7 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
+                <Label htmlFor="title" style={{ color: dialogTextColor }}>Título*</Label>
                 <Input
                   id="title"
                   name="title"
@@ -163,8 +163,8 @@ export function EditExpenseDialog({ expense, expenseTypes = [] }: EditExpenseDia
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
                 <Select name="category" defaultValue={expense.category || ""}>
                   <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
