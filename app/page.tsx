@@ -149,14 +149,14 @@ export default function Page() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div 
-          className="max-w-4xl mx-auto text-center space-y-8 border-2 rounded-3xl p-12"
+          className="max-w-4xl mx-auto text-center space-y-8 border-2 rounded-3xl p-8 sm:p-12"
           style={{ backgroundColor: "#b4d9fe", borderColor: "#0d3068" }}
         >
-          <h2 className="text-3xl font-bold" style={{ color: "#0d3068" }}>¿Listo para transformar tu administración?</h2>
-          <p className="text-lg" style={{ color: "#0d3068", opacity: 0.8 }}>Únete a cientos de condominios que ya confían en InteliCon</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-balance" style={{ color: "#0d3068" }}>¿Listo para transformar tu administración?</h2>
+          <p className="text-base sm:text-lg text-balance" style={{ color: "#0d3068", opacity: 0.8 }}>Únete a cientos de condominios que ya confían en InteliCon</p>
           <a 
             href="/auth/registro" 
-            className="inline-block px-8 py-3.5 rounded-full font-semibold text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            className="inline-block px-6 sm:px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
           >
             Comenzar prueba gratuita
