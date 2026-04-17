@@ -11,12 +11,14 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dashboard/reportes": "Reportes de Finanzas",
   "/dashboard/balance": "Balance",
-  "/dashboard/gastos": "Gastos",
+  "/dashboard/gastos": "Gastos y Egresos",
   "/dashboard/tipos-gastos": "Tipos de Gastos",
   "/dashboard/casas": "Casas",
   "/dashboard/usuarios": "Usuarios",
+  "/dashboard/propietarios": "Propietarios",
   "/dashboard/ingresos": "Ingresos",
   "/dashboard/ingreso-variable": "Ingresos Variables",
+  "/dashboard/ingresos-multas": "Ingresos por Multas",
   "/dashboard/exoneraciones": "Exoneraciones",
   "/dashboard/tipos-exoneraciones": "Tipos de Exoneraciones",
   "/dashboard/proyectos": "Proyectos",
@@ -31,11 +33,6 @@ const pageTitles: Record<string, string> = {
 
 // Pages that should show period selector
 const pagesWithPeriod = [
-  "/dashboard/gastos",
-  "/dashboard/reportes",
-  "/dashboard/balance",
-  "/dashboard/ingresos",
-  "/dashboard/ingreso-variable",
   "/dashboard/cartolas",
 ]
 
@@ -46,16 +43,10 @@ export function DashboardHeader({ user, profile }: { user: User; profile: Record
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage>{title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <div className="text-lg font-bold truncate">{title}</div>
       </div>
       
       {showPeriod && <PeriodSelector />}

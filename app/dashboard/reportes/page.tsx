@@ -3,10 +3,10 @@ import { redirect } from "next/navigation"
 import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsData } from "../gastos/actions"
 import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
+import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getUserCondoId } from "@/lib/supabase/owner-utils"
 
 export default async function ReportesPage({
   searchParams,
@@ -101,35 +101,29 @@ export default async function ReportesPage({
 
   return (
     <div className="space-y-6">
-      {/* Header with Month Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Reportes de Finanzas</h1>
-          <p className="text-muted-foreground text-sm">Analisis completo de ingresos y gastos</p>
-        </div>
-        
-        {/* Month Selector */}
-        <div className="flex items-center gap-2 bg-muted/50 rounded-full px-2 py-1">
-          <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <span className="px-3 py-1 text-sm font-medium min-w-[100px] text-center capitalize">
-            {monthName}
-          </span>
-          {canGoNext ? (
-            <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          ) : (
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled>
+      <p className="text-muted-foreground text-sm">Análisis completo de ingresos y gastos</p>
+
+      {/* Month Navigation */}
+      <div className="flex items-center justify-center gap-4">
+        <Link href={`/dashboard/reportes?mes=${prevMonth}&año=${prevYear}`}>
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
+          {monthName}
+        </span>
+        {canGoNext ? (
+          <Link href={`/dashboard/reportes?mes=${nextMonth}&año=${nextYear}`}>
+            <Button variant="outline" size="icon">
               <ChevronRight className="h-4 w-4" />
             </Button>
-          )}
-        </div>
+          </Link>
+        ) : (
+          <Button variant="outline" size="icon" disabled>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Key Metrics */}

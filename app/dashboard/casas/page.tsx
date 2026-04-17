@@ -51,11 +51,9 @@ export default async function CasasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Casas</h1>
-          <p className="text-muted-foreground">Gestión de propiedades del condominio</p>
-        </div>
+      <p className="text-muted-foreground text-sm">Gestión de propiedades del condominio</p>
+
+      <div className="flex items-center justify-center">
         {isAdmin && <CreateHouseDialog condoId={condoId} />}
       </div>
 

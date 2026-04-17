@@ -92,7 +92,7 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2" style={{ backgroundColor: "#2563eb" }}>
+        <Button className="gap-2" style={{ backgroundColor: "#2563eb", color: "white" }}>
           <Plus className="h-4 w-4" />
           Crear Casa
         </Button>

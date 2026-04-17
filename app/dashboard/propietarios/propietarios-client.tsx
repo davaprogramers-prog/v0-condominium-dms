@@ -89,16 +89,15 @@ export function PropietariosClient({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Propietarios</h1>
-          <p className="text-muted-foreground text-sm">
-            Estado de pagos - {periodLabel}
-          </p>
+      <p className="text-muted-foreground text-sm">
+        Estado de pagos - {periodLabel}
+      </p>
+
+      {isAdmin && (
+        <div className="flex items-center justify-center">
+          <CreateHouseDialog condoId={condoId} onSuccess={onRefresh} />
         </div>
-        {isAdmin && <CreateHouseDialog condoId={condoId} onSuccess={onRefresh} />}
-      </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -293,56 +292,49 @@ function HouseCard({
       <Card className={`${borderClass} transition-all hover:shadow-md`}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted">
+            <div className="flex flex-col gap-2">
+              {/* Primera fila: Casa y Propietario */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-muted flex-shrink-0">
                   <Home className="h-5 w-5" />
                 </div>
-                <div>
-                  <CardTitle className="text-lg">Casa #{house.house_number}</CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="h-3 w-3" />
-                    {house.owner_name}
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-lg truncate">Casa #{house.house_number}</CardTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
+                    <User className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{house.owner_name}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              {/* Segunda fila: Estado, Total y Chevron - Justificado */}
+              <div className="flex items-center justify-between gap-2">
                 {/* Status Badge */}
-                {house.isPaidComplete ? (
-                  <Badge className="bg-green-500 text-white">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Pagado
-                  </Badge>
-                ) : proofStatus === "pending" ? (
-                  <Badge className="bg-yellow-500 text-white">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Comprobante Enviado
-                  </Badge>
-                ) : proofStatus === "rejected" ? (
-                  <Badge variant="destructive">
-                    Rechazado
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-muted-foreground">
-                    Pendiente
-                  </Badge>
-                )}
+                <div className="flex-shrink-0">
+                  {house.isPaidComplete ? (
+                    <Badge className="bg-green-500 text-white text-xs">Pagado</Badge>
+                  ) : proofStatus === "pending" ? (
+                    <Badge className="bg-yellow-500 text-white text-xs">Comprobante</Badge>
+                  ) : proofStatus === "rejected" ? (
+                    <Badge variant="destructive" className="text-xs">Rechazado</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-muted-foreground text-xs">Pendiente</Badge>
+                  )}
+                </div>
 
-                {/* Fines Badge */}
+                {/* Fines Badge if applicable */}
                 {house.totalFines > 0 && (
-                  <Badge className="bg-red-600 hover:bg-red-700 text-white">
+                  <Badge className="bg-red-600 hover:bg-red-700 text-white text-xs flex-shrink-0">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Multa: {currencySymbol}{house.totalFines.toLocaleString("es-CL")}
                   </Badge>
                 )}
 
-                {/* Total */}
-                <div className="text-right">
-                  <p className="font-bold text-lg">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</p>
+                {/* Total y Chevron */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <p className="font-bold text-lg whitespace-nowrap">{currencySymbol}{totalAmount.toLocaleString("es-CL")}</p>
+                  {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
-
-                {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </div>
             </div>
           </CardHeader>

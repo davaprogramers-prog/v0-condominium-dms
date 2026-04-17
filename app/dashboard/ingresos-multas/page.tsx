@@ -100,37 +100,32 @@ export default async function IngresoMultasPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <AlertTriangle className="h-7 w-7 text-red-600" />
-            Ingresos por Multas
-          </h1>
-          <p className="text-muted-foreground">Registro de pagos de multas recibidos</p>
-        </div>
-        
-        {/* Month Selector */}
-        <div className="flex items-center gap-2 bg-muted/50 rounded-full px-2 py-1">
-          <Link href={`/dashboard/ingresos-multas?mes=${prevMonth}&año=${prevYear}`}>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <span className="px-3 py-1 text-sm font-medium min-w-[100px] text-center capitalize">
-            {monthName}
-          </span>
-          {canGoNext ? (
-            <Link href={`/dashboard/ingresos-multas?mes=${nextMonth}&año=${nextYear}`}>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          ) : (
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled>
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
+        <p className="text-muted-foreground text-sm">Registro de pagos de multas recibidos</p>
+      </div>
+
+      {/* Month Navigation - Centered */}
+      <div className="flex items-center justify-center gap-4">
+        <Link href={`/dashboard/ingresos-multas?mes=${prevMonth}&año=${prevYear}`}>
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
+          {monthName}
+        </span>
+        {canGoNext ? (
+          <Link href={`/dashboard/ingresos-multas?mes=${nextMonth}&año=${nextYear}`}>
+            <Button variant="outline" size="icon">
               <ChevronRight className="h-4 w-4" />
             </Button>
-          )}
-        </div>
+          </Link>
+        ) : (
+          <Button variant="outline" size="icon" disabled>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Summary Cards */}

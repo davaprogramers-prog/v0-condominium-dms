@@ -53,7 +53,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-8 rounded-lg border bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center justify-center gap-3">
           <img 
@@ -122,6 +122,19 @@ export default function LoginPage() {
           ¿No tienes cuenta?{" "}
           <Link href="/auth/registro" className="font-semibold text-blue-600 hover:underline">
             Registrarse aquí
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-8 text-center text-xs text-gray-500 space-y-2">
+        <div>
+          <Link href="/support" className="hover:text-blue-600 transition-colors">
+            Soporte
+          </Link>
+          <span className="mx-2">•</span>
+          <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">
+            Políticas de Privacidad
           </Link>
         </div>
       </div>

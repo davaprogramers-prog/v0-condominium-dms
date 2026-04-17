@@ -84,50 +84,43 @@ export default async function GastosPage({
 
   return (
     <div className="space-y-6">
-      {/* Header with Month Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Gastos (DEBE)</h1>
-          <p className="text-muted-foreground text-sm">Registro de gastos comunes del condominio</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Month Selector */}
-          <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2 py-1">
-            <Link href={`/dashboard/gastos?mes=${prevMonth}&año=${prevYear}`}>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <span className="px-2 py-1 text-sm font-medium min-w-[90px] text-center">
-              {monthName}
-            </span>
-            {canGoNext ? (
-              <Link href={`/dashboard/gastos?mes=${nextMonth}&año=${nextYear}`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          
-          {isAdmin && condoId && (
-            <>
-              <Link href="/dashboard/gastos/logos">
-                <Button variant="outline" size="sm">
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                  Logos
-                </Button>
-              </Link>
-              <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} isSuperAdmin={isSuperAdmin} />
-            </>
-          )}
-        </div>
+      <p className="text-muted-foreground text-sm">Registro de gastos comunes del condominio</p>
+
+      {/* Month Navigation - Centered */}
+      <div className="flex items-center justify-center gap-4">
+        <Link href={`/dashboard/gastos?mes=${prevMonth}&año=${prevYear}`}>
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
+          {monthName}
+        </span>
+        {canGoNext ? (
+          <Link href={`/dashboard/gastos?mes=${nextMonth}&año=${nextYear}`}>
+            <Button variant="outline" size="icon">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        ) : (
+          <Button variant="outline" size="icon" disabled>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
+
+      {/* Logos and Add Expense Buttons - Centered */}
+      {isAdmin && condoId && (
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/dashboard/gastos/logos">
+            <Button variant="outline" size="sm">
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Logos
+            </Button>
+          </Link>
+          <CreateExpenseDialog condoId={condoId} expenseTypes={expenseTypes} isSuperAdmin={isSuperAdmin} />
+        </div>
+      )}
 
       {/* 12-Month Bar Chart */}
       <GastosChart last12Months={last12Months} />

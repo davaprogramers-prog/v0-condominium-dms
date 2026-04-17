@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, ShieldOff, Edit2, Trash2, EyeOff } from "lucide-react"
+import { Plus, ShieldOff, Edit2, Trash2, Shield } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface TiposExoneracionesClientProps {
@@ -23,12 +23,10 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Tipos de Exoneraciones</h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">{exemptionTypes.length} tipos registrados</p>
-        </div>
-        {isAdmin && (
+      <p className="text-muted-foreground text-sm">{exemptionTypes.length} tipos registrados</p>
+
+      {isAdmin && (
+        <div className="flex items-center justify-center">
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
 
@@ -48,7 +46,7 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
                   fontWeight: "600"
                 }}
               >
-                <EyeOff className="h-5 w-5" />
+                <Shield className="h-5 w-5" />
                 Nuevo Tipo de Exoneraciones
               </Button>
 
@@ -85,8 +83,8 @@ export function TiposExoneracionesClient({ exemptionTypes, isAdmin }: TiposExone
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
 
       {exemptionTypes.length === 0 ? (
         <div className="rounded-lg border-2 p-12 text-center" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: cardTextColor }}>

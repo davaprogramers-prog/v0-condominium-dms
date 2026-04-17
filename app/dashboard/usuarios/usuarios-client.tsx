@@ -34,11 +34,9 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Usuarios</h1>
-          <p className="text-muted-foreground">Gestión de administradores, propietarios y arrendatarios</p>
-        </div>
+      <p className="text-muted-foreground text-sm">Gestión de administradores, propietarios y arrendatarios</p>
+
+      <div className="flex items-center justify-center">
         {(isAdmin || isSuperAdmin) && (
           <CreateUserDialog condos={condos} isSuperAdmin={isSuperAdmin} />
         )}
