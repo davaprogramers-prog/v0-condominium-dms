@@ -1,16 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 import { getCondoIncome } from "../ingresos/actions"
 import { IngresoVariableClient } from "./ingreso-variable-client"
+import { CreateVariableIncomeDialog } from "./create-variable-income-dialog"
 import { redirect } from "next/navigation"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, TrendingUp } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { createVariableIncome } from "@/app/dashboard/actions"
-import { FileUpload } from "@/components/file-upload"
 
 export default async function IngresoVariablePage({
   searchParams,
@@ -47,8 +43,11 @@ export default async function IngresoVariablePage({
     year: "numeric",
   })
 
-  // Fetch variable income for the selected month
-  const { data: variableIncome } = await getCondoIncome(supabase, condoId, month - 1, year)
+  // Fetch variable income for the selected month with correct parameters
+  let variableIncome: any[] = []
+  if (condoId) {
+    variableIncome = await getCondoIncome(condoId, year, month, "variable")
+  }
 
   // Check if user is admin
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
@@ -84,74 +83,13 @@ export default async function IngresoVariablePage({
       {/* Add Variable Income Button - Centered */}
       {isAdmin && condoId && (
         <div className="flex items-center justify-center">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <TrendingUp className="h-5 w-5" />
-                Nuevo Ingreso Variable
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Registrar Ingreso Variable</DialogTitle>
-              </DialogHeader>
-              <form
-                action={async (fd) => {
-                  await createVariableIncome(fd)
-                }}
-                className="flex flex-col gap-4"
-              >
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Descripción</Label>
-                  <Input id="description" name="description" placeholder="Descripción del ingreso" required />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="amount">Monto</Label>
-                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="income_date">Fecha</Label>
-                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="source">Fuente / Origen</Label>
-                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label>Respaldo</Label>
-                  <FileUpload bucket="receipts" onUpload={(url) => {
-                    const hiddenInput = document.getElementById('receipt_url') as HTMLInputElement
-                    if (hiddenInput) hiddenInput.value = url
-                  }} label="Subir comprobante" />
-                  <input type="hidden" id="receipt_url" name="receipt_url" />
-                </div>
-                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Ingreso</Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <CreateVariableIncomeDialog condoId={condoId} />
         </div>
       )}
 
       {/* Ingreso Variable Client Content */}
       <IngresoVariableClient 
-        incomes={variableIncome || []}
+        incomes={variableIncome}
         currencySymbol="$"
         isAdmin={isAdmin}
       />
