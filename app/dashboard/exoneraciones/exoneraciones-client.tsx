@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "../theme-context"
 import { createExemption, createExemptionType, updateExemption, updateExemptionType, deleteExemption, deleteExemptionType } from "@/app/dashboard/actions"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,7 @@ interface ExoneracionesClientProps {
 
 export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmin }: ExoneracionesClientProps) {
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [openExemption, setOpenExemption] = useState(false)
   const [openType, setOpenType] = useState(false)
   const [selectedHouse, setSelectedHouse] = useState("")
@@ -36,6 +37,10 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
   const [deletingExemption, setDeletingExemption] = useState<string | null>(null)
   const [deletingType, setDeletingType] = useState<string | null>(null)
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleDeleteExemption = async (id: string) => {
     setDeletingExemption(id)
@@ -67,6 +72,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
         <p className="text-sm text-muted-foreground">{exemptions.length} exoneraciones registradas</p>
       </div>
 
+      {mounted && (
       {/* Centered Buttons */}
       {isAdmin && (
         <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -300,6 +306,7 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
           </Card>
         </TabsContent>
       </Tabs>
+      )}
     </div>
   )
 }
