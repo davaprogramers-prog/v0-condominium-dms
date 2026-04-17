@@ -63,14 +63,14 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Exoneraciones</h1>
-          <p className="text-sm text-muted-foreground">{exemptions.length} exoneraciones registradas</p>
-        </div>
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <Dialog open={openType} onOpenChange={setOpenType}>
+      <div>
+        <p className="text-sm text-muted-foreground">{exemptions.length} exoneraciones registradas</p>
+      </div>
+
+      {/* Centered Buttons */}
+      {isAdmin && (
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <Dialog open={openType} onOpenChange={setOpenType}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
               </DialogTrigger>
@@ -182,7 +182,6 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
             </Dialog>
           </div>
         )}
-      </div>
 
       <Tabs defaultValue="exemptions">
         <TabsList>
@@ -192,7 +191,6 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
         <TabsContent value="exemptions">
           <Card style={{ backgroundColor: cardBgColor, borderColor: inputTextColor, color: cardTextColor }} className="border">
             <CardHeader>
-              <CardTitle className="text-base" style={{ color: cardTextColor }}>Exoneraciones Activas</CardTitle>
               <CardDescription style={{ color: cardTextColor, opacity: 0.7 }}>Casas con exoneracion de gasto comun</CardDescription>
             </CardHeader>
             <CardContent>
