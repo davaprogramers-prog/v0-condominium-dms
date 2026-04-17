@@ -117,7 +117,7 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label style={{ color: dialogTextColor }}>Tipo de Ingreso</Label>
+              <Label style={{ color: dialogTextColor }}>Tipo</Label>
               <Input
                 type="text"
                 value={income.income_type === "cuota" ? "Cuota Común" : "Ingreso Variable"}

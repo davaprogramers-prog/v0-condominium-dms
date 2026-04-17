@@ -38,6 +38,13 @@ export async function createCondoIncome(
   const periodYear = date.getFullYear()
   const periodMonth = date.getMonth() + 1
 
+  console.log("[v0] Creating income:", {
+    incomeDate: formData.incomeDate,
+    periodYear,
+    periodMonth,
+    condoId,
+  })
+
   const { error } = await supabase
     .from("condo_income")
     .insert({
@@ -57,6 +64,8 @@ export async function createCondoIncome(
     console.error("[v0] Error creating income:", error)
     throw new Error(error.message)
   }
+
+  console.log("[v0] Income created successfully")
 
   revalidatePath("/dashboard/ingresos")
   return { success: true }
@@ -116,6 +125,8 @@ export async function updateIncome(
 export async function getCondoIncome(condoId: string, year?: number, month?: number, incomeType?: string) {
   const supabase = await createClient()
 
+  console.log("[v0] Fetching income with filters:", { condoId, year, month, incomeType })
+
   let query = supabase
     .from("condo_income")
     .select("*")
@@ -133,6 +144,8 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
+
+  console.log("[v0] Income query result:", { count: data?.length || 0, error })
 
   if (error) {
     console.error("[v0] Error fetching income:", error)
