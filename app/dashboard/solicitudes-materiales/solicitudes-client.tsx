@@ -219,11 +219,14 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                     </Button>
                   </DialogTrigger>
                   <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-2xl mx-auto" showCloseButton={false}>
-                    <DialogHeader className="flex justify-between items-center px-1.25 py-2">
+                    <DialogHeader className="relative flex justify-center items-center px-1.25 py-2">
                       <DialogTitle style={{ color: dialogTextColor }}>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
                       <button
-                        onClick={() => setEditingId(null)}
-                        className="ml-2 inline-flex items-center justify-center rounded-md bg-slate-200 hover:bg-slate-300 text-slate-900 transition-colors w-8 h-8 flex-shrink-0"
+                        onClick={() => {
+                          setOpenCreate(false)
+                          setEditingId(null)
+                        }}
+                        className="absolute right-0 top-0 inline-flex items-center justify-center rounded-md bg-slate-200 hover:bg-slate-300 text-slate-900 transition-colors w-8 h-8 flex-shrink-0"
                         aria-label="Cerrar diálogo"
                       >
                         <span className="text-lg font-bold">✕</span>
