@@ -218,12 +218,19 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       Nueva Solicitud
                     </Button>
                   </DialogTrigger>
-                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
+                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-4xl mx-auto">
+                    <DialogHeader className="flex justify-between items-center">
                       <DialogTitle style={{ color: dialogTextColor }}>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="text-foreground hover:text-foreground/80 bg-slate-200 hover:bg-slate-300 rounded-full w-8 h-8 flex items-center justify-center"
+                        aria-label="Cerrar"
+                      >
+                        ✕
+                      </button>
                     </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div>
+                    <form onSubmit={handleSubmit} className="space-y-6 px-2">
+                      <div className="max-w-lg mx-auto w-full">
                         <Label htmlFor="title" style={{ color: dialogTextColor }}>Título</Label>
                         <Input
                           id="title"
@@ -235,7 +242,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                         />
                       </div>
 
-                      <div>
+                      <div className="max-w-lg mx-auto w-full">
                         <Label htmlFor="requested_by" style={{ color: dialogTextColor }}>Solicitado por *</Label>
                         <Input
                           id="requested_by"
@@ -307,9 +314,11 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                         </div>
                       </div>
 
-                      <Button type="submit" disabled={isSubmitting} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
-                        {isSubmitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
-                      </Button>
+                      <div className="flex justify-center mt-8">
+                        <Button type="submit" disabled={isSubmitting} className="max-w-lg w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">
+                          {isSubmitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
+                        </Button>
+                      </div>
                     </form>
                   </DialogContent>
                 </Dialog>
