@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/file-upload"
 import { Paperclip } from "lucide-react"
+import { useTheme } from "@/app/dashboard/theme-context"
 
 interface CreateCartolasDialogProps {
   condoId: string
@@ -18,6 +19,7 @@ export function CreateCartolasDialog({ condoId }: CreateCartolasDialogProps) {
   const [open, setOpen] = useState(false)
   const [fileUrl, setFileUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
   const handleSubmit = async (formData: FormData) => {
     try {
@@ -57,31 +59,33 @@ export function CreateCartolasDialog({ condoId }: CreateCartolasDialogProps) {
           Subir Cartolas
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor }} className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Subir Cartola Bancaria</DialogTitle>
+          <DialogTitle style={{ color: dialogTextColor }}>Subir Cartola Bancaria</DialogTitle>
         </DialogHeader>
         <form action={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="stmt_title">Título</Label>
+            <Label htmlFor="stmt_title" style={{ color: dialogTextColor }}>Título</Label>
             <Input
               id="stmt_title"
               name="title"
               placeholder="Ej: Cartola Enero 2026"
               required
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="statement_date">Fecha de la Cartola</Label>
+            <Label htmlFor="statement_date" style={{ color: dialogTextColor }}>Fecha de la Cartola</Label>
             <Input
               id="statement_date"
               name="statement_date"
               type="date"
               required
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Archivo PDF</Label>
+            <Label style={{ color: dialogTextColor }}>Archivo PDF</Label>
             <FileUpload
               bucket="statements"
               onUpload={setFileUrl}
@@ -90,17 +94,18 @@ export function CreateCartolasDialog({ condoId }: CreateCartolasDialogProps) {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="stmt_notes">Notas</Label>
+            <Label htmlFor="stmt_notes" style={{ color: dialogTextColor }}>Notas</Label>
             <Textarea
               id="stmt_notes"
               name="notes"
               placeholder="Notas opcionales..."
+              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
             />
           </div>
           <Button
             type="submit"
             disabled={!fileUrl || isLoading}
-            className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white"
+            style={{ backgroundColor: inputTextColor === "#000000" ? "#374151" : "#4B5563", color: "white" }}
           >
             {isLoading ? "Guardando..." : "Guardar Cartola"}
           </Button>
