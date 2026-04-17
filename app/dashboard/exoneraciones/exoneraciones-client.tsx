@@ -63,50 +63,54 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Buttons - Centered */}
-      {isAdmin && (
-        <div className="flex items-center justify-center gap-3">
-          <Dialog open={openType} onOpenChange={setOpenType}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo de Exoneracion</Button>
-            </DialogTrigger>
-            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
-              <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Nuevo Tipo de Exoneracion</DialogTitle></DialogHeader>
-              <form action={async (fd) => { await createExemptionType(fd); setOpenType(false) }} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="type_name" style={{ color: dialogTextColor }}>Nombre</Label>
-                  <Input id="type_name" name="name" placeholder="Ej: Servicio de vigilancia" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
-                  <Textarea id="type_desc" name="description" placeholder="Descripcion del tipo..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
-                </div>
-                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Tipo</Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={openExemption} onOpenChange={setOpenExemption}>
-            <DialogTrigger asChild>
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <ShieldOff className="h-5 w-5" />
-                Nueva Exoneracion
-              </Button>
-            </DialogTrigger>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Exoneraciones</h1>
+          <p className="text-sm text-muted-foreground">{exemptions.length} exoneraciones registradas</p>
+        </div>
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <Dialog open={openType} onOpenChange={setOpenType}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
+              </DialogTrigger>
+              <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Nuevo Tipo de Exoneracion</DialogTitle></DialogHeader>
+                <form action={async (fd) => { await createExemptionType(fd); setOpenType(false) }} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="type_name" style={{ color: dialogTextColor }}>Nombre</Label>
+                    <Input id="type_name" name="name" placeholder="Ej: Servicio de vigilancia" required style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
+                    <Textarea id="type_desc" name="description" placeholder="Descripcion del tipo..." style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                  </div>
+                  <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Tipo</Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={openExemption} onOpenChange={setOpenExemption}>
+              <DialogTrigger asChild>
+                <Button
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    padding: "12px 24px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "2px solid #1d4ed8",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                    cursor: "pointer",
+                    fontWeight: "600"
+                  }}
+                >
+                  <ShieldOff className="h-5 w-5" />
+                  Nueva Exoneracion
+                </Button>
+              </DialogTrigger>
               <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
                 <DialogHeader><DialogTitle style={{ color: dialogTextColor }}>Crear Exoneracion</DialogTitle></DialogHeader>
                 <form
@@ -178,8 +182,8 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
             </Dialog>
           </div>
         )}
+      </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="exemptions">
         <TabsList>
           <TabsTrigger value="exemptions">Exoneraciones ({exemptions.length})</TabsTrigger>

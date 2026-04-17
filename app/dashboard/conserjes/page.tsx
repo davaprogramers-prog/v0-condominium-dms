@@ -133,15 +133,12 @@ export default function ConserjesPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        <p className="text-muted-foreground text-sm">Administra los conserjes del condominio</p>
+      <div>
+        <h1 className="text-3xl font-bold">Gestión de Conserjes</h1>
+        <p className="text-muted-foreground">Administra los conserjes del condominio</p>
+      </div>
 
-        {/* Add Concierge Button - Centered */}
-        {canManageConcierges && (
-          <div className="flex items-center justify-center">
-            <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />
-          </div>
-        )}
+      {canManageConcierges && <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />}
 
         {isLoading ? (
           <div className="grid gap-4">

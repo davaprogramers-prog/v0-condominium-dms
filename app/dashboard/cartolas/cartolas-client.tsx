@@ -25,11 +25,15 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Add Cartola Button - Centered */}
-      {isAdmin && (
-        <div className="flex items-center justify-center">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Cartolas Bancarias</h1>
+          <p className="text-sm text-muted-foreground">{statements.length} cartolas almacenadas</p>
+        </div>
+        {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
+
               <Button
                 style={{
                   backgroundColor: "#2563eb",
@@ -49,6 +53,8 @@ export function CartolasClient({ statements, isAdmin }: CartolasClientProps) {
                 <Paperclip className="h-5 w-5" />
                 Subir Cartolas
               </Button>
+
+
             </DialogTrigger>
             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
               <DialogHeader>

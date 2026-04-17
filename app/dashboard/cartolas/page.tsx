@@ -17,14 +17,9 @@ export default async function CartolasPage() {
     .order("statement_date", { ascending: false })
 
   return (
-    <div className="space-y-6">
-      <p className="text-muted-foreground text-sm">Historico de cartolas bancarias del condominio</p>
-
-      {/* Cartolas Client Content */}
-      <CartolasClient
-        statements={statements || []}
-        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
-      />
-    </div>
+    <CartolasClient
+      statements={statements || []}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+    />
   )
 }

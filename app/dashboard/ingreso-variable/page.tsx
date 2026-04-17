@@ -4,14 +4,8 @@ import { IngresoVariableClient } from "./ingreso-variable-client"
 import { redirect } from "next/navigation"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, TrendingUp } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { createVariableIncome } from "@/app/dashboard/actions"
-import { FileUpload } from "@/components/file-upload"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useTheme } from "@/app/dashboard/theme-context"
 
 export default async function IngresoVariablePage({
   searchParams,
@@ -29,6 +23,63 @@ export default async function IngresoVariablePage({
   if (!condoId) {
     redirect("/dashboard")
   }
+
+  const params = await searchParams
+  const { mes = "3", año = "2026" } = params
+  const monthIndex = parseInt(mes) - 1
+  const currentDate = new Date(parseInt(año), monthIndex)
+  const monthName = currentDate.toLocaleDateString("es-CL", { month: "long", year: "numeric" })
+
+  const prevMonth = monthIndex === 0 ? "12" : String(monthIndex).padStart(2, "0")
+  const prevYear = monthIndex === 0 ? String(parseInt(año) - 1) : año
+  const nextMonth = monthIndex === 11 ? "1" : String(monthIndex + 2).padStart(2, "0")
+  const nextYear = monthIndex === 11 ? String(parseInt(año) + 1) : año
+
+  const canGoNext = !(parseInt(nextYear) === new Date().getFullYear() && parseInt(nextMonth) > new Date().getMonth() + 1)
+
+  // Fetch variable income for the selected month
+  const { data: variableIncome } = await getCondoIncome(supabase, condoId, monthIndex, parseInt(año))
+
+  // Check if user is admin
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+
+  return (
+    <div className="space-y-6">
+      <p className="text-muted-foreground text-sm">Ingresos variables adicionales del condominio</p>
+
+      {/* Month Navigation - Centered */}
+      <div className="flex items-center justify-center gap-4">
+        <Link href={`/dashboard/ingreso-variable?mes=${prevMonth}&año=${prevYear}`}>
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
+          {monthName}
+        </span>
+        {canGoNext ? (
+          <Link href={`/dashboard/ingreso-variable?mes=${nextMonth}&año=${nextYear}`}>
+            <Button variant="outline" size="icon">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        ) : (
+          <Button variant="outline" size="icon" disabled>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Ingreso Variable Client Content */}
+      <IngresoVariableClient 
+        incomes={variableIncome}
+        currencySymbol="$"
+        isAdmin={isAdmin}
+      />
+    </div>
+  )
+}
 
   const isAdmin = true
 

@@ -22,16 +22,11 @@ export default async function InfraccionesPage() {
   ])
 
   return (
-    <div className="space-y-6">
-      <p className="text-muted-foreground text-sm">Registro de infracciones y multas del condominio</p>
-
-      {/* Infracciones Client Content */}
-      <InfraccionesClient
-        infractions={infractions || []}
-        houses={houses || []}
-        currencySymbol={(condo?.currency_symbol as string) || "$"}
-        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
-      />
-    </div>
+    <InfraccionesClient
+      infractions={infractions || []}
+      houses={houses || []}
+      currencySymbol={(condo?.currency_symbol as string) || "$"}
+      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+    />
   )
 }
