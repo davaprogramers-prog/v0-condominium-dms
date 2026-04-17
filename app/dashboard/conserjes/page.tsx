@@ -137,11 +137,13 @@ export default function ConserjesPage() {
         <p className="text-muted-foreground">Administra los conserjes del condominio</p>
       </div>
 
-      {canManageConcierges && (
-        <div className="flex items-center justify-center">
-          <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />
-        </div>
-      )}
+      <div className="mt-8">
+        {canManageConcierges && (
+          <div className="flex items-center justify-center">
+            <CreateConciergeDialog condoId={condoId} onSuccess={refetch} />
+          </div>
+        )}
+      </div>
 
       <div className="mt-8">
         {isLoading ? (

@@ -101,7 +101,7 @@ export function CreateConciergeDialog({ condoId, onSuccess }: CreateConciergeDia
 
         {success && (
           <div className="animate-in fade-in duration-300 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+            <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -139,8 +139,8 @@ export function CreateConciergeDialog({ condoId, onSuccess }: CreateConciergeDia
               <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} style={{ borderColor: inputTextColor, color: inputTextColor }}>
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 style={{
                   backgroundColor: "#2563eb",
