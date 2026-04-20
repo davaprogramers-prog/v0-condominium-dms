@@ -669,21 +669,35 @@ export async function deleteDocumentType(id: string) {
 }
 
 export async function uploadDocument(formData: FormData) {
-  const { supabase, userId, condoId } = await getCondoId()
-  
-  // Use admin client to bypass RLS for document uploads
-  const admin = createAdminClient()
-  
-  const { error } = await admin.from("documents").insert({
-    condo_id: condoId,
-    document_type_id: formData.get("document_type_id") as string || null,
-    title: formData.get("title") as string,
-    description: formData.get("description") as string || null,
-    file_url: formData.get("file_url") as string,
-    uploaded_by: userId,
-  })
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    const { supabase, userId, condoId } = await getCondoId()
+    
+    // Use admin client to bypass RLS for document uploads
+    const admin = createAdminClient()
+    
+    console.log("[v0] uploadDocument: userId=", userId, "condoId=", condoId)
+    
+    const { data, error } = await admin.from("documents").insert({
+      condo_id: condoId,
+      document_type_id: formData.get("document_type_id") as string || null,
+      title: formData.get("title") as string,
+      description: formData.get("description") as string || null,
+      file_url: formData.get("file_url") as string,
+      uploaded_by: userId,
+    })
+    
+    console.log("[v0] uploadDocument response:", { data, error })
+    
+    if (error) {
+      console.error("[v0] uploadDocument error:", error)
+      throw error
+    }
+    
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] uploadDocument catch error:", err)
+    throw err
+  }
 }
 
 export async function updateDocument(formData: FormData) {
