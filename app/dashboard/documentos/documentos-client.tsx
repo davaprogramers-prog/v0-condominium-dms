@@ -58,7 +58,6 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Documentos</h1>
           <p className="text-sm text-muted-foreground">{documents.length} documentos almacenados</p>
         </div>
         {isAdmin && (
