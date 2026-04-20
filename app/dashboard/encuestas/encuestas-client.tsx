@@ -38,11 +38,8 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: cardTextColor }}>Encuestas</h1>
-          <p className="text-sm text-muted-foreground" style={{ color: cardTextColor }}>{surveys.length} encuestas en total</p>
-        </div>
+      <div>
+        <p className="text-sm font-semibold text-black mb-4">{surveys.length} encuestas en total</p>
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={(v) => { setOpenNew(v); if (!v) setOptions(["", ""]) }}>
             <DialogTrigger asChild>
@@ -149,9 +146,11 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle style={{ color: cardTextColor }}>{survey.title as string}</CardTitle>
-                      <Badge variant={isActive ? "default" : "secondary"}>
-                        {isActive ? "Activa" : "Cerrada"}
-                      </Badge>
+                      {isActive && (
+                        <Badge className="bg-green-600 hover:bg-green-700 text-white font-semibold">
+                          Activa
+                        </Badge>
+                      )}
                     </div>
                     {survey.description ? (
                       <CardDescription style={{ color: cardTextColor }} className="mt-1">{survey.description as string}</CardDescription>
@@ -164,9 +163,9 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                           variant="outline"
                           size="sm"
                           onClick={() => closeSurvey(survey.id as string)}
-                          style={{ 
-                            backgroundColor: inputBgColor, 
-                            color: inputTextColor, 
+                          style={{
+                            backgroundColor: inputBgColor,
+                            color: inputTextColor,
                             borderColor: inputTextColor + "60"
                           }}
                         >
@@ -175,13 +174,13 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="h-8 w-8 p-0"
-                            style={{ 
-                              backgroundColor: inputBgColor, 
-                              color: inputTextColor, 
+                            style={{
+                              backgroundColor: inputBgColor,
+                              color: inputTextColor,
                               borderColor: inputTextColor + "60"
                             }}
                           >
@@ -288,7 +287,7 @@ export function EncuestasClient({ surveys, userId, totalHouses, isAdmin }: Encue
                         <div className="w-full bg-gray-300 rounded-full h-2 overflow-hidden" style={{
                           backgroundColor: cardBgColor === '#ffffff' || cardBgColor === 'rgb(255, 255, 255)' ? '#e5e7eb' : '#2d3748'
                         }}>
-                          <div 
+                          <div
                             className="h-full bg-blue-600 rounded-full transition-all duration-300"
                             style={{ width: `${percentage}%` }}
                           />
