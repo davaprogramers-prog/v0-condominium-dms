@@ -45,10 +45,8 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{projects.length} proyectos registrados</p>
-        </div>
+      <div>
+        <p className="text-sm font-semibold text-black mb-4">{projects.length} proyectos registrados</p>
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
