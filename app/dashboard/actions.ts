@@ -648,23 +648,53 @@ export async function createDocumentType(formData: FormData) {
 }
 
 export async function updateDocumentType(formData: FormData) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("document_types")
-    .update({
-      name: formData.get("name") as string,
-      description: formData.get("description") as string || null,
-    })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    const { supabase } = await getCondoId()
+    const typeId = formData.get("id") as string
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string || null
+    
+    console.log("[v0] updateDocumentType:", { typeId, name, description })
+    
+    const { error } = await supabase
+      .from("document_types")
+      .update({
+        name,
+        description,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", typeId)
+      
+    if (error) {
+      console.error("[v0] updateDocumentType error:", error)
+      throw error
+    }
+    
+    console.log("[v0] updateDocumentType success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] updateDocumentType catch:", err)
+    throw err
+  }
 }
 
 export async function deleteDocumentType(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("document_types").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    console.log("[v0] deleteDocumentType:", { id })
+    const { supabase } = await getCondoId()
+    const { error } = await supabase.from("document_types").delete().eq("id", id)
+    
+    if (error) {
+      console.error("[v0] deleteDocumentType error:", error)
+      throw error
+    }
+    
+    console.log("[v0] deleteDocumentType success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] deleteDocumentType catch:", err)
+    throw err
+  }
 }
 
 export async function uploadDocument(formData: FormData) {
@@ -708,24 +738,55 @@ export async function uploadDocument(formData: FormData) {
 }
 
 export async function updateDocument(formData: FormData) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("documents")
-    .update({
-      title: formData.get("title") as string,
-      description: formData.get("description") as string || null,
-      file_url: formData.get("file_url") as string,
-    })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    const { supabase } = await getCondoId()
+    const docId = formData.get("id") as string
+    const title = formData.get("title") as string
+    const description = formData.get("description") as string || null
+    const fileUrl = formData.get("file_url") as string
+    
+    console.log("[v0] updateDocument:", { docId, title, description, fileUrl })
+    
+    const { error } = await supabase
+      .from("documents")
+      .update({
+        title,
+        description,
+        file_url: fileUrl,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", docId)
+      
+    if (error) {
+      console.error("[v0] updateDocument error:", error)
+      throw error
+    }
+    
+    console.log("[v0] updateDocument success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] updateDocument catch:", err)
+    throw err
+  }
 }
 
 export async function deleteDocument(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("documents").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    console.log("[v0] deleteDocument:", { id })
+    const { supabase } = await getCondoId()
+    const { error } = await supabase.from("documents").delete().eq("id", id)
+    
+    if (error) {
+      console.error("[v0] deleteDocument error:", error)
+      throw error
+    }
+    
+    console.log("[v0] deleteDocument success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] deleteDocument catch:", err)
+    throw err
+  }
 }
 
 // ===== Infractions =====
