@@ -23,7 +23,7 @@ interface ParametersFormProps {
 export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b", cardTextColor = "#f1f5f9", inputBgColor = "#0f172a", inputTextColor = "#e2e8f0" }: ParametersFormProps) {
   const [loading, setLoading] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
-  const [regenerateResult, setRegenerateResult] = useState<{success: boolean, message: string} | null>(null)
+  const [regenerateResult, setRegenerateResult] = useState<{ success: boolean, message: string } | null>(null)
   const [fineType, setFineType] = useState(currentParams?.fine_type || "porcentaje")
   const router = useRouter()
 
@@ -95,7 +95,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
   const currentYear = new Date().getFullYear()
 
   return (
-    <div 
+    <div
       className="rounded-lg border p-6 space-y-6"
       style={{
         backgroundColor: cardBgColor,
@@ -156,7 +156,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
             <h3 className="text-sm font-medium">Saldo Inicial</h3>
             <p className="text-xs text-muted-foreground">Punto de partida para el balance del condominio (solo se usa el primer mes)</p>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="initial_balance">Monto Saldo Inicial</Label>
@@ -199,7 +199,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
             <h3 className="text-sm font-medium">Montos de Gasto Comun</h3>
             <p className="text-xs text-muted-foreground">Valores que deben pagar los propietarios mensualmente</p>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fixed_income_amount">Gasto Comun Fijo</Label>
@@ -241,7 +241,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
         </div>
 
         {/* Late Fees Section */}
-        <div className="space-y-4 pt-4 border-t">
+        <div className="space-y-2 pt-4 border-t">
           <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
             <div>
               <Label htmlFor="enable_late_fees" className="cursor-pointer">Habilitar Multa por Atraso</Label>
@@ -261,7 +261,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
                 <SelectValue placeholder="Seleccionar tipo de multa" />
               </SelectTrigger>
               <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
-                <SelectItem value="porcentaje" style={{ color: inputTextColor }}>Porcentaje del gasto comun</SelectItem>
+                <SelectItem value="porcentaje" style={{ color: inputTextColor }}>% del gasto comun</SelectItem>
                 <SelectItem value="fijo" style={{ color: inputTextColor }}>Monto fijo</SelectItem>
                 <SelectItem value="uf" style={{ color: inputTextColor }}>Monto en UF</SelectItem>
               </SelectContent>
@@ -275,7 +275,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
 
           {fineType === "porcentaje" && (
             <div className="space-y-2">
-              <Label htmlFor="late_fee_percentage">Porcentaje de Multa (%)</Label>
+              <Label htmlFor="late_fee_percentage">% de Multa (%)</Label>
               <Input
                 id="late_fee_percentage"
                 name="late_fee_percentage"
@@ -329,20 +329,20 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
       </form>
 
       {/* Regenerate Income Section */}
-      <div className="space-y-4 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+      <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
         <div>
           <h3 className="text-sm font-medium" style={{ color: cardTextColor }}>Generar Ingresos Mensuales</h3>
           <p className="text-xs mt-1" style={{ color: cardTextColor, opacity: 0.6 }}>
             Crea automáticamente los registros de gasto común (fijo y variable) para todas las casas que no lo tengan en el mes actual
           </p>
         </div>
-        
-        <Button 
-          type="button" 
-          className="w-full border-2 min-h-14 sm:min-h-16 px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-semibold line-clamp-2 sm:line-clamp-1 flex items-center justify-center gap-2"
-          style={{ 
-            backgroundColor: inputBgColor, 
-            color: inputTextColor, 
+
+        <Button
+          type="button"
+          className="w-full border-2 min-h-12 sm:min-h-12 px-4 sm:px-6 py-0 sm:py-0 text-base sm:text-lg line-clamp-2 sm:line-clamp-2 flex items-left justify-left gap-1"
+          style={{
+            backgroundColor: inputBgColor,
+            color: inputTextColor,
             borderColor: inputTextColor
           }}
           onClick={handleRegenerate}
@@ -353,7 +353,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
           ) : (
             <RefreshCw className="h-5 w-5 flex-shrink-0" />
           )}
-          <span className="break-words">Generar Ingresos para Mes Actual</span>
+          <span>Generar Ingresos Mes </span>
         </Button>
 
         {!currentParams?.fixed_income_amount && (
@@ -363,11 +363,10 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
         )}
 
         {regenerateResult && (
-          <div className={`p-3 rounded-lg border ${
-            regenerateResult.success 
-              ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-300"
-              : "bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-300"
-          }`}>
+          <div className={`p-3 rounded-lg border ${regenerateResult.success
+            ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-300"
+            : "bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-300"
+            }`}>
             <p className="text-sm">{regenerateResult.message}</p>
           </div>
         )}
