@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
-import { getCondoIncome, getHouses } from "../ingresos/actions"
+import { getCondoIncome } from "../ingresos/actions"
 import { IngresoVariableClient } from "./ingreso-variable-client"
+import { CreateVariableIncomeDialog } from "./create-variable-income-dialog"
 import { redirect } from "next/navigation"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import Link from "next/link"
@@ -17,23 +18,18 @@ export default async function IngresoVariablePage({
 
   if (!user) redirect("/auth/login")
 
-  // Get condo_id using the helper function (works for both owners and admins)
+  // Get condo_id using the helper function
   const condoId = await getUserCondoId(supabase, user.id)
 
   if (!condoId) {
     redirect("/dashboard")
   }
 
-  const isAdmin = true
-
-  // Get period from query params or use current month
+  // Get period from query params
   const params = await searchParams
   const now = new Date()
   const year = parseInt(params.año as string) || now.getFullYear()
   const month = parseInt(params.mes as string) || now.getMonth() + 1
-
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1
 
   // Calculate previous and next month for navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -47,14 +43,15 @@ export default async function IngresoVariablePage({
     year: "numeric",
   })
 
-  // Get income variables (filter for "variable" type) and houses
-  let allIncome: any[] = []
+  // Fetch variable income for the selected month with correct parameters
   let variableIncome: any[] = []
-
   if (condoId) {
-    allIncome = await getCondoIncome(condoId, year, month)
-    variableIncome = allIncome.filter((inc) => inc.income_type === "variable")
+    variableIncome = await getCondoIncome(condoId, year, month, "variable")
   }
+
+  // Check if user is admin
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
   return (
     <div className="space-y-6">
@@ -83,6 +80,13 @@ export default async function IngresoVariablePage({
         )}
       </div>
 
+      {/* Add Variable Income Button - Centered */}
+      {isAdmin && condoId && (
+        <div className="flex items-center justify-center">
+          <CreateVariableIncomeDialog condoId={condoId} />
+        </div>
+      )}
+
       {/* Ingreso Variable Client Content */}
       <IngresoVariableClient 
         incomes={variableIncome}
@@ -92,5 +96,3 @@ export default async function IngresoVariablePage({
     </div>
   )
 }
-
-

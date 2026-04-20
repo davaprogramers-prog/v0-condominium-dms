@@ -58,7 +58,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
         .from("expense_logos")
         .select("id, name, logo_url")
         .order("name")
-      
+
       console.log("[v0] Expense logos query - returned:", data?.length || 0, "logos")
       if (error) {
         console.log("[v0] Logos error:", error.message, "code:", error.code)
@@ -169,7 +169,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título del Gasto *</Label>
+              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título*</Label>
               <Input
                 id="title"
                 name="title"
@@ -203,8 +203,8 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-1">
               <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
               {expenseTypes.length > 0 ? (
                 <Select name="category" required>

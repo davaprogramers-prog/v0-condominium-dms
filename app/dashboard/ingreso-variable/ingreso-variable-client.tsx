@@ -1,16 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { createVariableIncome } from "@/app/dashboard/actions"
 import { deleteVariableIncome } from "@/app/dashboard/ingresos/actions"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { FileUpload } from "@/components/file-upload"
-import { Plus, TrendingUp, Trash2, ExternalLink } from "lucide-react"
-import { useTheme } from "@/app/dashboard/theme-context"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { TrendingUp, Trash2, ExternalLink } from "lucide-react"
 
 interface VariableIncome {
   id: string
@@ -56,12 +50,7 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
 }
 
 export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
-  const [open, setOpen] = useState(false)
-  const [receiptUrl, setReceiptUrl] = useState("")
-  const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
-
-  const total = incomes.reduce((a, i) => a + Number(i.amount || 0), 0)
 
   // Ordenar ingresos por descripción/fuente naturalmente
   const sortedIncomes = [...incomes].sort((a, b) => {
@@ -78,79 +67,6 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Ingreso Variable</h1>
-          <p className="text-sm text-muted-foreground">
-            {"Total acumulado: "}
-            <span className="font-semibold text-foreground">{currencySymbol}{total.toLocaleString()}</span>
-          </p>
-        </div>
-        {isAdmin && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #1d4ed8",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                  cursor: "pointer",
-                  fontWeight: "600"
-                }}
-              >
-                <TrendingUp className="h-5 w-5" />
-                Nuevo Ingreso Variable
-              </Button>
-            </DialogTrigger>
-            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle style={{ color: dialogTextColor }}>Registrar Ingreso Variable</DialogTitle>
-              </DialogHeader>
-              <form
-                action={async (fd) => {
-                  fd.set("receipt_url", receiptUrl)
-                  await createVariableIncome(fd)
-                  setOpen(false)
-                  setReceiptUrl("")
-                }}
-                className="flex flex-col gap-4"
-              >
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripcion</Label>
-                  <Input id="description" name="description" placeholder="Descripcion del ingreso" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto</Label>
-                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0.00" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="income_date" style={{ color: dialogTextColor }}>Fecha</Label>
-                    <Input id="income_date" name="income_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="source" style={{ color: dialogTextColor }}>Fuente / Origen</Label>
-                  <Input id="source" name="source" placeholder="Ej: Arriendo sala, Multa, etc." style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label style={{ color: dialogTextColor }}>Respaldo</Label>
-                  <FileUpload bucket="receipts" onUpload={setReceiptUrl} label="Subir comprobante" />
-                </div>
-                <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Ingreso</Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-
       {incomes.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground rounded-lg border border-dashed p-8">
           <TrendingUp className="h-10 w-10" />

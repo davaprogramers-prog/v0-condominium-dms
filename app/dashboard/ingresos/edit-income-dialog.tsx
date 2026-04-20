@@ -90,12 +90,13 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Editar Ingreso</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los detalles del ingreso y el comprobante</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 px-2 space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
@@ -117,10 +118,10 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label style={{ color: dialogTextColor }}>Tipo de Ingreso</Label>
+              <Label style={{ color: dialogTextColor }}>Tipo</Label>
               <Input
                 type="text"
-                value={income.income_type === "cuota" ? "Cuota Común" : "Ingreso Variable"}
+                value={income.income_type === "fixed" ? "Ingreso" : "Ingreso Variable"}
                 disabled
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
@@ -205,11 +206,14 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
+          </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Guardar Cambios
-          </Button>
+          <div className="border-t mt-4 pt-4" style={{ borderColor: inputTextColor }}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Guardar Cambios
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

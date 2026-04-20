@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ExoneracionesClient } from "./exoneraciones-client"
+import { Shield } from "lucide-react"
 
 export default async function ExoneracionesPage() {
   const supabase = await createClient()
@@ -23,11 +24,20 @@ export default async function ExoneracionesPage() {
   ])
 
   return (
-    <ExoneracionesClient
-      exemptions={exemptions || []}
-      exemptionTypes={exemptionTypes || []}
-      houses={houses || []}
-      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
-    />
+    <div className="space-y-6">
+      {/* Subtitle with Icon */}
+      <div className="flex items-center gap-2">
+        <Shield className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <p className="text-muted-foreground text-sm">Casos con exoneración de gasto común</p>
+      </div>
+
+      {/* Exoneraciones Client Content */}
+      <ExoneracionesClient
+        exemptions={exemptions || []}
+        exemptionTypes={exemptionTypes || []}
+        houses={houses || []}
+        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+      />
+    </div>
   )
 }

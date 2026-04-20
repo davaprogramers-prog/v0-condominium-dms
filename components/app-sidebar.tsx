@@ -356,7 +356,7 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
 
   return (
     <Sidebar 
-      side="right"
+      side="left"
       className="!border-l !bg-opacity-100 !backdrop-filter-none !backdrop-blur-none"
       style={{
         '--sidebar-bg': (sidebarBgColor || "#ffffff"),

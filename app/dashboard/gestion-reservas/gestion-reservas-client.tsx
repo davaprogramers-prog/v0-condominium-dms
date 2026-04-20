@@ -84,12 +84,12 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
     try {
       const newHouseId = formData.get("house_id") as string
       const originalReservation = reservations.find(r => r.id === reservationId)
-      
+
       // If house changed, update it separately
       if (newHouseId && newHouseId !== originalReservation?.house_id) {
         await changeReservationHouse(reservationId, newHouseId)
       }
-      
+
       await updateReservation({
         reservation_id: reservationId,
         start_time: formData.get("start_time") as string,
@@ -120,26 +120,23 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: cardTextColor }}>Gestión de Reservas</h1>
-          <p className="text-sm opacity-70" style={{ color: cardTextColor }}>
-            Administrar todas las reservas del condominio
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <p className="text-sm font-semibold text-black">
+          Administrar todas las reservas del condominio
+        </p>
       </div>
 
       {/* Filters */}
-      <Card className="mb-6" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-2 mb-4">
+      <Card className="mb-6 w-full" style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
+        <CardContent className="pt-6 px-6">
+          <div className="flex items-center gap-4 mb-8">
             <Filter className="h-4 w-4" />
             <span className="font-medium">Filtros</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label className="text-xs">Estado</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full">
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Estado</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todos" />
@@ -153,8 +150,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Área Común</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Área Común</Label>
               <Select value={filterArea} onValueChange={setFilterArea}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
@@ -167,8 +164,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Propiedad</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Propiedad</Label>
               <Select value={filterHouse} onValueChange={setFilterHouse}>
                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Todas" />
@@ -181,11 +178,11 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-xs">Fecha</Label>
-              <Input 
-                type="date" 
-                value={searchDate} 
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-semibold">Fecha</Label>
+              <Input
+                type="date"
+                value={searchDate}
                 onChange={(e) => setSearchDate(e.target.value)}
                 style={{ backgroundColor: inputBgColor, color: inputTextColor }}
               />
@@ -272,8 +269,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                   <div className="flex gap-2 flex-wrap">
                     {/* Confirm button for pending */}
                     {reservation.status === "pending" && (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white"
                         onClick={() => handleConfirm(reservation.id)}
                         disabled={loading}
@@ -299,7 +296,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                               Indica la razón del rechazo. El propietario de Casa #{reservation.houses?.house_number} verá este mensaje.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <form 
+                          <form
                             onSubmit={(e) => {
                               e.preventDefault()
                               const formData = new FormData(e.currentTarget)
@@ -307,8 +304,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                             }}
                             className="flex flex-col gap-3"
                           >
-                            <Textarea 
-                              name="reason" 
+                            <Textarea
+                              name="reason"
                               placeholder="Ej: Mantenimiento programado, daño en el área, evento privado, etc."
                               required
                               style={{ backgroundColor: inputBgColor, color: inputTextColor }}
@@ -349,29 +346,29 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                                 <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                                   <SelectValue />
                                 </SelectTrigger>
-                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                  {allHouses.map(h => (
-                    <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+                                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                                  {allHouses.map(h => (
+                                    <SelectItem key={h.id} value={h.id}>Casa #{h.house_number}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
                               <div className="flex flex-col gap-2">
                                 <Label>Hora Inicio</Label>
-                                <Input 
-                                  type="time" 
-                                  name="start_time" 
+                                <Input
+                                  type="time"
+                                  name="start_time"
                                   defaultValue={formatTime(reservation.start_time)}
                                   style={{ backgroundColor: inputBgColor, color: inputTextColor }}
                                 />
                               </div>
                               <div className="flex flex-col gap-2">
                                 <Label>Hora Fin</Label>
-                                <Input 
-                                  type="time" 
-                                  name="end_time" 
+                                <Input
+                                  type="time"
+                                  name="end_time"
                                   defaultValue={formatTime(reservation.end_time)}
                                   style={{ backgroundColor: inputBgColor, color: inputTextColor }}
                                 />
@@ -380,8 +377,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
 
                             <div className="flex flex-col gap-2">
                               <Label>Notas</Label>
-                              <Textarea 
-                                name="notes" 
+                              <Textarea
+                                name="notes"
                                 defaultValue={reservation.notes || ""}
                                 style={{ backgroundColor: inputBgColor, color: inputTextColor }}
                               />

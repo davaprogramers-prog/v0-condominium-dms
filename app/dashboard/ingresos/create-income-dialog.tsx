@@ -29,7 +29,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
   const [error, setError] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [incomeType, setIncomeType] = useState<"cuota" | "variable">("cuota")
+  const [incomeType, setIncomeType] = useState<"fixed" | "variable">("fixed")
   const router = useRouter()
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
 
@@ -77,7 +77,7 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
 
       setOpen(false)
       clearFile()
-      setIncomeType("cuota")
+      setIncomeType("fixed")
       router.refresh()
     } catch (err) {
       console.error("[v0] Error in income form:", err)
@@ -110,134 +110,138 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
           Agregar Ingreso
         </Button>
       </DialogTrigger>
-      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl">
+      <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Registrar Nuevo Ingreso</DialogTitle>
           <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Agrega ingresos por cuotas o ingresos variables con comprobante</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 px-2 space-y-4">
+            {error && (
+              <div style={{ backgroundColor: "#ef4444", color: "white", borderColor: "white" }} className="p-3 rounded-lg text-sm border-l-4">
+                {error}
+              </div>
+            )}
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  required
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="incomeType" style={{ color: dialogTextColor }}>Tipo*</Label>
+                <Select value={incomeType} onValueChange={(val) => setIncomeType(val as "fixed" | "variable")}>
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                    <SelectItem value="fixed">Ingreso</SelectItem>
+                    <SelectItem value="variable">Ingreso Variable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="houseId" style={{ color: dialogTextColor }}>Casa (Opcional)</Label>
+                <Select name="houseId" defaultValue="none">
+                  <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+                    <SelectValue placeholder="Seleccionar casa..." />
+                  </SelectTrigger>
+                  <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                    <SelectItem value="none">Sin asignar</SelectItem>
+                    {houses.map((house) => (
+                      <SelectItem key={house.id} value={house.id}>
+                        Casa #{house.house_number} - {house.owner_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha</Label>
+                <Input
+                  id="incomeDate"
+                  name="incomeDate"
+                  type="date"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                required
+              <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Detalles adicionales del ingreso..."
+                rows={3}
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="incomeType" style={{ color: dialogTextColor }}>Tipo de Ingreso *</Label>
-              <Select value={incomeType} onValueChange={(val) => setIncomeType(val as "cuota" | "variable")}>
-                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                  <SelectItem value="cuota">Cuota Común</SelectItem>
-                  <SelectItem value="variable">Ingreso Variable</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+            {/* Receipt Upload */}
             <div className="space-y-2">
-              <Label htmlFor="houseId" style={{ color: dialogTextColor }}>Casa (Opcional)</Label>
-              <Select name="houseId" defaultValue="none">
-                <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
-                  <SelectValue placeholder="Seleccionar casa..." />
-                </SelectTrigger>
-                <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                  <SelectItem value="none">Sin asignar</SelectItem>
-                  {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id}>
-                      Casa #{house.house_number} - {house.owner_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso</Label>
-              <Input
-                id="incomeDate"
-                name="incomeDate"
-                type="date"
-                defaultValue={new Date().toISOString().split("T")[0]}
-                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Detalles adicionales del ingreso..."
-              rows={3}
-              style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-            />
-          </div>
-
-          {/* Receipt Upload */}
-          <div className="space-y-2">
-            <Label style={{ color: dialogTextColor }}>Comprobante (Transferencia/Depósito)</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
-              {previewUrl ? (
-                <div className="space-y-2">
-                  <div className="relative inline-block">
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="max-h-40 max-w-full rounded"
-                      style={{ border: `2px solid ${inputTextColor}` }}
+              <Label style={{ color: dialogTextColor }}>Comprobante (Transferencia/Depósito)</Label>
+              <div className="border-2 border-dashed rounded-lg p-4 text-center" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
+                {previewUrl ? (
+                  <div className="space-y-2">
+                    <div className="relative inline-block">
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="max-h-40 max-w-full rounded"
+                        style={{ border: `2px solid ${inputTextColor}` }}
+                      />
+                      <button
+                        type="button"
+                        onClick={clearFile}
+                        className="absolute top-1 right-1 bg-destructive rounded-full p-1"
+                      >
+                        <X className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
+                    <p className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>{selectedFile?.name}</p>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
+                      <span className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>
+                        Haz clic para cargar o arrastra una imagen
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
                     />
-                    <button
-                      type="button"
-                      onClick={clearFile}
-                      className="absolute top-1 right-1 bg-destructive rounded-full p-1"
-                    >
-                      <X className="h-4 w-4 text-white" />
-                    </button>
-                  </div>
-                  <p className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>{selectedFile?.name}</p>
-                </div>
-              ) : (
-                <label className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-6 w-6" style={{ color: inputTextColor, opacity: 0.5 }} />
-                    <span className="text-sm" style={{ color: inputTextColor, opacity: 0.7 }}>
-                      Haz clic para cargar o arrastra una imagen
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </label>
-              )}
+                  </label>
+                )}
+              </div>
+              <p className="text-xs" style={{ color: inputTextColor, opacity: 0.6 }}>
+                Formatos: JPG, PNG. Máx 5MB
+              </p>
             </div>
-            <p className="text-xs" style={{ color: inputTextColor, opacity: 0.6 }}>
-              Formatos: JPG, PNG. Máx 5MB
-            </p>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Registrar Ingreso
-          </Button>
+          <div className="border-t mt-4 pt-4" style={{ borderColor: inputTextColor }}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Registrar Ingreso
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
