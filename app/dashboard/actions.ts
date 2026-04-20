@@ -1,7 +1,6 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 
 // ===== Condo Switching =====
@@ -672,12 +671,20 @@ export async function uploadDocument(formData: FormData) {
   try {
     const { supabase, userId, condoId } = await getCondoId()
     
-    // Use admin client to bypass RLS for document uploads
-    const admin = createAdminClient()
+    // Verify user is admin - validation done server-side
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single()
+    
+    if (profile?.role !== "admin") {
+      throw new Error("Solo administradores pueden subir documentos")
+    }
     
     console.log("[v0] uploadDocument: userId=", userId, "condoId=", condoId)
     
-    const { data, error } = await admin.from("documents").insert({
+    const { data, error } = await supabase.from("documents").insert({
       condo_id: condoId,
       document_type_id: formData.get("document_type_id") as string || null,
       title: formData.get("title") as string,
