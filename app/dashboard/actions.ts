@@ -989,11 +989,55 @@ export async function deleteAlert(id: string) {
 
 // ===== File Upload Helper =====
 export async function uploadFile(bucket: string, path: string, file: File) {
-  const supabase = await createClient()
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-  if (error) throw error
-  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
-  return urlData.publicUrl
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
+    if (error) throw error
+    const { data: urlData } = admin.storage.from(bucket).getPublicUrl(data.path)
+    return urlData.publicUrl
+  } catch (err: any) {
+    console.error("[v0] Error uploading file:", err)
+    throw err
+  }
+}
+
+export async function uploadFileToStorage(formData: FormData) {
+  try {
+    const file = formData.get("file") as File
+    const bucket = formData.get("bucket") as string
+    const folder = formData.get("folder") as string || ""
+    
+    if (!file || !bucket) {
+      return { error: "Archivo y bucket son requeridos", url: null }
+    }
+    
+    console.log("[v0] uploadFileToStorage:", { bucket, folder, fileName: file.name })
+    
+    // Generate unique filename
+    const ext = file.name.split(".").pop()
+    const path = `${folder ? folder + "/" : ""}${Date.now()}.${ext}`
+    
+    // Use admin client to bypass RLS
+    const admin = createAdminClient()
+    const { data, error: uploadError } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
+    
+    if (uploadError) {
+      console.error("[v0] uploadFileToStorage error:", uploadError)
+      if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("bucket")) {
+        return { error: `Bucket "${bucket}" no existe. Contacta al administrador.`, url: null }
+      }
+      return { error: uploadError.message, url: null }
+    }
+    
+    // Get public URL
+    const { data: urlData } = admin.storage.from(bucket).getPublicUrl(data.path)
+    console.log("[v0] uploadFileToStorage success:", { url: urlData.publicUrl })
+    
+    return { error: null, url: urlData.publicUrl }
+  } catch (err: any) {
+    console.error("[v0] uploadFileToStorage catch error:", err)
+    return { error: err.message || "Error al subir archivo", url: null }
+  }
 }
 
 // ===== User Management =====

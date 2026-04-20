@@ -1,10 +1,10 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Upload, X, FileText, Image as ImageIcon } from "lucide-react"
 import { useState, useRef } from "react"
+import { uploadFileToStorage } from "@/app/dashboard/actions"
 
 interface FileUploadProps {
   bucket: string
@@ -29,24 +29,26 @@ export function FileUpload({ bucket, folder = "", onUpload, accept = "image/*,ap
     setUploading(true)
     setError(null)
     try {
-      const supabase = createClient()
-      const ext = file.name.split(".").pop()
-      const path = `${folder ? folder + "/" : ""}${Date.now()}.${ext}`
-      const { data, error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-      if (uploadError) {
-        if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("bucket")) {
-          setError(`Bucket "${bucket}" no existe. Contacta al administrador.`)
-        } else {
-          setError(uploadError.message)
-        }
+      // Use server action to upload with admin credentials
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("bucket", bucket)
+      formData.append("folder", folder)
+      
+      const result = await uploadFileToStorage(formData)
+      
+      if (result.error) {
+        setError(result.error)
         return
       }
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
-      setPreview(urlData.publicUrl)
-      setFileName(file.name)
-      onUpload(urlData.publicUrl)
+      
+      if (result.url) {
+        setPreview(result.url)
+        setFileName(file.name)
+        onUpload(result.url)
+      }
     } catch (err: any) {
-      console.error("Error uploading:", err)
+      console.error("[v0] Error uploading:", err)
       setError(err.message || "Error al subir archivo")
     } finally {
       setUploading(false)
