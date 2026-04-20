@@ -322,7 +322,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
           )}
         </div>
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold" disabled={loading}>
+        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 sm:py-6 text-sm sm:text-base font-semibold" disabled={loading}>
           {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Guardar Parámetros
         </Button>
@@ -339,7 +339,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
         
         <Button 
           type="button" 
-          className="w-full border-2"
+          className="w-full border-2 min-h-12 sm:min-h-14 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base font-medium line-clamp-2 sm:line-clamp-1 flex items-center justify-center gap-2"
           style={{ 
             backgroundColor: inputBgColor, 
             color: inputTextColor, 
@@ -349,11 +349,11 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
           disabled={regenerating || !currentParams?.fixed_income_amount}
         >
           {regenerating ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin" />
           ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 flex-shrink-0" />
           )}
-          Generar Ingresos para Mes Actual
+          <span className="break-words">Generar Ingresos para Mes Actual</span>
         </Button>
 
         {!currentParams?.fixed_income_amount && (
