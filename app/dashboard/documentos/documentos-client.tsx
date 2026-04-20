@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useTheme } from "../theme-context"
-import { uploadDocument, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
-import { createDocumentType } from "./actions"
+import { uploadDocument, updateDocument, deleteDocument } from "@/app/dashboard/actions"
+import { createDocumentType, updateDocumentType, deleteDocumentType } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
   const [typeName, setTypeName] = useState("")
   const [typeDescription, setTypeDescription] = useState("")
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
+  const [isPending, startTransition] = useTransition()
 
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -345,7 +346,18 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                   </AlertDialogHeader>
                                   <div className="flex gap-3 justify-end">
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => deleteDocumentType(t.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    <AlertDialogAction 
+                                      onClick={() => {
+                                        startTransition(async () => {
+                                          try {
+                                            await deleteDocumentType(t.id as string)
+                                          } catch (err) {
+                                            console.error("[v0] Error deleting document type:", err)
+                                          }
+                                        })
+                                      }} 
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
                                       Eliminar
                                     </AlertDialogAction>
                                   </div>
@@ -362,10 +374,21 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                 <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles del tipo</DialogDescription>
                               </DialogHeader>
                               <form
-                                action={async (fd) => {
+                                onSubmit={async (e) => {
+                                  e.preventDefault()
+                                  const fd = new FormData()
                                   fd.set("id", t.id as string)
-                                  await updateDocumentType(fd)
-                                  setEditTypeOpen(null)
+                                  fd.set("name", (e.currentTarget.elements.namedItem("name") as HTMLInputElement).value)
+                                  fd.set("description", (e.currentTarget.elements.namedItem("description") as HTMLTextAreaElement).value)
+                                  
+                                  startTransition(async () => {
+                                    try {
+                                      await updateDocumentType(fd)
+                                      setEditTypeOpen(null)
+                                    } catch (err) {
+                                      console.error("[v0] Error updating document type:", err)
+                                    }
+                                  })
                                 }}
                                 className="flex flex-col gap-4"
                               >
@@ -377,7 +400,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                   <Label htmlFor="edit_type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
                                   <Textarea id="edit_type_desc" name="description" defaultValue={(t.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                 </div>
-                                <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                                <Button type="submit" disabled={isPending} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">{isPending ? "Guardando..." : "Guardar Cambios"}</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
