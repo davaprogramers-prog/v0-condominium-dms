@@ -56,12 +56,10 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{documents.length} documentos almacenados</p>
-        </div>
+      <div>
+        <p className="text-sm font-semibold text-black mb-4">{documents.length} documentos almacenados</p>
         {isAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
             <Dialog open={openType} onOpenChange={setOpenType}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
