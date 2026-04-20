@@ -191,33 +191,34 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Titulo</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Descripcion</TableHead>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Archivo</TableHead>
-                        {isAdmin && <TableHead>Acciones</TableHead>}
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Titulo</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Tipo</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Descripcion</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Fecha</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Archivo</TableHead>
+                        {isAdmin && <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Acciones</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {documents.map((doc) => (
                         <TableRow key={doc.id as string}>
-                          <TableCell className="font-medium">{doc.title as string}</TableCell>
-                          <TableCell>
+                          <TableCell style={{ color: cardTextColor }} className="font-medium">{doc.title as string}</TableCell>
+                          <TableCell style={{ color: cardTextColor }}>
                             <Badge variant="secondary">
                               {(doc.document_types as Record<string, unknown>)?.name as string || "Sin tipo"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                          <TableCell style={{ color: cardTextColor }} className="max-w-[200px] truncate text-sm">
                             {(doc.description as string) || "-"}
                           </TableCell>
-                          <TableCell className="text-sm">{new Date(doc.created_at as string).toLocaleDateString("es-CL")}</TableCell>
+                          <TableCell style={{ color: cardTextColor }} className="text-sm">{new Date(doc.created_at as string).toLocaleDateString("es-CL")}</TableCell>
                           <TableCell>
                             <a
                               href={doc.file_url as string}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                              className="inline-flex items-center gap-1 text-sm hover:underline"
+                              style={{ color: cardTextColor }}
                             >
                               <ExternalLink className="h-3 w-3" />Ver
                             </a>
