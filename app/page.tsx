@@ -1,8 +1,11 @@
-import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight } from 'lucide-react'
+'use client'
+
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight, Download, Apple, Smartphone } from 'lucide-react'
 import Image from 'next/image'
+import { useState } from 'react'
 
 export default function Page() {
-  return (
+  const [showIOSAlert, setShowIOSAlert] = useState(false)
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
@@ -143,6 +146,67 @@ export default function Page() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* App Download Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-900 to-slate-800">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Descarga nuestra app móvil</h2>
+            <p className="text-base sm:text-lg text-slate-300">Gestiona tu condominio desde cualquier lugar</p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
+            {/* Android Download */}
+            <a 
+              href="/api/download-apk"
+              download
+              className="flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <Smartphone className="w-6 h-6" />
+              <div className="flex flex-col items-start">
+                <span className="text-xs opacity-90">Disponible en</span>
+                <span className="text-base font-bold">Android</span>
+              </div>
+            </a>
+
+            {/* iOS Download */}
+            <button 
+              onClick={() => setShowIOSAlert(true)}
+              className="flex items-center gap-3 px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-gray-700"
+            >
+              <Apple className="w-6 h-6" />
+              <div className="flex flex-col items-start">
+                <span className="text-xs opacity-90">Disponible en</span>
+                <span className="text-base font-bold">iOS</span>
+              </div>
+            </button>
+          </div>
+
+          {/* iOS Alert Dialog */}
+          {showIOSAlert && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+                <div className="text-center">
+                  <Apple className="w-12 h-12 mx-auto mb-3 text-gray-900" />
+                  <h3 className="text-xl font-bold text-gray-900">App iOS en Revisión</h3>
+                </div>
+                <p className="text-center text-gray-600">
+                  La versión de iOS está siendo revisada por Apple. Estará disponible en la App Store en unos días.
+                </p>
+                <p className="text-center text-sm text-gray-500">
+                  Te notificaremos cuando esté lista para descargar.
+                </p>
+                <button
+                  onClick={() => setShowIOSAlert(false)}
+                  className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
