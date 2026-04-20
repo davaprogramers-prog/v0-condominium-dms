@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 
 // ===== Condo Switching =====
@@ -714,7 +715,10 @@ export async function uploadDocument(formData: FormData) {
     
     console.log("[v0] uploadDocument: userId=", userId, "condoId=", condoId)
     
-    const { data, error } = await supabase.from("documents").insert({
+    // Use admin client to bypass RLS - server validates permissions
+    const admin = createAdminClient()
+    
+    const { data, error } = await admin.from("documents").insert({
       condo_id: condoId,
       document_type_id: formData.get("document_type_id") as string || null,
       title: formData.get("title") as string,
