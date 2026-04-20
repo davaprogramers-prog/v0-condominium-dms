@@ -47,7 +47,6 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Proyectos de Mejora</h1>
           <p className="text-sm text-muted-foreground">{projects.length} proyectos registrados</p>
         </div>
         {isAdmin && (
@@ -278,17 +277,17 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                             <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                               <SelectValue />
                             </SelectTrigger>
-                    <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                      {commonAreas.map((area) => (
-                        <SelectItem key={area.id} value={area.name}>
-                          {area.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
+                            <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                              {commonAreas.map((area) => (
+                                <SelectItem key={area.id} value={area.name}>
+                                  {area.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
                           <Input id="edit_cost" name="estimated_cost" type="number" defaultValue={(project.estimated_cost as number) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
@@ -463,12 +462,12 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                             setStatusUpdate("")
                           }}
                         >
-<SelectTrigger className="w-40" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
-                    <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                      {Object.entries(STATUS_MAP).map(([key, v]) => (
-                        <SelectItem key={key} value={key}>{v.label}</SelectItem>
-                      ))}
-                    </SelectContent>
+                          <SelectTrigger className="w-40" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
+                          <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                            {Object.entries(STATUS_MAP).map(([key, v]) => (
+                              <SelectItem key={key} value={key}>{v.label}</SelectItem>
+                            ))}
+                          </SelectContent>
                         </Select>
                       </div>
                     )}
