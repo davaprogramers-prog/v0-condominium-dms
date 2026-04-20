@@ -199,7 +199,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                       {isAdmin && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button 
+                              size="sm" 
+                              className="h-9 px-3 bg-white hover:bg-gray-100 text-slate-900 rounded-lg transition-colors shadow-md"
+                              title="Acciones del proyecto"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -233,7 +237,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {isExpanded ? <ChevronUp className="h-5 w-5" style={{ color: cardTextColor }} /> : <ChevronDown className="h-5 w-5" style={{ color: cardTextColor }} />}
                     </div>
                   </div>
                   {project.improvement_type ? (
