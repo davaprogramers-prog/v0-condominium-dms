@@ -709,7 +709,7 @@ export async function uploadDocument(formData: FormData) {
       .eq("id", userId)
       .single()
     
-    if (profile?.role !== "admin") {
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
       throw new Error("Solo administradores pueden subir documentos")
     }
     
