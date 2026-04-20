@@ -162,9 +162,9 @@ export default function Page() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
             {/* Android Download */}
             <a 
-              href="/api/download-apk"
+              href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '#'}
               download
-              className="flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              className={`flex items-center gap-3 px-8 py-4 ${process.env.NEXT_PUBLIC_ANDROID_APK_URL ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'} text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
             >
               <Smartphone className="w-6 h-6" />
               <div className="flex flex-col items-start">
