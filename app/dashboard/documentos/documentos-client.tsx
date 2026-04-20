@@ -318,7 +318,11 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                         <div className="flex items-center gap-1">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button 
+                                size="sm" 
+                                className="h-9 px-3 bg-white hover:bg-gray-100 text-slate-900 rounded-lg transition-colors shadow-md"
+                                title="Acciones"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -350,7 +354,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                             </DropdownMenuContent>
                           </DropdownMenu>
 
-                          {/* Edit Type Dialog */}
+                          {/* Edit Type Dialog - Moved outside DropdownMenu */}
                           <Dialog open={editTypeOpen === t.id} onOpenChange={(v) => !v && setEditTypeOpen(null)}>
                             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                               <DialogHeader>
