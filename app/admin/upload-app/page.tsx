@@ -37,21 +37,35 @@ export default function UploadAppPage() {
   const uploadFile = async (file: File, appType: 'android' | 'ios') => {
     try {
       setUploading(true)
+      setError('')
+      setSuccess('')
+      
       const formData = new FormData()
       formData.append('file', file)
       formData.append('appType', appType)
+
+      console.log('[v0] Starting upload for:', file.name, 'Type:', appType, 'Size:', file.size);
 
       const response = await fetch('/api/upload-app', {
         method: 'POST',
         body: formData,
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Error al subir el archivo')
+      console.log('[v0] Response status:', response.status);
+
+      const contentType = response.headers.get('content-type');
+      
+      let data;
+      try {
+        data = await response.json()
+      } catch (e) {
+        console.error('[v0] Failed to parse JSON:', e);
+        throw new Error('Invalid response from server');
       }
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al subir el archivo')
+      }
       
       if (appType === 'android') {
         setAndroidUrl(data.url)
@@ -61,6 +75,7 @@ export default function UploadAppPage() {
 
       setSuccess(`${appType === 'android' ? 'APK/AAB' : 'IPA'} subido correctamente: ${data.url}`)
     } catch (err) {
+      console.error('[v0] Upload error:', err);
       setError(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     } finally {
       setUploading(false)
