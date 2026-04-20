@@ -6,6 +6,8 @@ import { useState } from 'react'
 
 export default function Page() {
   const [showIOSAlert, setShowIOSAlert] = useState(false)
+  
+  return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-40 border-b border-border/50" style={{ backgroundColor: "#0d3068" }}>
