@@ -1,0 +1,13 @@
+-- Drop existing policies one by one
+DROP POLICY IF EXISTS "docs_manage" ON public.documents;
+DROP POLICY IF EXISTS "docs_select" ON public.documents;
+DROP POLICY IF EXISTS "docs_insert_admin" ON public.documents;
+DROP POLICY IF EXISTS "docs_update_admin" ON public.documents;
+DROP POLICY IF EXISTS "docs_delete_admin" ON public.documents;
+DROP POLICY IF EXISTS "docs_insert" ON public.documents;
+DROP POLICY IF EXISTS "docs_update" ON public.documents;
+DROP POLICY IF EXISTS "docs_delete" ON public.documents;
+DROP POLICY IF EXISTS "docs_insert_auth" ON public.documents;
+DROP POLICY IF EXISTS "docs_select_condo" ON public.documents;
+DROP POLICY IF EXISTS "docs_update_uploader" ON public.documents;
+DROP POLICY IF EXISTS "docs_delete_admin" ON public.documents;

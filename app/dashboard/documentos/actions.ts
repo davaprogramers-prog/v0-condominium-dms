@@ -77,3 +77,46 @@ export async function deleteDocumentType(typeId: string) {
     return { error: String(e) }
   }
 }
+
+export async function updateDocumentType(formData: FormData) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      throw new Error("No autenticado")
+    }
+
+    const typeId = formData.get("id") as string
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string || null
+
+    if (!typeId || !name) {
+      throw new Error("ID y nombre son requeridos")
+    }
+
+    // Use admin client
+    const admin = createAdminClient()
+
+    const { error } = await admin
+      .from("document_types")
+      .update({
+        name,
+        description,
+      })
+      .eq("id", typeId)
+
+    if (error) {
+      console.error("[v0] Error updating document type:", error)
+      throw new Error(error.message)
+    }
+
+    // Revalidate to refresh the page data
+    revalidatePath("/dashboard/documentos")
+
+    return { error: null }
+  } catch (e) {
+    console.error("[v0] Exception updating document type:", e)
+    throw e
+  }
+}

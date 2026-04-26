@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useTheme } from "../theme-context"
-import { uploadDocument, updateDocumentType, deleteDocumentType, updateDocument, deleteDocument } from "@/app/dashboard/actions"
-import { createDocumentType } from "./actions"
+import { uploadDocument, updateDocument, deleteDocument } from "@/app/dashboard/actions"
+import { createDocumentType, updateDocumentType, deleteDocumentType } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
   const [typeName, setTypeName] = useState("")
   const [typeDescription, setTypeDescription] = useState("")
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor, cardBgColor, cardTextColor } = useTheme()
+  const [isPending, startTransition] = useTransition()
 
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,13 +57,10 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Documentos</h1>
-          <p className="text-sm text-muted-foreground">{documents.length} documentos almacenados</p>
-        </div>
+      <div>
+        <p className="text-sm font-semibold text-black mb-4">{documents.length} documentos almacenados</p>
         {isAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
             <Dialog open={openType} onOpenChange={setOpenType}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Plus className="mr-2 h-4 w-4" />Tipo</Button>
@@ -193,33 +191,34 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Titulo</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Descripcion</TableHead>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Archivo</TableHead>
-                        {isAdmin && <TableHead>Acciones</TableHead>}
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Titulo</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Tipo</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Descripcion</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Fecha</TableHead>
+                        <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Archivo</TableHead>
+                        {isAdmin && <TableHead style={{ color: cardTextColor, fontWeight: 600 }}>Acciones</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {documents.map((doc) => (
                         <TableRow key={doc.id as string}>
-                          <TableCell className="font-medium">{doc.title as string}</TableCell>
-                          <TableCell>
+                          <TableCell style={{ color: cardTextColor }} className="font-medium">{doc.title as string}</TableCell>
+                          <TableCell style={{ color: cardTextColor }}>
                             <Badge variant="secondary">
                               {(doc.document_types as Record<string, unknown>)?.name as string || "Sin tipo"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                          <TableCell style={{ color: cardTextColor }} className="max-w-[200px] truncate text-sm">
                             {(doc.description as string) || "-"}
                           </TableCell>
-                          <TableCell className="text-sm">{new Date(doc.created_at as string).toLocaleDateString("es-CL")}</TableCell>
+                          <TableCell style={{ color: cardTextColor }} className="text-sm">{new Date(doc.created_at as string).toLocaleDateString("es-CL")}</TableCell>
                           <TableCell>
                             <a
                               href={doc.file_url as string}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                              className="inline-flex items-center gap-1 text-sm hover:underline"
+                              style={{ color: cardTextColor }}
                             >
                               <ExternalLink className="h-3 w-3" />Ver
                             </a>
@@ -321,7 +320,11 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                         <div className="flex items-center gap-1">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button 
+                                size="sm" 
+                                className="h-9 px-3 bg-white hover:bg-gray-100 text-slate-900 rounded-lg transition-colors shadow-md"
+                                title="Acciones"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -344,7 +347,18 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                   </AlertDialogHeader>
                                   <div className="flex gap-3 justify-end">
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => deleteDocumentType(t.id as string)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    <AlertDialogAction 
+                                      onClick={() => {
+                                        startTransition(async () => {
+                                          try {
+                                            await deleteDocumentType(t.id as string)
+                                          } catch (err) {
+                                            console.error("[v0] Error deleting document type:", err)
+                                          }
+                                        })
+                                      }} 
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
                                       Eliminar
                                     </AlertDialogAction>
                                   </div>
@@ -353,7 +367,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                             </DropdownMenuContent>
                           </DropdownMenu>
 
-                          {/* Edit Type Dialog */}
+                          {/* Edit Type Dialog - Moved outside DropdownMenu */}
                           <Dialog open={editTypeOpen === t.id} onOpenChange={(v) => !v && setEditTypeOpen(null)}>
                             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }}>
                               <DialogHeader>
@@ -361,10 +375,21 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                 <DialogDescription style={{ color: dialogTextColor }}>Modifica los detalles del tipo</DialogDescription>
                               </DialogHeader>
                               <form
-                                action={async (fd) => {
+                                onSubmit={async (e) => {
+                                  e.preventDefault()
+                                  const fd = new FormData()
                                   fd.set("id", t.id as string)
-                                  await updateDocumentType(fd)
-                                  setEditTypeOpen(null)
+                                  fd.set("name", (e.currentTarget.elements.namedItem("name") as HTMLInputElement).value)
+                                  fd.set("description", (e.currentTarget.elements.namedItem("description") as HTMLTextAreaElement).value)
+                                  
+                                  startTransition(async () => {
+                                    try {
+                                      await updateDocumentType(fd)
+                                      setEditTypeOpen(null)
+                                    } catch (err) {
+                                      console.error("[v0] Error updating document type:", err)
+                                    }
+                                  })
                                 }}
                                 className="flex flex-col gap-4"
                               >
@@ -376,7 +401,7 @@ export function DocumentosClient({ condoId, documents, documentTypes, isAdmin }:
                                   <Label htmlFor="edit_type_desc" style={{ color: dialogTextColor }}>Descripcion</Label>
                                   <Textarea id="edit_type_desc" name="description" defaultValue={(t.description as string) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                                 </div>
-                                <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                                <Button type="submit" disabled={isPending} className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">{isPending ? "Guardando..." : "Guardar Cambios"}</Button>
                               </form>
                             </DialogContent>
                           </Dialog>

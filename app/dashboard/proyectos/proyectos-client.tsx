@@ -45,11 +45,8 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Proyectos de Mejora</h1>
-          <p className="text-sm text-muted-foreground">{projects.length} proyectos registrados</p>
-        </div>
+      <div>
+        <p className="text-sm font-semibold text-black mb-4">{projects.length} proyectos registrados</p>
         {isAdmin && (
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
@@ -202,7 +199,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                       {isAdmin && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button 
+                              size="sm" 
+                              className="h-9 px-3 bg-white hover:bg-gray-100 text-slate-900 rounded-lg transition-colors shadow-md"
+                              title="Acciones del proyecto"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -236,11 +237,11 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {isExpanded ? <ChevronUp className="h-5 w-5" style={{ color: cardTextColor }} /> : <ChevronDown className="h-5 w-5" style={{ color: cardTextColor }} />}
                     </div>
                   </div>
                   {project.improvement_type ? (
-                    <CardDescription>{project.improvement_type as string}</CardDescription>
+                    <CardDescription style={{ color: cardTextColor }}>{project.improvement_type as string}</CardDescription>
                   ) : null}
                 </CardHeader>
 
@@ -278,17 +279,17 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                             <SelectTrigger style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
                               <SelectValue />
                             </SelectTrigger>
-                    <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                      {commonAreas.map((area) => (
-                        <SelectItem key={area.id} value={area.name}>
-                          {area.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
+                            <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                              {commonAreas.map((area) => (
+                                <SelectItem key={area.id} value={area.name}>
+                                  {area.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="edit_cost" style={{ color: dialogTextColor }}>Costo Estimado</Label>
                           <Input id="edit_cost" name="estimated_cost" type="number" defaultValue={(project.estimated_cost as number) || ""} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
                         </div>
                         <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
@@ -297,31 +298,31 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                   </Dialog>
                 )}
                 {isExpanded && (
-                  <CardContent className="flex flex-col gap-4">
+                  <CardContent className="flex flex-col gap-4" style={{ color: cardTextColor }}>
                     {project.description ? <p className="text-sm">{project.description as string}</p> : null}
 
                     <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
                       {project.location_description ? (
                         <div>
-                          <p className="text-muted-foreground">Ubicacion</p>
+                          <p style={{ color: cardTextColor, opacity: 0.7 }}>Ubicacion</p>
                           <p className="font-medium">{project.location_description as string}</p>
                         </div>
                       ) : null}
                       {project.estimated_cost ? (
                         <div>
-                          <p className="text-muted-foreground">Costo Estimado</p>
+                          <p style={{ color: cardTextColor, opacity: 0.7 }}>Costo Estimado</p>
                           <p className="font-medium">{currencySymbol}{Number(project.estimated_cost).toLocaleString()}</p>
                         </div>
                       ) : null}
                       {project.actual_cost ? (
                         <div>
-                          <p className="text-muted-foreground">Costo Real</p>
+                          <p style={{ color: cardTextColor, opacity: 0.7 }}>Costo Real</p>
                           <p className="font-medium">{currencySymbol}{Number(project.actual_cost).toLocaleString()}</p>
                         </div>
                       ) : null}
                       {project.start_date ? (
                         <div>
-                          <p className="text-muted-foreground">Inicio</p>
+                          <p style={{ color: cardTextColor, opacity: 0.7 }}>Inicio</p>
                           <p className="font-medium">{project.start_date as string}</p>
                         </div>
                       ) : null}
@@ -338,7 +339,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
 
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold">Cotizaciones ({quotes.length})</h4>
+                        <h4 className="text-sm font-semibold" style={{ color: cardTextColor }}>Cotizaciones ({quotes.length})</h4>
                         {isAdmin && (
                           <Button size="sm" variant="outline" onClick={() => setOpenQuote(project.id as string)}>
                             <Plus className="mr-1 h-3 w-3" />Cotizacion
@@ -348,16 +349,16 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                       {quotes.length > 0 ? (
                         <div className="flex flex-col gap-2">
                           {quotes.map((q) => (
-                            <div key={q.id as string} className="flex items-center justify-between rounded-lg border p-3">
+                            <div key={q.id as string} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: cardTextColor, backgroundColor: `${cardBgColor}80` }}>
                               <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                <FileText className="h-4 w-4" style={{ color: cardTextColor, opacity: 0.7 }} />
                                 <div>
-                                  <p className="text-sm font-medium">{q.vendor_name as string}</p>
-                                  {q.description ? <p className="text-xs text-muted-foreground">{q.description as string}</p> : null}
+                                  <p className="text-sm font-medium" style={{ color: cardTextColor }}>{q.vendor_name as string}</p>
+                                  {q.description ? <p className="text-xs" style={{ color: cardTextColor, opacity: 0.7 }}>{q.description as string}</p> : null}
                                 </div>
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold">{currencySymbol}{Number(q.amount).toLocaleString()}</span>
+                                <span className="text-sm font-semibold" style={{ color: cardTextColor }}>{currencySymbol}{Number(q.amount).toLocaleString()}</span>
                                 {q.is_selected ? <Badge>Seleccionada</Badge> : null}
                                 {q.document_url ? (
                                   <Button asChild variant="outline" size="sm">
@@ -370,7 +371,7 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                                     </a>
                                   </Button>
                                 ) : (
-                                  <span className="text-xs text-muted-foreground">Sin doc</span>
+                                  <span className="text-xs" style={{ color: cardTextColor, opacity: 0.7 }}>Sin doc</span>
                                 )}
                                 {isAdmin && (
                                   <>
@@ -463,12 +464,12 @@ export function ProyectosClient({ projects, commonAreas, currencySymbol, isAdmin
                             setStatusUpdate("")
                           }}
                         >
-<SelectTrigger className="w-40" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
-                    <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
-                      {Object.entries(STATUS_MAP).map(([key, v]) => (
-                        <SelectItem key={key} value={key}>{v.label}</SelectItem>
-                      ))}
-                    </SelectContent>
+                          <SelectTrigger className="w-40" style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}><SelectValue /></SelectTrigger>
+                          <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                            {Object.entries(STATUS_MAP).map(([key, v]) => (
+                              <SelectItem key={key} value={key}>{v.label}</SelectItem>
+                            ))}
+                          </SelectContent>
                         </Select>
                       </div>
                     )}

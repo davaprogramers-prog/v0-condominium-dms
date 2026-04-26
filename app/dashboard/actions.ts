@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 
 // ===== Condo Switching =====
@@ -648,58 +649,148 @@ export async function createDocumentType(formData: FormData) {
 }
 
 export async function updateDocumentType(formData: FormData) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("document_types")
-    .update({
-      name: formData.get("name") as string,
-      description: formData.get("description") as string || null,
-    })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    const { supabase } = await getCondoId()
+    const typeId = formData.get("id") as string
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string || null
+    
+    console.log("[v0] updateDocumentType:", { typeId, name, description })
+    
+    const { error } = await supabase
+      .from("document_types")
+      .update({
+        name,
+        description,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", typeId)
+      
+    if (error) {
+      console.error("[v0] updateDocumentType error:", error)
+      throw error
+    }
+    
+    console.log("[v0] updateDocumentType success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] updateDocumentType catch:", err)
+    throw err
+  }
 }
 
 export async function deleteDocumentType(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("document_types").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    console.log("[v0] deleteDocumentType:", { id })
+    const { supabase } = await getCondoId()
+    const { error } = await supabase.from("document_types").delete().eq("id", id)
+    
+    if (error) {
+      console.error("[v0] deleteDocumentType error:", error)
+      throw error
+    }
+    
+    console.log("[v0] deleteDocumentType success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] deleteDocumentType catch:", err)
+    throw err
+  }
 }
 
 export async function uploadDocument(formData: FormData) {
-  const { supabase, userId, condoId } = await getCondoId()
-  const { error } = await supabase.from("documents").insert({
-    condo_id: condoId,
-    document_type_id: formData.get("document_type_id") as string || null,
-    title: formData.get("title") as string,
-    description: formData.get("description") as string || null,
-    file_url: formData.get("file_url") as string,
-    uploaded_by: userId,
-  })
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
-}
-
-export async function updateDocument(formData: FormData) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase
-    .from("documents")
-    .update({
+  try {
+    const { supabase, userId, condoId } = await getCondoId()
+    
+    // Verify user is admin - validation done server-side
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single()
+    
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+      throw new Error("Solo administradores pueden subir documentos")
+    }
+    
+    console.log("[v0] uploadDocument: userId=", userId, "condoId=", condoId)
+    
+    // Use admin client to bypass RLS - server validates permissions
+    const admin = createAdminClient()
+    
+    const { data, error } = await admin.from("documents").insert({
+      condo_id: condoId,
+      document_type_id: formData.get("document_type_id") as string || null,
       title: formData.get("title") as string,
       description: formData.get("description") as string || null,
       file_url: formData.get("file_url") as string,
+      uploaded_by: userId,
     })
-    .eq("id", formData.get("id") as string)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+    
+    console.log("[v0] uploadDocument response:", { data, error })
+    
+    if (error) {
+      console.error("[v0] uploadDocument error:", error)
+      throw error
+    }
+    
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] uploadDocument catch error:", err)
+    throw err
+  }
+}
+
+export async function updateDocument(formData: FormData) {
+  try {
+    const { supabase } = await getCondoId()
+    const docId = formData.get("id") as string
+    const title = formData.get("title") as string
+    const description = formData.get("description") as string || null
+    const fileUrl = formData.get("file_url") as string
+    
+    console.log("[v0] updateDocument:", { docId, title, description, fileUrl })
+    
+    const { error } = await supabase
+      .from("documents")
+      .update({
+        title,
+        description,
+        file_url: fileUrl,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", docId)
+      
+    if (error) {
+      console.error("[v0] updateDocument error:", error)
+      throw error
+    }
+    
+    console.log("[v0] updateDocument success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] updateDocument catch:", err)
+    throw err
+  }
 }
 
 export async function deleteDocument(id: string) {
-  const { supabase } = await getCondoId()
-  const { error } = await supabase.from("documents").delete().eq("id", id)
-  if (error) throw error
-  revalidatePath("/dashboard/documentos")
+  try {
+    console.log("[v0] deleteDocument:", { id })
+    const { supabase } = await getCondoId()
+    const { error } = await supabase.from("documents").delete().eq("id", id)
+    
+    if (error) {
+      console.error("[v0] deleteDocument error:", error)
+      throw error
+    }
+    
+    console.log("[v0] deleteDocument success")
+    revalidatePath("/dashboard/documentos")
+  } catch (err) {
+    console.error("[v0] deleteDocument catch:", err)
+    throw err
+  }
 }
 
 // ===== Infractions =====
@@ -898,11 +989,55 @@ export async function deleteAlert(id: string) {
 
 // ===== File Upload Helper =====
 export async function uploadFile(bucket: string, path: string, file: File) {
-  const supabase = await createClient()
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-  if (error) throw error
-  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
-  return urlData.publicUrl
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
+    if (error) throw error
+    const { data: urlData } = admin.storage.from(bucket).getPublicUrl(data.path)
+    return urlData.publicUrl
+  } catch (err: any) {
+    console.error("[v0] Error uploading file:", err)
+    throw err
+  }
+}
+
+export async function uploadFileToStorage(formData: FormData) {
+  try {
+    const file = formData.get("file") as File
+    const bucket = formData.get("bucket") as string
+    const folder = formData.get("folder") as string || ""
+    
+    if (!file || !bucket) {
+      return { error: "Archivo y bucket son requeridos", url: null }
+    }
+    
+    console.log("[v0] uploadFileToStorage:", { bucket, folder, fileName: file.name })
+    
+    // Generate unique filename
+    const ext = file.name.split(".").pop()
+    const path = `${folder ? folder + "/" : ""}${Date.now()}.${ext}`
+    
+    // Use admin client to bypass RLS
+    const admin = createAdminClient()
+    const { data, error: uploadError } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
+    
+    if (uploadError) {
+      console.error("[v0] uploadFileToStorage error:", uploadError)
+      if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("bucket")) {
+        return { error: `Bucket "${bucket}" no existe. Contacta al administrador.`, url: null }
+      }
+      return { error: uploadError.message, url: null }
+    }
+    
+    // Get public URL
+    const { data: urlData } = admin.storage.from(bucket).getPublicUrl(data.path)
+    console.log("[v0] uploadFileToStorage success:", { url: urlData.publicUrl })
+    
+    return { error: null, url: urlData.publicUrl }
+  } catch (err: any) {
+    console.error("[v0] uploadFileToStorage catch error:", err)
+    return { error: err.message || "Error al subir archivo", url: null }
+  }
 }
 
 // ===== User Management =====

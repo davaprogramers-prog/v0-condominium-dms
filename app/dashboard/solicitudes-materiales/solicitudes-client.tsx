@@ -186,7 +186,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
     <div className="flex flex-col h-full">
       {/* Content with scrollable filters */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-4">
+        <div className="max-w-8x1 mx-1 p-1">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -218,7 +218,7 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                       Nueva Solicitud
                     </Button>
                   </DialogTrigger>
-                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-2xl mx-auto" showCloseButton={false}>
+                  <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-h-[90vh] overflow-y-auto w-[95vw] md:w-full max-w-8 mx-auto" showCloseButton={false}>
                     <DialogHeader className="relative flex justify-center items-center px-1.25 py-2">
                       <DialogTitle style={{ color: dialogTextColor }}>{editingId ? 'Editar' : 'Nueva'} Solicitud de Material</DialogTitle>
                       <button
@@ -416,14 +416,14 @@ export function SolicitudesClient({ condoId, solicitudes, staff, isAdmin, userRo
                     <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <CardTitle style={{ color: dialogTextColor }} className="text-lg">{request.request_title}</CardTitle>
+                          <CardTitle style={{ color: cardTextColor }} className="text-lg font-semibold">{request.request_title}</CardTitle>
                           {expandedRequest === request.id ? (
-                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                            <ChevronUp className="h-5 w-5" style={{ color: cardTextColor }} />
                           ) : (
-                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            <ChevronDown className="h-5 w-5" style={{ color: cardTextColor }} />
                           )}
                         </div>
-                        <p style={{ color: dialogTextColor }} className="text-sm text-muted-foreground mt-1">
+                        <p style={{ color: cardTextColor, opacity: 0.7 }} className="text-sm mt-1">
                           {new Date(request.created_at).toLocaleDateString('es-CL')}
                         </p>
                       </div>
