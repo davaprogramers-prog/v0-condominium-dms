@@ -4,7 +4,16 @@ import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getContrastTextColor, type CondoTheme } from '@/lib/theme-utils'
-import { AlertCircle, Save } from 'lucide-react'
+import { AlertCircle, Save, RotateCcw } from 'lucide-react'
+
+// Colores predefinidos del sistema
+const PREDEFINED_COLORS = {
+  sidebarBg: '#465368',
+  mainBg: '#b2d5f8',
+  cardBg: '#153874',
+  dialogBg: '#b8b7a6',
+  inputBg: '#e5e4cd',
+}
 
 interface ThemeCustomizerProps {
   condoId: string
@@ -40,6 +49,14 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
   const cardText = getContrastTextColor(cardBg)
   const dialogText = getContrastTextColor(dialogBg)
   const inputText = getContrastTextColor(inputBg)
+
+  const handleRestorePredefined = () => {
+    setSidebarBg(PREDEFINED_COLORS.sidebarBg)
+    setMainBg(PREDEFINED_COLORS.mainBg)
+    setCardBg(PREDEFINED_COLORS.cardBg)
+    setDialogBg(PREDEFINED_COLORS.dialogBg)
+    setInputBg(PREDEFINED_COLORS.inputBg)
+  }
 
   const handleSave = async () => {
     try {
@@ -224,15 +241,28 @@ export function ThemeCustomizer({ condoId, currentTheme, isAdmin, onSave }: Them
           </>
         )}
 
-        {/* Save Button */}
-        <button 
-          onClick={handleSave} 
-          disabled={loading || !enableCustom}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-        >
-          <Save className="h-4 w-4" />
-          {loading ? 'Guardando...' : 'Guardar Cambios'}
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Restore Predefined Colors Button */}
+          <button 
+            onClick={handleRestorePredefined}
+            disabled={loading || !enableCustom}
+            className="flex-1 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Colores Predefinidos
+          </button>
+          
+          {/* Save Button */}
+          <button 
+            onClick={handleSave} 
+            disabled={loading || !enableCustom}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
+            <Save className="h-4 w-4" />
+            {loading ? 'Guardando...' : 'Guardar Cambios'}
+          </button>
+        </div>
       </CardContent>
     </Card>
   )
