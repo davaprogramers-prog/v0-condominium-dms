@@ -90,7 +90,7 @@ export default async function CasasPage() {
 
                       {/* Owner information */}
                       <div>
-                        <p className="text-xs font-medium uppercase opacity-75">Propietario</p>
+                        <p className="text-xs font-medium uppercase opacity-75">Residente</p>
                         <p className="font-semibold" style={{ color: cardTextColor }}>{house.owner_name || "-"}</p>
                       </div>
 

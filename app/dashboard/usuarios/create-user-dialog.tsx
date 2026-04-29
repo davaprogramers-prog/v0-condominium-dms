@@ -265,7 +265,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
               <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                 <SelectItem value="admin">Administrador</SelectItem>
                 <SelectItem value="conserje">Conserje</SelectItem>
-                <SelectItem value="propietario">Propietario</SelectItem>
+                <SelectItem value="propietario">Residente</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -278,7 +278,7 @@ export function CreateUserDialog({ condos, isSuperAdmin }: CreateUserDialogProps
                 onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
               />
               <Label htmlFor="is_owner" className="font-normal" style={{ color: dialogTextColor }}>
-                También es Propietario
+                También es Residente
               </Label>
             </div>
           )}

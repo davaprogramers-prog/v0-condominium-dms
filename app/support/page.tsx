@@ -12,7 +12,7 @@ export default function SupportPage() {
     },
     {
       question: "¿Cómo agrego usuarios a mi condominio?",
-      answer: "Una vez en el dashboard, ve a la sección 'Usuarios'. Haz clic en el botón 'Nuevo Usuario' y completa los datos del usuario. Puedes asignar diferentes roles (administrador, conserje, propietario) según las necesidades."
+      answer: "Una vez en el dashboard, ve a la sección 'Usuarios'. Haz clic en el botón 'Nuevo Usuario' y completa los datos del usuario. Puedes asignar diferentes roles (administrador, conserje, residente) según las necesidades."
     },
     {
       question: "¿Cómo registro los gastos del condominio?",

@@ -147,7 +147,7 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
 
           <div>
             <Label htmlFor="ownerName" className="font-bold mb-2 block text-sm" style={{ color: dialogTextColor }}>
-              Nombre del Propietario
+              Nombre del Residente
             </Label>
             <Input
               id="ownerName"
@@ -167,7 +167,7 @@ export function CreateHouseDialog({ condoId, onSuccess }: CreateHouseDialogProps
 
           <div>
             <Label htmlFor="ownerEmail" className="font-bold mb-2 block text-sm" style={{ color: dialogTextColor }}>
-              Email del Propietario
+              Email del Residente
             </Label>
             <Input
               id="ownerEmail"

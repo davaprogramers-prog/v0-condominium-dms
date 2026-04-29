@@ -141,7 +141,7 @@ export function ManageUsersClient({ houses }: ManageUsersClientProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="propietario">Propietario de Casa</SelectItem>
+                    <SelectItem value="propietario">Residente</SelectItem>
                     <SelectItem value="arrendatario">Arrendatario</SelectItem>
                   </SelectContent>
                 </Select>
@@ -181,7 +181,7 @@ export function ManageUsersClient({ houses }: ManageUsersClientProps) {
         <div className="text-sm text-muted-foreground">
           <p className="mb-2 font-semibold">Tipos de Usuarios:</p>
           <ul className="space-y-1 text-xs">
-            <li>• <strong>Propietario:</strong> Dueño de una casa, puede pagar gastos comunes</li>
+            <li>• <strong>Residente:</strong> Propietario o arrendatario de una casa, puede pagar gastos comunes</li>
             <li>• <strong>Arrendatario:</strong> Inquilino, acceso limitado a información</li>
           </ul>
         </div>

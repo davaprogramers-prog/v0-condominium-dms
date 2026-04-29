@@ -293,7 +293,7 @@ function HouseCard({
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer pb-3">
             <div className="flex flex-col gap-2">
-              {/* Primera fila: Casa y Propietario */}
+              {/* Primera fila: Casa y Residente */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 rounded-lg bg-muted flex-shrink-0">
                   <Home className="h-5 w-5" />

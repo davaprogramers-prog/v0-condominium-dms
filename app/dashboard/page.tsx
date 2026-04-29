@@ -25,7 +25,7 @@ const adminMenuItems = [
   { href: "/dashboard/usuarios", icon: Users, label: "Usuarios", desc: "Administrar residentes", colorKey: "bg-purple-500" },
   { href: "/dashboard/gastos", icon: DollarSign, label: "Gastos", desc: "Registrar gastos comunes", colorKey: "bg-orange-500" },
   { href: "/dashboard/ingresos", icon: DollarSign, label: "Ingresos", desc: "Registrar pagos recibidos", colorKey: "bg-green-500" },
-  { href: "/dashboard/propietarios", icon: Users, label: "Propietarios", desc: "Ver todos los propietarios", colorKey: "bg-pink-500" },
+  { href: "/dashboard/propietarios", icon: Users, label: "Residentes", desc: "Ver todos los residentes", colorKey: "bg-pink-500" },
   { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes y estadísticas", colorKey: "bg-cyan-500" },
   { href: "/dashboard/documentos", icon: FileText, label: "Documentos", desc: "Documentación importante", colorKey: "bg-amber-500" },
   { href: "/dashboard/encuestas", icon: FileCheck, label: "Encuestas", desc: "Gestionar encuestas", colorKey: "bg-indigo-500" },
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
         <div className="space-y-6">
           <div className="rounded-lg border bg-card p-6">
             <h1 className="text-3xl font-bold mb-2">Bienvenido, {firstName}</h1>
-            <p className="text-muted-foreground mb-4">Propietario</p>
+            <p className="text-muted-foreground mb-4">Residente</p>
             <p className="text-muted-foreground">Tu cuenta está siendo configurada. Por favor, espera a que se asigne un condominio.</p>
           </div>
         </div>
