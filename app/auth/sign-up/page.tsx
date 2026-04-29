@@ -50,7 +50,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="owner">Propietario</SelectItem>
+                  <SelectItem value="owner">Residente</SelectItem>
                 </SelectContent>
               </Select>
             </div>

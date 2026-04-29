@@ -139,7 +139,7 @@ const adminMenuItems = [
   {
     section: "Finanzas",
     items: [
-      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
+      { title: "Residentes", href: "/dashboard/propietarios", icon: Users },
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
@@ -212,7 +212,7 @@ const adminWithPropertyMenuItems = [
   {
     section: "Finanzas",
     items: [
-      { title: "Propietarios", href: "/dashboard/propietarios", icon: Users },
+      { title: "Residentes", href: "/dashboard/propietarios", icon: Users },
       { title: "Gastos", href: "/dashboard/gastos", icon: Receipt },
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
@@ -570,10 +570,10 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
 {isSuperAdmin 
   ? "Super Admin" 
   : isAdmin 
-    ? (hasProperty ? "Administrador - Propietario" : "Administrador")
+    ? (hasProperty ? "Administrador - Residente" : "Administrador")
     : isConcierge 
-      ? (hasProperty ? "Conserje - Propietario" : "Conserje")
-      : "Propietario"}
+      ? (hasProperty ? "Conserje - Residente" : "Conserje")
+      : "Residente"}
 </span>
             </div>
           </div>

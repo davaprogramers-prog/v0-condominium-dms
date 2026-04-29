@@ -66,7 +66,7 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
       >
         <DialogHeader>
           <DialogTitle style={{ color: dialogTextColor }}>Editar Casa #{houseNumber}</DialogTitle>
-          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los datos del propietario (no puedes cambiar el número de casa)</DialogDescription>
+          <DialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>Actualiza los datos del residente (no puedes cambiar el número de casa)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -75,7 +75,7 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
+            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Residente</Label>
             <Input
               id="owner_name"
               name="owner_name"
@@ -85,7 +85,7 @@ export function EditHouseDialog({ houseId, houseNumber, ownerName, ownerEmail, p
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario</Label>
+            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Residente</Label>
             <Input
               id="owner_email"
               name="owner_email"

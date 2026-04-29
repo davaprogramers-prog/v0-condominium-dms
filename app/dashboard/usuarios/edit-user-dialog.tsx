@@ -183,7 +183,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
               onCheckedChange={(checked) => setFormData({ ...formData, is_owner: checked as boolean })}
             />
             <Label htmlFor="is_owner" className="font-normal" style={{ color: dialogTextColor }}>
-              También es Propietario
+              También es Residente
             </Label>
           </div>
 
@@ -203,7 +203,7 @@ export function EditUserDialog({ user, condos, open, onOpenChange }: EditUserDia
                 </SelectContent>
               </Select>
               {formData.is_owner && !formData.house_id && (
-                <p className="text-xs text-red-600 dark:text-red-400 font-semibold">La propiedad es requerida si es propietario</p>
+                <p className="text-xs text-red-600 dark:text-red-400 font-semibold">La propiedad es requerida si es residente</p>
               )}
             </div>
           )}

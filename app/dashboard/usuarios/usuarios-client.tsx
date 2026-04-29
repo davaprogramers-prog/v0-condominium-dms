@@ -34,7 +34,7 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
 
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground text-sm">Gestión de administradores, propietarios y arrendatarios</p>
+      <p className="text-muted-foreground text-sm">Gestión de administradores, residentes y arrendatarios</p>
 
       <div className="flex items-center justify-center">
         {(isAdmin || isSuperAdmin) && (
@@ -47,7 +47,7 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
         {[
           { role: "admin", label: "Administrador", desc: "Gestión completa" },
           { role: "conserje", label: "Conserje", desc: "Gestión de solicitudes" },
-          { role: "propietario", label: "Propietario", desc: "Subir comprobantes" },
+          { role: "propietario", label: "Residente", desc: "Subir comprobantes" },
           { role: "arrendatario", label: "Arrendatario", desc: "Acceso limitado" },
         ].map((item) => (
           <div key={item.role} className="rounded-lg border bg-card p-4">

@@ -96,15 +96,15 @@ export function CreateHouseDialog({ condoId }: { condoId: string }) {
             <Input id="house_number" name="house_number" type="number" min={1} required placeholder="Ej: 101" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Propietario</Label>
+            <Label htmlFor="owner_name" style={{ color: dialogTextColor }}>Nombre del Residente</Label>
             <Input id="owner_name" name="owner_name" placeholder="Nombre completo" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Propietario *</Label>
+            <Label htmlFor="owner_email" style={{ color: dialogTextColor }}>Email del Residente *</Label>
             <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="owner_phone" style={{ color: dialogTextColor }}>Teléfono del Propietario</Label>
+            <Label htmlFor="owner_phone" style={{ color: dialogTextColor }}>Teléfono del Residente</Label>
             <Input id="owner_phone" name="owner_phone" placeholder="+56912345678" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
           </div>
           <div className="space-y-2">

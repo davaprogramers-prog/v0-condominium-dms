@@ -167,7 +167,7 @@ export default async function IngresoMultasPage({
                 <TableRow>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Casa</TableHead>
-                  <TableHead>Propietario</TableHead>
+                  <TableHead>Residente</TableHead>
                   <TableHead>Descripcion</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
                 </TableRow>

@@ -51,11 +51,11 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
                   <Input id="house_number" name="house_number" placeholder="Ej: A-101, Casa 5..." required className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                  <Label htmlFor="owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Residente</Label>
                   <Input id="owner_name" name="owner_name" placeholder="Nombre completo" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                  <Label htmlFor="owner_email" className="text-slate-900 dark:text-slate-200">Email del Residente</Label>
                   <Input id="owner_email" name="owner_email" type="email" placeholder="correo@ejemplo.com" className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -75,7 +75,7 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
           <DialogContent className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700">
             <DialogHeader>
               <DialogTitle className="text-slate-900 dark:text-white">Editar Casa #{editHouse.house_number as string}</DialogTitle>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Actualiza los datos del propietario (no puedes cambiar el número de casa)</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Actualiza los datos del residente (no puedes cambiar el número de casa)</p>
             </DialogHeader>
             <form
               action={async (fd) => {
@@ -86,11 +86,11 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Propietario</Label>
+                <Label htmlFor="edit_owner_name" className="text-slate-900 dark:text-slate-200">Nombre del Residente</Label>
                 <Input id="edit_owner_name" name="owner_name" defaultValue={(editHouse.owner_name as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit_owner_email" className="text-slate-900 dark:text-slate-200">Email del Propietario</Label>
+                <Label htmlFor="edit_owner_email" className="text-slate-900 dark:text-slate-200">Email del Residente</Label>
                 <Input id="edit_owner_email" name="owner_email" type="email" defaultValue={(editHouse.owner_email as string) || ""} className="border-slate-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500 dark:bg-slate-800 dark:text-white" />
               </div>
               <div className="flex flex-col gap-2">
@@ -144,7 +144,7 @@ export function CasasClient({ houses, isAdmin, currencySymbol }: CasasClientProp
 
                       {/* Owner information */}
                       <div>
-                        <p className={`text-xs font-medium uppercase ${color.text}`}>Propietario</p>
+                        <p className={`text-xs font-medium uppercase ${color.text}`}>Residente</p>
                         <p className={`font-semibold ${color.title}`}>{(house.owner_name as string) || "-"}</p>
                       </div>
 

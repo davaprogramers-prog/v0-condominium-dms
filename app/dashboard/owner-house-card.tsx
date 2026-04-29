@@ -77,7 +77,7 @@ export function OwnerHouseCard({ house, condoName }: OwnerHouseCardProps) {
 
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Propietario:</span>
+          <span className="text-muted-foreground">Residente:</span>
           <span className="font-medium">{house.owner_name}</span>
         </div>
         <div className="flex justify-between">
