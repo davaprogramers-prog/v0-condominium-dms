@@ -60,7 +60,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
       fine_uf_amount: fineType === "uf" ? parseFloat(formData.get("fine_uf_amount") as string) || 0 : 0,
       fixed_income_amount: parseFloat(formData.get("fixed_income_amount") as string) || 0,
       variable_income_amount: parseFloat(formData.get("variable_income_amount") as string) || 0,
-      initial_balance: parseFloat(formData.get("initial_balance") as string) || 0,
+      initial_balance: Math.round(parseFloat(formData.get("initial_balance") as string) * 100) / 100 || 0,
       initial_balance_date: initialBalanceDate && initialBalanceDate.trim() !== "" ? initialBalanceDate : null,
     }
 
@@ -187,7 +187,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
             <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 Saldo inicial de <strong>${(currentParams?.initial_balance || 0).toLocaleString("es-CL")}</strong> registrado desde{" "}
-                <strong>{new Date(currentParams.initial_balance_date).toLocaleDateString("es-CL")}</strong>
+                <strong>{new Intl.DateTimeFormat("es-CL", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(currentParams.initial_balance_date + "T00:00:00"))}</strong>
               </p>
             </div>
           )}

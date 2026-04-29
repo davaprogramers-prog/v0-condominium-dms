@@ -55,7 +55,13 @@ export default async function BalancePage({
   let saldoAnterior = 0
   
   if (condoId && parameters?.initial_balance_date) {
-    const initialDate = new Date(parameters.initial_balance_date)
+    // Parse date as YYYY-MM-DD and treat as local date, not UTC
+    const dateParts = parameters.initial_balance_date.split("-")
+    const initialDate = new Date(
+      parseInt(dateParts[0]), // year
+      parseInt(dateParts[1]) - 1, // month (0-indexed)
+      parseInt(dateParts[2]) // day
+    )
     const initialYear = initialDate.getFullYear()
     const initialMonth = initialDate.getMonth() + 1
     
