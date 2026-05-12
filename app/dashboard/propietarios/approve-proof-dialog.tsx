@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink, AlertTriangle } from "lucide-react"
+import { CheckCircle, XCircle, Loader2, FileCheck, ExternalLink, AlertTriangle, Trash2 } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface ApproveProofDialogProps {
@@ -32,10 +32,26 @@ export function ApproveProofDialog({
 }: ApproveProofDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [action, setAction] = useState<"approve" | "reject" | null>(null)
+  const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const router = useRouter()
   const { dialogBgColor, dialogTextColor, cardBgColor, cardTextColor } = useTheme()
+
+  // Get user role on mount
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single()
+        setUserRole(profile?.role || null)
+      }
+    })
+  }, [])
 
   const paymentType = proof.payment_type || "gastos_comunes"
   const isGastosComunes = paymentType === "gastos_comunes"
@@ -171,8 +187,9 @@ export function ApproveProofDialog({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      const formData = new FormData(e.currentTarget)
-      const reason = formData.get("rejection_reason") as string
+      const formElement = e.currentTarget
+      const reasonInput = formElement.querySelector('[name="rejection_reason"]') as HTMLTextAreaElement
+      const reason = reasonInput?.value || ""
 
       if (!reason?.trim()) {
         setError("Debes indicar el motivo del rechazo")
@@ -198,6 +215,61 @@ export function ApproveProofDialog({
     } catch (err: any) {
       console.error("[v0] Error rejecting proof:", err)
       setError(err.message || "Error al rechazar el comprobante")
+    } finally {
+      setLoading(false)
+      setAction(null)
+    }
+  }
+
+  async function handleDelete() {
+    // Verify user is admin or super_admin
+    if (!userRole || (userRole !== "admin" && userRole !== "super_admin")) {
+      setError("No tienes permiso para eliminar comprobantes")
+      return
+    }
+
+    // Confirm deletion
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este comprobante? Esta acción no se puede deshacer.")) {
+      return
+    }
+
+    setLoading(true)
+    setAction("delete")
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
+
+      // Delete the proof
+      const { error: deleteError } = await supabase
+        .from("payment_proofs")
+        .delete()
+        .eq("id", proof.id)
+
+      if (deleteError) throw deleteError
+
+      // If there's a receipt URL, try to delete it from storage
+      if (proof.receipt_url) {
+        try {
+          const fileName = proof.receipt_url.split("/").pop()
+          if (fileName) {
+            await supabase.storage
+              .from("payment_receipts")
+              .remove([fileName])
+          }
+        } catch (storageErr) {
+          console.error("[v0] Error deleting storage file:", storageErr)
+          // Don't throw - the proof is already deleted from DB
+        }
+      }
+
+      setOpen(false)
+      router.refresh()
+    } catch (err: any) {
+      console.error("[v0] Error deleting proof:", err)
+      setError(err.message || "Error al eliminar el comprobante")
     } finally {
       setLoading(false)
       setAction(null)
@@ -339,6 +411,19 @@ export function ApproveProofDialog({
               </Button>
             </form>
           </div>
+
+          {/* Delete Button - Only for admins and super_admins */}
+          {userRole && (userRole === "admin" || userRole === "super_admin") && (
+            <Button
+              onClick={handleDelete}
+              className="w-full bg-black hover:bg-gray-800 text-white dark:bg-gray-700 dark:hover:bg-gray-600"
+              disabled={loading}
+            >
+              {loading && action === "delete" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar Comprobante
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
