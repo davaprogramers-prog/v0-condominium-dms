@@ -160,7 +160,7 @@ export function ApproveProofDialog({
     }
   }
 
-  async function handleReject(e: React.FormEvent<HTMLFormElement>) {
+  async function handleReject(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setAction("reject")
@@ -171,7 +171,8 @@ export function ApproveProofDialog({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      const formData = new FormData(e.currentTarget)
+      const target = e.target as HTMLFormElement
+      const formData = new FormData(target)
       const reason = formData.get("rejection_reason") as string
 
       if (!reason?.trim()) {
