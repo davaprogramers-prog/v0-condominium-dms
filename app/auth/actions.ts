@@ -87,6 +87,12 @@ export async function registerOwner(
     },
   })
 
+  // Handle specific database errors
+  if (authError && authError.message.includes("Database error")) {
+    console.error("[v0] Database error during signup:", authError)
+    throw new Error("Error en la base de datos. Por favor contacta al administrador para verificar la configuración del sistema.")
+  }
+
   // If user already exists, that's fine - we'll just ensure profile is updated
   if (authError && authError.message.includes("already registered")) {
     console.log("[v0] User already registered, attempting to get their auth user...")
