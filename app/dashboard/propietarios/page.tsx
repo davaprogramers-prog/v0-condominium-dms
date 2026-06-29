@@ -84,6 +84,33 @@ export default async function PropietariosPage() {
     .eq("period_month", currentMonth)
     .eq("period_year", currentYear)
 
+  // Get active exemptions for this condo
+  const { data: exemptions } = await supabase
+    .from("exemptions")
+    .select("house_id, fixed_percentage, variable_percentage, is_permanent, start_date, end_date")
+    .eq("condo_id", condoId)
+
+  // Build a reference date for the period being displayed (last day of the month)
+  const periodEnd = new Date(currentYear, currentMonth, 0) // day 0 of next month = last day of current
+  const periodStart = new Date(currentYear, currentMonth - 1, 1)
+
+  // Map house_id -> { fixed, variable } exemption percentages (highest active value wins)
+  const exemptionByHouse = new Map<string, { fixed: number; variable: number }>()
+  for (const ex of exemptions || []) {
+    const start = ex.start_date ? new Date(ex.start_date) : null
+    const end = ex.end_date ? new Date(ex.end_date) : null
+    // Exemption is active for the period if permanent, or its date range overlaps the period
+    const startsInTime = !start || start <= periodEnd
+    const endsInTime = ex.is_permanent || !end || end >= periodStart
+    if (!startsInTime || !endsInTime) continue
+
+    const current = exemptionByHouse.get(ex.house_id as string) || { fixed: 0, variable: 0 }
+    exemptionByHouse.set(ex.house_id as string, {
+      fixed: Math.max(current.fixed, Number(ex.fixed_percentage) || 0),
+      variable: Math.max(current.variable, Number(ex.variable_percentage) || 0),
+    })
+  }
+
   // Build houses data with payment status
   const housesWithStatus = (houses || []).map(house => {
     const houseInfractions = (infractions || []).filter(inf => inf.house_id === house.id && inf.status !== "pagada")
@@ -110,6 +137,11 @@ export default async function PropietariosPage() {
     const isPaidFixed = !!fixedIncome
     const isPaidVariable = !!variableIncome
 
+    // Get exemptions for this house to calculate effective amounts
+    const houseExemption = exemptionByHouse.get(house.id) || { fixed: 0, variable: 0 }
+    const effectiveFixedAmount = Math.round(fixedAmount * (1 - houseExemption.fixed / 100))
+    const effectiveVariableAmount = Math.round(variableAmount * (1 - houseExemption.variable / 100))
+
     return {
       ...house,
       infractions: houseInfractions,
@@ -119,6 +151,9 @@ export default async function PropietariosPage() {
       isPaidFixed,
       isPaidVariable,
       isPaidComplete: isPaidFixed && isPaidVariable,
+      effectiveFixedAmount,
+      effectiveVariableAmount,
+      houseExemption,
     }
   })
 

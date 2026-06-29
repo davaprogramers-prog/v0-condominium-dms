@@ -34,6 +34,9 @@ interface HouseWithStatus {
   isPaidFixed: boolean
   isPaidVariable: boolean
   isPaidComplete: boolean
+  effectiveFixedAmount: number
+  effectiveVariableAmount: number
+  houseExemption: { fixed: number; variable: number }
 }
 
 interface PropietariosClientProps {
@@ -274,7 +277,8 @@ function HouseCard({
   onToggle: () => void
   onViewReceipt: (url: string) => void
 }) {
-  const totalAmount = fixedAmount + variableAmount + house.totalFines
+  // Use effective amounts (with exemptions applied)
+  const totalAmount = house.effectiveFixedAmount + house.effectiveVariableAmount + house.totalFines
   const proofStatus = house.paymentProof?.status
 
   // Determine card border color based on status
@@ -342,19 +346,29 @@ function HouseCard({
 
         <CollapsibleContent>
           <CardContent className="pt-0 space-y-4">
-            {/* Payment Breakdown */}
+            {/* Payment Breakdown with Exemptions */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-lg bg-muted/50">
               <div className="flex justify-between sm:flex-col">
-                <span className="text-sm text-muted-foreground">Gasto Fijo</span>
+                <div>
+                  <span className="text-sm text-muted-foreground block">Gasto Fijo</span>
+                  {house.houseExemption.fixed > 0 && (
+                    <span className="text-xs text-orange-600">Exonerado {house.houseExemption.fixed}%</span>
+                  )}
+                </div>
                 <span className="font-medium flex items-center gap-2">
-                  {currencySymbol}{fixedAmount.toLocaleString("es-CL")}
+                  {currencySymbol}{house.effectiveFixedAmount.toLocaleString("es-CL")}
                   {house.isPaidFixed && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                 </span>
               </div>
               <div className="flex justify-between sm:flex-col">
-                <span className="text-sm text-muted-foreground">Gasto Variable</span>
+                <div>
+                  <span className="text-sm text-muted-foreground block">Gasto Variable</span>
+                  {house.houseExemption.variable > 0 && (
+                    <span className="text-xs text-orange-600">Exonerado {house.houseExemption.variable}%</span>
+                  )}
+                </div>
                 <span className="font-medium flex items-center gap-2">
-                  {currencySymbol}{variableAmount.toLocaleString("es-CL")}
+                  {currencySymbol}{house.effectiveVariableAmount.toLocaleString("es-CL")}
                   {house.isPaidVariable && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                 </span>
               </div>
@@ -450,6 +464,8 @@ function HouseCard({
                   variableAmount={variableAmount}
                   currencySymbol={currencySymbol}
                   paymentType="gastos_comunes"
+                  effectiveFixedAmount={house.effectiveFixedAmount}
+                  effectiveVariableAmount={house.effectiveVariableAmount}
                 />
               )}
 
