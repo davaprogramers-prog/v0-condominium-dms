@@ -333,6 +333,8 @@ export async function createExemptionType(formData: FormData) {
 
 export async function createExemption(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  const fixedPercentage = Math.min(100, Math.max(0, Number(formData.get("fixed_percentage")) || 0))
+  const variablePercentage = Math.min(100, Math.max(0, Number(formData.get("variable_percentage")) || 0))
   const { error } = await supabase.from("exemptions").insert({
     condo_id: condoId,
     house_id: formData.get("house_id") as string,
@@ -340,7 +342,9 @@ export async function createExemption(formData: FormData) {
     is_permanent: formData.get("is_permanent") === "true",
     start_date: formData.get("start_date") as string,
     end_date: formData.get("end_date") as string || null,
-    percentage: Number(formData.get("percentage")) || 100,
+    fixed_percentage: fixedPercentage,
+    variable_percentage: variablePercentage,
+    percentage: Math.max(fixedPercentage, variablePercentage),
     reason: formData.get("reason") as string || null,
     created_by: userId,
   })
@@ -350,12 +354,16 @@ export async function createExemption(formData: FormData) {
 
 export async function updateExemption(id: string, formData: FormData) {
   const { supabase } = await getCondoId()
+  const fixedPercentage = Math.min(100, Math.max(0, Number(formData.get("fixed_percentage")) || 0))
+  const variablePercentage = Math.min(100, Math.max(0, Number(formData.get("variable_percentage")) || 0))
   const { error } = await supabase.from("exemptions").update({
     exemption_type_id: formData.get("exemption_type_id") as string,
     is_permanent: formData.get("is_permanent") === "true",
     start_date: formData.get("start_date") as string,
     end_date: formData.get("end_date") as string || null,
-    percentage: Number(formData.get("percentage")) || 100,
+    fixed_percentage: fixedPercentage,
+    variable_percentage: variablePercentage,
+    percentage: Math.max(fixedPercentage, variablePercentage),
     reason: formData.get("reason") as string || null,
   }).eq("id", id)
   if (error) throw error
