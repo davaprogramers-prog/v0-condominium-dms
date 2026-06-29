@@ -23,6 +23,8 @@ interface UploadProofDialogProps {
   currencySymbol: string
   paymentType: PaymentType
   infractions?: any[]
+  effectiveFixedAmount?: number
+  effectiveVariableAmount?: number
 }
 
 export function UploadProofDialog({
@@ -36,6 +38,8 @@ export function UploadProofDialog({
   currencySymbol,
   paymentType,
   infractions = [],
+  effectiveFixedAmount,
+  effectiveVariableAmount,
 }: UploadProofDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -47,8 +51,12 @@ export function UploadProofDialog({
   const router = useRouter()
   const { dialogBgColor, dialogTextColor, cardBgColor, cardTextColor } = useTheme()
 
+  // Use effective amounts if provided (with exemptions), otherwise use base amounts
+  const displayedFixedAmount = effectiveFixedAmount !== undefined ? effectiveFixedAmount : fixedAmount
+  const displayedVariableAmount = effectiveVariableAmount !== undefined ? effectiveVariableAmount : variableAmount
+
   const totalAmount = paymentType === "gastos_comunes" 
-    ? fixedAmount + variableAmount 
+    ? displayedFixedAmount + displayedVariableAmount 
     : finesAmount
   
   const dialogTitle = paymentType === "gastos_comunes" 
@@ -178,11 +186,11 @@ export function UploadProofDialog({
               <>
                 <div className="flex justify-between text-sm">
                   <span style={{ opacity: 0.7 }}>Gasto Comun Fijo</span>
-                  <span className="font-medium">{currencySymbol}{fixedAmount.toLocaleString("es-CL")}</span>
+                  <span className="font-medium">{currencySymbol}{displayedFixedAmount.toLocaleString("es-CL")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span style={{ opacity: 0.7 }}>Gasto Comun Variable</span>
-                  <span className="font-medium">{currencySymbol}{variableAmount.toLocaleString("es-CL")}</span>
+                  <span className="font-medium">{currencySymbol}{displayedVariableAmount.toLocaleString("es-CL")}</span>
                 </div>
               </>
             ) : (
