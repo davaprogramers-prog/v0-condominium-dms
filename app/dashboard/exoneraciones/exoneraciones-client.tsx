@@ -172,9 +172,17 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                       Ej: 100% en Fijo = no se cobra el gasto fijo. 0% en Variable = se cobra el variable completo.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Switch id="is_permanent" checked={isPermanent} onCheckedChange={setIsPermanent} />
-                    <Label htmlFor="is_permanent" style={{ color: dialogTextColor }}>Exoneracion permanente</Label>
+                  <div className="flex items-center gap-3 rounded-lg border p-3" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
+                    <input 
+                      type="checkbox" 
+                      id="is_permanent" 
+                      name="is_permanent" 
+                      checked={isPermanent} 
+                      onChange={(e) => setIsPermanent(e.target.checked)}
+                      className="h-5 w-5 rounded border-2 cursor-pointer"
+                      style={{ borderColor: inputTextColor, accentColor: "#3b82f6" }}
+                    />
+                    <Label htmlFor="is_permanent" style={{ color: dialogTextColor }} className="font-semibold cursor-pointer">Exoneracion permanente</Label>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
