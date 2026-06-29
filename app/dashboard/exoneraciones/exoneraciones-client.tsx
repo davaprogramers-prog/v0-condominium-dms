@@ -156,13 +156,33 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="percentage" style={{ color: dialogTextColor }}>Porcentaje de exoneracion (%)</Label>
-                    <Input id="percentage" name="percentage" type="number" min={1} max={100} defaultValue={100} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                  <div className="flex flex-col gap-3 rounded-lg border p-3" style={{ borderColor: inputTextColor }}>
+                    <p className="text-sm font-medium" style={{ color: dialogTextColor }}>Porcentaje de exoneración por tipo de gasto</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="fixed_percentage" style={{ color: dialogTextColor }}>Gasto Común Fijo (%)</Label>
+                        <Input id="fixed_percentage" name="fixed_percentage" type="number" min={0} max={100} defaultValue={0} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="variable_percentage" style={{ color: dialogTextColor }}>Gasto Común Variable (%)</Label>
+                        <Input id="variable_percentage" name="variable_percentage" type="number" min={0} max={100} defaultValue={0} style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }} />
+                      </div>
+                    </div>
+                    <p className="text-xs" style={{ color: dialogTextColor, opacity: 0.7 }}>
+                      Ej: 100% en Fijo = no se cobra el gasto fijo. 0% en Variable = se cobra el variable completo.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Switch id="is_permanent" checked={isPermanent} onCheckedChange={setIsPermanent} />
-                    <Label htmlFor="is_permanent" style={{ color: dialogTextColor }}>Exoneracion permanente</Label>
+                  <div className="flex items-center gap-3 rounded-lg border p-3" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor }}>
+                    <input 
+                      type="checkbox" 
+                      id="is_permanent" 
+                      name="is_permanent" 
+                      checked={isPermanent} 
+                      onChange={(e) => setIsPermanent(e.target.checked)}
+                      className="h-5 w-5 rounded border-2 cursor-pointer"
+                      style={{ borderColor: inputTextColor, accentColor: "#3b82f6" }}
+                    />
+                    <Label htmlFor="is_permanent" style={{ color: dialogTextColor }} className="font-semibold cursor-pointer">Exoneracion permanente</Label>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
@@ -210,7 +230,8 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                       <TableRow style={{ borderColor: inputTextColor }}>
                         <TableHead style={{ color: cardTextColor }}>Casa</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Tipo</TableHead>
-                        <TableHead style={{ color: cardTextColor }}>Porcentaje</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Exon. Fijo</TableHead>
+                        <TableHead style={{ color: cardTextColor }}>Exon. Variable</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Desde</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Hasta</TableHead>
                         <TableHead style={{ color: cardTextColor }}>Estado</TableHead>
@@ -231,7 +252,8 @@ export function ExoneracionesClient({ exemptions, exemptionTypes, houses, isAdmi
                                 {(ex.exemption_types as Record<string, unknown>)?.name as string || "Sin tipo"}
                               </Badge>
                             </TableCell>
-                            <TableCell style={{ color: cardTextColor }}>{ex.percentage as number || 100}%</TableCell>
+                            <TableCell style={{ color: cardTextColor }}>{(ex.fixed_percentage as number) ?? 0}%</TableCell>
+                            <TableCell style={{ color: cardTextColor }}>{(ex.variable_percentage as number) ?? 0}%</TableCell>
                             <TableCell className="text-sm" style={{ color: cardTextColor }}>{ex.start_date as string}</TableCell>
                             <TableCell className="text-sm" style={{ color: cardTextColor }}>{ex.is_permanent ? "Permanente" : (ex.end_date as string || "-")}</TableCell>
                             <TableCell>
