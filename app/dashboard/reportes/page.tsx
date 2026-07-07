@@ -4,6 +4,8 @@ import { getCondoExpenses, getCondoIncome, getPaidCondoIncome, getLast12MonthsDa
 import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { ReportesCharts } from "./reportes-charts"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,11 +27,10 @@ export default async function ReportesPage({
     redirect("/dashboard")
   }
 
-  // Get period from query params or use current month
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   // Get expenses, income, and 12-month historical data
   let expenses: any[] = []
@@ -101,6 +102,7 @@ export default async function ReportesPage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       <p className="text-muted-foreground text-sm">Análisis completo de ingresos y gastos</p>
 
       {/* Month Navigation */}

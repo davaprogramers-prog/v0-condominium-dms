@@ -4,6 +4,8 @@ import { getCondoIncome, getHouses } from "./actions"
 import { CreateIncomeDialog } from "./create-income-dialog"
 import { IngresosTable } from "./ingresos-table"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -27,11 +29,10 @@ export default async function IngresosPage({
 
   const isAdmin = true
 
-  // Get period from query params or use current month
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
@@ -60,6 +61,7 @@ export default async function IngresosPage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       <p className="text-muted-foreground text-sm">Registro de ingresos del condominio</p>
 
       {/* Month Navigation - Centered */}

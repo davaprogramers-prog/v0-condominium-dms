@@ -4,6 +4,8 @@ import { IngresoVariableClient } from "./ingreso-variable-client"
 import { CreateVariableIncomeDialog } from "./create-variable-income-dialog"
 import { redirect } from "next/navigation"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,11 +27,10 @@ export default async function IngresoVariablePage({
     redirect("/dashboard")
   }
 
-  // Get period from query params
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   // Calculate previous and next month for navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -55,6 +56,7 @@ export default async function IngresoVariablePage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       <p className="text-muted-foreground text-sm">Ingresos variables adicionales del condominio</p>
 
       {/* Month Navigation - Centered */}

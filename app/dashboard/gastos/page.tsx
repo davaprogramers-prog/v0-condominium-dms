@@ -8,6 +8,8 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 
 export default async function GastosPage({
   searchParams,
@@ -29,11 +31,10 @@ export default async function GastosPage({
   const isAdmin = true // If we got here via user_condos, they're an admin
   const isSuperAdmin = false // Will be set below if verified
 
-  // Get period from query params or use current month
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
@@ -84,6 +85,7 @@ export default async function GastosPage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       <p className="text-muted-foreground text-sm">Registro de gastos comunes del condominio</p>
 
       {/* Month Navigation - Centered */}
