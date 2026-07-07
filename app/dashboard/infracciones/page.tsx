@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { InfraccionesClient } from "./infracciones-client"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,11 +21,10 @@ export default async function InfraccionesPage({
 
   const { data: condo } = await supabase.from("condominiums").select("currency_symbol").eq("id", profile.condo_id).single()
 
-  // Get period from query params
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   // Calculate previous and next month for navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -48,6 +49,7 @@ export default async function InfraccionesPage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       {/* Subtitle */}
       <p className="text-muted-foreground text-sm">Registro de infracciones del condominio</p>
 
