@@ -6,6 +6,8 @@ import { AlertTriangle, DollarSign } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { resolvePeriod } from "@/lib/period"
+import { PeriodAnchor } from "@/components/period-anchor"
 
 export default async function IngresoMultasPage({
   searchParams,
@@ -24,11 +26,10 @@ export default async function IngresoMultasPage({
   const condoId = profile?.condo_id
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
 
-  // Get period from query params or use current month
+  // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
   const now = new Date()
-  const year = parseInt(params.año as string) || now.getFullYear()
-  const month = parseInt(params.mes as string) || now.getMonth() + 1
+  const { year, month } = await resolvePeriod(params)
 
   // Get paid infractions (which are fines income)
   let finesData: any[] = []
@@ -100,6 +101,7 @@ export default async function IngresoMultasPage({
 
   return (
     <div className="space-y-6">
+      <PeriodAnchor month={month} year={year} />
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
         <p className="text-muted-foreground text-sm">Registro de pagos de multas recibidos</p>
