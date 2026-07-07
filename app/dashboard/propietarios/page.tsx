@@ -142,6 +142,16 @@ export default async function PropietariosPage() {
     const effectiveFixedAmount = Math.round(fixedAmount * (1 - houseExemption.fixed / 100))
     const effectiveVariableAmount = Math.round(variableAmount * (1 - houseExemption.variable / 100))
 
+    // Determine if payment is complete based on effective amounts
+    // If a type of expense is 100% exempted, it doesn't need payment
+    // Only non-exempted amounts need to be paid
+    const needsFixedPayment = effectiveFixedAmount > 0
+    const needsVariablePayment = effectiveVariableAmount > 0
+    
+    const isPaidComplete = 
+      (!needsFixedPayment || isPaidFixed) &&
+      (!needsVariablePayment || isPaidVariable)
+
     return {
       ...house,
       infractions: houseInfractions,
@@ -150,7 +160,7 @@ export default async function PropietariosPage() {
       finesProof: multasProof, // Separate proof for fines
       isPaidFixed,
       isPaidVariable,
-      isPaidComplete: isPaidFixed && isPaidVariable,
+      isPaidComplete,
       effectiveFixedAmount,
       effectiveVariableAmount,
       houseExemption,
