@@ -17,9 +17,28 @@ import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2, Circle
 import { useTheme } from "@/app/dashboard/theme-context"
 import { Alert } from "@/components/ui/alert"
 
+interface Infraction {
+  id: string
+  house_id: string
+  description: string
+  fine_amount: number
+  period_month: number
+  period_year: number
+  is_paid: boolean
+  status?: string
+  [key: string]: unknown
+}
+
+interface House {
+  id: string
+  house_number: string
+  owner_name: string
+  [key: string]: unknown
+}
+
 interface InfraccionesClientProps {
-  infractions: Record<string, unknown>[]
-  houses: Record<string, unknown>[]
+  infractions: Infraction[]
+  houses: House[]
   currencySymbol: string
   isAdmin: boolean
 }
@@ -180,7 +199,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((inf) => (
+                  {filtered.map((inf: Infraction) => (
                     <TableRow key={inf.id as string}>
                       <TableCell className="font-medium">
                         {(inf.houses as Record<string, unknown>)?.house_number as string || "?"}
