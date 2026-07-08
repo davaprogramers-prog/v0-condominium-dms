@@ -32,7 +32,7 @@ interface Infraction {
 interface House {
   id: string
   house_number: string
-  owner_name: string
+  owner_name?: string
   [key: string]: unknown
 }
 
