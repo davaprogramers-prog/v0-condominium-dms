@@ -37,6 +37,9 @@ export function IngresoMultasClient({
 }: IngresoMultasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [selectedHouse, setSelectedHouse] = useState("")
+  const [selectedType, setSelectedType] = useState("")
+  const [editOpen, setEditOpen] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   const allFinesIncome = incomeRecords
@@ -48,7 +51,7 @@ export function IngresoMultasClient({
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Multas Pagadas</p>
-            <p className="text-2xl font-bold text-red-600">${combinedTotal.toLocaleString("es-CL")}</p>
+            <p className="text-2xl font-bold text-red-600">${totalFines.toLocaleString("es-CL")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -88,6 +91,7 @@ export function IngresoMultasClient({
               await createFineIncome(fd)
               setOpenNew(false)
               setSelectedHouse("")
+              setSelectedType("")
             }}
             className="flex flex-col gap-4"
           >
@@ -100,7 +104,7 @@ export function IngresoMultasClient({
                 <SelectContent>
                   {houses.map((house) => (
                     <SelectItem key={house.id} value={house.id}>
-                      Casa #{house.house_number} - {house.owner_name}
+                      Casa #{house.house_number} - {house.owner_name || "Sin nombre"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -109,9 +113,9 @@ export function IngresoMultasClient({
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="description" style={{ color: dialogTextColor }}>Descripción de la Multa</Label>
-              <Select name="description">
-                <SelectTrigger id="description" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
+              <Label htmlFor="type_select" style={{ color: dialogTextColor }}>Tipo de Multa</Label>
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger id="type_select" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -123,17 +127,7 @@ export function IngresoMultasClient({
                   <SelectItem value="Otra multa">Otra multa</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="custom_description" style={{ color: dialogTextColor }}>Descripción personalizada (opcional)</Label>
-              <Textarea 
-                id="custom_description" 
-                name="custom_description" 
-                placeholder="Detalles adicionales..."
-                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-                rows={2}
-              />
+              <input type="hidden" name="description" value={selectedType} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -162,7 +156,7 @@ export function IngresoMultasClient({
               </div>
             </div>
 
-            <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" disabled={!selectedHouse}>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" disabled={!selectedHouse || !selectedType}>
               Registrar Ingreso
             </Button>
           </form>
@@ -187,8 +181,9 @@ export function IngresoMultasClient({
                   <TableHead>Fecha</TableHead>
                   <TableHead>Casa</TableHead>
                   <TableHead>Residente</TableHead>
-                  <TableHead>Descripcion</TableHead>
+                  <TableHead>Descripción</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
+                  {isAdmin && <TableHead className="text-right">Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -209,6 +204,25 @@ export function IngresoMultasClient({
                       <TableCell className="text-right font-semibold text-red-600">
                         ${(item.fine_amount || item.amount || 0).toLocaleString("es-CL")}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setEditOpen(item.id)}
+                          >
+                            Editar
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:bg-red-50"
+                            onClick={() => setDeleteOpen(item.id)}
+                          >
+                            Eliminar
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   )
                 })}
