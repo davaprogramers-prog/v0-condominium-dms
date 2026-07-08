@@ -145,7 +145,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Multas</p>
-            <p className="text-2xl font-bold">{currencySymbol}{totalFines.toLocaleString()}</p>
+            <p className="text-2xl font-bold">{currencySymbol}{totalFines.toLocaleString("es-CL")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -207,7 +207,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                       <TableCell className="text-sm">{inf.infraction_date as string}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm">{inf.description as string}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString()}` : "-"}
+                        {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString("es-CL")}` : "-"}
                       </TableCell>
                       <TableCell>
                         <Badge
