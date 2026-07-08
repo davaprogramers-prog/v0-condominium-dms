@@ -827,6 +827,99 @@ export async function markInfractionPaid(id: string) {
   revalidatePath("/dashboard/infracciones")
 }
 
+export async function markInfractionPaidWithIncome(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const infractionId = formData.get("infraction_id") as string
+  const houseId = formData.get("house_id") as string
+  const amount = Number(formData.get("amount") || 0)
+  const paidDate = formData.get("paid_date") as string
+
+  // Get the infraction details
+  const { data: infraction } = await supabase
+    .from("infractions")
+    .select("period_month, period_year, fine_amount, description")
+    .eq("id", infractionId)
+    .single()
+
+  if (!infraction) throw new Error("Infracción no encontrada")
+
+  // Mark infraction as paid
+  const { error: updateError } = await supabase
+    .from("infractions")
+    .update({ 
+      is_paid: true, 
+      paid_date: paidDate || new Date().toISOString().split("T")[0]
+    })
+    .eq("id", infractionId)
+
+  if (updateError) throw updateError
+
+  // Create income record for the fine payment
+  const paidDateObj = new Date(paidDate || new Date().toISOString())
+  const month = infraction.period_month || paidDateObj.getMonth() + 1
+  const year = infraction.period_year || paidDateObj.getFullYear()
+
+  const { error: incomeError } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: `Multa: ${infraction.description}`,
+      amount: amount || infraction.fine_amount,
+      income_date: paidDate || new Date().toISOString().split("T")[0],
+      period_month: month,
+      period_year: year,
+      income_type: "multa",
+      status: "approved",
+      created_by: userId,
+    })
+
+  if (incomeError) throw incomeError
+
+  revalidatePath("/dashboard/infracciones")
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/reportes")
+  revalidatePath("/dashboard/balance")
+}
+
+export async function createFineIncome(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const houseId = formData.get("house_id") as string
+  const description = formData.get("description") as string
+  const customDescription = formData.get("custom_description") as string
+  const amount = Number(formData.get("amount") || 0)
+  const incomeDate = formData.get("income_date") as string
+  const periodMonth = Number(formData.get("period_month") || new Date().getMonth() + 1)
+  const periodYear = Number(formData.get("period_year") || new Date().getFullYear())
+
+  // Combine description with custom details if provided
+  let finalDescription = description || "Ingreso por multa"
+  if (customDescription?.trim()) {
+    finalDescription = `${finalDescription} - ${customDescription.trim()}`
+  }
+
+  const { error } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: finalDescription,
+      amount,
+      income_date: incomeDate || new Date().toISOString().split("T")[0],
+      period_month: periodMonth,
+      period_year: periodYear,
+      income_type: "multa",
+      status: "approved",
+      created_by: userId,
+    })
+
+  if (error) throw error
+
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/reportes")
+  revalidatePath("/dashboard/balance")
+}
+
 export async function updateInfraction(formData: FormData) {
   const { supabase } = await getCondoId()
   const id = formData.get("id") as string
