@@ -412,6 +412,29 @@ CREATE POLICY "bank_statements_admin" ON public.bank_statements FOR ALL USING (
   EXISTS (SELECT 1 FROM public.condominiums c WHERE c.id = bank_statements.condo_id AND c.created_by = auth.uid())
 );
 
+-- 21. Monthly Balances
+CREATE TABLE IF NOT EXISTS public.monthly_balances (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  condo_id UUID NOT NULL REFERENCES public.condominiums(id) ON DELETE CASCADE,
+  year INTEGER NOT NULL,
+  month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
+  saldo_anterior NUMERIC NOT NULL DEFAULT 0,
+  ingresos_recaudados NUMERIC NOT NULL DEFAULT 0,
+  gastos NUMERIC NOT NULL DEFAULT 0,
+  balance_mes NUMERIC NOT NULL DEFAULT 0,
+  saldo_final NUMERIC NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(condo_id, year, month)
+);
+ALTER TABLE public.monthly_balances ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "monthly_balances_select" ON public.monthly_balances;
+CREATE POLICY "monthly_balances_select" ON public.monthly_balances FOR SELECT USING (true);
+DROP POLICY IF EXISTS "monthly_balances_admin" ON public.monthly_balances;
+CREATE POLICY "monthly_balances_admin" ON public.monthly_balances FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.condominiums c WHERE c.id = monthly_balances.condo_id AND c.created_by = auth.uid())
+);
+
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
