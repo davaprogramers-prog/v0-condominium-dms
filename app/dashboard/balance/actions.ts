@@ -54,7 +54,7 @@ export async function calculateSaldoAnterior(
   return initialBalance + totalIncome - totalExpenses
 }
 
-// Get all ingresos for a specific month (filter by period_month/period_year - accounting period, not creation date)
+// Get all ingresos for a specific month (filter by income_date)
 export async function getMonthIncome(
   condoId: string,
   year: number,
@@ -62,13 +62,16 @@ export async function getMonthIncome(
 ) {
   const supabase = await createClient()
 
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
   const { data, error } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("status", "approved")
-    .eq("period_year", year)
-    .eq("period_month", month)
+    .gte("income_date", startDate)
+    .lte("income_date", endDate)
     .order("income_date", { ascending: false })
 
   if (error) {
@@ -79,7 +82,7 @@ export async function getMonthIncome(
   return data || []
 }
 
-// Get all gastos for a specific month (filter by period_month/period_year - accounting period, not creation date)
+// Get all gastos for a specific month (filter by expense_date)
 export async function getMonthExpenses(
   condoId: string,
   year: number,
@@ -87,12 +90,15 @@ export async function getMonthExpenses(
 ) {
   const supabase = await createClient()
 
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
   const { data, error } = await supabase
     .from("expenses")
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
-    .eq("period_year", year)
-    .eq("period_month", month)
+    .gte("expense_date", startDate)
+    .lte("expense_date", endDate)
     .order("expense_date", { ascending: false })
 
   if (error) {

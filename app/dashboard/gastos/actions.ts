@@ -13,11 +13,13 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
   }
 
   const { data, error } = await query.order("expense_date", { ascending: false })
@@ -38,11 +40,13 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
     .select("*")
     .eq("condo_id", condoId)
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
@@ -65,11 +69,13 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
     .eq("condo_id", condoId)
     .eq("status", "approved")
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
@@ -110,8 +116,8 @@ export async function getLast12MonthsData(condoId: string) {
       .from("condo_income")
       .select("amount")
       .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
     
     const totalExpenses = expensesData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
     const totalIncome = incomeData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
