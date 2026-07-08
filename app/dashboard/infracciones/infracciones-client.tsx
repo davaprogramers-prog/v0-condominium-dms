@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction, markInfractionPaidWithIncome } from "@/app/dashboard/actions"
+import { formatCurrency, formatCurrencyNumber } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -145,7 +146,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Multas</p>
-            <p className="text-2xl font-bold">{currencySymbol}{totalFines.toLocaleString("es-CL")}</p>
+            <p className="text-2xl font-bold">{formatCurrency(totalFines, currencySymbol)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -207,7 +208,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                       <TableCell className="text-sm">{inf.infraction_date as string}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm">{inf.description as string}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString("es-CL")}` : "-"}
+                        {inf.fine_amount ? formatCurrency(inf.fine_amount, currencySymbol) : "-"}
                       </TableCell>
                       <TableCell>
                         <Badge
