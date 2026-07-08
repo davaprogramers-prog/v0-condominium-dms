@@ -272,14 +272,13 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 <DialogTitle style={{ color: dialogTextColor }}>Registrar Pago de Multa</DialogTitle>
                               </DialogHeader>
                               <form
-                                action={async (fd) => {
-                                  fd.set("infraction_id", inf.id as string)
-                                  fd.set("house_id", inf.house_id as string)
-                                  await markInfractionPaidWithIncome(fd)
-                                  setPaymentOpen(null)
-                                }}
+                                action={markInfractionPaidWithIncome}
                                 className="flex flex-col gap-4"
                               >
+                                {/* Hidden inputs for IDs */}
+                                <input type="hidden" name="infraction_id" value={inf.id as string} />
+                                <input type="hidden" name="house_id" value={inf.house_id as string} />
+                                
                                 <div className="space-y-2 p-3 bg-muted rounded">
                                   <p style={{ color: dialogTextColor }}><strong>Descripción:</strong> {inf.description}</p>
                                   <p style={{ color: dialogTextColor }}><strong>Monto:</strong> {currencySymbol}{Number(inf.fine_amount || 0).toLocaleString("es-CL")}</p>
@@ -294,7 +293,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                     <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                 </div>
-                                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Confirmar Pago</Button>
+                                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setPaymentOpen(null)}>Confirmar Pago</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
