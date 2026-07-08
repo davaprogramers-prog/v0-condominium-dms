@@ -129,7 +129,7 @@ export function ReportesCharts({
                 {/* Center Total */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">{formatCurrency(totalExpenses)}</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrencyFull(totalExpenses)}</p>
                     <p className="text-lg font-bold">{currencySymbol}{totalExpenses.toLocaleString("es-CL")}</p>
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export function ReportesCharts({
                 {/* Center Total */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">{formatCurrency(totalIncome)}</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrencyFull(totalIncome)}</p>
                     <p className="text-lg font-bold text-green-600">{currencySymbol}{totalIncome.toLocaleString("es-CL")}</p>
                   </div>
                 </div>

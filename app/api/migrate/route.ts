@@ -78,6 +78,8 @@ CREATE TABLE IF NOT EXISTS public.expenses (
   description TEXT NOT NULL,
   amount NUMERIC NOT NULL,
   expense_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  period_month INTEGER,
+  period_year INTEGER,
   receipt_url TEXT,
   notes TEXT,
   created_by UUID NOT NULL REFERENCES auth.users(id),
