@@ -48,42 +48,11 @@ export default async function IngresoMultasPage({
     .single()
   const currencySymbol = condo?.currency_symbol || "$"
 
-  // Get paid infractions (which are fines income)
-  let finesData: any[] = []
+  // Get income records of type "multa" from condo_income
+  let incomeRecords: any[] = []
   let totalFines = 0
   let paidCount = 0
 
-  if (condoId) {
-    // Get paid infractions and calculate totals
-    const { data: infractions } = await supabase
-      .from("infractions")
-      .select(`
-        id,
-        fine_amount,
-        is_paid,
-        paid_date,
-        description,
-        houses (house_number, owner_name)
-      `)
-      .eq("condo_id", condoId)
-      .eq("is_paid", true)
-      .order("paid_date", { ascending: false })
-
-    // Filter by month/year if date exists
-    if (infractions) {
-      finesData = infractions.filter(inf => {
-        if (!inf.paid_date) return false
-        const paidDate = new Date(inf.paid_date)
-        return paidDate.getFullYear() === year && (paidDate.getMonth() + 1) === month
-      })
-
-      paidCount = finesData.length
-      totalFines = finesData.reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
-    }
-  }
-
-  // Also get income records of type "multa" for backward compatibility
-  let incomeRecords: any[] = []
   if (condoId) {
     const { data } = await supabase
       .from("condo_income")
@@ -98,11 +67,13 @@ export default async function IngresoMultasPage({
       .order("income_date", { ascending: false })
     
     incomeRecords = data || []
+    paidCount = incomeRecords.length
+    totalFines = incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
   }
 
-  // Combine both sources
-  const allFinesIncome = [...finesData, ...incomeRecords]
-  const combinedTotal = totalFines + incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+  // Use only income records (no need to combine from infractions table)
+  const allFinesIncome = incomeRecords
+  const combinedTotal = totalFines
 
   // Navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -148,12 +119,10 @@ export default async function IngresoMultasPage({
       </div>
 
       <IngresoMultasClient
-        finesData={finesData}
         incomeRecords={incomeRecords}
         houses={houses}
         totalFines={totalFines}
         paidCount={paidCount}
-        combinedTotal={combinedTotal}
         month={month}
         year={year}
         isAdmin={isAdmin}

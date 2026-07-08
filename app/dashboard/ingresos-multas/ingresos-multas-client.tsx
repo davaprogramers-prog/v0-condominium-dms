@@ -15,12 +15,10 @@ import { useTheme } from "@/app/dashboard/theme-context"
 import { createFineIncome } from "@/app/dashboard/actions"
 
 interface IngresoMultasClientProps {
-  finesData: any[]
   incomeRecords: any[]
   houses: any[]
   totalFines: number
   paidCount: number
-  combinedTotal: number
   month: number
   year: number
   isAdmin: boolean
@@ -28,12 +26,10 @@ interface IngresoMultasClientProps {
 }
 
 export function IngresoMultasClient({
-  finesData,
   incomeRecords,
   houses,
   totalFines,
   paidCount,
-  combinedTotal,
   month,
   year,
   isAdmin,
@@ -43,7 +39,7 @@ export function IngresoMultasClient({
   const [selectedHouse, setSelectedHouse] = useState("")
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
-  const allFinesIncome = [...finesData, ...incomeRecords]
+  const allFinesIncome = incomeRecords
 
   return (
     <>
