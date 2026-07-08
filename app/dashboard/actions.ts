@@ -224,12 +224,31 @@ export async function deleteExemptionType(id: string) {
 // ===== Expenses =====
 export async function createExpense(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  
+  // Get month, year, and day from form
+  const month = formData.get("expenseMonth") as string
+  const year = formData.get("expenseYear") as string
+  const dateStr = formData.get("expense_date") as string
+  
+  // Extract day from the date input, fall back to 1st of month
+  const date = dateStr ? new Date(dateStr) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  // Construct expense_date as YYYY-MM-DD
+  const expenseDate = `${year}-${month}-${day}`
+  
+  // Extract month and year as integers for period tracking
+  const periodMonth = parseInt(month)
+  const periodYear = parseInt(year)
+  
   const { error } = await supabase.from("expenses").insert({
     condo_id: condoId,
     expense_type_id: formData.get("expense_type_id") as string,
     description: formData.get("description") as string,
     amount: Number(formData.get("amount")),
-    expense_date: formData.get("expense_date") as string,
+    expense_date: expenseDate,
+    period_month: periodMonth,
+    period_year: periodYear,
     receipt_url: formData.get("receipt_url") as string || null,
     notes: formData.get("notes") as string || null,
     created_by: userId,
