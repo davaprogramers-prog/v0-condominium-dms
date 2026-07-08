@@ -838,10 +838,10 @@ export async function markInfractionPaidWithIncome(formData: FormData) {
 
   if (!infractionId) throw new Error("ID de infracción no proporcionado")
 
-  // Get the infraction details
+  // Get the infraction details (only columns that exist)
   const { data: infraction, error: selectError } = await supabase
     .from("infractions")
-    .select("period_month, period_year, fine_amount, description")
+    .select("fine_amount, description, created_at")
     .eq("id", infractionId)
     .single()
 
@@ -863,9 +863,11 @@ export async function markInfractionPaidWithIncome(formData: FormData) {
   if (updateError) throw updateError
 
   // Create income record for the fine payment
-  const paidDateObj = new Date(paidDate || new Date().toISOString())
-  const month = infraction.period_month || paidDateObj.getMonth() + 1
-  const year = infraction.period_year || paidDateObj.getFullYear()
+  // Use the payment date or infraction creation date to determine the month/year
+  const dateToUse = paidDate || (infraction.created_at ? infraction.created_at.split("T")[0] : new Date().toISOString().split("T")[0])
+  const dateObj = new Date(dateToUse)
+  const month = dateObj.getMonth() + 1
+  const year = dateObj.getFullYear()
 
   const { error: incomeError } = await supabase
     .from("condo_income")
