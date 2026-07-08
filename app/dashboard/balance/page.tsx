@@ -67,34 +67,29 @@ export default async function BalancePage({
       // Calculate from initial balance + all months before current
       saldoAnterior = parameters.initial_balance || 0
       
-      // Get all PAID income (with approved proofs) and expenses from initial month to previous month
-      const { data: allPaymentProofs } = await supabase
-        .from("payment_proofs")
-        .select("fixed_amount, variable_amount, period_year, period_month")
+      // Get the last day of the previous month
+      const lastDayOfPreviousMonth = new Date(year, month - 1, 0).toISOString().split('T')[0]
+      
+      // Get all PAID income and expenses from initial date to end of previous month
+      const { data: allIncome } = await supabase
+        .from("condo_income")
+        .select("amount, income_date")
         .eq("condo_id", condoId)
         .eq("status", "approved")
+        .lte("income_date", lastDayOfPreviousMonth)
       
       const { data: allExpenses } = await supabase
         .from("condo_expenses")
-        .select("amount, period_year, period_month")
+        .select("amount, expense_date")
         .eq("condo_id", condoId)
+        .lte("expense_date", lastDayOfPreviousMonth)
       
-      // Sum all PAID income (from approved payment proofs) before current month
-      const paidIncomeBeforeCurrent = (allPaymentProofs || [])
-        .filter((p: any) => {
-          if (p.period_year < year) return true
-          if (p.period_year === year && p.period_month < month) return true
-          return false
-        })
-        .reduce((sum: number, p: any) => sum + (p.fixed_amount || 0) + (p.variable_amount || 0), 0)
+      // Sum all PAID income and expenses before current month (using actual transaction dates)
+      const paidIncomeBeforeCurrent = (allIncome || [])
+        .reduce((sum: number, inc: any) => sum + (inc.amount || 0), 0)
       
       const expensesBeforeCurrent = (allExpenses || [])
-        .filter((e: any) => {
-          if (e.period_year < year) return true
-          if (e.period_year === year && e.period_month < month) return true
-          return false
-        })
-        .reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
+        .reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0)
       
       saldoAnterior += paidIncomeBeforeCurrent - expensesBeforeCurrent
     }

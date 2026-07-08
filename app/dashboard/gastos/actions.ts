@@ -67,16 +67,20 @@ export async function createCondoExpense(
 export async function getCondoExpenses(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
+  // Filter by actual expense_date, not period_year/period_month which represent registration date
   let query = supabase
     .from("condo_expenses")
     .select("*, expense_logo:expense_logos(id, name, logo_url)")
     .eq("condo_id", condoId)
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    // Create date range for the month: from the 1st to the last day
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0] // Last day of the month
+    
+    query = query
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
   }
 
   const { data, error } = await query.order("expense_date", { ascending: false })
@@ -119,18 +123,21 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // Get income with approved status directly from condo_income table
+  // Get income with approved status - filter by actual income_date, not period_year/period_month
   let query = supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("status", "approved")
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    // Create date range for the month: from the 1st to the last day
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0] // Last day of the month
+    
+    query = query
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
