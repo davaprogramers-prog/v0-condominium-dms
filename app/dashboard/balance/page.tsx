@@ -75,8 +75,8 @@ export default async function BalancePage({
         .eq("status", "approved")
       
       const { data: allExpenses } = await supabase
-        .from("condo_expenses")
-        .select("amount, period_year, period_month")
+        .from("expenses")
+        .select("amount, expense_date")
         .eq("condo_id", condoId)
       
       // Sum all PAID income (from approved payment proofs) before current month
@@ -90,8 +90,12 @@ export default async function BalancePage({
       
       const expensesBeforeCurrent = (allExpenses || [])
         .filter((e: any) => {
-          if (e.period_year < year) return true
-          if (e.period_year === year && e.period_month < month) return true
+          if (!e.expense_date) return false
+          const expenseDate = new Date(e.expense_date)
+          const expenseYear = expenseDate.getFullYear()
+          const expenseMonth = expenseDate.getMonth() + 1
+          if (expenseYear < year) return true
+          if (expenseYear === year && expenseMonth < month) return true
           return false
         })
         .reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
