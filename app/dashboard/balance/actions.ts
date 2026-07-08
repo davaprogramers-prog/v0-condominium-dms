@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 // Calculate saldo_anterior for a given month
 // This sums all ingresos and gastos from the beginning until the END of the previous month
