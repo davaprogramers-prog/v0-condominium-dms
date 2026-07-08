@@ -101,9 +101,9 @@ export function IngresoMultasClient({
                 <SelectTrigger id="house_select" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar casa" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-black">
                   {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id}>
+                    <SelectItem key={house.id} value={house.id} className="text-black hover:bg-gray-100">
                       Casa #{house.house_number} - {house.owner_name || "Sin nombre"}
                     </SelectItem>
                   ))}
@@ -118,13 +118,13 @@ export function IngresoMultasClient({
                 <SelectTrigger id="type_select" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Multa por estacionamiento">Multa por estacionamiento</SelectItem>
-                  <SelectItem value="Intereses por mora">Intereses por mora</SelectItem>
-                  <SelectItem value="Multa por ruido">Multa por ruido</SelectItem>
-                  <SelectItem value="Multa por mascotas">Multa por mascotas</SelectItem>
-                  <SelectItem value="Multa por uso de áreas comunes">Multa por uso de áreas comunes</SelectItem>
-                  <SelectItem value="Otra multa">Otra multa</SelectItem>
+                <SelectContent className="bg-white text-black">
+                  <SelectItem value="Multa por estacionamiento" className="text-black hover:bg-gray-100">Multa por estacionamiento</SelectItem>
+                  <SelectItem value="Intereses por mora" className="text-black hover:bg-gray-100">Intereses por mora</SelectItem>
+                  <SelectItem value="Multa por ruido" className="text-black hover:bg-gray-100">Multa por ruido</SelectItem>
+                  <SelectItem value="Multa por mascotas" className="text-black hover:bg-gray-100">Multa por mascotas</SelectItem>
+                  <SelectItem value="Multa por uso de áreas comunes" className="text-black hover:bg-gray-100">Multa por uso de áreas comunes</SelectItem>
+                  <SelectItem value="Otra multa" className="text-black hover:bg-gray-100">Otra multa</SelectItem>
                 </SelectContent>
               </Select>
               <input type="hidden" name="description" value={selectedType} />
