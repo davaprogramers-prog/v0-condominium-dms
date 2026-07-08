@@ -1,96 +1,110 @@
 "use server"
 
 import { createClient } from "@/lib/supabase"
-import { revalidatePath } from "next/cache"
 
-// Save monthly balance to database
-export async function saveMonthlyBalance(
+// Calculate saldo_anterior for a given month
+// This sums all ingresos and gastos from the beginning until the END of the previous month
+// This approach handles payments of previous months made later (e.g., paying March expenses in June)
+export async function calculateSaldoAnterior(
   condoId: string,
   year: number,
   month: number,
-  balanceData: {
-    saldo_anterior: number
-    ingresos_recaudados: number
-    gastos: number
-    balance_mes: number
-    saldo_final: number
-  }
+  initialBalance: number,
+  initialDate: Date
 ) {
   const supabase = await createClient()
 
-  const { error } = await supabase
-    .from("monthly_balances")
-    .upsert({
-      condo_id: condoId,
-      year,
-      month,
-      ...balanceData,
-      updated_at: new Date(),
-    }, {
-      onConflict: "condo_id,year,month"
-    })
+  // Get the last day of the previous month
+  const lastDayOfPreviousMonth = new Date(year, month - 1, 0)
+  const endDate = lastDayOfPreviousMonth.toISOString().split('T')[0]
 
-  if (error) {
-    console.error("[v0] Error saving monthly balance:", error)
-    throw new Error(error.message)
+  // Check if we're at the initial month
+  if (year === initialDate.getFullYear() && month === initialDate.getMonth() + 1) {
+    return initialBalance
   }
 
-  revalidatePath("/dashboard/balance")
-}
-
-// Get previous month's balance to use as saldo_anterior
-export async function getPreviousMonthBalance(
-  condoId: string,
-  year: number,
-  month: number
-) {
-  const supabase = await createClient()
-
-  let prevYear = year
-  let prevMonth = month - 1
-
-  // If month is January, previous month is December of previous year
-  if (month === 1) {
-    prevYear--
-    prevMonth = 12
-  }
-
-  const { data, error } = await supabase
-    .from("monthly_balances")
-    .select("saldo_final")
+  // Get ALL approved ingresos up to end of previous month
+  const { data: allIncome, error: incomeError } = await supabase
+    .from("condo_income")
+    .select("amount")
     .eq("condo_id", condoId)
-    .eq("year", prevYear)
-    .eq("month", prevMonth)
-    .single()
+    .eq("status", "approved")
+    .lte("income_date", endDate)
 
-  if (error && error.code !== "PGRST116") { // PGRST116 = no rows returned
-    console.error("[v0] Error fetching previous balance:", error)
-    throw new Error(error.message)
+  // Get ALL gastos up to end of previous month
+  const { data: allExpenses, error: expensesError } = await supabase
+    .from("expenses")
+    .select("amount")
+    .eq("condo_id", condoId)
+    .lte("expense_date", endDate)
+
+  if (incomeError) {
+    console.error("[v0] Error fetching income for saldo anterior:", incomeError)
+    throw new Error(incomeError.message)
   }
 
-  return data?.saldo_final || null
+  if (expensesError) {
+    console.error("[v0] Error fetching expenses for saldo anterior:", expensesError)
+    throw new Error(expensesError.message)
+  }
+
+  const totalIncome = (allIncome || []).reduce((sum, inc) => sum + (inc.amount || 0), 0)
+  const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
+
+  return initialBalance + totalIncome - totalExpenses
 }
 
-// Get monthly balance from database
-export async function getMonthlyBalance(
+// Get all ingresos for a specific month (only those within that month's dates)
+export async function getMonthIncome(
   condoId: string,
   year: number,
   month: number
 ) {
   const supabase = await createClient()
 
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
   const { data, error } = await supabase
-    .from("monthly_balances")
+    .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .eq("year", year)
-    .eq("month", month)
-    .single()
+    .eq("status", "approved")
+    .gte("income_date", startDate)
+    .lte("income_date", endDate)
+    .order("income_date", { ascending: false })
 
-  if (error && error.code !== "PGRST116") {
-    console.error("[v0] Error fetching monthly balance:", error)
+  if (error) {
+    console.error("[v0] Error fetching month income:", error)
     throw new Error(error.message)
   }
 
-  return data || null
+  return data || []
+}
+
+// Get all gastos for a specific month (only those within that month's dates)
+export async function getMonthExpenses(
+  condoId: string,
+  year: number,
+  month: number
+) {
+  const supabase = await createClient()
+
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("*, expense_type:expense_types(id, name)")
+    .eq("condo_id", condoId)
+    .gte("expense_date", startDate)
+    .lte("expense_date", endDate)
+    .order("expense_date", { ascending: false })
+
+  if (error) {
+    console.error("[v0] Error fetching month expenses:", error)
+    throw new Error(error.message)
+  }
+
+  return data || []
 }

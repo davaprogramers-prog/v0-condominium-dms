@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { getCondoExpenses, getPaidCondoIncome } from "../gastos/actions"
-import { getPreviousMonthBalance, saveMonthlyBalance } from "./actions"
+import { calculateSaldoAnterior, getMonthIncome, getMonthExpenses } from "./actions"
 import { Banknote, TrendingDown, TrendingUp, BarChart3, Wallet, ChevronLeft, ChevronRight } from "lucide-react"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { resolvePeriod } from "@/lib/period"
@@ -42,95 +41,36 @@ export default async function BalancePage({
     parameters = data
   }
 
-  // Get expenses and PAID income only (with approved payment proofs)
+  // Get expenses and income ONLY for this month
   let expenses: any[] = []
   let paidIncome: any[] = []
 
   if (condoId) {
-    expenses = await getCondoExpenses(condoId, year, month)
-    paidIncome = await getPaidCondoIncome(condoId, year, month)
+    expenses = await getMonthExpenses(condoId, year, month)
+    paidIncome = await getMonthIncome(condoId, year, month)
   }
 
-  // Calculate saldo anterior from monthly_balances table
-  // If this is the first month (same as initial_balance_date), use initial_balance
-  // Otherwise, use saldo_final from previous month (stored in monthly_balances)
+  // Calculate saldo anterior dynamically
+  // This sums ALL ingresos and gastos from the start until the END of the previous month
+  // This approach handles payments of previous months made later (e.g., paying March expenses in June)
   let saldoAnterior = 0
   
   if (condoId && parameters?.initial_balance_date) {
     const initialDate = new Date(parameters.initial_balance_date)
-    const initialYear = initialDate.getFullYear()
-    const initialMonth = initialDate.getMonth() + 1
-    
-    // Check if current view is the first month
-    if (year === initialYear && month === initialMonth) {
-      saldoAnterior = parameters.initial_balance || 0
-    } else {
-      // Get saldo_final from previous month (stored in monthly_balances)
-      const previousBalance = await getPreviousMonthBalance(condoId, year, month)
-      
-      if (previousBalance !== null) {
-        // Use the stored saldo_final from previous month
-        saldoAnterior = previousBalance
-      } else {
-        // Fallback: calculate from scratch if monthly_balances not populated
-        saldoAnterior = parameters.initial_balance || 0
-        
-        const { data: allPaymentProofs } = await supabase
-          .from("payment_proofs")
-          .select("fixed_amount, variable_amount, period_year, period_month")
-          .eq("condo_id", condoId)
-          .eq("status", "approved")
-        
-        const { data: allExpenses } = await supabase
-          .from("expenses")
-          .select("amount, expense_date")
-          .eq("condo_id", condoId)
-        
-        const paidIncomeBeforeCurrent = (allPaymentProofs || [])
-          .filter((p: any) => {
-            if (p.period_year < year) return true
-            if (p.period_year === year && p.period_month < month) return true
-            return false
-          })
-          .reduce((sum: number, p: any) => sum + (p.fixed_amount || 0) + (p.variable_amount || 0), 0)
-        
-        const expensesBeforeCurrent = (allExpenses || [])
-          .filter((e: any) => {
-            if (!e.expense_date) return false
-            const expenseDate = new Date(e.expense_date)
-            const expenseYear = expenseDate.getFullYear()
-            const expenseMonth = expenseDate.getMonth() + 1
-            if (expenseYear < year) return true
-            if (expenseYear === year && expenseMonth < month) return true
-            return false
-          })
-          .reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
-        
-        saldoAnterior += paidIncomeBeforeCurrent - expensesBeforeCurrent
-      }
-    }
+    saldoAnterior = await calculateSaldoAnterior(
+      condoId,
+      year,
+      month,
+      parameters.initial_balance || 0,
+      initialDate
+    )
   }
 
-  // Calculate totals - only PAID income
+  // Calculate totals for THIS month only
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalPaidIncome = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0)
   const balanceDelMes = totalPaidIncome - totalExpenses
   const saldoFinal = saldoAnterior + balanceDelMes
-
-  // Save monthly balance to database for future reference
-  if (condoId) {
-    try {
-      await saveMonthlyBalance(condoId, year, month, {
-        saldo_anterior: saldoAnterior,
-        ingresos_recaudados: totalPaidIncome,
-        gastos: totalExpenses,
-        balance_mes: balanceDelMes,
-        saldo_final: saldoFinal,
-      })
-    } catch (error) {
-      console.error("[v0] Error saving monthly balance:", error)
-    }
-  }
 
   const monthName = new Date(year, month - 1).toLocaleDateString("es-CL", {
     month: "long",
