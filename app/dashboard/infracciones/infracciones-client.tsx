@@ -293,7 +293,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                     <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                 </div>
-                                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setPaymentOpen(null)}>Confirmar Pago</Button>
+                                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Confirmar Pago</Button>
                               </form>
                             </DialogContent>
                           </Dialog>
