@@ -834,8 +834,6 @@ export async function markInfractionPaidWithIncome(formData: FormData) {
   const amount = Number(formData.get("amount") || 0)
   const paidDate = formData.get("paid_date") as string
 
-  console.log("[v0] markInfractionPaidWithIncome - infractionId:", infractionId, "houseId:", houseId)
-
   if (!infractionId) throw new Error("ID de infracción no proporcionado")
 
   // Get the infraction details (only columns that exist)
@@ -845,11 +843,50 @@ export async function markInfractionPaidWithIncome(formData: FormData) {
     .eq("id", infractionId)
     .single()
 
-  console.log("[v0] selectError:", selectError, "infraction:", infraction)
-
   if (selectError || !infraction) {
     throw new Error(`Infracción no encontrada: ${selectError?.message || "No data"}`)
   }
+
+  // Mark infraction as paid
+  const { error: updateError } = await supabase
+    .from("infractions")
+    .update({ 
+      is_paid: true, 
+      paid_date: paidDate || new Date().toISOString().split("T")[0]
+    })
+    .eq("id", infractionId)
+
+  if (updateError) throw updateError
+
+  // Create income record for the fine payment
+  // Use the payment date or infraction creation date to determine the month/year
+  const dateToUse = paidDate || (infraction.created_at ? infraction.created_at.split("T")[0] : new Date().toISOString().split("T")[0])
+  const dateObj = new Date(dateToUse)
+  const month = dateObj.getMonth() + 1
+  const year = dateObj.getFullYear()
+
+  const { error: incomeError } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: `Multa: ${infraction.description}`,
+      amount: amount || infraction.fine_amount,
+      income_date: paidDate || new Date().toISOString().split("T")[0],
+      period_month: month,
+      period_year: year,
+      income_type: "multa",
+      status: "approved",
+      created_by: userId,
+    })
+
+  if (incomeError) throw incomeError
+
+  revalidatePath("/dashboard/infracciones")
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/reportes")
+  revalidatePath("/dashboard/balance")
+}
 
   // Mark infraction as paid
   const { error: updateError } = await supabase

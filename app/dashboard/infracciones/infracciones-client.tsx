@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction, markInfractionPaidWithIncome } from "@/app/dashboard/actions"
 import { formatCurrency, formatCurrencyNumber } from "@/lib/format"
 import { Button } from "@/components/ui/button"
@@ -51,6 +51,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
   const [paymentOpen, setPaymentOpen] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   const pendingCount = infractions.filter((i) => !i.is_paid).length
@@ -286,13 +287,26 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                           </Dialog>
 
                           {/* Payment Dialog */}
-                          <Dialog open={paymentOpen === inf.id} onOpenChange={(v) => !v && setPaymentOpen(null)}>
+                          <Dialog open={paymentOpen === inf.id} onOpenChange={(v) => {
+                            if (!v && !isPending) {
+                              setPaymentOpen(null)
+                            }
+                          }}>
                             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
                               <DialogHeader>
                                 <DialogTitle style={{ color: dialogTextColor }}>Registrar Pago de Multa</DialogTitle>
                               </DialogHeader>
                               <form
-                                action={markInfractionPaidWithIncome}
+                                action={(formData) => {
+                                  startTransition(async () => {
+                                    try {
+                                      await markInfractionPaidWithIncome(formData)
+                                      setPaymentOpen(null)
+                                    } catch (error) {
+                                      console.error("[v0] Error en pago:", error)
+                                    }
+                                  })
+                                }}
                                 className="flex flex-col gap-4"
                               >
                                 {/* Hidden inputs for IDs */}
@@ -301,19 +315,21 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 
                                 <div className="space-y-2 p-3 bg-muted rounded">
                                   <p style={{ color: dialogTextColor }}><strong>Descripción:</strong> {inf.description}</p>
-                                  <p style={{ color: dialogTextColor }}><strong>Monto:</strong> {currencySymbol}{Number(inf.fine_amount || 0).toLocaleString("es-CL")}</p>
+                                  <p style={{ color: dialogTextColor }}><strong>Monto:</strong> {formatCurrency(inf.fine_amount, currencySymbol)}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="flex flex-col gap-2">
                                     <Label htmlFor="payment_date" style={{ color: dialogTextColor }}>Fecha de Pago</Label>
-                                    <Input id="payment_date" name="paid_date" type="date" defaultValue={new Date().toISOString().split('T')[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                    <Input id="payment_date" name="paid_date" type="date" defaultValue={new Date().toISOString().split('T')[0]} required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                   <div className="flex flex-col gap-2">
                                     <Label htmlFor="payment_amount" style={{ color: dialogTextColor }}>Monto Recibido ({currencySymbol})</Label>
-                                    <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                    <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                 </div>
-                                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Confirmar Pago</Button>
+                                <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">
+                                  {isPending ? "Procesando..." : "Confirmar Pago"}
+                                </Button>
                               </form>
                             </DialogContent>
                           </Dialog>
