@@ -13,14 +13,11 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
 
-  if (year && month) {
-    // Filter by actual expense_date month/year (not using period fields since they don't exist in expenses table)
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    
-    query = query
-      .gte("expense_date", startDate)
-      .lte("expense_date", endDate)
+  if (year) {
+    query = query.eq("period_year", year)
+  }
+  if (month) {
+    query = query.eq("period_month", month)
   }
 
   const { data, error } = await query.order("expense_date", { ascending: false })
@@ -36,19 +33,16 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 export async function getCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // Get all income for a specific month (filter by income_date)
   let query = supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
 
-  if (year && month) {
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    
-    query = query
-      .gte("income_date", startDate)
-      .lte("income_date", endDate)
+  if (year) {
+    query = query.eq("period_year", year)
+  }
+  if (month) {
+    query = query.eq("period_month", month)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
@@ -71,13 +65,11 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
     .eq("condo_id", condoId)
     .eq("status", "approved")
 
-  if (year && month) {
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    
-    query = query
-      .gte("income_date", startDate)
-      .lte("income_date", endDate)
+  if (year) {
+    query = query.eq("period_year", year)
+  }
+  if (month) {
+    query = query.eq("period_month", month)
   }
 
   const { data, error } = await query.order("income_date", { ascending: false })
