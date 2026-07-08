@@ -55,6 +55,7 @@ export async function calculateSaldoAnterior(
 }
 
 // Get all ingresos for a specific month (filter by income_date)
+// Includes both gastos comunes (from condo_income) and multas (from infractions)
 export async function getMonthIncome(
   condoId: string,
   year: number,
@@ -65,21 +66,51 @@ export async function getMonthIncome(
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-  const { data, error } = await supabase
+  // Get gastos comunes (verificado = verified/approved)
+  const { data: condoIncomeData, error: condoIncomeError } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .eq("status", "approved")
+    .eq("status", "verificado")
     .gte("income_date", startDate)
     .lte("income_date", endDate)
-    .order("income_date", { ascending: false })
 
-  if (error) {
-    console.error("[v0] Error fetching month income:", error)
-    throw new Error(error.message)
+  // Get multas (is_paid = true, within date range)
+  const { data: infractionsData, error: infractionsError } = await supabase
+    .from("infractions")
+    .select("*, house:houses(id, number)")
+    .eq("condo_id", condoId)
+    .eq("is_paid", true)
+    .gte("paid_date", startDate)
+    .lte("paid_date", endDate)
+
+  if (condoIncomeError) {
+    console.error("[v0] Error fetching condo income:", condoIncomeError)
+    throw new Error(condoIncomeError.message)
   }
 
-  return data || []
+  if (infractionsError) {
+    console.error("[v0] Error fetching infractions:", infractionsError)
+    throw new Error(infractionsError.message)
+  }
+
+  // Combine both sources: gastos comunes + multas
+  const allIncome = [
+    ...(condoIncomeData || []),
+    ...(infractionsData || []).map((infraction: any) => ({
+      id: infraction.id,
+      condo_id: infraction.condo_id,
+      amount: infraction.fine_amount,
+      income_type: "multa",
+      income_date: infraction.paid_date,
+      status: "verificado",
+      description: `Multa - ${infraction.house?.number || ""}`,
+    })),
+  ]
+
+  return allIncome.sort((a: any, b: any) => 
+    new Date(b.income_date).getTime() - new Date(a.income_date).getTime()
+  )
 }
 
 // Get all gastos for a specific month (filter by expense_date)
