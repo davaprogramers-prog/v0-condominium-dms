@@ -834,14 +834,22 @@ export async function markInfractionPaidWithIncome(formData: FormData) {
   const amount = Number(formData.get("amount") || 0)
   const paidDate = formData.get("paid_date") as string
 
+  console.log("[v0] markInfractionPaidWithIncome - infractionId:", infractionId, "houseId:", houseId)
+
+  if (!infractionId) throw new Error("ID de infracción no proporcionado")
+
   // Get the infraction details
-  const { data: infraction } = await supabase
+  const { data: infraction, error: selectError } = await supabase
     .from("infractions")
     .select("period_month, period_year, fine_amount, description")
     .eq("id", infractionId)
     .single()
 
-  if (!infraction) throw new Error("Infracción no encontrada")
+  console.log("[v0] selectError:", selectError, "infraction:", infraction)
+
+  if (selectError || !infraction) {
+    throw new Error(`Infracción no encontrada: ${selectError?.message || "No data"}`)
+  }
 
   // Mark infraction as paid
   const { error: updateError } = await supabase
