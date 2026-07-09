@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { PendingPaymentCard } from "./pending-payment-card"
 
 interface PendingDebt {
@@ -14,7 +16,7 @@ interface PendingDebt {
 
 export async function PendingPaymentsSection({ condoId, currencySymbol }: { condoId: string; currencySymbol: string }) {
   try {
-    const supabase = await createClient()
+    const supabase = createClient()
 
     // Get all houses in the condo
     const { data: houses } = await supabase
@@ -143,11 +145,18 @@ export async function PendingPaymentsSection({ condoId, currencySymbol }: { cond
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold">Pendiente de Pago</h2>
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-semibold text-sm">
-            {housesWithDebt.length}
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold">Pendiente de Pago</h2>
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-semibold text-sm">
+              {housesWithDebt.length}
+            </span>
+          </div>
+          <Link href="/dashboard/deudas-consolidadas">
+            <Button className="bg-red-600 hover:bg-red-700 text-white">
+              Ver Todas las Deudas
+            </Button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {housesWithDebt.map((debt) => (
