@@ -66,14 +66,30 @@ export async function getMonthIncome(
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-  // Get gastos comunes (approved = verified/approved)
-  const { data: condoIncomeData, error: condoIncomeError } = await supabase
+  // Get ingresos comunes (approved = verified/approved)
+  // Try by period_month/period_year first
+  const { data: periodData, error: periodError } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("status", "approved")
+    .eq("period_year", year)
+    .eq("period_month", month)
+    .order("income_date", { ascending: false })
+
+  // Fallback to income_date if period fields are null
+  const { data: dateData, error: dateError } = await supabase
+    .from("condo_income")
+    .select("*")
+    .eq("condo_id", condoId)
+    .eq("status", "approved")
+    .is("period_month", null)
     .gte("income_date", startDate)
     .lte("income_date", endDate)
+    .order("income_date", { ascending: false })
+
+  const condoIncomeData = [...(periodData || []), ...(dateData || [])]
+  const condoIncomeError = periodError && dateError ? periodError : null
 
   // Get multas (is_paid = true, within date range)
   const { data: infractionsData, error: infractionsError } = await supabase
