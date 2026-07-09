@@ -227,24 +227,24 @@ export function ReportesCharts({
       {/* Resumen Comparativo */}
       <div className="rounded-xl border bg-card p-4 md:p-6">
         <h2 className="text-lg font-semibold mb-4">Resumen del Periodo</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
-            <p className="text-xs text-muted-foreground mb-1">Total Ingresos</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrencyFull(totalIncome)}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="text-center p-3 rounded-lg bg-green-100 dark:bg-green-950/50">
+            <p className="text-xs font-semibold text-green-800 dark:text-green-100 uppercase tracking-wide mb-2">Total Ingresos</p>
+            <p className="text-lg md:text-base lg:text-lg font-bold text-green-700 dark:text-green-300 break-words">{formatCurrencyFull(totalIncome)}</p>
           </div>
-          <div className="text-center p-4 rounded-lg bg-pink-50 dark:bg-pink-950/30">
-            <p className="text-xs text-muted-foreground mb-1">Total Gastos</p>
-            <p className="text-xl font-bold text-pink-600">{formatCurrencyFull(totalExpenses)}</p>
+          <div className="text-center p-3 rounded-lg bg-pink-100 dark:bg-pink-950/50">
+            <p className="text-xs font-semibold text-pink-800 dark:text-pink-100 uppercase tracking-wide mb-2">Total Gastos</p>
+            <p className="text-lg md:text-base lg:text-lg font-bold text-pink-700 dark:text-pink-300 break-words">{formatCurrencyFull(totalExpenses)}</p>
           </div>
-          <div className="text-center p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-            <p className="text-xs text-muted-foreground mb-1">Balance</p>
-            <p className={`text-xl font-bold ${totalIncome - totalExpenses >= 0 ? "text-blue-600" : "text-red-600"}`}>
+          <div className="text-center p-3 rounded-lg bg-blue-100 dark:bg-blue-950/50">
+            <p className="text-xs font-semibold text-blue-800 dark:text-blue-100 uppercase tracking-wide mb-2">Balance</p>
+            <p className={`text-lg md:text-base lg:text-lg font-bold break-words ${totalIncome - totalExpenses >= 0 ? "text-blue-700 dark:text-blue-300" : "text-red-700 dark:text-red-300"}`}>
               {formatCurrencyFull(totalIncome - totalExpenses)}
             </p>
           </div>
-          <div className="text-center p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30">
-            <p className="text-xs text-muted-foreground mb-1">Razon G/I</p>
-            <p className="text-xl font-bold text-purple-600">
+          <div className="text-center p-3 rounded-lg bg-purple-100 dark:bg-purple-950/50">
+            <p className="text-xs font-semibold text-purple-800 dark:text-purple-100 uppercase tracking-wide mb-2">Razon G/I</p>
+            <p className="text-lg md:text-base lg:text-lg font-bold text-purple-700 dark:text-purple-300">
               {totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toFixed(1) : "0"}%
             </p>
           </div>
