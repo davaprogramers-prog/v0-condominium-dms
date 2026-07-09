@@ -3,86 +3,29 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
-export async function createCondoExpense(
-  condoId: string,
-  formData: {
-    title: string
-    description: string
-    amount: number
-    category: string
-    expenseDate: string
-    receiptUrl?: string
-    expenseLogoId?: string
-  }
-) {
-  const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-
-  // Verify user is admin of this condo
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  const canAccessCondo = profile?.condo_id === condoId || profile?.role === "super_admin"
-  
-  if (!isAdmin || !canAccessCondo) {
-    throw new Error("No tienes permisos para crear gastos")
-  }
-
-  // Get period from expense date
-  const date = new Date(formData.expenseDate)
-  const periodYear = date.getFullYear()
-  const periodMonth = date.getMonth() + 1
-
-  const { error } = await supabase
-    .from("condo_expenses")
-    .insert({
-      condo_id: condoId,
-      title: formData.title,
-      description: formData.description,
-      amount: formData.amount,
-      category: formData.category,
-      expense_date: formData.expenseDate,
-      period_year: periodYear,
-      period_month: periodMonth,
-      receipt_url: formData.receiptUrl,
-      expense_logo_id: formData.expenseLogoId && formData.expenseLogoId !== "none" ? formData.expenseLogoId : null,
-      created_by: user.id,
-    })
-
-  if (error) {
-    console.error("[v0] Error creating expense:", error)
-    throw new Error(error.message)
-  }
-
-  revalidatePath("/dashboard/gastos")
-  return { success: true }
-}
 
 export async function getCondoExpenses(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
   let query = supabase
     .from("condo_expenses")
-    .select("*, expense_logo:expense_logos(id, name, logo_url)")
+    .select("*")
     .eq("condo_id", condoId)
 
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
   }
 
   const { data, error } = await query.order("expense_date", { ascending: false })
 
   if (error) {
-    console.error("Error fetching expenses:", error)
+    console.error("[v0] Error fetching expenses:", error)
     return []
   }
 
@@ -92,20 +35,47 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 export async function getCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // Get all income first (without join)
-  let query = supabase
+  if (year && month) {
+    // Try to get by period_month/period_year first (new way)
+    const { data: periodData, error: periodError } = await supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("period_year", year)
+      .eq("period_month", month)
+      .order("income_date", { ascending: false })
+
+    // If period fields don't exist or are null, fallback to income_date
+    const { data: dateData, error: dateError } = await supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .is("period_month", null)
+      .gte("income_date", `${year}-${String(month).padStart(2, '0')}-01`)
+      .lte("income_date", new Date(year, month, 0).toISOString().split('T')[0])
+      .order("income_date", { ascending: false })
+
+    if (periodError && dateError) {
+      console.error("Error fetching income:", periodError || dateError)
+      return []
+    }
+
+    // Combine and deduplicate
+    const allData = [...(periodData || []), ...(dateData || [])]
+    const seen = new Set()
+    return allData.filter((inc: any) => {
+      if (seen.has(inc.id)) return false
+      seen.add(inc.id)
+      return true
+    })
+  }
+
+  // If no year/month specified, get all income
+  const { data, error } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
-  }
-
-  const { data, error } = await query.order("income_date", { ascending: false })
+    .order("income_date", { ascending: false })
 
   if (error) {
     console.error("Error fetching income:", error)
@@ -115,25 +85,54 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   return data || []
 }
 
-// Get only income that has been paid (status = approved)
+// Get only income that has been paid (status = approved) for a specific month
 export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  // Get income with approved status directly from condo_income table
-  let query = supabase
+  if (year && month) {
+    // Try to get by period_month/period_year first (new way)
+    const { data: periodData, error: periodError } = await supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "approved")
+      .eq("period_year", year)
+      .eq("period_month", month)
+      .order("income_date", { ascending: false })
+
+    // If period fields don't exist or are null, fallback to income_date
+    const { data: dateData, error: dateError } = await supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "approved")
+      .is("period_month", null)
+      .gte("income_date", `${year}-${String(month).padStart(2, '0')}-01`)
+      .lte("income_date", new Date(year, month, 0).toISOString().split('T')[0])
+      .order("income_date", { ascending: false })
+
+    if (periodError && dateError) {
+      console.error("Error fetching paid income:", periodError || dateError)
+      return []
+    }
+
+    // Combine and deduplicate
+    const allData = [...(periodData || []), ...(dateData || [])]
+    const seen = new Set()
+    return allData.filter((inc: any) => {
+      if (seen.has(inc.id)) return false
+      seen.add(inc.id)
+      return true
+    })
+  }
+
+  // If no year/month specified, get all approved income
+  const { data, error } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("status", "approved")
-
-  if (year) {
-    query = query.eq("period_year", year)
-  }
-  if (month) {
-    query = query.eq("period_month", month)
-  }
-
-  const { data, error } = await query.order("income_date", { ascending: false })
+    .order("income_date", { ascending: false })
 
   if (error) {
     console.error("Error fetching paid income:", error)
@@ -141,6 +140,101 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
   }
 
   return data || []
+}
+
+// Create a new expense for a condo
+export async function createCondoExpense(
+  condoId: string,
+  data: {
+    title?: string
+    description: string
+    amount: number
+    category?: string
+    expenseDate?: string
+    expenseMonth?: string
+    expenseYear?: string
+    receiptUrl?: string
+    expenseLogoId?: string
+  }
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    throw new Error("User not authenticated")
+  }
+  
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
+  
+  const { error } = await supabase.from("condo_expenses").insert({
+    condo_id: condoId,
+    title: data.title || null,
+    description: data.description,
+    amount: parseFloat(String(data.amount)),
+    category: data.category || null,
+    expense_date: expenseDate,
+    receipt_url: data.receiptUrl || null,
+  })
+  
+  if (error) {
+    console.error("Error creating expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
+}
+
+// Update an existing expense
+export async function updateExpense(
+  expenseId: string,
+  data: {
+    title?: string
+    description: string
+    amount: number
+    category?: string
+    expenseDate?: string
+    expenseMonth?: string
+    expenseYear?: string
+    receiptUrl?: string
+    expenseLogoId?: string
+  }
+) {
+  const supabase = await createClient()
+  
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
+  
+  const { error } = await supabase
+    .from("condo_expenses")
+    .update({
+      title: data.title || null,
+      description: data.description,
+      amount: parseFloat(String(data.amount)),
+      category: data.category || null,
+      expense_date: expenseDate,
+      receipt_url: data.receiptUrl || null,
+    })
+    .eq("id", expenseId)
+  
+  if (error) {
+    console.error("Error updating expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
+}
+
+// Delete an expense
+export async function deleteExpense(id: string) {
+  const supabase = await createClient()
+  
+  const { error } = await supabase.from("condo_expenses").delete().eq("id", id)
+  
+  if (error) {
+    console.error("Error deleting expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
 }
 
 export async function getLast12MonthsData(condoId: string) {
@@ -155,24 +249,39 @@ export async function getLast12MonthsData(condoId: string) {
     const month = date.getMonth() + 1
     const monthName = date.toLocaleDateString("es-CL", { month: "short" }).replace(".", "")
     
-    // Get expenses for this month
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    // Get expenses by expense_date from condo_expenses
     const { data: expensesData } = await supabase
       .from("condo_expenses")
       .select("amount")
       .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
     
-    // Get income for this month
-    const { data: incomeData } = await supabase
+    // Get income by period_month/period_year (new way)
+    const { data: incomePeriod } = await supabase
       .from("condo_income")
       .select("amount")
       .eq("condo_id", condoId)
       .eq("period_year", year)
       .eq("period_month", month)
     
-    const totalExpenses = expensesData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
-    const totalIncome = incomeData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0
+    // Fallback to income_date for old entries
+    const { data: incomeDate } = await supabase
+      .from("condo_income")
+      .select("amount")
+      .eq("condo_id", condoId)
+      .is("period_month", null)
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
+    
+    // Combine income sources (avoiding duplicates)
+    const allIncome = [...(incomePeriod || []), ...(incomeDate || [])]
+    
+    const totalExpenses = (expensesData || []).reduce((sum, e) => sum + (e.amount || 0), 0)
+    const totalIncome = allIncome.reduce((sum, e) => sum + (e.amount || 0), 0)
     
     months.push({
       year,
@@ -186,90 +295,4 @@ export async function getLast12MonthsData(condoId: string) {
   return months
 }
 
-export async function updateExpense(
-  expenseId: string,
-  formData: {
-    title: string
-    description: string
-    amount: number
-    expenseDate: string
-    category: string
-    receiptUrl?: string
-    expenseLogoId?: string
-  }
-) {
-  const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-
-  // Verify user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
-    throw new Error("Solo administradores pueden editar gastos")
-  }
-
-  // Get period from expense date
-  const date = new Date(formData.expenseDate)
-  const periodYear = date.getFullYear()
-  const periodMonth = date.getMonth() + 1
-
-  const { error } = await supabase
-    .from("condo_expenses")
-    .update({
-      title: formData.title,
-      description: formData.description,
-      amount: formData.amount,
-      category: formData.category,
-      expense_date: formData.expenseDate,
-      period_year: periodYear,
-      period_month: periodMonth,
-      receipt_url: formData.receiptUrl,
-      expense_logo_id: formData.expenseLogoId || null,
-    })
-    .eq("id", expenseId)
-
-  if (error) {
-    console.error("[v0] Error updating expense:", error)
-    throw new Error(error.message)
-  }
-
-  revalidatePath("/dashboard/gastos")
-  return { success: true }
-}
-
-export async function deleteExpense(expenseId: string) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-
-  // Verify user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
-    throw new Error("Solo administradores pueden eliminar gastos")
-  }
-
-  const { error } = await supabase
-    .from("condo_expenses")
-    .delete()
-    .eq("id", expenseId)
-
-  if (error) {
-    console.error("[v0] Error deleting expense:", error)
-    throw new Error(error.message)
-  }
-
-  revalidatePath("/dashboard/gastos")
-  return { success: true }
-}

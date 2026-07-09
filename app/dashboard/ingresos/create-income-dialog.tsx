@@ -65,12 +65,19 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
         return
       }
 
+      const incomeDate = formData.get("incomeDate") as string
+      if (!incomeDate) {
+        setError("Debes seleccionar una fecha para el ingreso")
+        setLoading(false)
+        return
+      }
+
       const houseId = formData.get("houseId") as string
       await createCondoIncome(condoId, {
         houseId: houseId && houseId !== "none" ? houseId : undefined,
         amount,
         incomeType,
-        incomeDate: (formData.get("incomeDate") as string) || new Date().toISOString().split("T")[0],
+        incomeDate,
         description: (formData.get("description") as string) || undefined,
         receiptUrl: previewUrl || undefined,
       })
@@ -168,12 +175,13 @@ export function CreateIncomeDialog({ condoId, houses }: CreateIncomeDialogProps)
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha</Label>
+                <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso *</Label>
                 <Input
                   id="incomeDate"
                   name="incomeDate"
                   type="date"
-                  defaultValue={new Date().toISOString().split("T")[0]}
+                  required
+                  placeholder="Selecciona la fecha del ingreso"
                   style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                 />
               </div>

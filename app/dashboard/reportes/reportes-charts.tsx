@@ -28,13 +28,19 @@ export function ReportesCharts({
   currencySymbol = "$",
 }: ReportesChartsProps) {
   
-  const formatCurrency = (value: number) => {
+  // Formato abreviado para los ejes del gráfico
+  const formatCurrencyAbbreviated = (value: number) => {
     if (value >= 1000000) {
       return `${currencySymbol}${(value / 1000000).toFixed(1)}M`
     }
     if (value >= 1000) {
       return `${currencySymbol}${(value / 1000).toFixed(0)}K`
     }
+    return `${currencySymbol}${value.toLocaleString("es-CL")}`
+  }
+
+  // Formato completo para los totales
+  const formatCurrencyFull = (value: number) => {
     return `${currencySymbol}${value.toLocaleString("es-CL")}`
   }
 
@@ -61,7 +67,7 @@ export function ReportesCharts({
                 tickLine={false}
               />
               <YAxis 
-                tickFormatter={formatCurrency}
+                tickFormatter={formatCurrencyAbbreviated}
                 tick={{ fontSize: 11, fill: "#6b7280" }}
                 axisLine={false}
                 tickLine={false}
@@ -123,7 +129,7 @@ export function ReportesCharts({
                 {/* Center Total */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">{formatCurrency(totalExpenses)}</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrencyFull(totalExpenses)}</p>
                     <p className="text-lg font-bold">{currencySymbol}{totalExpenses.toLocaleString("es-CL")}</p>
                   </div>
                 </div>
@@ -185,7 +191,7 @@ export function ReportesCharts({
                 {/* Center Total */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">{formatCurrency(totalIncome)}</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrencyFull(totalIncome)}</p>
                     <p className="text-lg font-bold text-green-600">{currencySymbol}{totalIncome.toLocaleString("es-CL")}</p>
                   </div>
                 </div>
@@ -224,16 +230,16 @@ export function ReportesCharts({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
             <p className="text-xs text-muted-foreground mb-1">Total Ingresos</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(totalIncome)}</p>
+            <p className="text-xl font-bold text-green-600">{formatCurrencyFull(totalIncome)}</p>
           </div>
           <div className="text-center p-4 rounded-lg bg-pink-50 dark:bg-pink-950/30">
             <p className="text-xs text-muted-foreground mb-1">Total Gastos</p>
-            <p className="text-xl font-bold text-pink-600">{formatCurrency(totalExpenses)}</p>
+            <p className="text-xl font-bold text-pink-600">{formatCurrencyFull(totalExpenses)}</p>
           </div>
           <div className="text-center p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
             <p className="text-xs text-muted-foreground mb-1">Balance</p>
             <p className={`text-xl font-bold ${totalIncome - totalExpenses >= 0 ? "text-blue-600" : "text-red-600"}`}>
-              {formatCurrency(totalIncome - totalExpenses)}
+              {formatCurrencyFull(totalIncome - totalExpenses)}
             </p>
           </div>
           <div className="text-center p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30">

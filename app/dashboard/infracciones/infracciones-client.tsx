@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction } from "@/app/dashboard/actions"
+import { useState, useTransition } from "react"
+import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction, markInfractionPaidWithIncome } from "@/app/dashboard/actions"
+import { formatCurrency, formatCurrencyNumber } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,9 +18,28 @@ import { Plus, AlertTriangle, CheckCircle, MoreHorizontal, Edit2, Trash2, Circle
 import { useTheme } from "@/app/dashboard/theme-context"
 import { Alert } from "@/components/ui/alert"
 
+interface Infraction {
+  id: string
+  house_id: string
+  description: string
+  fine_amount: number
+  period_month: number
+  period_year: number
+  is_paid: boolean
+  status?: string
+  [key: string]: unknown
+}
+
+interface House {
+  id: string
+  house_number: string
+  owner_name?: string
+  [key: string]: unknown
+}
+
 interface InfraccionesClientProps {
-  infractions: Record<string, unknown>[]
-  houses: Record<string, unknown>[]
+  infractions: Infraction[]
+  houses: House[]
   currencySymbol: string
   isAdmin: boolean
 }
@@ -30,6 +50,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [filter, setFilter] = useState("todas")
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
+  const [paymentOpen, setPaymentOpen] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
   const pendingCount = infractions.filter((i) => !i.is_paid).length
@@ -125,7 +147,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Multas</p>
-            <p className="text-2xl font-bold">{currencySymbol}{totalFines.toLocaleString()}</p>
+            <p className="text-2xl font-bold">{formatCurrency(totalFines, currencySymbol)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -179,7 +201,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((inf) => (
+                  {filtered.map((inf: Infraction) => (
                     <TableRow key={inf.id as string}>
                       <TableCell className="font-medium">
                         {(inf.houses as Record<string, unknown>)?.house_number as string || "?"}
@@ -187,7 +209,7 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                       <TableCell className="text-sm">{inf.infraction_date as string}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm">{inf.description as string}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {inf.fine_amount ? `${currencySymbol}${Number(inf.fine_amount).toLocaleString()}` : "-"}
+                        {inf.fine_amount ? formatCurrency(inf.fine_amount, currencySymbol) : "-"}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -209,8 +231,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="dark:bg-slate-800 dark:text-white">
                               {!inf.is_paid && (
-                                <DropdownMenuItem onClick={() => markInfractionPaid(inf.id as string)} className="dark:focus:bg-slate-700">
-                                  <CheckCircle className="h-4 w-4 mr-2" />Marcar pagada
+                                <DropdownMenuItem onClick={() => setPaymentOpen(inf.id as string)} className="dark:focus:bg-slate-700">
+                                  <CheckCircle className="h-4 w-4 mr-2" />Registrar Pago
                                 </DropdownMenuItem>
                               )}
                               {!inf.is_paid && (
@@ -260,6 +282,54 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                   </div>
                                 </div>
                                 <Button type="submit" className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Guardar Cambios</Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Payment Dialog */}
+                          <Dialog open={paymentOpen === inf.id} onOpenChange={(v) => {
+                            if (!v && !isPending) {
+                              setPaymentOpen(null)
+                            }
+                          }}>
+                            <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
+                              <DialogHeader>
+                                <DialogTitle style={{ color: dialogTextColor }}>Registrar Pago de Multa</DialogTitle>
+                              </DialogHeader>
+                              <form
+                                action={(formData) => {
+                                  startTransition(async () => {
+                                    try {
+                                      await markInfractionPaidWithIncome(formData)
+                                      setPaymentOpen(null)
+                                    } catch (error) {
+                                      console.error("[v0] Error en pago:", error)
+                                    }
+                                  })
+                                }}
+                                className="flex flex-col gap-4"
+                              >
+                                {/* Hidden inputs for IDs */}
+                                <input type="hidden" name="infraction_id" value={inf.id as string} />
+                                <input type="hidden" name="house_id" value={inf.house_id as string} />
+                                
+                                <div className="space-y-2 p-3 bg-muted rounded">
+                                  <p style={{ color: dialogTextColor }}><strong>Descripción:</strong> {inf.description}</p>
+                                  <p style={{ color: dialogTextColor }}><strong>Monto:</strong> {formatCurrency(inf.fine_amount, currencySymbol)}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="flex flex-col gap-2">
+                                    <Label htmlFor="payment_date" style={{ color: dialogTextColor }}>Fecha de Pago</Label>
+                                    <Input id="payment_date" name="paid_date" type="date" defaultValue={new Date().toISOString().split('T')[0]} required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <Label htmlFor="payment_amount" style={{ color: dialogTextColor }}>Monto Recibido ({currencySymbol})</Label>
+                                    <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                  </div>
+                                </div>
+                                <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">
+                                  {isPending ? "Procesando..." : "Confirmar Pago"}
+                                </Button>
                               </form>
                             </DialogContent>
                           </Dialog>

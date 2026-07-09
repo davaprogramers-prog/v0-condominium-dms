@@ -229,14 +229,49 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expenseDate" style={{ color: dialogTextColor }}>Fecha del Gasto</Label>
+              <Label style={{ color: dialogTextColor }}>Mes y Año del Gasto</Label>
+              <div className="flex gap-2">
+                <Select defaultValue={String(new Date().getMonth() + 1).padStart(2, '0')}>
+                  <SelectTrigger name="expenseMonth" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} className="flex-1">
+                    <SelectValue placeholder="Mes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="01">Enero</SelectItem>
+                    <SelectItem value="02">Febrero</SelectItem>
+                    <SelectItem value="03">Marzo</SelectItem>
+                    <SelectItem value="04">Abril</SelectItem>
+                    <SelectItem value="05">Mayo</SelectItem>
+                    <SelectItem value="06">Junio</SelectItem>
+                    <SelectItem value="07">Julio</SelectItem>
+                    <SelectItem value="08">Agosto</SelectItem>
+                    <SelectItem value="09">Septiembre</SelectItem>
+                    <SelectItem value="10">Octubre</SelectItem>
+                    <SelectItem value="11">Noviembre</SelectItem>
+                    <SelectItem value="12">Diciembre</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select defaultValue={String(new Date().getFullYear())}>
+                  <SelectTrigger name="expenseYear" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} className="flex-1">
+                    <SelectValue placeholder="Año" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[2024, 2025, 2026, 2027].map((year) => (
+                      <SelectItem key={year} value={String(year)}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Input
                 id="expenseDate"
                 name="expenseDate"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                className="text-xs"
               />
+              <p style={{ color: dialogTextColor }} className="text-xs opacity-70">Selecciona el mes/año del gasto. El día se usará como referencia.</p>
             </div>
           </div>
 

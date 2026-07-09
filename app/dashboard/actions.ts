@@ -224,12 +224,31 @@ export async function deleteExemptionType(id: string) {
 // ===== Expenses =====
 export async function createExpense(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  
+  // Get month, year, and day from form
+  const month = formData.get("expenseMonth") as string
+  const year = formData.get("expenseYear") as string
+  const dateStr = formData.get("expense_date") as string
+  
+  // Extract day from the date input, fall back to 1st of month
+  const date = dateStr ? new Date(dateStr) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  // Construct expense_date as YYYY-MM-DD
+  const expenseDate = `${year}-${month}-${day}`
+  
+  // Extract month and year as integers for period tracking
+  const periodMonth = parseInt(month)
+  const periodYear = parseInt(year)
+  
   const { error } = await supabase.from("expenses").insert({
     condo_id: condoId,
     expense_type_id: formData.get("expense_type_id") as string,
     description: formData.get("description") as string,
     amount: Number(formData.get("amount")),
-    expense_date: formData.get("expense_date") as string,
+    expense_date: expenseDate,
+    period_month: periodMonth,
+    period_year: periodYear,
     receipt_url: formData.get("receipt_url") as string || null,
     notes: formData.get("notes") as string || null,
     created_by: userId,
@@ -825,6 +844,105 @@ export async function markInfractionPaid(id: string) {
     .eq("id", id)
   if (error) throw error
   revalidatePath("/dashboard/infracciones")
+}
+
+export async function markInfractionPaidWithIncome(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const infractionId = formData.get("infraction_id") as string
+  const houseId = formData.get("house_id") as string
+  const amount = Number(formData.get("amount") || 0)
+  const paidDate = formData.get("paid_date") as string
+
+  if (!infractionId) throw new Error("ID de infracción no proporcionado")
+
+  // Get the infraction details (only columns that exist)
+  const { data: infraction, error: selectError } = await supabase
+    .from("infractions")
+    .select("fine_amount, description, created_at")
+    .eq("id", infractionId)
+    .single()
+
+  if (selectError || !infraction) {
+    throw new Error(`Infracción no encontrada: ${selectError?.message || "No data"}`)
+  }
+
+  // Mark infraction as paid
+  const { error: updateError } = await supabase
+    .from("infractions")
+    .update({ 
+      is_paid: true, 
+      paid_date: paidDate || new Date().toISOString().split("T")[0]
+    })
+    .eq("id", infractionId)
+
+  if (updateError) throw updateError
+
+  // Create income record for the fine payment
+  // Use the payment date or infraction creation date to determine the month/year
+  const dateToUse = paidDate || (infraction.created_at ? infraction.created_at.split("T")[0] : new Date().toISOString().split("T")[0])
+  const dateObj = new Date(dateToUse)
+  const month = dateObj.getMonth() + 1
+  const year = dateObj.getFullYear()
+
+  const { error: incomeError } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: `Multa: ${infraction.description}`,
+      amount: amount || infraction.fine_amount,
+      income_date: paidDate || new Date().toISOString().split("T")[0],
+      period_month: month,
+      period_year: year,
+      income_type: "multa",
+      status: "approved",
+      created_by: userId,
+    })
+
+  if (incomeError) throw incomeError
+
+  revalidatePath("/dashboard/infracciones")
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/reportes")
+  revalidatePath("/dashboard/balance")
+}
+
+export async function createFineIncome(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const houseId = formData.get("house_id") as string
+  const description = formData.get("description") as string
+  const customDescription = formData.get("custom_description") as string
+  const amount = Number(formData.get("amount") || 0)
+  const incomeDate = formData.get("income_date") as string
+  const periodMonth = Number(formData.get("period_month") || new Date().getMonth() + 1)
+  const periodYear = Number(formData.get("period_year") || new Date().getFullYear())
+
+  // Combine description with custom details if provided
+  let finalDescription = description || "Ingreso por multa"
+  if (customDescription?.trim()) {
+    finalDescription = `${finalDescription} - ${customDescription.trim()}`
+  }
+
+  const { error } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: finalDescription,
+      amount,
+      income_date: incomeDate || new Date().toISOString().split("T")[0],
+      period_month: periodMonth,
+      period_year: periodYear,
+      income_type: "multa",
+      status: "approved",
+      created_by: userId,
+    })
+
+  if (error) throw error
+
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/reportes")
+  revalidatePath("/dashboard/balance")
 }
 
 export async function updateInfraction(formData: FormData) {

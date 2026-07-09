@@ -1,13 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { AlertTriangle, DollarSign } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { resolvePeriod } from "@/lib/period"
 import { PeriodAnchor } from "@/components/period-anchor"
+import { IngresoMultasClient } from "./ingresos-multas-client"
 
 export default async function IngresoMultasPage({
   searchParams,
@@ -31,42 +29,30 @@ export default async function IngresoMultasPage({
   const now = new Date()
   const { year, month } = await resolvePeriod(params)
 
-  // Get paid infractions (which are fines income)
-  let finesData: any[] = []
+  // Get all houses for the dropdown
+  let houses: any[] = []
+  if (condoId) {
+    const { data } = await supabase
+      .from("houses")
+      .select("id, house_number, owner_name")
+      .eq("condo_id", condoId)
+      .order("house_number", { ascending: true })
+    houses = data || []
+  }
+
+  // Get currency info
+  const { data: condo } = await supabase
+    .from("condominiums")
+    .select("currency_symbol")
+    .eq("id", condoId)
+    .single()
+  const currencySymbol = condo?.currency_symbol || "$"
+
+  // Get income records of type "multa" from condo_income
+  let incomeRecords: any[] = []
   let totalFines = 0
   let paidCount = 0
 
-  if (condoId) {
-    // Get paid infractions and calculate totals
-    const { data: infractions } = await supabase
-      .from("infractions")
-      .select(`
-        id,
-        fine_amount,
-        is_paid,
-        paid_date,
-        description,
-        houses (house_number, owner_name)
-      `)
-      .eq("condo_id", condoId)
-      .eq("is_paid", true)
-      .order("paid_date", { ascending: false })
-
-    // Filter by month/year if date exists
-    if (infractions) {
-      finesData = infractions.filter(inf => {
-        if (!inf.paid_date) return false
-        const paidDate = new Date(inf.paid_date)
-        return paidDate.getFullYear() === year && (paidDate.getMonth() + 1) === month
-      })
-
-      paidCount = finesData.length
-      totalFines = finesData.reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
-    }
-  }
-
-  // Also get income records of type "multa" for backward compatibility
-  let incomeRecords: any[] = []
   if (condoId) {
     const { data } = await supabase
       .from("condo_income")
@@ -81,11 +67,13 @@ export default async function IngresoMultasPage({
       .order("income_date", { ascending: false })
     
     incomeRecords = data || []
+    paidCount = incomeRecords.length
+    totalFines = incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
   }
 
-  // Combine both sources
-  const allFinesIncome = [...finesData, ...incomeRecords]
-  const combinedTotal = totalFines + incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+  // Use only income records (no need to combine from infractions table)
+  const allFinesIncome = incomeRecords
+  const combinedTotal = totalFines
 
   // Navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -130,76 +118,16 @@ export default async function IngresoMultasPage({
         )}
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Total Multas Pagadas</p>
-            <p className="text-2xl font-bold text-red-600">${combinedTotal.toLocaleString("es-CL")}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Infracciones Pagadas</p>
-            <p className="text-2xl font-bold text-emerald-600">{paidCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Ingresos Registrados</p>
-            <p className="text-2xl font-bold">{incomeRecords.length}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Detalle de Pagos de Multas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {allFinesIncome.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              <AlertTriangle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p>No hay pagos de multas registrados para este mes</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Casa</TableHead>
-                  <TableHead>Residente</TableHead>
-                  <TableHead>Descripcion</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allFinesIncome.map((item, idx) => {
-                  const date = item.paid_date || item.income_date
-                  return (
-                    <TableRow key={`${item.id}-${idx}`}>
-                      <TableCell>
-                        {new Date(date).toLocaleDateString("es-CL")}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">#{item.houses?.house_number}</Badge>
-                      </TableCell>
-                      <TableCell>{item.houses?.owner_name || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {item.description || "Pago de multa"}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold text-red-600">
-                        ${(item.fine_amount || item.amount || 0).toLocaleString("es-CL")}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <IngresoMultasClient
+        incomeRecords={incomeRecords}
+        houses={houses}
+        totalFines={totalFines}
+        paidCount={paidCount}
+        month={month}
+        year={year}
+        isAdmin={isAdmin}
+        currencySymbol={currencySymbol}
+      />
     </div>
   )
 }

@@ -37,12 +37,24 @@ export default async function ReportesPage({
   let income: any[] = []
   let paidIncome: any[] = []
   let last12Months: any[] = []
+  let paidFines: any[] = []
 
   if (condoId) {
     expenses = await getCondoExpenses(condoId, year, month)
     income = await getCondoIncome(condoId, year, month)
     paidIncome = await getPaidCondoIncome(condoId, year, month)
     last12Months = await getLast12MonthsData(condoId)
+    
+    // Get paid fines (infractions) for this period
+    const { data: fines } = await supabase
+      .from("infractions")
+      .select("fine_amount")
+      .eq("condo_id", condoId)
+      .eq("is_paid", true)
+      .gte("paid_date", `${year}-${String(month).padStart(2, '0')}-01`)
+      .lte("paid_date", new Date(year, month, 0).toISOString().split('T')[0])
+    
+    paidFines = fines?.map((f: any) => ({ amount: f.fine_amount })) || []
   }
 
   // Calculate previous and next month for navigation
@@ -55,7 +67,9 @@ export default async function ReportesPage({
   // Calculate totals
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalExpected = income.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Por cobrar
-  const totalCollected = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Recaudado
+  const totalCollected = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0) // Recaudado de gastos comunes
+  const totalCollectedFines = paidFines.reduce((sum, fine) => sum + (fine.amount || 0), 0) // Recaudado de multas
+  const totalIncome = totalCollected + totalCollectedFines // Total recaudado (gastos + multas)
   const totalPending = totalExpected - totalCollected // Pendiente
 
   // Prepare data for charts
@@ -66,7 +80,9 @@ export default async function ReportesPage({
   })
 
   // Use ONLY paid income for the pie chart (not all income)
+  // Include both condo_income (gastos comunes) and payment_proofs (multas)
   const incomeByType: Record<string, number> = {}
+  
   paidIncome.forEach((inc) => {
     let type = "Otros"
     if (inc.income_type === "cuota" || inc.income_type === "gasto_comun" || inc.income_type === "fixed") {
@@ -78,6 +94,11 @@ export default async function ReportesPage({
     }
     incomeByType[type] = (incomeByType[type] || 0) + inc.amount
   })
+  
+  // Add paid fines to the income breakdown
+  if (totalCollectedFines > 0) {
+    incomeByType["Multas"] = (incomeByType["Multas"] || 0) + totalCollectedFines
+  }
 
   const pieExpensesData = Object.entries(expensesByCategory).map(([name, value]) => ({
     name,
@@ -91,7 +112,7 @@ export default async function ReportesPage({
 
   const barData = [
     { nombre: "Por Cobrar", valor: totalExpected, fill: "#3b82f6" },
-    { nombre: "Recaudado", valor: totalCollected, fill: "#22c55e" },
+    { nombre: "Recaudado", valor: totalIncome, fill: "#22c55e" },
     { nombre: "Gastos", valor: totalExpenses, fill: "#ef4444" },
   ]
 
@@ -203,14 +224,14 @@ export default async function ReportesPage({
               })}
             </p>
           </div>
-          <TrendingUp className={`h-10 w-10 opacity-30 ${totalCollected - totalExpenses >= 0 ? "text-green-500" : "text-red-500"}`} />
+          <TrendingUp className={`h-10 w-10 opacity-30 ${totalIncome - totalExpenses >= 0 ? "text-green-500" : "text-red-500"}`} />
         </div>
       </div>
 
       {/* Charts Component */}
       <ReportesCharts 
         totalExpenses={totalExpenses}
-        totalIncome={totalCollected}
+        totalIncome={totalIncome}
         barData={barData}
         pieExpensesData={pieExpensesData}
         pieIncomeData={pieIncomeData}

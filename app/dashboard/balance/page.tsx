@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { getCondoExpenses, getPaidCondoIncome } from "../gastos/actions"
+import { calculateSaldoAnterior, getMonthIncome, getMonthExpenses } from "./actions"
 import { Banknote, TrendingDown, TrendingUp, BarChart3, Wallet, ChevronLeft, ChevronRight } from "lucide-react"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { resolvePeriod } from "@/lib/period"
@@ -41,66 +41,32 @@ export default async function BalancePage({
     parameters = data
   }
 
-  // Get expenses and PAID income only (with approved payment proofs)
+  // Get expenses and income ONLY for this month
   let expenses: any[] = []
   let paidIncome: any[] = []
 
   if (condoId) {
-    expenses = await getCondoExpenses(condoId, year, month)
-    paidIncome = await getPaidCondoIncome(condoId, year, month)
+    expenses = await getMonthExpenses(condoId, year, month)
+    paidIncome = await getMonthIncome(condoId, year, month)
   }
 
-  // Calculate previous balance (saldo anterior)
-  // If this is the first month (same as initial_balance_date), use initial_balance
-  // Otherwise, calculate from all previous months
+  // Calculate saldo anterior dynamically
+  // This sums ALL ingresos and gastos from the start until the END of the previous month
+  // This approach handles payments of previous months made later (e.g., paying March expenses in June)
   let saldoAnterior = 0
   
   if (condoId && parameters?.initial_balance_date) {
     const initialDate = new Date(parameters.initial_balance_date)
-    const initialYear = initialDate.getFullYear()
-    const initialMonth = initialDate.getMonth() + 1
-    
-    // Check if current view is the first month
-    if (year === initialYear && month === initialMonth) {
-      saldoAnterior = parameters.initial_balance || 0
-    } else {
-      // Calculate from initial balance + all months before current
-      saldoAnterior = parameters.initial_balance || 0
-      
-      // Get all PAID income (with approved proofs) and expenses from initial month to previous month
-      const { data: allPaymentProofs } = await supabase
-        .from("payment_proofs")
-        .select("fixed_amount, variable_amount, period_year, period_month")
-        .eq("condo_id", condoId)
-        .eq("status", "approved")
-      
-      const { data: allExpenses } = await supabase
-        .from("condo_expenses")
-        .select("amount, period_year, period_month")
-        .eq("condo_id", condoId)
-      
-      // Sum all PAID income (from approved payment proofs) before current month
-      const paidIncomeBeforeCurrent = (allPaymentProofs || [])
-        .filter((p: any) => {
-          if (p.period_year < year) return true
-          if (p.period_year === year && p.period_month < month) return true
-          return false
-        })
-        .reduce((sum: number, p: any) => sum + (p.fixed_amount || 0) + (p.variable_amount || 0), 0)
-      
-      const expensesBeforeCurrent = (allExpenses || [])
-        .filter((e: any) => {
-          if (e.period_year < year) return true
-          if (e.period_year === year && e.period_month < month) return true
-          return false
-        })
-        .reduce((sum: number, e: any) => sum + (e.amount || 0), 0)
-      
-      saldoAnterior += paidIncomeBeforeCurrent - expensesBeforeCurrent
-    }
+    saldoAnterior = await calculateSaldoAnterior(
+      condoId,
+      year,
+      month,
+      parameters.initial_balance || 0,
+      initialDate
+    )
   }
 
-  // Calculate totals - only PAID income
+  // Calculate totals for THIS month only
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalPaidIncome = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0)
   const balanceDelMes = totalPaidIncome - totalExpenses
@@ -282,26 +248,36 @@ export default async function BalancePage({
         <div className="rounded-lg border bg-card p-6">
           <h2 className="text-lg font-semibold mb-4">Desglose Gastos</h2>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Total Registros de Gastos</span>
-              <span className="font-semibold">{expenses.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Promedio por Gasto</span>
-              <span className="font-semibold">
-                {expenses.length > 0 
-                  ? `$${(totalExpenses / expenses.length).toLocaleString("es-CL", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}`
-                  : "$0"
+            {(() => {
+              // Group expenses by expense_type (category)
+              const expensesByType = expenses.reduce((acc: any, exp: any) => {
+                const typeName = exp.expense_type?.name || exp.category || "Sin categoría"
+                if (!acc[typeName]) {
+                  acc[typeName] = 0
                 }
-              </span>
-            </div>
-            <div className="flex justify-between text-sm pt-2 border-t">
-              <span className="font-medium">Total</span>
-              <span className="font-bold">${totalExpenses.toLocaleString("es-CL")}</span>
-            </div>
+                acc[typeName] += exp.amount || 0
+                return acc
+              }, {})
+
+              return (
+                <>
+                  {Object.entries(expensesByType).map(([typeName, amount]: [string, any]) => (
+                    <div key={typeName} className="flex justify-between text-sm">
+                      <span>{typeName}</span>
+                      <span className="font-semibold text-red-600">${amount.toLocaleString("es-CL")}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between text-sm pt-2 border-t">
+                    <span className="font-medium">Total Registros</span>
+                    <span className="font-semibold">{expenses.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium">Total Gastos</span>
+                    <span className="font-bold">${totalExpenses.toLocaleString("es-CL")}</span>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
       </div>
