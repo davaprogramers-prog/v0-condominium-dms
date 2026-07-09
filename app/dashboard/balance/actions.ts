@@ -23,12 +23,12 @@ export async function calculateSaldoAnterior(
     return initialBalance
   }
 
-  // Get ALL verified ingresos up to end of previous month
+  // Get ALL approved ingresos up to end of previous month
   const { data: allIncome, error: incomeError } = await supabase
     .from("condo_income")
     .select("amount")
     .eq("condo_id", condoId)
-    .eq("status", "verificado")
+    .eq("status", "approved")
     .lte("income_date", endDate)
 
   // Get ALL gastos up to end of previous month
@@ -66,19 +66,19 @@ export async function getMonthIncome(
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-  // Get gastos comunes (verificado = verified/approved)
+  // Get gastos comunes (approved = verified/approved)
   const { data: condoIncomeData, error: condoIncomeError } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .eq("status", "verificado")
+    .eq("status", "approved")
     .gte("income_date", startDate)
     .lte("income_date", endDate)
 
   // Get multas (is_paid = true, within date range)
   const { data: infractionsData, error: infractionsError } = await supabase
     .from("infractions")
-    .select("*, house:houses(id, number)")
+    .select("*")
     .eq("condo_id", condoId)
     .eq("is_paid", true)
     .gte("paid_date", startDate)

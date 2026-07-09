@@ -85,7 +85,7 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
   return data || []
 }
 
-// Get only income that has been paid (status = verificado) for a specific month
+// Get only income that has been paid (status = approved) for a specific month
 export async function getPaidCondoIncome(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
@@ -95,7 +95,7 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
       .from("condo_income")
       .select("*")
       .eq("condo_id", condoId)
-      .eq("status", "verificado")
+      .eq("status", "approved")
       .eq("period_year", year)
       .eq("period_month", month)
       .order("income_date", { ascending: false })
@@ -105,7 +105,7 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
       .from("condo_income")
       .select("*")
       .eq("condo_id", condoId)
-      .eq("status", "verificado")
+      .eq("status", "approved")
       .is("period_month", null)
       .gte("income_date", `${year}-${String(month).padStart(2, '0')}-01`)
       .lte("income_date", new Date(year, month, 0).toISOString().split('T')[0])
@@ -126,12 +126,12 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
     })
   }
 
-  // If no year/month specified, get all verified income
+  // If no year/month specified, get all approved income
   const { data, error } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .eq("status", "verificado")
+    .eq("status", "approved")
     .order("income_date", { ascending: false })
 
   if (error) {
@@ -140,6 +140,91 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
   }
 
   return data || []
+}
+
+// Create a new expense for a condo
+export async function createCondoExpense(formData: FormData) {
+  const supabase = await createClient()
+  
+  // Get the condo_id from the request (assuming it's passed or stored in context)
+  const condoId = formData.get("condo_id") as string
+  const userId = formData.get("user_id") as string
+  
+  // Get month, year, and day from form
+  const month = formData.get("expenseMonth") as string
+  const year = formData.get("expenseYear") as string
+  const dateStr = formData.get("expense_date") as string
+  
+  // Extract day from the date input, fall back to 1st of month
+  const date = dateStr ? new Date(dateStr) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  // Construct expense_date as YYYY-MM-DD
+  const expenseDate = `${year}-${month}-${day}`
+  
+  const { error } = await supabase.from("expenses").insert({
+    condo_id: condoId,
+    expense_type_id: formData.get("expense_type_id") as string,
+    description: formData.get("description") as string,
+    amount: Number(formData.get("amount")),
+    expense_date: expenseDate,
+    receipt_url: formData.get("receipt_url") as string || null,
+    notes: formData.get("notes") as string || null,
+    created_by: userId,
+  })
+  
+  if (error) {
+    console.error("Error creating expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
+}
+
+// Update an existing expense
+export async function updateExpense(formData: FormData) {
+  const supabase = await createClient()
+  
+  const expenseId = formData.get("id") as string
+  const month = formData.get("expenseMonth") as string
+  const year = formData.get("expenseYear") as string
+  const dateStr = formData.get("expense_date") as string
+  
+  const date = dateStr ? new Date(dateStr) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  const expenseDate = `${year}-${month}-${day}`
+  
+  const { error } = await supabase
+    .from("expenses")
+    .update({
+      expense_type_id: formData.get("expense_type_id") as string,
+      description: formData.get("description") as string,
+      amount: Number(formData.get("amount")),
+      expense_date: expenseDate,
+      notes: formData.get("notes") as string || null,
+    })
+    .eq("id", expenseId)
+  
+  if (error) {
+    console.error("Error updating expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
+}
+
+// Delete an expense
+export async function deleteExpense(id: string) {
+  const supabase = await createClient()
+  
+  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  
+  if (error) {
+    console.error("Error deleting expense:", error)
+    throw error
+  }
+  
+  revalidatePath("/dashboard/gastos")
 }
 
 export async function getLast12MonthsData(condoId: string) {
