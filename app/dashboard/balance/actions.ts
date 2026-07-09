@@ -23,21 +23,13 @@ export async function calculateSaldoAnterior(
     return initialBalance
   }
 
-  // Get ALL approved ingresos (gastos comunes) up to end of previous month
+  // Get ALL approved ingresos (includes gastos comunes AND multas) up to end of previous month
   const { data: allIncome, error: incomeError } = await supabase
     .from("condo_income")
     .select("amount")
     .eq("condo_id", condoId)
     .eq("status", "approved")
     .lte("income_date", endDate)
-
-  // Get ALL multas (infractions paid) up to end of previous month
-  const { data: allInfractions, error: infractionsError } = await supabase
-    .from("infractions")
-    .select("fine_amount")
-    .eq("condo_id", condoId)
-    .eq("is_paid", true)
-    .lte("paid_date", endDate)
 
   // Get ALL gastos up to end of previous month
   const { data: allExpenses, error: expensesError } = await supabase
@@ -51,21 +43,15 @@ export async function calculateSaldoAnterior(
     throw new Error(incomeError.message)
   }
 
-  if (infractionsError) {
-    console.error("[v0] Error fetching infractions for saldo anterior:", infractionsError)
-    throw new Error(infractionsError.message)
-  }
-
   if (expensesError) {
     console.error("[v0] Error fetching expenses for saldo anterior:", expensesError)
     throw new Error(expensesError.message)
   }
 
   const totalIncome = (allIncome || []).reduce((sum, inc) => sum + (inc.amount || 0), 0)
-  const totalInfractions = (allInfractions || []).reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
   const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
 
-  return initialBalance + totalIncome + totalInfractions - totalExpenses
+  return initialBalance + totalIncome - totalExpenses
 }
 
 // Get all ingresos for a specific month (filter by income_date)
