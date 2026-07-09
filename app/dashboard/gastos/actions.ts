@@ -10,7 +10,7 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
 
   let query = supabase
     .from("condo_expenses")
-    .select("*")
+    .select("*, expense_logos(id, name, logo_url)")
     .eq("condo_id", condoId)
 
   if (year && month) {
@@ -183,6 +183,7 @@ export async function createCondoExpense(
     period_year: periodYear,
     period_month: periodMonth,
     receipt_url: data.receiptUrl || null,
+    expense_logo_id: data.expenseLogoId || null,
   }
 
   console.log("[v0] createCondoExpense inserting data:", insertData)
