@@ -38,6 +38,14 @@ export async function calculateSaldoAnterior(
     .eq("condo_id", condoId)
     .lte("expense_date", endDate)
 
+  // Get ALL multas (infractions paid) up to end of previous month
+  const { data: allInfractions, error: infractionsError } = await supabase
+    .from("infractions")
+    .select("amount")
+    .eq("condo_id", condoId)
+    .eq("is_paid", true)
+    .lte("paid_date", endDate)
+
   if (incomeError) {
     console.error("[v0] Error fetching income for saldo anterior:", incomeError)
     throw new Error(incomeError.message)
@@ -48,10 +56,16 @@ export async function calculateSaldoAnterior(
     throw new Error(expensesError.message)
   }
 
+  if (infractionsError) {
+    console.error("[v0] Error fetching infractions for saldo anterior:", infractionsError)
+    throw new Error(infractionsError.message)
+  }
+
   const totalIncome = (allIncome || []).reduce((sum, inc) => sum + (inc.amount || 0), 0)
   const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
+  const totalInfractions = (allInfractions || []).reduce((sum, inf) => sum + (inf.amount || 0), 0)
 
-  return initialBalance + totalIncome - totalExpenses
+  return initialBalance + totalIncome + totalInfractions - totalExpenses
 }
 
 // Get all ingresos for a specific month (filter by income_date)
