@@ -8,46 +8,21 @@ import { revalidatePath } from "next/cache"
 export async function getCondoExpenses(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  if (year && month) {
-    // First, try by period_month/period_year (primary method)
-    const { data: periodData, error: periodError } = await supabase
-      .from("expenses")
-      .select("*, expense_type:expense_types(id, name)")
-      .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
-      .order("expense_date", { ascending: false })
-
-    if (!periodError && periodData) {
-      return periodData
-    }
-
-    // Fallback to expense_date if period method fails
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    
-    const { data: dateData, error: dateError } = await supabase
-      .from("expenses")
-      .select("*, expense_type:expense_types(id, name)")
-      .eq("condo_id", condoId)
-      .gte("expense_date", startDate)
-      .lte("expense_date", endDate)
-      .order("expense_date", { ascending: false })
-
-    if (dateError) {
-      console.error("Error fetching expenses:", dateError)
-      return []
-    }
-
-    return dateData || []
-  }
-
-  // If no year/month specified, get all expenses
-  const { data, error } = await supabase
+  let query = supabase
     .from("expenses")
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
-    .order("expense_date", { ascending: false })
+
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
+  }
+
+  const { data, error } = await query.order("expense_date", { ascending: false })
 
   if (error) {
     console.error("Error fetching expenses:", error)
@@ -189,26 +164,13 @@ export async function createCondoExpense(
     throw new Error("User not authenticated")
   }
   
-  // Build expense_date from month/year/date or use provided date
-  let expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
-  let periodMonth: number | null = null
-  let periodYear: number | null = null
-  
-  if (data.expenseMonth && data.expenseYear) {
-    const dateObj = data.expenseDate ? new Date(data.expenseDate) : new Date()
-    const day = String(dateObj.getDate()).padStart(2, '0')
-    expenseDate = `${data.expenseYear}-${data.expenseMonth}-${day}`
-    periodMonth = parseInt(data.expenseMonth)
-    periodYear = parseInt(data.expenseYear)
-  }
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
   const { error } = await supabase.from("expenses").insert({
     condo_id: condoId,
     description: data.description,
     amount: data.amount,
     expense_date: expenseDate,
-    period_month: periodMonth,
-    period_year: periodYear,
     receipt_url: data.receiptUrl || null,
     notes: data.title || null,
     created_by: user.id,
@@ -239,18 +201,7 @@ export async function updateExpense(
 ) {
   const supabase = await createClient()
   
-  // Build expense_date from month/year/date or use provided date
-  let expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
-  let periodMonth: number | null = null
-  let periodYear: number | null = null
-  
-  if (data.expenseMonth && data.expenseYear) {
-    const dateObj = data.expenseDate ? new Date(data.expenseDate) : new Date()
-    const day = String(dateObj.getDate()).padStart(2, '0')
-    expenseDate = `${data.expenseYear}-${data.expenseMonth}-${day}`
-    periodMonth = parseInt(data.expenseMonth)
-    periodYear = parseInt(data.expenseYear)
-  }
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
   const { error } = await supabase
     .from("expenses")
@@ -258,8 +209,6 @@ export async function updateExpense(
       description: data.description,
       amount: data.amount,
       expense_date: expenseDate,
-      period_month: periodMonth,
-      period_year: periodYear,
       receipt_url: data.receiptUrl || null,
       notes: data.title || null,
     })
@@ -299,27 +248,16 @@ export async function getLast12MonthsData(condoId: string) {
     const month = date.getMonth() + 1
     const monthName = date.toLocaleDateString("es-CL", { month: "short" }).replace(".", "")
     
-    // Get expenses by period_month/period_year (primary method)
-    const { data: expensesPeriod } = await supabase
-      .from("expenses")
-      .select("amount")
-      .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
-    
-    // Fallback to expense_date if period method fails
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
     
-    const { data: expensesDate } = await supabase
+    // Get expenses by expense_date
+    const { data: expensesData } = await supabase
       .from("expenses")
       .select("amount")
       .eq("condo_id", condoId)
       .gte("expense_date", startDate)
       .lte("expense_date", endDate)
-    
-    // Combine and remove duplicates
-    const expensesData = [...(expensesPeriod || []), ...(expensesDate || [])]
     
     // Get income by period_month/period_year (new way)
     const { data: incomePeriod } = await supabase
