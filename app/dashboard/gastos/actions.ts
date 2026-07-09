@@ -143,34 +143,35 @@ export async function getPaidCondoIncome(condoId: string, year?: number, month?:
 }
 
 // Create a new expense for a condo
-export async function createCondoExpense(formData: FormData) {
+export async function createCondoExpense(
+  condoId: string,
+  data: {
+    title?: string
+    description: string
+    amount: number
+    category?: string
+    expenseDate?: string
+    receiptUrl?: string
+    expenseLogoId?: string
+  }
+) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
-  // Get the condo_id from the request (assuming it's passed or stored in context)
-  const condoId = formData.get("condo_id") as string
-  const userId = formData.get("user_id") as string
+  if (!user) {
+    throw new Error("User not authenticated")
+  }
   
-  // Get month, year, and day from form
-  const month = formData.get("expenseMonth") as string
-  const year = formData.get("expenseYear") as string
-  const dateStr = formData.get("expense_date") as string
-  
-  // Extract day from the date input, fall back to 1st of month
-  const date = dateStr ? new Date(dateStr) : new Date()
-  const day = String(date.getDate()).padStart(2, '0')
-  
-  // Construct expense_date as YYYY-MM-DD
-  const expenseDate = `${year}-${month}-${day}`
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
   const { error } = await supabase.from("expenses").insert({
     condo_id: condoId,
-    expense_type_id: formData.get("expense_type_id") as string,
-    description: formData.get("description") as string,
-    amount: Number(formData.get("amount")),
+    description: data.description,
+    amount: data.amount,
     expense_date: expenseDate,
-    receipt_url: formData.get("receipt_url") as string || null,
-    notes: formData.get("notes") as string || null,
-    created_by: userId,
+    receipt_url: data.receiptUrl || null,
+    notes: data.title || null,
+    created_by: user.id,
   })
   
   if (error) {
