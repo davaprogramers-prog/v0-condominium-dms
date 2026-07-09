@@ -82,6 +82,7 @@ const iconColorMap: Record<string, string> = {
   "ingreso-variable": "#A855F7", // Púrpura
   "ingresos-multas": "#F59E0B", // Ámbar
   "cartolas": "#0EA5E9",       // Sky blue
+  "deudas-consolidadas": "#E11D48", // Rojo oscuro
   
   // Regulaciones
   "infracciones": "#EF4444",   // Rojo alerta
@@ -144,6 +145,7 @@ const adminMenuItems = [
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
+      { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
@@ -217,6 +219,7 @@ const adminWithPropertyMenuItems = [
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
+      { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
