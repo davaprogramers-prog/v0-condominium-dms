@@ -47,8 +47,29 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [expenseLogos, setExpenseLogos] = useState<ExpenseLogo[]>([])
   const [selectedLogoId, setSelectedLogoId] = useState<string>("")
+  const [expenseMonth, setExpenseMonth] = useState(String(new Date().getMonth() + 1).padStart(2, '0'))
+  const [expenseYear, setExpenseYear] = useState(String(new Date().getFullYear()))
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0])
   const router = useRouter()
   const { dialogBgColor, dialogTextColor, inputBgColor, inputTextColor } = useTheme()
+
+  // Sincronizar: cuando cambien mes o año, actualizar la fecha
+  useEffect(() => {
+    const day = new Date(expenseDate).getDate()
+    const newDate = new Date(Number(expenseYear), Number(expenseMonth) - 1, day)
+    setExpenseDate(newDate.toISOString().split("T")[0])
+  }, [expenseMonth, expenseYear])
+
+  // Sincronizar: cuando cambie la fecha, actualizar mes y año
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateStr = e.target.value
+    setExpenseDate(dateStr)
+    if (dateStr) {
+      const date = new Date(dateStr)
+      setExpenseMonth(String(date.getMonth() + 1).padStart(2, '0'))
+      setExpenseYear(String(date.getFullYear()))
+    }
+  }
 
   useEffect(() => {
     async function loadLogos() {
@@ -231,7 +252,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             <div className="space-y-2">
               <Label style={{ color: dialogTextColor }}>Mes y Año del Gasto</Label>
               <div className="flex gap-2">
-                <Select name="expenseMonth" defaultValue={String(new Date().getMonth() + 1).padStart(2, '0')}>
+                <Select name="expenseMonth" value={expenseMonth} onValueChange={setExpenseMonth}>
                   <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} className="flex-1">
                     <SelectValue placeholder="Mes" />
                   </SelectTrigger>
@@ -250,7 +271,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                     <SelectItem value="12">Diciembre</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select name="expenseYear" defaultValue={String(new Date().getFullYear())}>
+                <Select name="expenseYear" value={expenseYear} onValueChange={setExpenseYear}>
                   <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} className="flex-1">
                     <SelectValue placeholder="Año" />
                   </SelectTrigger>
@@ -267,11 +288,12 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
                 id="expenseDate"
                 name="expenseDate"
                 type="date"
-                defaultValue={new Date().toISOString().split("T")[0]}
+                value={expenseDate}
+                onChange={handleDateChange}
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
                 className="text-xs"
               />
-              <p style={{ color: dialogTextColor }} className="text-xs opacity-70">Selecciona el mes/año del gasto. El día se usará como referencia.</p>
+              <p style={{ color: dialogTextColor }} className="text-xs opacity-70">Cambiar el mes/año o la fecha sincroniza automáticamente todos los campos.</p>
             </div>
           </div>
 
