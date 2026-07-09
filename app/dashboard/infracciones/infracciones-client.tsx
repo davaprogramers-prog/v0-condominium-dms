@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction, markInfractionPaidWithIncome } from "@/app/dashboard/actions"
+import { createInfraction, markInfractionPaid, updateInfraction, deleteInfraction, markInfractionPaidWithIncome, payInfractionInstallment } from "@/app/dashboard/actions"
 import { formatCurrency, formatCurrencyNumber } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -58,6 +58,8 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [currency, setCurrency] = useState("CLP")
   const [paymentType, setPaymentType] = useState("complete")
   const [ufValue, setUfValue] = useState("")
+  const [paymentAmount, setPaymentAmount] = useState("")
+  const [paymentUFValue, setPaymentUFValue] = useState("")
   const [isPending, startTransition] = useTransition()
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
@@ -358,18 +360,36 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                           <Dialog open={paymentOpen === inf.id} onOpenChange={(v) => {
                             if (!v && !isPending) {
                               setPaymentOpen(null)
+                              setPaymentAmount("")
+                              setPaymentUFValue("")
                             }
                           }}>
                             <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
                               <DialogHeader>
-                                <DialogTitle style={{ color: dialogTextColor }}>Registrar Pago de Multa</DialogTitle>
+                                <DialogTitle style={{ color: dialogTextColor }}>
+                                  {inf.payment_status === "complete" ? "Registrar Pago Completo" : "Pagar Cuota"}
+                                </DialogTitle>
                               </DialogHeader>
                               <form
                                 action={(formData) => {
                                   startTransition(async () => {
                                     try {
-                                      await markInfractionPaidWithIncome(formData)
+                                      // Add UF value to form if it's a UF multa
+                                      if (inf.currency === "UF" && paymentUFValue) {
+                                        formData.set("uf_value_at_payment", paymentUFValue)
+                                      }
+                                      
+                                      // Use appropriate action based on multa type
+                                      if (inf.payment_status === "pending" || inf.payment_status === "partial") {
+                                        // New installment flow for multas en cuotas
+                                        await payInfractionInstallment(formData)
+                                      } else {
+                                        // Old flow for backward compatibility
+                                        await markInfractionPaidWithIncome(formData)
+                                      }
                                       setPaymentOpen(null)
+                                      setPaymentAmount("")
+                                      setPaymentUFValue("")
                                     } catch (error) {
                                       console.error("[v0] Error en pago:", error)
                                     }
@@ -380,22 +400,76 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                                 {/* Hidden inputs for IDs */}
                                 <input type="hidden" name="infraction_id" value={inf.id as string} />
                                 <input type="hidden" name="house_id" value={inf.house_id as string} />
+                                <input type="hidden" name="currency" value={inf.currency || "CLP"} />
                                 
                                 <div className="space-y-2 p-3 bg-muted rounded">
                                   <p style={{ color: dialogTextColor }}><strong>Descripción:</strong> {inf.description}</p>
-                                  <p style={{ color: dialogTextColor }}><strong>Monto:</strong> {formatCurrency(inf.fine_amount, currencySymbol)}</p>
+                                  <p style={{ color: dialogTextColor }}>
+                                    <strong>Moneda:</strong> {inf.currency === "UF" ? "UF" : currencySymbol}
+                                  </p>
+                                  <p style={{ color: dialogTextColor }}>
+                                    <strong>Monto Original:</strong> {inf.currency === "UF" ? `${inf.fine_amount} UF` : formatCurrency(inf.fine_amount, currencySymbol)}
+                                  </p>
+                                  {inf.amount_pending && (
+                                    <p style={{ color: dialogTextColor }}>
+                                      <strong>Saldo Pendiente:</strong> {inf.currency === "UF" ? `${inf.amount_pending} UF` : formatCurrency(inf.amount_pending, currencySymbol)}
+                                    </p>
+                                  )}
                                 </div>
+
+                                {/* If multa is in UF, show UF value input */}
+                                {inf.currency === "UF" && (
+                                  <div className="flex flex-col gap-2">
+                                    <Label htmlFor="uf_value_payment" style={{ color: dialogTextColor }}>Valor UF Actual ({currencySymbol})</Label>
+                                    <Input 
+                                      id="uf_value_payment" 
+                                      type="number" 
+                                      step="0.01" 
+                                      placeholder="Ej: 40340" 
+                                      value={paymentUFValue}
+                                      onChange={(e) => setPaymentUFValue(e.target.value)}
+                                      disabled={isPending}
+                                      style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} 
+                                    />
+                                  </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="flex flex-col gap-2">
                                     <Label htmlFor="payment_date" style={{ color: dialogTextColor }}>Fecha de Pago</Label>
                                     <Input id="payment_date" name="paid_date" type="date" defaultValue={new Date().toISOString().split('T')[0]} required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                                   </div>
                                   <div className="flex flex-col gap-2">
-                                    <Label htmlFor="payment_amount" style={{ color: dialogTextColor }}>Monto Recibido ({currencySymbol})</Label>
-                                    <Input id="payment_amount" name="amount" type="number" step="0.01" defaultValue={Number(inf.fine_amount || 0)} min="0" required disabled={isPending} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                                    <Label htmlFor="payment_amount" style={{ color: dialogTextColor }}>
+                                      {inf.currency === "UF" ? "Cuota (UF)" : `Monto Recibido (${currencySymbol})`}
+                                    </Label>
+                                    <Input 
+                                      id="payment_amount" 
+                                      name="amount" 
+                                      type="number" 
+                                      step="0.01" 
+                                      value={paymentAmount}
+                                      onChange={(e) => setPaymentAmount(e.target.value)}
+                                      min="0" 
+                                      max={inf.amount_pending || inf.fine_amount}
+                                      required 
+                                      disabled={isPending}
+                                      placeholder={inf.currency === "UF" ? "0.00 UF" : "0.00"}
+                                      style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} 
+                                    />
                                   </div>
                                 </div>
-                                <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">
+
+                                {/* Show CLP equivalent if UF */}
+                                {inf.currency === "UF" && paymentAmount && paymentUFValue && (
+                                  <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                                    <p style={{ color: dialogTextColor }} className="text-sm">
+                                      <strong>Equivalente CLP:</strong> {formatCurrency(Number(paymentAmount) * Number(paymentUFValue), currencySymbol)}
+                                    </p>
+                                  </div>
+                                )}
+
+                                <Button type="submit" disabled={isPending || !paymentAmount} className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">
                                   {isPending ? "Procesando..." : "Confirmar Pago"}
                                 </Button>
                               </form>

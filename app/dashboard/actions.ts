@@ -854,6 +854,86 @@ export async function markInfractionPaid(id: string) {
   revalidatePath("/dashboard/infracciones")
 }
 
+export async function payInfractionInstallment(formData: FormData) {
+  const { supabase, userId, condoId } = await getCondoId()
+  const infractionId = formData.get("infraction_id") as string
+  const houseId = formData.get("house_id") as string
+  const amount = Number(formData.get("amount") || 0)
+  const paidDate = formData.get("paid_date") as string
+  const currency = formData.get("currency") as string
+  const ufValueAtPayment = currency === "UF" ? Number(formData.get("uf_value_at_payment") || 0) : null
+
+  if (!infractionId) throw new Error("ID de infracción no proporcionado")
+  if (amount <= 0) throw new Error("El monto debe ser mayor a 0")
+
+  // Get infraction details
+  const { data: infraction, error: selectError } = await supabase
+    .from("infractions")
+    .select("fine_amount, description, amount_pending, payment_status, currency")
+    .eq("id", infractionId)
+    .single()
+
+  if (selectError || !infraction) {
+    throw new Error(`Infracción no encontrada: ${selectError?.message || "No data"}`)
+  }
+
+  // Calculate new pending amount
+  const newPending = Math.max(0, (infraction.amount_pending || 0) - amount)
+  const newStatus = newPending === 0 ? "complete" : "partial"
+
+  // Create condo_income record
+  const amountInCLP = currency === "UF" ? amount * (ufValueAtPayment || 0) : amount
+  
+  const { data: incomeRecord, error: incomeError } = await supabase
+    .from("condo_income")
+    .insert({
+      condo_id: condoId,
+      house_id: houseId,
+      description: `Pago de cuota: ${infraction.description}`,
+      amount: amountInCLP,
+      income_date: paidDate,
+      income_type: "fine",
+      period_year: new Date().getFullYear(),
+      period_month: new Date().getMonth() + 1,
+      created_by: userId,
+    })
+    .select()
+    .single()
+
+  if (incomeError) throw incomeError
+
+  // Create fine_payment record
+  const { error: paymentError } = await supabase
+    .from("fine_payments")
+    .insert({
+      infraction_id: infractionId,
+      condo_income_id: incomeRecord.id,
+      amount_paid: amount,
+      currency: currency,
+      uf_value_at_payment: ufValueAtPayment,
+      payment_date: paidDate,
+      notes: `Cuota pagada - Saldo restante: ${newPending} ${currency}`,
+      created_by: userId,
+    })
+
+  if (paymentError) throw paymentError
+
+  // Update infraction with new pending amount and status
+  const { error: updateError } = await supabase
+    .from("infractions")
+    .update({
+      amount_pending: newPending,
+      payment_status: newStatus,
+      is_paid: newStatus === "complete",
+    })
+    .eq("id", infractionId)
+
+  if (updateError) throw updateError
+
+  revalidatePath("/dashboard/infracciones")
+  revalidatePath("/dashboard/mi-casa")
+}
+
 export async function markInfractionPaidWithIncome(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
   const infractionId = formData.get("infraction_id") as string
