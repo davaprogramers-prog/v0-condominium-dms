@@ -64,9 +64,16 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
         return
       }
 
+      const incomeDate = formData.get("incomeDate") as string
+      if (!incomeDate) {
+        setError("Debes seleccionar una fecha para el ingreso")
+        setLoading(false)
+        return
+      }
+
       await updateIncome(income.id, {
         amount,
-        incomeDate: (formData.get("incomeDate") as string),
+        incomeDate,
         description: (formData.get("description") as string) || undefined,
         receiptUrl: previewUrl || undefined,
       })
@@ -139,11 +146,12 @@ export function EditIncomeDialog({ income, houses }: EditIncomeDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso</Label>
+              <Label htmlFor="incomeDate" style={{ color: dialogTextColor }}>Fecha del Ingreso *</Label>
               <Input
                 id="incomeDate"
                 name="incomeDate"
                 type="date"
+                required
                 defaultValue={new Date(income.income_date).toISOString().split("T")[0]}
                 style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
               />
