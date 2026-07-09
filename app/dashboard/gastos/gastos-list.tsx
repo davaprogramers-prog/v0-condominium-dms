@@ -86,13 +86,14 @@ export function GastosList({ expenses, categories, isAdmin, currentYear, current
           >
             {/* Icon or Logo */}
             <div className="flex-shrink-0 w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-              {expense.expense_logo?.logo_url ? (
+              {expense.expense_logos?.logo_url ? (
                 <Image
-                  src={expense.expense_logo.logo_url}
-                  alt={expense.expense_logo.name || "Logo"}
+                  src={expense.expense_logos.logo_url}
+                  alt={expense.expense_logos.name || "Logo"}
                   width={48}
                   height={48}
                   className="w-full h-full object-cover"
+                  unoptimized
                 />
               ) : (
                 <Icon className="h-6 w-6 text-muted-foreground" />
