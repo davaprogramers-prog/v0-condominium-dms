@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { useTheme } from "@/app/dashboard/theme-context"
 import { createFineIncome, updateFineIncome, deleteFineIncome } from "@/app/dashboard/actions"
+import { FormattedDate } from "@/app/dashboard/usuarios/formatted-date"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -247,7 +248,7 @@ export function IngresoMultasClient({
                   return (
                     <TableRow key={`${item.id}-${idx}`}>
                       <TableCell>
-                        {new Date(date).toLocaleDateString("es-CL")}
+                        <FormattedDate dateString={date} />
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">#{item.houses?.house_number}</Badge>
