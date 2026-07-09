@@ -166,7 +166,7 @@ export async function createCondoExpense(
   
   const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
-  const { error } = await supabase.from("condo_expenses").insert({
+  const insertData = {
     condo_id: condoId,
     title: data.title || null,
     description: data.description,
@@ -174,7 +174,11 @@ export async function createCondoExpense(
     category: data.category || null,
     expense_date: expenseDate,
     receipt_url: data.receiptUrl || null,
-  })
+  }
+
+  console.log("[v0] createCondoExpense inserting data:", insertData)
+  
+  const { error } = await supabase.from("condo_expenses").insert(insertData)
   
   if (error) {
     console.error("Error creating expense:", error)
