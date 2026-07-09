@@ -118,7 +118,7 @@ export default async function ConfiguracionPage() {
                 </div>
                 <div>
                   <p style={{ color: cardTextColor, opacity: 0.7 }}>Creado</p>
-                  <p className="font-medium" style={{ color: cardTextColor }}>{new Date(condo.created_at).toLocaleDateString("es-CL")}</p>
+                  <p className="font-medium" style={{ color: cardTextColor }} suppressHydrationWarning>{new Date(condo.created_at).toLocaleDateString("es-CL")}</p>
                 </div>
               </div>
             ) : (

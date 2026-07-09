@@ -103,7 +103,7 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
                     {/* Fecha de Registro */}
                     <div>
                       <p className="text-xs font-medium uppercase opacity-75">Fecha Registro</p>
-                      <p className="font-semibold" style={{ color: cardTextColor }}>
+                      <p className="font-semibold" style={{ color: cardTextColor }} suppressHydrationWarning>
                         {new Date(u.created_at).toLocaleDateString("es-CL")}
                       </p>
                     </div>

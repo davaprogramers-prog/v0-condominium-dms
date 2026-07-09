@@ -220,7 +220,7 @@ export function SuperAdminDashboard({ userEmail }: { userEmail: string }) {
 
                     {condo.created_at && (
                       <div className="text-xs text-slate-500">
-                        <p>Creado: {new Date(condo.created_at).toLocaleDateString("es-CL")}</p>
+                        <p suppressHydrationWarning>Creado: {new Date(condo.created_at).toLocaleDateString("es-CL")}</p>
                       </div>
                     )}
 
