@@ -8,50 +8,21 @@ import { revalidatePath } from "next/cache"
 export async function getCondoExpenses(condoId: string, year?: number, month?: number) {
   const supabase = await createClient()
 
-  if (year && month) {
-    // First, try to get by period_month/period_year (new way)
-    const { data: periodData, error: periodError } = await supabase
-      .from("expenses")
-      .select("*, expense_type:expense_types(id, name)")
-      .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
-      .order("expense_date", { ascending: false })
-
-    // Also get by expense_date (fallback for old entries)
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    
-    const { data: dateData, error: dateError } = await supabase
-      .from("expenses")
-      .select("*, expense_type:expense_types(id, name)")
-      .eq("condo_id", condoId)
-      .is("period_month", null)
-      .gte("expense_date", startDate)
-      .lte("expense_date", endDate)
-      .order("expense_date", { ascending: false })
-
-    if (periodError && dateError) {
-      console.error("Error fetching expenses:", periodError || dateError)
-      return []
-    }
-
-    // Combine and remove duplicates
-    const allData = [...(periodData || []), ...(dateData || [])]
-    const seen = new Set()
-    return allData.filter((exp: any) => {
-      if (seen.has(exp.id)) return false
-      seen.add(exp.id)
-      return true
-    })
-  }
-
-  // If no year/month specified, get all expenses
-  const { data, error } = await supabase
+  let query = supabase
     .from("expenses")
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
-    .order("expense_date", { ascending: false })
+
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    query = query
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
+  }
+
+  const { data, error } = await query.order("expense_date", { ascending: false })
 
   if (error) {
     console.error("Error fetching expenses:", error)
@@ -306,25 +277,13 @@ export async function getLast12MonthsData(condoId: string) {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
     
-    // Get expenses by period_month/period_year (new way)
-    const { data: expensesPeriod } = await supabase
+    // Get expenses by expense_date
+    const { data: expensesData } = await supabase
       .from("expenses")
       .select("amount")
       .eq("condo_id", condoId)
-      .eq("period_year", year)
-      .eq("period_month", month)
-    
-    // Fallback to expense_date for old entries
-    const { data: expensesDate } = await supabase
-      .from("expenses")
-      .select("amount")
-      .eq("condo_id", condoId)
-      .is("period_month", null)
       .gte("expense_date", startDate)
       .lte("expense_date", endDate)
-    
-    // Combine expenses (avoiding duplicates)
-    const allExpenses = [...(expensesPeriod || []), ...(expensesDate || [])]
     
     // Get income by period_month/period_year (new way)
     const { data: incomePeriod } = await supabase
@@ -346,7 +305,7 @@ export async function getLast12MonthsData(condoId: string) {
     // Combine income sources (avoiding duplicates)
     const allIncome = [...(incomePeriod || []), ...(incomeDate || [])]
     
-    const totalExpenses = allExpenses.reduce((sum, e) => sum + (e.amount || 0), 0)
+    const totalExpenses = (expensesData || []).reduce((sum, e) => sum + (e.amount || 0), 0)
     const totalIncome = allIncome.reduce((sum, e) => sum + (e.amount || 0), 0)
     
     months.push({
