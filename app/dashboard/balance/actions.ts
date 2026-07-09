@@ -23,20 +23,13 @@ export async function calculateSaldoAnterior(
     return initialBalance
   }
 
-  // Get ALL approved ingresos up to end of previous month
+  // Get ALL approved ingresos (gastos comunes) up to end of previous month
   const { data: allIncome, error: incomeError } = await supabase
     .from("condo_income")
     .select("amount")
     .eq("condo_id", condoId)
     .eq("status", "approved")
     .lte("income_date", endDate)
-
-  // Get ALL gastos up to end of previous month
-  const { data: allExpenses, error: expensesError } = await supabase
-    .from("condo_expenses")
-    .select("amount")
-    .eq("condo_id", condoId)
-    .lte("expense_date", endDate)
 
   // Get ALL multas (infractions paid) up to end of previous month
   const { data: allInfractions, error: infractionsError } = await supabase
@@ -46,14 +39,16 @@ export async function calculateSaldoAnterior(
     .eq("is_paid", true)
     .lte("paid_date", endDate)
 
+  // Get ALL gastos up to end of previous month
+  const { data: allExpenses, error: expensesError } = await supabase
+    .from("condo_expenses")
+    .select("amount")
+    .eq("condo_id", condoId)
+    .lte("expense_date", endDate)
+
   if (incomeError) {
     console.error("[v0] Error fetching income for saldo anterior:", incomeError)
     throw new Error(incomeError.message)
-  }
-
-  if (expensesError) {
-    console.error("[v0] Error fetching expenses for saldo anterior:", expensesError)
-    throw new Error(expensesError.message)
   }
 
   if (infractionsError) {
@@ -61,9 +56,14 @@ export async function calculateSaldoAnterior(
     throw new Error(infractionsError.message)
   }
 
+  if (expensesError) {
+    console.error("[v0] Error fetching expenses for saldo anterior:", expensesError)
+    throw new Error(expensesError.message)
+  }
+
   const totalIncome = (allIncome || []).reduce((sum, inc) => sum + (inc.amount || 0), 0)
-  const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalInfractions = (allInfractions || []).reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
+  const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
 
   return initialBalance + totalIncome + totalInfractions - totalExpenses
 }
