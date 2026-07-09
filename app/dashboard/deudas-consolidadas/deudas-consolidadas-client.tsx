@@ -239,7 +239,7 @@ export function DeudasConsolidadasClient({
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8" style={{ color: theme.text_color, opacity: 0.6 }}>
+                      <TableCell colSpan={8} className="text-center py-8" style={{ color: theme.card_text_color, opacity: 0.6 }}>
                         No se encontraron resultados
                       </TableCell>
                     </TableRow>
