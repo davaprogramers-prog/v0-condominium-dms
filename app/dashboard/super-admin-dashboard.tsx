@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Plus, Building2, MoreVertical, Trash2, Edit, LogIn, Eye, Users } from "lucide-react"
+import { FormattedDate } from "./usuarios/formatted-date"
 import {
   Dialog,
   DialogContent,
@@ -220,7 +221,7 @@ export function SuperAdminDashboard({ userEmail }: { userEmail: string }) {
 
                     {condo.created_at && (
                       <div className="text-xs text-slate-500">
-                        <p>Creado: {new Date(condo.created_at).toLocaleDateString()}</p>
+                        <p>Creado: <FormattedDate dateString={condo.created_at} /></p>
                       </div>
                     )}
 

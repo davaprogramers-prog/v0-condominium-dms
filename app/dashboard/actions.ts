@@ -945,6 +945,43 @@ export async function createFineIncome(formData: FormData) {
   revalidatePath("/dashboard/balance")
 }
 
+export async function updateFineIncome(formData: FormData) {
+  const { supabase } = await getCondoId()
+  const id = formData.get("id") as string
+  const amount = formData.get("amount") as string
+  const description = formData.get("description") as string
+  const income_date = formData.get("income_date") as string
+
+  if (!id) throw new Error("ID es requerido")
+  if (!amount) throw new Error("El monto es requerido")
+  if (!income_date) throw new Error("La fecha es requerida")
+
+  const { error } = await supabase
+    .from("condo_income")
+    .update({
+      amount: Number(amount),
+      description: description || "Ingreso por multa",
+      income_date: income_date,
+    })
+    .eq("id", id)
+
+  if (error) throw error
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/mi-casa")
+}
+
+export async function deleteFineIncome(id: string) {
+  const { supabase } = await getCondoId()
+  const { error } = await supabase
+    .from("condo_income")
+    .delete()
+    .eq("id", id)
+
+  if (error) throw error
+  revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/mi-casa")
+}
+
 export async function updateInfraction(formData: FormData) {
   const { supabase } = await getCondoId()
   const id = formData.get("id") as string

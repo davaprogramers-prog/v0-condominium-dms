@@ -7,6 +7,7 @@ import { ThemeCustomizerWrapper } from "./theme-customizer-wrapper"
 import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 import { ProfileSettingsFormServer } from "./profile-settings-form-server"
 import { AvatarUploadSettings } from "./avatar-upload-settings"
+import { FormattedDate } from "@/app/dashboard/usuarios/formatted-date"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
@@ -118,7 +119,7 @@ export default async function ConfiguracionPage() {
                 </div>
                 <div>
                   <p style={{ color: cardTextColor, opacity: 0.7 }}>Creado</p>
-                  <p className="font-medium" style={{ color: cardTextColor }}>{new Date(condo.created_at).toLocaleDateString()}</p>
+                  <FormattedDate dateString={condo.created_at} className="font-medium block" style={{ color: cardTextColor }} />
                 </div>
               </div>
             ) : (
