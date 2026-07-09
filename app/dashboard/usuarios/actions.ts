@@ -201,6 +201,47 @@ export async function updateUser(userId: string, data: any) {
   }
 }
 
+// Default password assigned when an admin resets a user's password
+export const DEFAULT_RESET_PASSWORD = "usuario123@"
+
+export async function resetUserPassword(userId: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+
+    if (!currentUser) {
+      return { success: false, error: "No autenticado" }
+    }
+
+    // Verify current user is admin or super_admin
+    const { data: currentProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", currentUser.id)
+      .single()
+
+    if (!currentProfile || !["admin", "super_admin"].includes(currentProfile.role)) {
+      return { success: false, error: "No tienes permisos para resetear contraseñas" }
+    }
+
+    // Reset the password using the admin client (service role bypasses the encrypted stored password)
+    const adminClient = createAdminClient()
+    const { error } = await adminClient.auth.admin.updateUserById(userId, {
+      password: DEFAULT_RESET_PASSWORD,
+    })
+
+    if (error) {
+      console.error("[v0] Error resetting password:", error)
+      return { success: false, error: "Error al resetear la contraseña: " + error.message }
+    }
+
+    return { success: true, password: DEFAULT_RESET_PASSWORD }
+  } catch (err) {
+    console.error("Error resetting password:", err)
+    return { success: false, error: "Error inesperado al resetear la contraseña" }
+  }
+}
+
 export async function deleteUser(userId: string) {
   try {
     const supabase = await createClient()
