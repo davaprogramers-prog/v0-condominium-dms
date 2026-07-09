@@ -33,7 +33,7 @@ export async function calculateSaldoAnterior(
 
   // Get ALL gastos up to end of previous month
   const { data: allExpenses, error: expensesError } = await supabase
-    .from("expenses")
+    .from("condo_expenses")
     .select("amount")
     .eq("condo_id", condoId)
     .lte("expense_date", endDate)
