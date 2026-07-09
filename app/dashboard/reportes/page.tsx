@@ -150,81 +150,81 @@ export default async function ReportesPage({
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="rounded-lg border bg-blue-50 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Por Cobrar</p>
-              <p className="text-lg font-bold text-blue-700 mt-2 break-words">
+              <p className="text-sm text-muted-foreground">Por Cobrar</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">
                 ${totalExpected.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <DollarSign className="h-6 w-6 text-blue-400 opacity-50 flex-shrink-0 ml-2" />
+            <DollarSign className="h-8 w-8 text-blue-500 opacity-30" />
           </div>
         </div>
 
-        <div className="rounded-lg border bg-green-50 p-4">
+        <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Recaudado</p>
-              <p className="text-lg font-bold text-green-700 mt-2 break-words">
+              <p className="text-sm text-muted-foreground">Recaudado</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
                 ${totalCollected.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <CheckCircle className="h-6 w-6 text-green-400 opacity-50 flex-shrink-0 ml-2" />
+            <CheckCircle className="h-8 w-8 text-green-500 opacity-30" />
           </div>
         </div>
 
-        <div className="rounded-lg border bg-amber-50 p-4">
+        <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Pendiente</p>
-              <p className="text-lg font-bold text-amber-700 mt-2 break-words">
+              <p className="text-sm text-muted-foreground">Pendiente</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">
                 ${totalPending.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <Clock className="h-6 w-6 text-amber-400 opacity-50 flex-shrink-0 ml-2" />
+            <Clock className="h-8 w-8 text-amber-500 opacity-30" />
           </div>
         </div>
 
-        <div className="rounded-lg border bg-red-50 p-4">
+        <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Gastos</p>
-              <p className="text-lg font-bold text-red-700 mt-2 break-words">
+              <p className="text-sm text-muted-foreground">Total Gastos</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">
                 ${totalExpenses.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
               </p>
             </div>
-            <TrendingDown className="h-6 w-6 text-red-400 opacity-50 flex-shrink-0 ml-2" />
+            <TrendingDown className="h-8 w-8 text-red-500 opacity-30" />
           </div>
         </div>
       </div>
 
       {/* Balance Card */}
-      <div className={`rounded-lg border p-4 ${totalCollected - totalExpenses >= 0 ? "bg-green-50" : "bg-red-50"}`}>
+      <div className="rounded-lg border bg-card p-6">
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Balance Real (Recaudado - Gastos)</p>
-            <p className={`text-lg font-bold mt-2 break-words ${totalCollected - totalExpenses >= 0 ? "text-green-700" : "text-red-700"}`}>
+          <div>
+            <p className="text-sm text-muted-foreground">Balance Real (Recaudado - Gastos)</p>
+            <p className={`text-3xl font-bold mt-1 ${totalCollected - totalExpenses >= 0 ? "text-green-600" : "text-red-600"}`}>
               ${(totalCollected - totalExpenses).toLocaleString("es-CL", {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               })}
             </p>
           </div>
-          <TrendingUp className={`h-6 w-6 opacity-50 flex-shrink-0 ml-2 ${totalCollected - totalExpenses >= 0 ? "text-green-400" : "text-red-400"}`} />
+          <TrendingUp className={`h-10 w-10 opacity-30 ${totalIncome - totalExpenses >= 0 ? "text-green-500" : "text-red-500"}`} />
         </div>
       </div>
 
