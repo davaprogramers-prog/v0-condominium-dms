@@ -23,12 +23,12 @@ export async function calculateSaldoAnterior(
     return initialBalance
   }
 
-  // Get ALL approved ingresos up to end of previous month
+  // Get ALL verified ingresos up to end of previous month
   const { data: allIncome, error: incomeError } = await supabase
     .from("condo_income")
     .select("amount")
     .eq("condo_id", condoId)
-    .eq("status", "approved")
+    .eq("status", "verificado")
     .lte("income_date", endDate)
 
   // Get ALL gastos up to end of previous month
@@ -113,9 +113,7 @@ export async function getMonthIncome(
   )
 }
 
-// Get all gastos for a specific month
-// Prioritizes period_month/period_year (accounting period) if available
-// Falls back to expense_date if period fields are NULL
+// Get all gastos for a specific month (filter by expense_date)
 export async function getMonthExpenses(
   condoId: string,
   year: number,
@@ -123,43 +121,21 @@ export async function getMonthExpenses(
 ) {
   const supabase = await createClient()
 
-  // First, try to get by period_month and period_year (new way)
-  const { data: periodData, error: periodError } = await supabase
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+  const { data, error } = await supabase
     .from("expenses")
     .select("*, expense_type:expense_types(id, name)")
     .eq("condo_id", condoId)
-    .eq("period_year", year)
-    .eq("period_month", month)
+    .gte("expense_date", startDate)
+    .lte("expense_date", endDate)
+    .order("expense_date", { ascending: false })
 
-  // If period fields don't exist in DB or are null, fall back to expense_date
-  const { data: dateData, error: dateError } = await supabase
-    .from("expenses")
-    .select("*, expense_type:expense_types(id, name)")
-    .eq("condo_id", condoId)
-    .is("period_month", null)
-    .gte("expense_date", `${year}-${String(month).padStart(2, '0')}-01`)
-    .lte("expense_date", new Date(year, month, 0).toISOString().split('T')[0])
-
-  if (periodError && dateError) {
-    console.error("[v0] Error fetching month expenses:", periodError || dateError)
-    throw new Error((periodError || dateError)?.message)
+  if (error) {
+    console.error("[v0] Error fetching month expenses:", error)
+    throw new Error(error.message)
   }
 
-  // Combine both results (period-based + date-based for older entries)
-  const allData = [
-    ...(periodData || []),
-    ...(dateData || []),
-  ]
-
-  // Remove duplicates by ID
-  const seen = new Set()
-  const uniqueData = allData.filter((expense: any) => {
-    if (seen.has(expense.id)) return false
-    seen.add(expense.id)
-    return true
-  })
-
-  return uniqueData.sort((a: any, b: any) =>
-    new Date(b.expense_date).getTime() - new Date(a.expense_date).getTime()
-  )
+  return data || []
 }
