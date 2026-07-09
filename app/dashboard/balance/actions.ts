@@ -125,8 +125,8 @@ export async function getMonthExpenses(
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
   const { data, error } = await supabase
-    .from("expenses")
-    .select("*, expense_type:expense_types(id, name)")
+    .from("condo_expenses")
+    .select("*")
     .eq("condo_id", condoId)
     .gte("expense_date", startDate)
     .lte("expense_date", endDate)
@@ -136,11 +136,6 @@ export async function getMonthExpenses(
     console.error("[v0] Error fetching month expenses:", error)
     throw new Error(error.message)
   }
-
-  console.log("[v0] getMonthExpenses - condoId:", condoId, "year:", year, "month:", month)
-  console.log("[v0] Query range:", startDate, "to", endDate)
-  console.log("[v0] Found expenses:", data?.length || 0, "records")
-  console.log("[v0] Expenses data:", data)
 
   return data || []
 }

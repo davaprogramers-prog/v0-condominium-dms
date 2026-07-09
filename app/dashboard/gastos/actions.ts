@@ -9,8 +9,8 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
   const supabase = await createClient()
 
   let query = supabase
-    .from("expenses")
-    .select("*, expense_type:expense_types(id, name)")
+    .from("condo_expenses")
+    .select("*")
     .eq("condo_id", condoId)
 
   if (year && month) {
@@ -27,18 +27,6 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
   if (error) {
     console.error("[v0] Error fetching expenses:", error)
     return []
-  }
-
-  if (year && month) {
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-    console.log("[v0] getCondoExpenses - condoId:", condoId, "year:", year, "month:", month)
-    console.log("[v0] Query range:", startDate, "to", endDate)
-    console.log("[v0] Found expenses:", data?.length || 0, "records")
-    if (data && data.length > 0) {
-      console.log("[v0] First expense date:", data[0].expense_date)
-      console.log("[v0] All expense dates:", data.map((e: any) => e.expense_date))
-    }
   }
 
   return data || []
@@ -178,14 +166,14 @@ export async function createCondoExpense(
   
   const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
-  const { error } = await supabase.from("expenses").insert({
+  const { error } = await supabase.from("condo_expenses").insert({
     condo_id: condoId,
+    title: data.title || null,
     description: data.description,
-    amount: data.amount,
+    amount: parseFloat(String(data.amount)),
+    category: data.category || null,
     expense_date: expenseDate,
     receipt_url: data.receiptUrl || null,
-    notes: data.title || null,
-    created_by: user.id,
   })
   
   if (error) {
@@ -216,13 +204,14 @@ export async function updateExpense(
   const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
   const { error } = await supabase
-    .from("expenses")
+    .from("condo_expenses")
     .update({
+      title: data.title || null,
       description: data.description,
-      amount: data.amount,
+      amount: parseFloat(String(data.amount)),
+      category: data.category || null,
       expense_date: expenseDate,
       receipt_url: data.receiptUrl || null,
-      notes: data.title || null,
     })
     .eq("id", expenseId)
   
@@ -238,7 +227,7 @@ export async function updateExpense(
 export async function deleteExpense(id: string) {
   const supabase = await createClient()
   
-  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  const { error } = await supabase.from("condo_expenses").delete().eq("id", id)
   
   if (error) {
     console.error("Error deleting expense:", error)
@@ -263,9 +252,9 @@ export async function getLast12MonthsData(condoId: string) {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
     
-    // Get expenses by expense_date
+    // Get expenses by expense_date from condo_expenses
     const { data: expensesData } = await supabase
-      .from("expenses")
+      .from("condo_expenses")
       .select("amount")
       .eq("condo_id", condoId)
       .gte("expense_date", startDate)
