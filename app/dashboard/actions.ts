@@ -967,6 +967,7 @@ export async function updateFineIncome(formData: FormData) {
 
   if (error) throw error
   revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/mi-casa")
 }
 
 export async function deleteFineIncome(id: string) {
@@ -978,6 +979,7 @@ export async function deleteFineIncome(id: string) {
 
   if (error) throw error
   revalidatePath("/dashboard/ingresos-multas")
+  revalidatePath("/dashboard/mi-casa")
 }
 
 export async function updateInfraction(formData: FormData) {

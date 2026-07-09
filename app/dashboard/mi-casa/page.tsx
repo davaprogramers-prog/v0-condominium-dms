@@ -200,6 +200,10 @@ export default async function MiCasaPage() {
                   const hasReceipt = proofs.length > 0
                   const isApproved = hasApprovedProof(income.id, income.income_type)
                   
+                  // Las multas no necesitan comprobante para estar aprobadas
+                  const isFine = income.description?.toLowerCase().includes("multa") || income.income_type === "fine"
+                  const finalStatus = isFine ? "approved" : (isApproved ? "approved" : (hasReceipt ? "revision" : "pending"))
+                  
                   return (
                     <tr key={income.id} className="border-b hover:opacity-80" style={{ backgroundColor: cardBgColor, color: cardTextColor, borderColor: "rgba(255,255,255,0.1)" }}>
                       <td className="px-6 py-3 font-medium">{income.description || "Gasto Común"}</td>
@@ -210,15 +214,15 @@ export default async function MiCasaPage() {
                             {proofs.length} comprobante(s)
                           </span>
                         ) : (
-                          <span className="text-xs opacity-50" style={{ color: cardTextColor }}>Sin comprobante</span>
+                          <span className="text-xs opacity-50" style={{ color: cardTextColor }}>{isFine ? "No aplica" : "Sin comprobante"}</span>
                         )}
                       </td>
                       <td className="px-6 py-3">
                         <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium" style={{
-                          backgroundColor: isApproved ? "#065f46" : hasReceipt ? "#78350f" : "#7f1d1d",
+                          backgroundColor: finalStatus === "approved" ? "#065f46" : finalStatus === "revision" ? "#78350f" : "#7f1d1d",
                           color: "#f1f5f9"
                         }}>
-                          {isApproved ? "Aprobado" : hasReceipt ? "En Revisión" : "Pendiente"}
+                          {finalStatus === "approved" ? "Aprobado" : finalStatus === "revision" ? "En Revisión" : "Pendiente"}
                         </span>
                       </td>
                     </tr>
