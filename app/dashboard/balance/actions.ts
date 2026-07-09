@@ -129,6 +129,52 @@ export async function getMonthIncome(
   )
 }
 
+// Get all PENDING ingresos for a specific month
+// These are ingresos that have been generated but not yet approved/paid
+export async function getMonthPendingIncome(
+  condoId: string,
+  year: number,
+  month: number
+) {
+  const supabase = await createClient()
+
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+  // Get pending ingresos comunes (pending = not yet approved)
+  const { data: periodData, error: periodError } = await supabase
+    .from("condo_income")
+    .select("*")
+    .eq("condo_id", condoId)
+    .eq("status", "pending")
+    .eq("period_year", year)
+    .eq("period_month", month)
+    .order("income_date", { ascending: false })
+
+  // Fallback to income_date if period fields are null
+  const { data: dateData, error: dateError } = await supabase
+    .from("condo_income")
+    .select("*")
+    .eq("condo_id", condoId)
+    .eq("status", "pending")
+    .is("period_month", null)
+    .gte("income_date", startDate)
+    .lte("income_date", endDate)
+    .order("income_date", { ascending: false })
+
+  const condoIncomeData = [...(periodData || []), ...(dateData || [])]
+  const condoIncomeError = periodError && dateError ? periodError : null
+
+  if (condoIncomeError) {
+    console.error("[v0] Error fetching pending income:", condoIncomeError)
+    throw new Error(condoIncomeError.message)
+  }
+
+  return condoIncomeData.sort((a: any, b: any) => 
+    new Date(b.income_date).getTime() - new Date(a.income_date).getTime()
+  )
+}
+
 // Get all gastos for a specific month (filter by expense_date)
 export async function getMonthExpenses(
   condoId: string,

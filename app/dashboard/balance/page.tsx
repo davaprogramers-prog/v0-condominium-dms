@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { calculateSaldoAnterior, getMonthIncome, getMonthExpenses } from "./actions"
+import { calculateSaldoAnterior, getMonthIncome, getMonthPendingIncome, getMonthExpenses } from "./actions"
 import { Banknote, TrendingDown, TrendingUp, BarChart3, Wallet, ChevronLeft, ChevronRight } from "lucide-react"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { resolvePeriod } from "@/lib/period"
@@ -44,10 +44,12 @@ export default async function BalancePage({
   // Get expenses and income ONLY for this month
   let expenses: any[] = []
   let paidIncome: any[] = []
+  let pendingIncome: any[] = []
 
   if (condoId) {
     expenses = await getMonthExpenses(condoId, year, month)
     paidIncome = await getMonthIncome(condoId, year, month)
+    pendingIncome = await getMonthPendingIncome(condoId, year, month)
   }
 
   // Calculate saldo anterior dynamically
@@ -69,6 +71,7 @@ export default async function BalancePage({
   // Calculate totals for THIS month only
   const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   const totalPaidIncome = paidIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+  const totalPendingIncome = pendingIncome.reduce((sum, inc) => sum + (inc.amount || 0), 0)
   const balanceDelMes = totalPaidIncome - totalExpenses
   const saldoFinal = saldoAnterior + balanceDelMes
 
@@ -113,7 +116,7 @@ export default async function BalancePage({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         {/* Saldo Anterior */}
         <div className="rounded-lg border bg-slate-100 dark:bg-slate-800 p-6">
           <div className="flex items-center justify-between">
@@ -137,6 +140,22 @@ export default async function BalancePage({
               <p className="text-sm text-green-100">Ingresos Recaudados</p>
               <p className="text-lg md:text-xl font-bold text-white">
                 ${totalPaidIncome.toLocaleString("es-CL", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-white opacity-40" />
+          </div>
+        </div>
+
+        {/* Ingresos Por Cobrar - Yellow/Orange background - PENDING income */}
+        <div className="rounded-lg border border-amber-500 bg-amber-500 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-amber-100">Ingresos Por Cobrar</p>
+              <p className="text-lg md:text-xl font-bold text-white">
+                ${totalPendingIncome.toLocaleString("es-CL", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}
