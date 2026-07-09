@@ -181,7 +181,7 @@ export function EnviarMensajeDialog({
           </div>
 
           {/* Botones de acción */}
-          <div className="flex gap-2 justify-end pt-4 border-t" style={{ borderColor: theme.dialog_text_color, borderOpacity: 0.1 }}>
+          <div className="flex gap-2 justify-end pt-4 border-t" style={{ borderColor: theme.dialog_text_color }}>
             <Button
               type="button"
               variant="outline"

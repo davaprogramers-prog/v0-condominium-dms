@@ -143,10 +143,10 @@ export default async function DeudasConsolidadasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" style={{ color: theme.textColor }}>
+        <h1 className="text-3xl font-bold" style={{ color: theme.main_text_color }}>
           Deudas Consolidadas
         </h1>
-        <p className="text-sm opacity-75" style={{ color: theme.textColor }}>
+        <p className="text-sm opacity-75" style={{ color: theme.main_text_color }}>
           Resumen completo de deudas por casa (gastos comunes, variables y multas)
         </p>
       </div>

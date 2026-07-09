@@ -107,7 +107,7 @@ export function DeudaDetailDialog({
           </div>
 
           {/* Información adicional */}
-          <div className="border-t pt-4" style={{ borderColor: theme.dialog_text_color, borderOpacity: 0.1 }}>
+          <div className="border-t pt-4" style={{ borderColor: theme.dialog_text_color }}>
             <div className="flex justify-between items-center">
               <span className="font-semibold" style={{ color: theme.dialog_text_color }}>
                 Total a Cobrar
