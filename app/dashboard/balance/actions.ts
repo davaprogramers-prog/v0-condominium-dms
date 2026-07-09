@@ -41,7 +41,7 @@ export async function calculateSaldoAnterior(
   // Get ALL multas (infractions paid) up to end of previous month
   const { data: allInfractions, error: infractionsError } = await supabase
     .from("infractions")
-    .select("amount")
+    .select("fine_amount")
     .eq("condo_id", condoId)
     .eq("is_paid", true)
     .lte("paid_date", endDate)
@@ -63,7 +63,7 @@ export async function calculateSaldoAnterior(
 
   const totalIncome = (allIncome || []).reduce((sum, inc) => sum + (inc.amount || 0), 0)
   const totalExpenses = (allExpenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
-  const totalInfractions = (allInfractions || []).reduce((sum, inf) => sum + (inf.amount || 0), 0)
+  const totalInfractions = (allInfractions || []).reduce((sum, inf) => sum + (inf.fine_amount || 0), 0)
 
   return initialBalance + totalIncome + totalInfractions - totalExpenses
 }
