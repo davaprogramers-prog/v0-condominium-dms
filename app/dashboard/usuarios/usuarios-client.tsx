@@ -104,7 +104,7 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
                     <div>
                       <p className="text-xs font-medium uppercase opacity-75">Fecha Registro</p>
                       <p className="font-semibold" style={{ color: cardTextColor }}>
-                        {new Date(u.created_at).toLocaleDateString()}
+                        {new Date(u.created_at).toLocaleDateString("es-CL")}
                       </p>
                     </div>
 
