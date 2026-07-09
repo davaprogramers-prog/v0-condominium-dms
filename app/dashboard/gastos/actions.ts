@@ -165,14 +165,23 @@ export async function createCondoExpense(
   }
   
   const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
+  const dateObj = new Date(expenseDate)
+  const periodYear = dateObj.getFullYear()
+  const periodMonth = dateObj.getMonth() + 1
   
+  if (!data.title || data.title.trim() === "") {
+    throw new Error("El título del gasto es requerido")
+  }
+
   const insertData = {
     condo_id: condoId,
-    title: data.title || null,
-    description: data.description,
+    title: data.title.trim(),
+    description: data.description || "",
     amount: parseFloat(String(data.amount)),
-    category: data.category || null,
+    category: data.category || "otro",
     expense_date: expenseDate,
+    period_year: periodYear,
+    period_month: periodMonth,
     receipt_url: data.receiptUrl || null,
   }
 

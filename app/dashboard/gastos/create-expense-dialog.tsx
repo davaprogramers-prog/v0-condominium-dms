@@ -189,15 +189,15 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title" style={{ color: dialogTextColor }}>Título*</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="Ej: Limpieza áreas comunes"
-                required
-                style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="title" style={{ color: dialogTextColor }}>Título *</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Ej: Limppieza febrero - Rusbel"
+                  required
+                  style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}
+                />
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount" style={{ color: dialogTextColor }}>Monto (CLP) *</Label>
