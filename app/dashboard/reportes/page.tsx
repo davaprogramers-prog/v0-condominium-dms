@@ -45,17 +45,16 @@ export default async function ReportesPage({
     paidIncome = await getPaidCondoIncome(condoId, year, month)
     last12Months = await getLast12MonthsData(condoId)
     
-    // Get paid fines for this period
+    // Get paid fines (infractions) for this period
     const { data: fines } = await supabase
-      .from("payment_proofs")
-      .select("amount")
+      .from("infractions")
+      .select("fine_amount")
       .eq("condo_id", condoId)
-      .eq("payment_type", "multas")
-      .eq("status", "approved")
-      .eq("period_month", month)
-      .eq("period_year", year)
+      .eq("is_paid", true)
+      .gte("paid_date", `${year}-${String(month).padStart(2, '0')}-01`)
+      .lte("paid_date", new Date(year, month, 0).toISOString().split('T')[0])
     
-    paidFines = fines || []
+    paidFines = fines?.map((f: any) => ({ amount: f.fine_amount })) || []
   }
 
   // Calculate previous and next month for navigation
