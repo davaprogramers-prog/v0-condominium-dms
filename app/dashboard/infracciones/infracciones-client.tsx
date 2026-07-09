@@ -240,7 +240,9 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                     <TableHead>Fecha</TableHead>
                     <TableHead>Descripcion</TableHead>
                     <TableHead className="text-right">Multa</TableHead>
-                    <TableHead>Estado</TableHead>
+                    <TableHead>Moneda</TableHead>
+                    <TableHead className="text-right">Saldo Pendiente</TableHead>
+                    <TableHead>Estado Pago</TableHead>
                     {isAdmin && <TableHead>Acciones</TableHead>}
                   </TableRow>
                 </TableHeader>
@@ -253,16 +255,29 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                       <TableCell className="text-sm">{inf.infraction_date as string}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm">{inf.description as string}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {inf.fine_amount ? formatCurrency(inf.fine_amount, currencySymbol) : "-"}
+                        {inf.currency === "UF" ? `${inf.fine_amount} UF` : (inf.fine_amount ? formatCurrency(inf.fine_amount, currencySymbol) : "-")}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <span className={inf.currency === "UF" ? "bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs" : "bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs"}>
+                          {inf.currency || "CLP"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {inf.amount_pending ? (
+                          inf.currency === "UF" ? `${inf.amount_pending} UF` : formatCurrency(inf.amount_pending, currencySymbol)
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={inf.is_paid
-                            ? "bg-green-600 text-white border-green-600 hover:bg-green-700"
-                            : "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
+                          className={
+                            inf.payment_status === "complete" ? "bg-green-600 text-white border-green-600 hover:bg-green-700" :
+                            inf.payment_status === "partial" ? "bg-blue-600 text-white border-blue-600 hover:bg-blue-700" :
+                            "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
                           }
                         >
-                          {inf.is_paid ? "Pagada" : "Pendiente"}
+                          {inf.payment_status === "complete" ? "Pagada" : inf.payment_status === "partial" ? "Parcial" : "Pendiente"}
                         </Badge>
                       </TableCell>
                       {isAdmin && (
@@ -274,22 +289,31 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="dark:bg-slate-800 dark:text-white">
-                              {!inf.is_paid && (
+                              {/* Pagar cuota for pending/partial multas */}
+                              {(inf.payment_status === "pending" || inf.payment_status === "partial") && (
+                                <DropdownMenuItem onClick={() => setPaymentOpen(inf.id as string)} className="dark:focus:bg-slate-700">
+                                  <CheckCircle className="h-4 w-4 mr-2" />Pagar Cuota
+                                </DropdownMenuItem>
+                              )}
+                              {/* Registrar pago completo (deprecated but keep for backward compat) */}
+                              {inf.payment_status === "complete" && inf.is_paid === false && (
                                 <DropdownMenuItem onClick={() => setPaymentOpen(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <CheckCircle className="h-4 w-4 mr-2" />Registrar Pago
                                 </DropdownMenuItem>
                               )}
-                              {!inf.is_paid && (
+                              {/* Edit option only if not paid */}
+                              {inf.payment_status !== "complete" && (
                                 <DropdownMenuItem onClick={() => setEditOpen(inf.id as string)} className="dark:focus:bg-slate-700">
                                   <Edit2 className="h-4 w-4 mr-2" />Editar
                                 </DropdownMenuItem>
                               )}
-                              {!inf.is_paid ? (
+                              {/* Delete option only if no saldo is pending */}
+                              {inf.payment_status !== "complete" ? (
                                 <DropdownMenuItem onClick={() => setDeleteOpen(inf.id as string)} className="text-destructive dark:focus:bg-slate-700">
                                   <Trash2 className="h-4 w-4 mr-2" />Eliminar
                                 </DropdownMenuItem>
                               ) : null}
-                              {inf.is_paid ? (
+                              {inf.payment_status === "complete" ? (
                                 <DropdownMenuItem disabled className="text-muted-foreground">
                                   No disponible (pagada)
                                 </DropdownMenuItem>
