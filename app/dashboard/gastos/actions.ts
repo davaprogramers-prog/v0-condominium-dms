@@ -183,26 +183,30 @@ export async function createCondoExpense(
 }
 
 // Update an existing expense
-export async function updateExpense(formData: FormData) {
+export async function updateExpense(
+  expenseId: string,
+  data: {
+    title?: string
+    description: string
+    amount: number
+    category?: string
+    expenseDate?: string
+    receiptUrl?: string
+    expenseLogoId?: string
+  }
+) {
   const supabase = await createClient()
   
-  const expenseId = formData.get("id") as string
-  const month = formData.get("expenseMonth") as string
-  const year = formData.get("expenseYear") as string
-  const dateStr = formData.get("expense_date") as string
-  
-  const date = dateStr ? new Date(dateStr) : new Date()
-  const day = String(date.getDate()).padStart(2, '0')
-  const expenseDate = `${year}-${month}-${day}`
+  const expenseDate = data.expenseDate || new Date().toISOString().split("T")[0]
   
   const { error } = await supabase
     .from("expenses")
     .update({
-      expense_type_id: formData.get("expense_type_id") as string,
-      description: formData.get("description") as string,
-      amount: Number(formData.get("amount")),
+      description: data.description,
+      amount: data.amount,
       expense_date: expenseDate,
-      notes: formData.get("notes") as string || null,
+      receipt_url: data.receiptUrl || null,
+      notes: data.title || null,
     })
     .eq("id", expenseId)
   
