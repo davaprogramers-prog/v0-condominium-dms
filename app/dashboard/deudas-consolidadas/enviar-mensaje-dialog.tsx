@@ -115,17 +115,16 @@ export function EnviarMensajeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         style={{
-          backgroundColor: theme.card_bg_color,
-          color: theme.text_color,
-          borderColor: theme.border_color,
+          backgroundColor: theme.dialog_bg_color,
+          color: theme.dialog_text_color,
         }}
         className="max-w-2xl"
       >
         <DialogHeader>
-          <DialogTitle style={{ color: theme.text_color }}>
+          <DialogTitle style={{ color: theme.dialog_text_color }}>
             Enviar Mensaje - Casa #{deuda.houseNumber}
           </DialogTitle>
-          <DialogDescription style={{ color: theme.text_color, opacity: 0.7 }}>
+          <DialogDescription style={{ color: theme.dialog_text_color, opacity: 0.7 }}>
             {deuda.ownerName || "Sin asignar"} - Deuda total:{" "}
             {formatCurrency(deuda.totalDebt, currencySymbol)}
             {deuda.finesUF > 0 && ` + ${deuda.finesUF.toFixed(2)} UF`}
@@ -140,7 +139,7 @@ export function EnviarMensajeDialog({
               checked={incluirDetalles}
               onCheckedChange={(checked) => setIncluirDetalles(!!checked)}
             />
-            <Label htmlFor="auto-message" style={{ color: theme.text_color }}>
+            <Label htmlFor="auto-message" style={{ color: theme.dialog_text_color }}>
               Generar mensaje automático con detalles de deuda
             </Label>
           </div>
@@ -151,8 +150,8 @@ export function EnviarMensajeDialog({
               variant="outline"
               onClick={generarMensajeAutomatico}
               style={{
-                borderColor: theme.border_color,
-                color: theme.text_color,
+                borderColor: theme.dialog_text_color,
+                color: theme.dialog_text_color,
               }}
             >
               Generar Mensaje
@@ -161,7 +160,7 @@ export function EnviarMensajeDialog({
 
           {/* Área de texto para el mensaje */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="message" style={{ color: theme.text_color }}>
+            <Label htmlFor="message" style={{ color: theme.dialog_text_color }}>
               Mensaje
             </Label>
             <Textarea
@@ -172,25 +171,25 @@ export function EnviarMensajeDialog({
               rows={10}
               style={{
                 backgroundColor: theme.input_bg_color,
-                borderColor: theme.input_border_color,
+                borderColor: theme.dialog_text_color,
                 color: theme.input_text_color,
               }}
             />
-            <p className="text-xs" style={{ color: theme.text_color, opacity: 0.6 }}>
+            <p className="text-xs" style={{ color: theme.dialog_text_color, opacity: 0.6 }}>
               {mensaje.length} caracteres
             </p>
           </div>
 
           {/* Botones de acción */}
-          <div className="flex gap-2 justify-end pt-4 border-t" style={{ borderColor: theme.border_color }}>
+          <div className="flex gap-2 justify-end pt-4 border-t" style={{ borderColor: theme.dialog_text_color, borderOpacity: 0.1 }}>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSending}
               style={{
-                borderColor: theme.border_color,
-                color: theme.text_color,
+                borderColor: theme.dialog_text_color,
+                color: theme.dialog_text_color,
               }}
             >
               Cancelar

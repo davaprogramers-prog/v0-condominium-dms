@@ -82,11 +82,11 @@ export function DeudasConsolidadasClient({
       <div className="space-y-6">
         {/* Resumen de totales */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card style={{ backgroundColor: theme.card_bg_color, borderColor: theme.border_color }}>
+          <Card style={{ backgroundColor: theme.card_bg_color }}>
             <CardHeader>
               <CardTitle
                 className="text-sm font-medium"
-                style={{ color: theme.text_color, opacity: 0.7 }}
+                style={{ color: theme.card_text_color, opacity: 0.7 }}
               >
                 Total Deuda General
               </CardTitle>
@@ -98,41 +98,33 @@ export function DeudasConsolidadasClient({
               >
                 {formatCurrency(totalDeudaGeneral, currencySymbol)}
               </p>
-              <p className="text-xs mt-2" style={{ color: theme.text_color, opacity: 0.6 }}>
-                De {debts.length} casa{debts.length !== 1 ? "s" : ""} con deuda
+            </CardContent>
+          </Card>
+
+          <Card style={{ backgroundColor: theme.card_bg_color }}>
+            <CardHeader>
+              <CardTitle
+                className="text-sm font-medium"
+                style={{ color: theme.card_text_color, opacity: 0.7 }}
+              >
+                Total en UF
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p
+                className="text-3xl font-bold"
+                style={{ color: "#06b6d4" }}
+              >
+                {totalDeudaUF.toFixed(2)} UF
               </p>
             </CardContent>
           </Card>
 
-          {totalDeudaUF > 0 && (
-            <Card style={{ backgroundColor: theme.card_bg_color, borderColor: theme.border_color }}>
-              <CardHeader>
-                <CardTitle
-                  className="text-sm font-medium"
-                  style={{ color: theme.text_color, opacity: 0.7 }}
-                >
-                  Total Deuda en UF
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p
-                  className="text-3xl font-bold"
-                  style={{ color: "#3b82f6" }}
-                >
-                  {totalDeudaUF.toFixed(2)} UF
-                </p>
-                <p className="text-xs mt-2" style={{ color: theme.text_color, opacity: 0.6 }}>
-                  Multas pendientes
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card style={{ backgroundColor: theme.card_bg_color, borderColor: theme.border_color }}>
+          <Card style={{ backgroundColor: theme.card_bg_color }}>
             <CardHeader>
               <CardTitle
                 className="text-sm font-medium"
-                style={{ color: theme.text_color, opacity: 0.7 }}
+                style={{ color: theme.card_text_color, opacity: 0.7 }}
               >
                 Casas con Deuda
               </CardTitle>
@@ -143,9 +135,6 @@ export function DeudasConsolidadasClient({
                 style={{ color: "#8b5cf6" }}
               >
                 {debts.length}
-              </p>
-              <p className="text-xs mt-2" style={{ color: theme.text_color, opacity: 0.6 }}>
-                Requieren acción
               </p>
             </CardContent>
           </Card>
@@ -166,30 +155,30 @@ export function DeudasConsolidadasClient({
         </div>
 
         {/* Tabla de deudas */}
-        <Card style={{ backgroundColor: theme.card_bg_color, borderColor: theme.border_color }}>
+        <Card style={{ backgroundColor: theme.card_bg_color }}>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow style={{ borderColor: theme.border_color }}>
-                    <TableHead style={{ color: theme.text_color }}>Casa</TableHead>
-                    <TableHead style={{ color: theme.text_color }}>Residente</TableHead>
-                    <TableHead className="text-right" style={{ color: theme.text_color }}>
+                  <TableRow>
+                    <TableHead style={{ color: theme.card_text_color }}>Casa</TableHead>
+                    <TableHead style={{ color: theme.card_text_color }}>Residente</TableHead>
+                    <TableHead className="text-right" style={{ color: theme.card_text_color }}>
                       Gasto Común
                     </TableHead>
-                    <TableHead className="text-right" style={{ color: theme.text_color }}>
+                    <TableHead className="text-right" style={{ color: theme.card_text_color }}>
                       Gasto Variable
                     </TableHead>
-                    <TableHead className="text-right" style={{ color: theme.text_color }}>
+                    <TableHead className="text-right" style={{ color: theme.card_text_color }}>
                       Multas CLP
                     </TableHead>
-                    <TableHead className="text-right" style={{ color: theme.text_color }}>
+                    <TableHead className="text-right" style={{ color: theme.card_text_color }}>
                       Multas UF
                     </TableHead>
-                    <TableHead className="text-right" style={{ color: theme.text_color }}>
+                    <TableHead className="text-right" style={{ color: theme.card_text_color }}>
                       Total Deuda
                     </TableHead>
-                    <TableHead className="text-center" style={{ color: theme.text_color }}>
+                    <TableHead className="text-center" style={{ color: theme.card_text_color }}>
                       Acciones
                     </TableHead>
                   </TableRow>
@@ -201,8 +190,7 @@ export function DeudasConsolidadasClient({
                         key={debt.houseId}
                         style={{
                           backgroundColor: theme.card_bg_color,
-                          borderColor: theme.border_color,
-                          color: theme.text_color,
+                          color: theme.card_text_color,
                         }}
                       >
                         <TableCell className="font-bold">#{debt.houseNumber}</TableCell>
