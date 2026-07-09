@@ -3,6 +3,7 @@ import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
+import { PendingPaymentsSection } from "./pending-payments-section"
 
 const colorMap: Record<string, { bg: string; }> = {
   "bg-blue-500": { bg: "#3B82F6" },
@@ -189,8 +190,18 @@ export default async function DashboardPage() {
 
         {/* Admin Dashboard */}
         {isAdmin && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {adminMenuItems.map((item) => (
+          <div className="space-y-6">
+            {/* Pending Payments Section */}
+            {condoId && (
+              <PendingPaymentsSection 
+                condoId={condoId} 
+                currencySymbol={condo?.currency_symbol || "$"}
+              />
+            )}
+
+            {/* Admin Menu Items */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {adminMenuItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full hover:shadow-md hover:border-primary/50">
                   <div 
@@ -206,6 +217,7 @@ export default async function DashboardPage() {
                 </div>
               </Link>
             ))}
+            </div>
           </div>
         )}
 
