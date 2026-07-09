@@ -148,7 +148,6 @@ export function DeudasConsolidadasClient({
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               backgroundColor: theme.input_bg_color,
-              borderColor: theme.input_border_color,
               color: theme.input_text_color,
             }}
           />
