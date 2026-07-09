@@ -27,6 +27,10 @@ interface Infraction {
   period_year: number
   is_paid: boolean
   status?: string
+  currency?: string
+  amount_pending?: number
+  payment_status?: string
+  uf_value_at_creation?: number
   [key: string]: unknown
 }
 
@@ -51,6 +55,9 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
   const [editOpen, setEditOpen] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState<string | null>(null)
   const [paymentOpen, setPaymentOpen] = useState<string | null>(null)
+  const [currency, setCurrency] = useState("CLP")
+  const [paymentType, setPaymentType] = useState("complete")
+  const [ufValue, setUfValue] = useState("")
   const [isPending, startTransition] = useTransition()
   const { inputBgColor, inputTextColor, dialogBgColor, dialogTextColor } = useTheme()
 
@@ -105,9 +112,17 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
               <form
                 action={async (fd) => {
                   fd.set("house_id", selectedHouse)
+                  fd.set("currency", currency)
+                  fd.set("payment_status", paymentType === "complete" ? "complete" : "pending")
+                  if (currency === "UF" && ufValue) {
+                    fd.set("uf_value_at_creation", ufValue)
+                  }
                   await createInfraction(fd)
                   setOpenNew(false)
                   setSelectedHouse("")
+                  setCurrency("CLP")
+                  setPaymentType("complete")
+                  setUfValue("")
                 }}
                 className="flex flex-col gap-4"
               >
@@ -128,14 +143,43 @@ export function InfraccionesClient({ infractions, houses, currencySymbol, isAdmi
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="fine_amount" style={{ color: dialogTextColor }}>Multa ({currencySymbol})</Label>
-                    <Input id="fine_amount" name="fine_amount" type="number" step="0.01" placeholder="0.00" style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                    <Label style={{ color: dialogTextColor }}>Moneda</Label>
+                    <Select value={currency} onValueChange={setCurrency}>
+                      <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue /></SelectTrigger>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                        <SelectItem value="CLP">CLP ({currencySymbol})</SelectItem>
+                        <SelectItem value="UF">UF (Unidad de Fomento)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label style={{ color: dialogTextColor }}>Tipo Pago</Label>
+                    <Select value={paymentType} onValueChange={setPaymentType}>
+                      <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}><SelectValue /></SelectTrigger>
+                      <SelectContent style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}>
+                        <SelectItem value="complete">Pagada Completa</SelectItem>
+                        <SelectItem value="installment">En Cuotas</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="fine_amount" style={{ color: dialogTextColor }}>Multa ({currency === "UF" ? "UF" : currencySymbol})</Label>
+                    <Input id="fine_amount" name="fine_amount" type="number" step={currency === "UF" ? "0.01" : "0.01"} placeholder="0.00" required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="inf_date" style={{ color: dialogTextColor }}>Fecha</Label>
                     <Input id="inf_date" name="infraction_date" type="date" defaultValue={new Date().toISOString().split("T")[0]} required style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
                   </div>
                 </div>
+                {currency === "UF" && (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="uf_value" style={{ color: dialogTextColor }}>Valor UF a la fecha ({currencySymbol})</Label>
+                    <Input id="uf_value" type="number" step="0.01" placeholder="Ej: 40000" value={ufValue} onChange={(e) => setUfValue(e.target.value)} style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }} />
+                    <p className="text-xs opacity-75">Para referencia al momento de pagar</p>
+                  </div>
+                )}
                 <Button type="submit" disabled={!selectedHouse} className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white">Registrar Infraccion</Button>
               </form>
             </DialogContent>

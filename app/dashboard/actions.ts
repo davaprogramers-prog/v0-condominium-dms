@@ -823,13 +823,21 @@ export async function deleteDocument(id: string) {
 // ===== Infractions =====
 export async function createInfraction(formData: FormData) {
   const { supabase, userId, condoId } = await getCondoId()
+  const currency = formData.get("currency") as string || "CLP"
+  const paymentStatus = formData.get("payment_status") as string || "pending"
+  const fineAmount = Number(formData.get("fine_amount")) || 0
+  
   const { error } = await supabase.from("infractions").insert({
     condo_id: condoId,
     house_id: formData.get("house_id") as string,
     description: formData.get("description") as string,
-    fine_amount: Number(formData.get("fine_amount")) || 0,
+    fine_amount: fineAmount,
     infraction_date: formData.get("infraction_date") as string,
     evidence_url: formData.get("evidence_url") as string || null,
+    currency: currency,
+    payment_status: paymentStatus,
+    amount_pending: paymentStatus === "complete" ? 0 : fineAmount,
+    uf_value_at_creation: currency === "UF" ? Number(formData.get("uf_value_at_creation")) : null,
     created_by: userId,
   })
   if (error) throw error
