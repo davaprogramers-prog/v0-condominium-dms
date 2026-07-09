@@ -25,8 +25,20 @@ export async function getCondoExpenses(condoId: string, year?: number, month?: n
   const { data, error } = await query.order("expense_date", { ascending: false })
 
   if (error) {
-    console.error("Error fetching expenses:", error)
+    console.error("[v0] Error fetching expenses:", error)
     return []
+  }
+
+  if (year && month) {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+    console.log("[v0] getCondoExpenses - condoId:", condoId, "year:", year, "month:", month)
+    console.log("[v0] Query range:", startDate, "to", endDate)
+    console.log("[v0] Found expenses:", data?.length || 0, "records")
+    if (data && data.length > 0) {
+      console.log("[v0] First expense date:", data[0].expense_date)
+      console.log("[v0] All expense dates:", data.map((e: any) => e.expense_date))
+    }
   }
 
   return data || []

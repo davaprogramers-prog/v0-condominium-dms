@@ -137,5 +137,10 @@ export async function getMonthExpenses(
     throw new Error(error.message)
   }
 
+  console.log("[v0] getMonthExpenses - condoId:", condoId, "year:", year, "month:", month)
+  console.log("[v0] Query range:", startDate, "to", endDate)
+  console.log("[v0] Found expenses:", data?.length || 0, "records")
+  console.log("[v0] Expenses data:", data)
+
   return data || []
 }
