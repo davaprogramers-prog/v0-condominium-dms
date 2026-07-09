@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { DEFAULT_RESET_PASSWORD } from "./constants"
 
 interface CreateUserParams {
   email: string
@@ -200,9 +201,6 @@ export async function updateUser(userId: string, data: any) {
     return { error: "Error inesperado al actualizar el usuario" }
   }
 }
-
-// Default password assigned when an admin resets a user's password
-export const DEFAULT_RESET_PASSWORD = "InteliCon2026@"
 
 export async function resetUserPassword(userId: string) {
   try {

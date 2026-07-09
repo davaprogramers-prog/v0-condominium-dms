@@ -20,7 +20,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
-import { deleteUser, resetUserPassword, DEFAULT_RESET_PASSWORD } from "./actions"
+import { deleteUser, resetUserPassword } from "./actions"
+import { DEFAULT_RESET_PASSWORD } from "./constants"
 import { EditUserDialog } from "./edit-user-dialog"
 import { useTheme } from "@/app/dashboard/theme-context"
 
