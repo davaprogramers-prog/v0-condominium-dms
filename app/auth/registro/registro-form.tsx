@@ -96,13 +96,17 @@ export function RegistroForm() {
       }
 
       // Call server action to register owner
-      await registerOwner(
+      const result = await registerOwner(
         email,
         password,
         firstName || email.split("@")[0],
         lastName || "",
         selectedHouseId
       )
+
+      if (!result.success) {
+        throw new Error(result.error)
+      }
 
       router.push("/auth/registro-exitoso")
     } catch (err) {

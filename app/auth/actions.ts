@@ -52,13 +52,15 @@ export async function signup(formData: FormData) {
   return redirect("/auth/registro-exitoso")
 }
 
+type RegisterResult = { success: true } | { success: false; error: string }
+
 export async function registerOwner(
   email: string,
   password: string,
   firstName: string,
   lastName: string,
   houseId: string
-) {
+): Promise<RegisterResult> {
   const supabase = await createClient()
   const serviceClient = createServiceClient()
 
@@ -69,7 +71,10 @@ export async function registerOwner(
     .eq("id", houseId)
     .single()
 
-  if (houseError || !house) throw new Error("Casa no válida")
+  if (houseError || !house) {
+    console.error("[v0] House lookup error:", houseError)
+    return { success: false, error: "Casa no válida" }
+  }
 
   // Try to sign up new user
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -90,51 +95,66 @@ export async function registerOwner(
   // Handle specific database errors
   if (authError && authError.message.includes("Database error")) {
     console.error("[v0] Database error during signup:", authError)
-    throw new Error("Error en la base de datos. Por favor contacta al administrador para verificar la configuración del sistema.")
+    return { success: false, error: "Error en la base de datos. Por favor contacta al administrador para verificar la configuración del sistema." }
   }
 
-  // If user already exists, that's fine - we'll just ensure profile is updated
-  if (authError && authError.message.includes("already registered")) {
-    console.log("[v0] User already registered, attempting to get their auth user...")
-    
-    // User already exists, try to get their current user
-    const { data: { user: existingUser } } = await supabase.auth.getUser()
-    
-    if (existingUser?.email === email) {
-      // Logged in user - update their profile
-      console.log("[v0] Updating profile for existing logged-in user:", existingUser.id)
-      
-      const { error: updateError } = await serviceClient
-        .from("profiles")
-        .update({
-          house_id: houseId,
-          condo_id: house.condo_id,
-          first_name: firstName,
-          last_name: lastName,
-        })
-        .eq("id", existingUser.id)
-      
-      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
-      
-      return existingUser
-    } else {
-      // Different user exists with this email - can't register
-      throw new Error("El email ya está registrado. Intenta iniciar sesión.")
+  // If user already exists, update their profile using the service client (admin lookup)
+  if (authError && (authError.message.includes("already registered") || authError.message.includes("already been registered"))) {
+    console.log("[v0] User already registered, looking up existing auth user by email...")
+
+    // Find the existing auth user by email using the admin API
+    const { data: listData, error: listError } = await serviceClient.auth.admin.listUsers()
+
+    if (listError) {
+      console.error("[v0] Error listing users:", listError)
+      return { success: false, error: "El email ya está registrado. Intenta iniciar sesión." }
     }
+
+    const existingAuthUser = listData.users.find((u) => u.email?.toLowerCase() === email.toLowerCase())
+
+    if (!existingAuthUser) {
+      return { success: false, error: "El email ya está registrado. Intenta iniciar sesión." }
+    }
+
+    // Upsert their profile with the assigned house/condo
+    const { error: upsertError } = await serviceClient
+      .from("profiles")
+      .upsert({
+        id: existingAuthUser.id,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        house_id: houseId,
+        condo_id: house.condo_id,
+        role: "owner",
+      })
+
+    if (upsertError) {
+      console.error("[v0] Profile upsert error (existing user):", upsertError)
+      return { success: false, error: "Error al actualizar perfil: " + upsertError.message }
+    }
+
+    console.log("[v0] Existing user profile updated:", existingAuthUser.id)
+    return { success: true }
   }
 
-  if (authError) throw authError
-  if (!authData.user) throw new Error("No se pudo crear la cuenta")
+  if (authError) {
+    console.error("[v0] Signup auth error:", authError)
+    return { success: false, error: authError.message }
+  }
+  if (!authData.user) {
+    return { success: false, error: "No se pudo crear la cuenta" }
+  }
 
   const userId = authData.user.id
 
-  // Wait 1 second for auth to be ready
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  // Wait for auth trigger to be ready
+  await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  // Create profile with all data including condo_id using service client
+  // Create/update profile with all data including condo_id using service client
   const { error: profileError } = await serviceClient
     .from("profiles")
-    .insert({
+    .upsert({
       id: userId,
       email,
       first_name: firstName,
@@ -146,27 +166,12 @@ export async function registerOwner(
 
   if (profileError) {
     console.error("[v0] Profile creation error:", profileError)
-    // If insert fails due to duplicate, try update
-    if (profileError.code === "23505") {
-      const { error: updateError } = await serviceClient
-        .from("profiles")
-        .update({
-          house_id: houseId,
-          condo_id: house.condo_id,
-          first_name: firstName,
-          last_name: lastName,
-        })
-        .eq("id", userId)
-      
-      if (updateError) throw new Error("Error al actualizar perfil: " + updateError.message)
-    } else {
-      throw new Error("Error al crear el perfil")
-    }
+    return { success: false, error: "Error al crear el perfil: " + profileError.message }
   }
 
   console.log("[v0] User registered with profile:", userId, "condo_id:", house.condo_id)
 
-  return authData.user
+  return { success: true }
 }
 
 export async function ensureUserProfile(userId: string, email: string) {
