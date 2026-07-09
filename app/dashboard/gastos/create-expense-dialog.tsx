@@ -228,7 +228,7 @@ export function CreateExpenseDialog({ condoId, expenseTypes, isSuperAdmin = fals
             <div className="space-y-1">
               <Label htmlFor="category" style={{ color: dialogTextColor }}>Tipo de Gasto *</Label>
               {expenseTypes.length > 0 ? (
-                <Select name="category" required>
+                <Select name="category" required defaultValue={expenseTypes[0]?.name || ""}>
                   <SelectTrigger style={{ borderColor: inputTextColor, backgroundColor: inputBgColor, color: inputTextColor }}>
                     <SelectValue placeholder="Seleccionar tipo..." />
                   </SelectTrigger>
