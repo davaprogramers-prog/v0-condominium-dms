@@ -2,6 +2,7 @@
 
 import { CreateUserDialog } from "./create-user-dialog"
 import { UserActionsMenu } from "./user-actions-menu"
+import { FormattedDate } from "./formatted-date"
 import { useTheme } from "@/app/dashboard/theme-context"
 
 interface UserProfile {
@@ -103,9 +104,7 @@ export function UsuariosClient({ users, isAdmin, isSuperAdmin, condos }: Usuario
                     {/* Fecha de Registro */}
                     <div>
                       <p className="text-xs font-medium uppercase opacity-75">Fecha Registro</p>
-                      <p className="font-semibold" style={{ color: cardTextColor }} suppressHydrationWarning>
-                        {new Date(u.created_at).toLocaleDateString("es-CL")}
-                      </p>
+                      <FormattedDate dateString={u.created_at} className="font-semibold block" style={{ color: cardTextColor }} />
                     </div>
 
                     {/* Actions */}
