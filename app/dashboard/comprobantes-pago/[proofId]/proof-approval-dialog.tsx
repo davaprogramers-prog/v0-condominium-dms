@@ -295,7 +295,6 @@ export function ProofApprovalDialog({
         }
       }
 
-      setOpen(false)
       router.refresh()
     } catch (err: any) {
       console.error("[v0] Error deleting proof:", err)
