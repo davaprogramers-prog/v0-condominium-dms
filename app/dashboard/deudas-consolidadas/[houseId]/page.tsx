@@ -3,9 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import dynamic from "next/dynamic"
-
-const DebtPaymentContainer = dynamic(() => import("./debt-payment-container").then(mod => ({ default: mod.DebtPaymentContainer })), { ssr: false })
+import { DebtPaymentContainer } from "./debt-payment-container"
 
 const DEFAULT_THEME = {
   primary_color: "#2563eb",
