@@ -63,7 +63,7 @@ export default async function ProofDetailPage({
   const currencySymbol = condo?.currency_symbol || "$"
 
   // Get parameters for amounts
-  const { data: params: condoParams } = await supabase
+  const { data: condoParams } = await supabase
     .from("parameters")
     .select("*")
     .eq("condo_id", profile.condo_id)
