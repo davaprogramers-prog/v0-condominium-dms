@@ -56,27 +56,7 @@ export default async function IngresoMultasPage({
   if (condoId) {
     const { data } = await supabase
       .from("condo_income")
-      .select(`
-        *,
-        houses (house_number, owner_name),
-        fine_payments (
-          id,
-          infraction_id,
-          amount_paid,
-          currency,
-          uf_value_at_payment,
-          payment_date,
-          notes,
-          infractions (
-            id,
-            description,
-            fine_amount,
-            amount_pending,
-            currency,
-            payment_status
-          )
-        )
-      `)
+      .select("*")
       .eq("condo_id", condoId)
       .eq("income_type", "multa")
       .eq("period_year", year)
@@ -86,10 +66,6 @@ export default async function IngresoMultasPage({
     incomeRecords = data || []
     paidCount = incomeRecords.length
     totalFines = incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
-    
-    console.log("[v0] Income multas query - period:", { year, month })
-    console.log("[v0] Income multas found:", incomeRecords.length)
-    console.log("[v0] Sample multa:", incomeRecords[0])
   }
 
   // Use only income records (no need to combine from infractions table)
