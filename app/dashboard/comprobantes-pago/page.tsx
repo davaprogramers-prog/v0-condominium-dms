@@ -9,138 +9,124 @@ import { createClient } from "@/lib/supabase/client"
 
 type FilterType = "pending" | "approved" | "rejected" | "all"
 
+interface Proof {
+  id: string
+  house_id: string
+  status: string
+  fixed_amount?: number
+  variable_amount?: number
+  fines_amount?: number
+  period_month: number
+  period_year: number
+}
+
 export default function ProofsPage() {
   const [filter, setFilter] = useState<FilterType>("pending")
-  const [allProofs, setAllProofs] = useState<any[]>([])
-  const [houseMap, setHouseMap] = useState(new Map<string, string>())
+  const [proofs, setProofs] = useState<Proof[]>([])
+  const [houseMap, setHouseMap] = useState<Map<string, string>>(new Map())
   const [currencySymbol, setCurrencySymbol] = useState("$")
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string>("")
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const supabase = createClient()
-
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("condo_id, role")
-          .eq("id", user.id)
-          .single()
-
-        if (!profile?.condo_id) return
-
-        // Get condo currency
-        const { data: condo } = await supabase
-          .from("condominiums")
-          .select("currency_symbol")
-          .eq("id", profile.condo_id)
-          .single()
-
-        setCurrencySymbol(condo?.currency_symbol || "$")
-
-        // Get all payment proofs
-        const { data: proofs } = await supabase
-          .from("payment_proofs")
-          .select("*")
-          .eq("condo_id", profile.condo_id)
-          .order("created_at", { ascending: false })
-
-        setAllProofs(proofs || [])
-
-        // Get houses
-        const { data: houses } = await supabase
-          .from("houses")
-          .select("*")
-          .eq("condo_id", profile.condo_id)
-
-        const newHouseMap = new Map(
-          houses?.map((h: any) => [h.id, String(h.house_number || h.number)]) || []
-        )
-        setHouseMap(newHouseMap)
-      } catch (error) {
-        console.error("[v0] Error fetching proofs:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
+    fetchProofs()
   }, [])
 
-  // Filter proofs based on selected filter
+  const fetchProofs = async () => {
+    try {
+      setLoading(true)
+      const supabase = createClient()
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError("No autenticado")
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("condo_id")
+        .eq("id", user.id)
+        .single()
+
+      if (!profile?.condo_id) {
+        setError("Sin condominio asignado")
+        return
+      }
+
+      // Get currency
+      const { data: condo } = await supabase
+        .from("condominiums")
+        .select("currency_symbol")
+        .eq("id", profile.condo_id)
+        .single()
+
+      if (condo?.currency_symbol) {
+        setCurrencySymbol(condo.currency_symbol)
+      }
+
+      // Get proofs
+      const { data: proofData, error: proofError } = await supabase
+        .from("payment_proofs")
+        .select("*")
+        .eq("condo_id", profile.condo_id)
+        .order("created_at", { ascending: false })
+
+      if (proofError) {
+        setError(`Error al cargar comprobantes: ${proofError.message}`)
+        return
+      }
+
+      setProofs(proofData || [])
+
+      // Get houses
+      const { data: houses } = await supabase
+        .from("houses")
+        .select("id, house_number, number")
+        .eq("condo_id", profile.condo_id)
+
+      const map = new Map<string, string>()
+      houses?.forEach((house: any) => {
+        map.set(house.id, String(house.house_number || house.number))
+      })
+      setHouseMap(map)
+
+      setError("")
+    } catch (err: any) {
+      setError(`Error: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filteredProofs = filter === "all"
-    ? allProofs
-    : allProofs.filter((p) => p.status === filter)
+    ? proofs
+    : proofs.filter((p) => p.status === filter)
 
-  const pendingCount = allProofs.filter((p) => p.status === "pending").length
-  const approvedCount = allProofs.filter((p) => p.status === "approved").length
-  const rejectedCount = allProofs.filter((p) => p.status === "rejected").length
-
-  const ProofCard = ({ proof }: { proof: any }) => {
-    const borderColor =
-      proof.status === "pending"
-        ? "border-orange-500 border-2"
-        : proof.status === "approved"
-          ? "border-green-500 border-2"
-          : "border-red-500 border-2"
-
-    return (
-      <Link
-        href={`/dashboard/comprobantes-pago/${proof.id}`}
-        className={`block p-4 rounded-lg ${borderColor} bg-card hover:bg-accent transition-colors`}
-      >
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex-1">
-            <p className="font-medium">Casa #{houseMap.get(proof.house_id)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
-                month: "long",
-                year: "numeric"
-              })}
-            </p>
-          </div>
-          <Badge
-            variant={
-              proof.status === "pending"
-                ? "outline"
-                : proof.status === "approved"
-                  ? "default"
-                  : "destructive"
-            }
-          >
-            {proof.status === "pending"
-              ? "Pendiente"
-              : proof.status === "approved"
-                ? "Aprobado"
-                : "Rechazado"}
-          </Badge>
-        </div>
-        <div className="flex gap-4 text-sm">
-          <span>
-            Fijo: {currencySymbol}
-            {(proof.fixed_amount || 0).toLocaleString("es-CL")}
-          </span>
-          <span>
-            Variable: {currencySymbol}
-            {(proof.variable_amount || 0).toLocaleString("es-CL")}
-          </span>
-          <span>
-            Multas: {currencySymbol}
-            {(proof.fines_amount || 0).toLocaleString("es-CL")}
-          </span>
-        </div>
-      </Link>
-    )
+  const counts = {
+    pending: proofs.filter((p) => p.status === "pending").length,
+    approved: proofs.filter((p) => p.status === "approved").length,
+    rejected: proofs.filter((p) => p.status === "rejected").length,
   }
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          <p className="text-muted-foreground">Cargando comprobantes...</p>
+      <main className="min-h-screen bg-background p-4 md:p-6">
+        <p className="text-muted-foreground text-center mt-8">Cargando comprobantes...</p>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-background p-4 md:p-6">
+        <div className="max-w-lg mx-auto mt-8">
+          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
+            {error}
+          </div>
+          <Button onClick={fetchProofs} className="mt-4 w-full">
+            Reintentar
+          </Button>
         </div>
       </main>
     )
@@ -166,26 +152,20 @@ export default function ProofsPage() {
           <Button
             variant={filter === "pending" ? "default" : "outline"}
             onClick={() => setFilter("pending")}
-            className="flex items-center gap-2"
           >
-            Por Revisar
-            <Badge variant="secondary" className="ml-1">{pendingCount}</Badge>
+            Por Revisar <Badge className="ml-2">{counts.pending}</Badge>
           </Button>
           <Button
             variant={filter === "approved" ? "default" : "outline"}
             onClick={() => setFilter("approved")}
-            className="flex items-center gap-2"
           >
-            Aprobados
-            <Badge variant="secondary" className="ml-1">{approvedCount}</Badge>
+            Aprobados <Badge className="ml-2">{counts.approved}</Badge>
           </Button>
           <Button
             variant={filter === "rejected" ? "default" : "outline"}
             onClick={() => setFilter("rejected")}
-            className="flex items-center gap-2"
           >
-            Rechazados
-            <Badge variant="secondary" className="ml-1">{rejectedCount}</Badge>
+            Rechazados <Badge className="ml-2">{counts.rejected}</Badge>
           </Button>
           <Button
             variant={filter === "all" ? "default" : "outline"}
@@ -199,12 +179,48 @@ export default function ProofsPage() {
         {filteredProofs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProofs.map((proof) => (
-              <ProofCard key={proof.id} proof={proof} />
+              <Link
+                key={proof.id}
+                href={`/dashboard/comprobantes-pago/${proof.id}`}
+                className={`block p-4 rounded-lg transition-all border-2 hover:shadow-md
+                  ${proof.status === "pending"
+                    ? "border-orange-500 bg-card hover:bg-accent"
+                    : proof.status === "approved"
+                      ? "border-green-500 bg-card hover:bg-accent"
+                      : "border-red-500 bg-card hover:bg-accent"
+                  }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="font-semibold">Casa #{houseMap.get(proof.house_id) || "?"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={proof.status === "pending" ? "outline" : proof.status === "approved" ? "default" : "destructive"}
+                  >
+                    {proof.status === "pending"
+                      ? "Pendiente"
+                      : proof.status === "approved"
+                        ? "Aprobado"
+                        : "Rechazado"}
+                  </Badge>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <p>Fijo: <span className="font-medium">{currencySymbol}{(proof.fixed_amount || 0).toLocaleString("es-CL")}</span></p>
+                  <p>Variable: <span className="font-medium">{currencySymbol}{(proof.variable_amount || 0).toLocaleString("es-CL")}</span></p>
+                  <p>Multas: <span className="font-medium">{currencySymbol}{(proof.fines_amount || 0).toLocaleString("es-CL")}</span></p>
+                </div>
+              </Link>
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-muted-foreground text-center">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
               {filter === "pending" && "No hay comprobantes pendientes de revisar"}
               {filter === "approved" && "No hay comprobantes aprobados"}
               {filter === "rejected" && "No hay comprobantes rechazados"}
