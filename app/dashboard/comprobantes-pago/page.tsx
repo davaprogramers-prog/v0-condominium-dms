@@ -24,6 +24,7 @@ export default function ProofsPage() {
   const [filter, setFilter] = useState<FilterType>("pending")
   const [proofs, setProofs] = useState<Proof[]>([])
   const [houseMap, setHouseMap] = useState<Map<string, string>>(new Map())
+  const [residentMap, setResidentMap] = useState<Map<string, string>>(new Map())
   const [currencySymbol, setCurrencySymbol] = useState("$")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
@@ -77,13 +78,12 @@ export default function ProofsPage() {
       })
       setHouseMap(map)
 
-      // Get proofs with resident info
+      // Get proofs with house info
       const { data: proofData, error: proofError } = await supabase
         .from("payment_proofs")
         .select(`
           *,
-          houses(house_number, number),
-          profiles(full_name)
+          houses(id, house_number, number)
         `)
         .eq("condo_id", profile.condo_id)
         .order("created_at", { ascending: false })
@@ -92,6 +92,18 @@ export default function ProofsPage() {
         setError(`Error al cargar comprobantes: ${proofError.message}`)
         return
       }
+
+      // Get all profiles to map resident names
+      const { data: residentsData } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("condo_id", profile.condo_id)
+
+      const resMap = new Map<string, string>()
+      residentsData?.forEach((resident: any) => {
+        resMap.set(resident.id, resident.full_name)
+      })
+      setResidentMap(resMap)
 
       setProofs(proofData || [])
 
@@ -125,8 +137,9 @@ export default function ProofsPage() {
     return (
       <main className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-lg mx-auto mt-8">
-          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
-            {error}
+          <div className="p-4 rounded-lg bg-red-100 border border-red-300 text-red-900 dark:bg-red-950 dark:border-red-800 dark:text-red-100">
+            <p className="font-semibold mb-1">Error</p>
+            <p className="text-sm">{error}</p>
           </div>
           <Button onClick={fetchProofs} className="mt-4 w-full">
             Reintentar
@@ -198,7 +211,7 @@ export default function ProofsPage() {
                   <div>
                     <p className="font-semibold">Casa #{(proof.houses as any)?.house_number || (proof.houses as any)?.number || houseMap.get(proof.house_id) || "?"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(proof.profiles as any)?.full_name || "Sin nombre"}
+                      {residentMap.get((proof as any).user_id) || "Sin nombre"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
