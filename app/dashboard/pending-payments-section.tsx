@@ -16,7 +16,7 @@ interface PendingDebt {
 
 export async function PendingPaymentsSection({ condoId, currencySymbol }: { condoId: string; currencySymbol: string }) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get all houses in the condo
     const { data: houses } = await supabase
