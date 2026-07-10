@@ -98,8 +98,8 @@ export function DebtPaymentForm({
         .from("receipts")
         .getPublicUrl(uploadData.path)
 
-      // Create payment proof record directly (same as propietarios)
-      const debtIds = selectedDebts.map((d) => d.id)
+      // Create payment proof record using correct schema fields
+      const now = new Date()
       
       const { error: insertError } = await supabase
         .from("payment_proofs")
@@ -107,10 +107,11 @@ export function DebtPaymentForm({
           condo_id: houseId,
           house_id: houseId,
           uploaded_by: user.id,
-          debt_ids: debtIds,
           total_amount: selectedTotal,
           receipt_url: publicUrl.publicUrl,
           status: "pending",
+          period_month: now.getMonth() + 1,
+          period_year: now.getFullYear(),
           payment_type: "consolidated_debts",
         })
 
