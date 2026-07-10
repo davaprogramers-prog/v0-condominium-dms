@@ -36,6 +36,7 @@ export default async function GastosPage({
   // Get the first admin role condominium
   const adminCondo = userCondos[0]
   const condoId = adminCondo.condo_id
+  const isAdmin = true // Already verified user is admin above
   const isSuperAdmin = adminCondo.role === "super_admin"
 
   // Get period from query params, anchored cookie, or fall back to current month
