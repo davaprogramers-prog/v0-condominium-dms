@@ -65,21 +65,7 @@ export default function ProofsPage() {
         setCurrencySymbol(condo.currency_symbol)
       }
 
-      // Get proofs
-      const { data: proofData, error: proofError } = await supabase
-        .from("payment_proofs")
-        .select("*")
-        .eq("condo_id", profile.condo_id)
-        .order("created_at", { ascending: false })
-
-      if (proofError) {
-        setError(`Error al cargar comprobantes: ${proofError.message}`)
-        return
-      }
-
-      setProofs(proofData || [])
-
-      // Get houses
+      // Get houses first to build map
       const { data: houses } = await supabase
         .from("houses")
         .select("id, house_number, number")
@@ -90,6 +76,24 @@ export default function ProofsPage() {
         map.set(house.id, String(house.house_number || house.number))
       })
       setHouseMap(map)
+
+      // Get proofs with resident info
+      const { data: proofData, error: proofError } = await supabase
+        .from("payment_proofs")
+        .select(`
+          *,
+          houses(house_number, number),
+          profiles(full_name)
+        `)
+        .eq("condo_id", profile.condo_id)
+        .order("created_at", { ascending: false })
+
+      if (proofError) {
+        setError(`Error al cargar comprobantes: ${proofError.message}`)
+        return
+      }
+
+      setProofs(proofData || [])
 
       setError("")
     } catch (err: any) {
@@ -192,7 +196,10 @@ export default function ProofsPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="font-semibold">Casa #{houseMap.get(proof.house_id) || "?"}</p>
+                    <p className="font-semibold">Casa #{(proof.houses as any)?.house_number || (proof.houses as any)?.number || houseMap.get(proof.house_id) || "?"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(proof.profiles as any)?.full_name || "Sin nombre"}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
                         month: "long",
