@@ -41,11 +41,18 @@ export default async function DeudasConsolidadasPage() {
 
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
+  // Get debts data
+  const { data: debts = [] } = await supabase
+    .from("resident_debts")
+    .select("*")
+    .eq("condo_id", condoId)
+
   // Pass admin status to client
   const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
 
   return (
     <DeudasConsolidadasClient
+      debts={debts}
       condoId={condoId}
       userId={user.id}
       theme={theme}
