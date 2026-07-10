@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -29,8 +29,9 @@ export function ProofApprovalDialog({
 }: ApproveProofDialogProps) {
   const [loading, setLoading] = useState(false)
   const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string>("")
   const [userRole, setUserRole] = useState<string | null>(null)
+  const rejectionReasonRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
 
   // Get user role on mount
@@ -225,9 +226,7 @@ export function ProofApprovalDialog({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
-      const formElement = e.currentTarget
-      const reasonInput = formElement.querySelector('[name="rejection_reason"]') as HTMLTextAreaElement
-      const reason = reasonInput?.value || ""
+      const reason = rejectionReasonRef.current?.value || ""
 
       if (!reason?.trim()) {
         setError("Debes indicar el motivo del rechazo")
@@ -345,6 +344,7 @@ export function ProofApprovalDialog({
         <form onSubmit={handleReject} className="space-y-2 border-t pt-4">
           <Label htmlFor="rejection_reason" className="text-sm font-medium">Motivo de Rechazo</Label>
           <Textarea
+            ref={rejectionReasonRef}
             id="rejection_reason"
             name="rejection_reason"
             placeholder="Ej: Monto no coincide, imagen ilegible..."
