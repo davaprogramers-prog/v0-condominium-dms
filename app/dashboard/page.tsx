@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, TrendingDown, Newspaper, AlertTriangle, Trees, Plus, Building2, Package } from "lucide-react"
+import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, Newspaper, AlertTriangle, Trees, Plus, Building2, Package } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
@@ -34,7 +34,6 @@ const adminMenuItems = [
 const ownerMenuItems = [
   { href: "/dashboard/balance", icon: DollarSign, label: "Balance", desc: "Ver tu saldo", colorKey: "bg-emerald-500" },
   { href: "/dashboard/reportes", icon: BarChart3, label: "Reportes", desc: "Ver reportes", colorKey: "bg-cyan-500" },
-  { href: "/dashboard/gastos", icon: TrendingDown, label: "Gastos", desc: "Detalle de gastos", colorKey: "bg-orange-500" },
   { href: "/dashboard/alertas", icon: AlertTriangle, label: "Alertas", desc: "Notificaciones", colorKey: "bg-red-500" },
   { href: "/dashboard/areas-comunes", icon: Home, label: "Instalaciones", desc: "Reservar espacios", colorKey: "bg-purple-500" },
   { href: "/dashboard/encomiendas", icon: Package, label: "Encomiendas", desc: "Recibir paquetes", colorKey: "bg-blue-600" },
