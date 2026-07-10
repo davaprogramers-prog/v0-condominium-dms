@@ -43,7 +43,7 @@ export function MisDeudasClient({
 }: MisDeudasClientProps) {
   const [selectedDebts, setSelectedDebts] = useState<DebtItem[]>([])
 
-  // Combine all debts into single array
+  // Combine all debts into single array and sort by date (newest first)
   const allDebts: DebtItem[] = [
     ...commonExpenses.map((e) => ({
       id: e.id,
@@ -69,7 +69,13 @@ export function MisDeudasClient({
       period_year: i.period_year || new Date().getFullYear(),
       description: `Multa: ${i.reason}`,
     })),
-  ]
+  ].sort((a, b) => {
+    // Sort by year descending, then by month descending (most recent first)
+    if (b.period_year !== a.period_year) {
+      return b.period_year - a.period_year
+    }
+    return b.period_month - a.period_month
+  })
 
   const handleDebtToggle = (debt: DebtItem) => {
     setSelectedDebts((prev) => {
