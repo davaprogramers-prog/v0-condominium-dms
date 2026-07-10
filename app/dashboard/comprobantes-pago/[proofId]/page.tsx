@@ -30,18 +30,32 @@ export default async function ProofDetailPage({
     )
   }
 
-  // Get the proof
+  // Get the proof by ID - RLS policy should handle authorization
   const { data: proof, error: proofError } = await supabase
     .from("payment_proofs")
     .select("*")
     .eq("id", params.proofId)
-    .eq("condo_id", profile.condo_id)
     .maybeSingle()
 
   if (!proof) {
+    console.error("[v0] Proof not found:", { proofId: params.proofId, proofError })
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Comprobante no encontrado.</p>
+        <div className="text-center space-y-2">
+          <p className="text-muted-foreground">Comprobante no encontrado.</p>
+          {proofError && (
+            <p className="text-xs text-red-500">{proofError.message}</p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Verify user has access to this proof's condo
+  if (proof.condo_id !== profile.condo_id) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No tienes acceso a este comprobante.</p>
       </div>
     )
   }
