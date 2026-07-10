@@ -52,10 +52,22 @@ export function DebtPaymentContainer({
       {/* Deudas Selection */}
       <div className="lg:col-span-2">
         <DebtBreakdownClient 
-          debts={debts} 
+          debts={debts.map(d => ({
+            ...d,
+            description: d.description || "Sin descripción",
+            amount: d.amount || 0,
+            currency: d.currency || ""
+          }))} 
           currencySymbol={currencySymbol}
-          selectedDebts={selectedDebts}
-          onSelectionChange={setSelectedDebts}
+          selectedDebts={selectedDebts.map(d => ({
+            ...d,
+            description: d.description || "Sin descripción",
+            amount: d.amount || 0,
+            currency: d.currency || ""
+          }))}
+          onSelectionChange={(selected) => {
+            setSelectedDebts(selected as Debt[])
+          }}
         />
       </div>
 
