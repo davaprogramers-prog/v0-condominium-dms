@@ -135,7 +135,7 @@ export function DebtBreakdownClient({
                   <div>{expense.description || "Gasto"}</div>
                   {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
                 </div>
-                <span className="font-medium flex-shrink-0 whitespace-nowrap">
+                <span className="font-medium flex-shrink-0 whitespace-nowrap" suppressHydrationWarning>
                   {expense.currency === "CLP" || type !== "multa" ? currencySymbol : ""}
                   {formatNumber(expense.amount)}
                   {expense.currency === "UF" ? " UF" : ""}
@@ -160,7 +160,7 @@ export function DebtBreakdownClient({
           <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Monto Seleccionado</p>
-            <p className="text-2xl font-bold text-blue-600">
+            <p className="text-2xl font-bold text-blue-600" suppressHydrationWarning>
               {currencySymbol}
               {formatNumber(selectedTotal)}
             </p>
