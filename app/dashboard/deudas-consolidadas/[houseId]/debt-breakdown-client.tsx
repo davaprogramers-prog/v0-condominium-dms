@@ -129,6 +129,7 @@ export function DebtBreakdownClient({
                   isSelected ? "bg-blue-50" : "hover:bg-muted"
                 }`}
                 onClick={() => handleToggle(expense.id)}
+                suppressHydrationWarning
               >
                 <Checkbox checked={isSelected} onChange={() => handleToggle(expense.id)} />
                 <div className="flex-1 text-muted-foreground">
@@ -155,7 +156,7 @@ export function DebtBreakdownClient({
     <>
       <input type="hidden" id={formDataId} value={JSON.stringify(selectedDebtsArray)} />
       
-      <div className="space-y-4">
+      <div className="space-y-4" suppressHydrationWarning>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
           <div className="text-right">
