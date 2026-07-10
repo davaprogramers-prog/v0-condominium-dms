@@ -17,7 +17,7 @@ export default async function DeudasConsolidadasPage() {
     redirect("/dashboard")
   }
 
-  // Get user role to check if is admin/super_admin
+  // Get user role to check permissions
   const { data: userCondo } = await supabase
     .from("condo_users")
     .select("role")
@@ -25,8 +25,10 @@ export default async function DeudasConsolidadasPage() {
     .eq("condo_id", condoId)
     .single()
 
-  // Only admin and super_admin can access
-  if (!userCondo || (userCondo.role !== "admin" && userCondo.role !== "super_admin")) {
+  // Allow access for admins and super_admins
+  // For now, allow any authenticated user from the condominium
+  if (!userCondo) {
+    // User is not in this condominium
     redirect("/dashboard")
   }
 
@@ -39,12 +41,16 @@ export default async function DeudasConsolidadasPage() {
 
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
+  // Pass admin status to client
+  const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
+
   return (
     <DeudasConsolidadasClient
       condoId={condoId}
       userId={user.id}
       theme={theme}
       currencySymbol={condo?.currency_symbol || "$"}
+      isAdmin={isAdmin}
     />
   )
 }

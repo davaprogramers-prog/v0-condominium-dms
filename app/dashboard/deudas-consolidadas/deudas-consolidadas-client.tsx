@@ -36,6 +36,7 @@ interface DeudasConsolidadasClientProps {
   theme: CondoTheme
   condoId: string
   userId: string
+  isAdmin?: boolean
 }
 
 function formatCurrency(amount: number, symbol: string): string {
@@ -51,6 +52,7 @@ export function DeudasConsolidadasClient({
   theme,
   condoId,
   userId,
+  isAdmin = false,
 }: DeudasConsolidadasClientProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedDeuda, setSelectedDeuda] = useState<DeudaConsolidada | null>(null)
