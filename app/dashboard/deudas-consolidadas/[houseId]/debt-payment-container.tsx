@@ -18,6 +18,7 @@ interface DebtPaymentContainerProps {
   debts: Debt[]
   currencySymbol: string
   houseId: string
+  condoId: string
   houseName: string
   totalDebt: number
 }
@@ -26,6 +27,7 @@ export function DebtPaymentContainer({
   debts,
   currencySymbol,
   houseId,
+  condoId,
   houseName,
   totalDebt,
 }: DebtPaymentContainerProps) {
@@ -50,6 +52,7 @@ export function DebtPaymentContainer({
         <h2 className="text-xl font-semibold">Informar Pago</h2>
         <DebtPaymentForm
           houseId={houseId}
+          condoId={condoId}
           houseName={houseName}
           totalDebt={totalDebt}
           currencySymbol={currencySymbol}

@@ -13,6 +13,7 @@ interface DebtItem {
 
 interface DebtPaymentFormProps {
   houseId: string
+  condoId: string
   houseName: string
   totalDebt: number
   currencySymbol: string
@@ -22,6 +23,7 @@ interface DebtPaymentFormProps {
 
 export function DebtPaymentForm({
   houseId,
+  condoId,
   houseName,
   totalDebt,
   currencySymbol,
@@ -104,7 +106,7 @@ export function DebtPaymentForm({
       const { error: insertError } = await supabase
         .from("payment_proofs")
         .insert({
-          condo_id: houseId,
+          condo_id: condoId,
           house_id: houseId,
           uploaded_by: user.id,
           fixed_amount: selectedTotal,

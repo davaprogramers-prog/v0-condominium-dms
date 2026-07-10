@@ -151,6 +151,7 @@ export default async function DebtDetailPage({
         debts={debts}
         currencySymbol={currencySymbol}
         houseId={houseId}
+        condoId={condoId}
         houseName={`Casa #${house.house_number || house.number}`}
         totalDebt={totalDebt}
       />
