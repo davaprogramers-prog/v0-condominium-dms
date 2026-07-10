@@ -11,8 +11,7 @@ type FilterType = "pending" | "approved" | "rejected" | "all"
 
 interface House {
   id: string
-  house_number?: string | number
-  number?: string | number
+  house_number: string | number
 }
 
 interface Proof {
@@ -77,12 +76,12 @@ export default function ProofsPage() {
       // Get houses first to build map
       const { data: houses } = await supabase
         .from("houses")
-        .select("id, house_number, number")
+        .select("id, house_number")
         .eq("condo_id", profile.condo_id)
 
       const map = new Map<string, string>()
       houses?.forEach((house: any) => {
-        map.set(house.id, String(house.house_number || house.number))
+        map.set(house.id, String(house.house_number))
       })
       setHouseMap(map)
 
@@ -91,7 +90,7 @@ export default function ProofsPage() {
         .from("payment_proofs")
         .select(`
           *,
-          houses(id, house_number, number)
+          houses(id, house_number)
         `)
         .eq("condo_id", profile.condo_id)
         .order("created_at", { ascending: false })
@@ -217,7 +216,7 @@ export default function ProofsPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="font-semibold">Casa #{proof.houses?.house_number || proof.houses?.number || houseMap.get(proof.house_id) || "?"}</p>
+                    <p className="font-semibold">Casa #{proof.houses?.house_number || houseMap.get(proof.house_id) || "?"}</p>
                     <p className="text-xs text-muted-foreground">
                       {residentMap.get(proof.user_id) || "Sin nombre"}
                     </p>
