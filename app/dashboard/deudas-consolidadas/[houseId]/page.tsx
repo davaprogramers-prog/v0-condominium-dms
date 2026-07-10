@@ -62,31 +62,15 @@ export default async function DebtDetailPage({
   const currencySymbol = condo?.currency_symbol || "$"
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
-  // Get debts for this house
-  const { data: commonExpensesData } = await supabase
-    .from("condo_expenses")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("house_id", houseId)
-    .eq("is_paid", false)
-  const commonExpenses = commonExpensesData || []
-
-  const { data: variableExpensesData } = await supabase
+  // Get all debts for this house from condo_income
+  const { data: debtsData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
     .neq("status", "approved")
-    .neq("income_type", "multa")
-  const variableExpenses = variableExpensesData || []
-
-  const { data: infractionsData } = await supabase
-    .from("infractions")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("house_id", houseId)
-    .gt("amount_pending", 0)
-  const infractions = infractionsData || []
+    .order("created_at", { ascending: false })
+  const debts = debtsData || []
 
   const { data: paymentProofsData } = await supabase
     .from("payment_proofs")
@@ -96,14 +80,18 @@ export default async function DebtDetailPage({
   const paymentProofs = paymentProofsData || []
 
   // Calculate totals
-  const commonTotal = commonExpenses.reduce((sum, e) => sum + (e.amount || 0), 0)
-  const variableTotal = variableExpenses.reduce((sum, e) => sum + (e.amount || 0), 0)
-  const finesCLP = infractions
-    .filter((i) => i.currency === "CLP")
-    .reduce((sum, i) => sum + (i.amount_pending || 0), 0)
-  const finesUF = infractions
-    .filter((i) => i.currency === "UF")
-    .reduce((sum, i) => sum + (i.amount_pending || 0), 0)
+  const commonTotal = debts
+    .filter((d) => d.income_type === "common")
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+  const variableTotal = debts
+    .filter((d) => d.income_type === "variable")
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+  const finesCLP = debts
+    .filter((d) => d.income_type === "multa" && d.currency === "CLP")
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+  const finesUF = debts
+    .filter((d) => d.income_type === "multa" && d.currency === "UF")
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
   const totalDebt = commonTotal + variableTotal + finesCLP + finesUF
 
   const ownerName =

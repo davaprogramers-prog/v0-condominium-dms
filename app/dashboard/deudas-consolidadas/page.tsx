@@ -76,14 +76,7 @@ export default async function DeudasConsolidadasPage() {
     )
   }
 
-  // Get debts for all houses
-  const { data: condoExpensesData } = await supabase
-    .from("condo_expenses")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("is_paid", false)
-  const condo_expenses = condoExpensesData || []
-
+  // Get all debts from condo_income for all houses
   const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
@@ -91,30 +84,23 @@ export default async function DeudasConsolidadasPage() {
     .neq("status", "approved")
   const condo_income = condoIncomeData || []
 
-  const { data: infractionsData } = await supabase
-    .from("infractions")
-    .select("*")
-    .eq("condo_id", condoId)
-    .gt("amount_pending", 0)
-  const infractions = infractionsData || []
-
   // Calculate debts by house
   const housesDebts: HouseDebt[] = houses
     .map((house) => {
-      const houseCommonExpenses = condo_expenses.filter((e) => e.house_id === house.id)
-      const houseVariableExpenses = condo_income.filter(
-        (e) => e.house_id === house.id && e.income_type === "variable"
-      )
-      const houseInfractions = infractions.filter((i) => i.house_id === house.id)
+      const houseDebts = condo_income.filter((e) => e.house_id === house.id)
 
-      const commonExpense = houseCommonExpenses.reduce((sum, e) => sum + (e.amount || 0), 0)
-      const variableExpense = houseVariableExpenses.reduce((sum, e) => sum + (e.amount || 0), 0)
-      const finesCLP = houseInfractions
-        .filter((i) => i.currency === "CLP")
-        .reduce((sum, i) => sum + (i.amount_pending || 0), 0)
-      const finesUF = houseInfractions
-        .filter((i) => i.currency === "UF")
-        .reduce((sum, i) => sum + (i.amount_pending || 0), 0)
+      const commonExpense = houseDebts
+        .filter((e) => e.income_type === "common")
+        .reduce((sum, e) => sum + (e.amount || 0), 0)
+      const variableExpense = houseDebts
+        .filter((e) => e.income_type === "variable")
+        .reduce((sum, e) => sum + (e.amount || 0), 0)
+      const finesCLP = houseDebts
+        .filter((e) => e.income_type === "multa" && e.currency === "CLP")
+        .reduce((sum, e) => sum + (e.amount || 0), 0)
+      const finesUF = houseDebts
+        .filter((e) => e.income_type === "multa" && e.currency === "UF")
+        .reduce((sum, e) => sum + (e.amount || 0), 0)
 
       const totalDebt = commonExpense + variableExpense + finesCLP + finesUF
 
