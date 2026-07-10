@@ -5,27 +5,23 @@ import { DeudasConsolidadasClient } from "./deudas-consolidadas-client"
 import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function DeudasConsolidadasPage() {
-  const supabase = createClient()
-  
-  // Get current user first
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  
-  if (!user || userError) {
-    redirect("/auth/login")
-  }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Get condo_id for the user
-  const condoId = await getUserCondoId(supabase, user.id, user.email)
-  
+  if (!user) redirect("/auth/login")
+
+  // Get condo_id using the helper function (works for both owners and admins)
+  const condoId = await getUserCondoId(supabase, user.id)
+
   if (!condoId) {
-    redirect("/auth/login")
+    redirect("/dashboard")
   }
 
   // Get user role to check if is admin/super_admin
   const { data: userCondo } = await supabase
     .from("condo_users")
     .select("role")
-    .eq("user_id", user?.user?.id)
+    .eq("user_id", user.id)
     .eq("condo_id", condoId)
     .single()
 
@@ -48,9 +44,7 @@ export default async function DeudasConsolidadasPage() {
       condoId={condoId}
       userId={user.id}
       theme={theme}
-        condoId={condoId}
-        userId={userId}
-      />
-    </div>
+      currencySymbol={condo?.currency_symbol || "$"}
+    />
   )
 }
