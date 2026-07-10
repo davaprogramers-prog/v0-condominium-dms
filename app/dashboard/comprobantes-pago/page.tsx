@@ -17,7 +17,7 @@ interface House {
 interface Proof {
   id: string
   house_id: string
-  user_id: string
+  uploaded_by: string
   status: string
   fixed_amount?: number
   variable_amount?: number
@@ -218,7 +218,7 @@ export default function ProofsPage() {
                   <div>
                     <p className="font-semibold">Casa #{proof.houses?.house_number || houseMap.get(proof.house_id) || "?"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {residentMap.get(proof.user_id) || "Sin nombre"}
+                      {residentMap.get(proof.uploaded_by) || "Sin nombre"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
