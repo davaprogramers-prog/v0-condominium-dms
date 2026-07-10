@@ -81,7 +81,7 @@ export default async function DebtDetailPage({
 
   // Calculate totals
   const commonTotal = debts
-    .filter((d) => d.income_type === "common")
+    .filter((d) => d.income_type === "fixed")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
   const variableTotal = debts
     .filter((d) => d.income_type === "variable")
@@ -151,14 +151,14 @@ export default async function DebtDetailPage({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
 
-          {debts.filter((d) => d.income_type === "common").length > 0 && (
+          {debts.filter((d) => d.income_type === "fixed").length > 0 && (
             <div className="rounded-lg border bg-card p-4">
               <h3 className="font-semibold mb-3">
-                Gastos Comunes ({debts.filter((d) => d.income_type === "common").length})
+                Gastos Comunes ({debts.filter((d) => d.income_type === "fixed").length})
               </h3>
               <div className="space-y-2 text-sm">
                 {debts
-                  .filter((d) => d.income_type === "common")
+                  .filter((d) => d.income_type === "fixed")
                   .map((expense, idx) => (
                     <div key={idx} className="flex justify-between">
                       <span className="text-muted-foreground">{expense.description || "Gasto"}</span>
