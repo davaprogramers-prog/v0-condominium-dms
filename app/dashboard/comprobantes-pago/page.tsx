@@ -9,15 +9,23 @@ import { createClient } from "@/lib/supabase/client"
 
 type FilterType = "pending" | "approved" | "rejected" | "all"
 
+interface House {
+  id: string
+  house_number?: string | number
+  number?: string | number
+}
+
 interface Proof {
   id: string
   house_id: string
+  user_id: string
   status: string
   fixed_amount?: number
   variable_amount?: number
   fines_amount?: number
   period_month: number
   period_year: number
+  houses?: House
 }
 
 export default function ProofsPage() {
@@ -209,9 +217,9 @@ export default function ProofsPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="font-semibold">Casa #{(proof.houses as any)?.house_number || (proof.houses as any)?.number || houseMap.get(proof.house_id) || "?"}</p>
+                    <p className="font-semibold">Casa #{proof.houses?.house_number || proof.houses?.number || houseMap.get(proof.house_id) || "?"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {residentMap.get((proof as any).user_id) || "Sin nombre"}
+                      {residentMap.get(proof.user_id) || "Sin nombre"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
