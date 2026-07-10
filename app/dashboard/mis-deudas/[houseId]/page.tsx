@@ -21,7 +21,17 @@ export default async function DebtDetailPage({ params }: DebtDetailPageProps) {
   const condoId = await getUserCondoId(supabase, user.id)
   if (!condoId) redirect("/dashboard")
 
-  // Verify user has access to this house
+  // Verify user has access to this house (owner or admin)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role, house_id")
+    .eq("id", user.id)
+    .single()
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isOwner = profile?.house_id === houseId
+
+  // Check if user is owner/admin or resident
   const { data: houseResident } = await supabase
     .from("house_residents")
     .select("*")
@@ -29,7 +39,7 @@ export default async function DebtDetailPage({ params }: DebtDetailPageProps) {
     .eq("resident_id", user.id)
     .single()
 
-  if (!houseResident) {
+  if (!isAdmin && !isOwner && !houseResident) {
     redirect("/dashboard/mis-deudas")
   }
 
@@ -242,6 +252,7 @@ export default async function DebtDetailPage({ params }: DebtDetailPageProps) {
             houseNumber={house.house_number}
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
+            condoId={condoId}
           />
         </div>
       </div>

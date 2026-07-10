@@ -13,9 +13,10 @@ interface DebtPaymentFormProps {
   houseNumber: string
   totalDebt: number
   currencySymbol: string
+  condoId?: string
 }
 
-export function DebtPaymentForm({ houseId, houseNumber, totalDebt, currencySymbol }: DebtPaymentFormProps) {
+export function DebtPaymentForm({ houseId, houseNumber, totalDebt, currencySymbol, condoId }: DebtPaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [amount, setAmount] = useState(totalDebt.toString())
   const [file, setFile] = useState<File | null>(null)
@@ -73,6 +74,7 @@ export function DebtPaymentForm({ houseId, houseNumber, totalDebt, currencySymbo
       const { data: proofData, error: proofError } = await supabase
         .from("payment_proofs")
         .insert({
+          condo_id: condoId,
           house_id: houseId,
           amount: parseFloat(amount),
           file_url: uploadData.path,
