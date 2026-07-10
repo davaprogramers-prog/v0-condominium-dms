@@ -129,7 +129,7 @@ export async function getCondoIncome(condoId: string, year?: number, month?: num
 
   let query = supabase
     .from("condo_income")
-    .select("*")
+    .select("*, houses(house_number)")
     .eq("condo_id", condoId)
 
   if (year) {
