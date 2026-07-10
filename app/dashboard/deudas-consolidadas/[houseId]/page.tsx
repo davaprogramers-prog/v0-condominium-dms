@@ -151,56 +151,68 @@ export default async function DebtDetailPage({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
 
-          {commonExpenses.length > 0 && (
+          {debts.filter((d) => d.income_type === "common").length > 0 && (
             <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">Gastos Comunes ({commonExpenses.length})</h3>
+              <h3 className="font-semibold mb-3">
+                Gastos Comunes ({debts.filter((d) => d.income_type === "common").length})
+              </h3>
               <div className="space-y-2 text-sm">
-                {commonExpenses.map((expense, idx) => (
-                  <div key={idx} className="flex justify-between">
-                    <span className="text-muted-foreground">{expense.description || "Gasto"}</span>
-                    <span className="font-medium">
-                      {currencySymbol}
-                      {expense.amount?.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                {debts
+                  .filter((d) => d.income_type === "common")
+                  .map((expense, idx) => (
+                    <div key={idx} className="flex justify-between">
+                      <span className="text-muted-foreground">{expense.description || "Gasto"}</span>
+                      <span className="font-medium">
+                        {currencySymbol}
+                        {expense.amount?.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
 
-          {variableExpenses.length > 0 && (
+          {debts.filter((d) => d.income_type === "variable").length > 0 && (
             <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">Gastos Variables ({variableExpenses.length})</h3>
+              <h3 className="font-semibold mb-3">
+                Gastos Variables ({debts.filter((d) => d.income_type === "variable").length})
+              </h3>
               <div className="space-y-2 text-sm">
-                {variableExpenses.map((expense, idx) => (
-                  <div key={idx} className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {expense.description || "Gasto variable"}
-                    </span>
-                    <span className="font-medium">
-                      {currencySymbol}
-                      {expense.amount?.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                {debts
+                  .filter((d) => d.income_type === "variable")
+                  .map((expense, idx) => (
+                    <div key={idx} className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        {expense.description || "Gasto variable"}
+                      </span>
+                      <span className="font-medium">
+                        {currencySymbol}
+                        {expense.amount?.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
 
-          {infractions.length > 0 && (
+          {debts.filter((d) => d.income_type === "multa").length > 0 && (
             <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3 text-red-600">Multas ({infractions.length})</h3>
+              <h3 className="font-semibold mb-3 text-red-600">
+                Multas ({debts.filter((d) => d.income_type === "multa").length})
+              </h3>
               <div className="space-y-2 text-sm">
-                {infractions.map((fine, idx) => (
-                  <div key={idx} className="flex justify-between">
-                    <span className="text-muted-foreground">{fine.description || "Multa"}</span>
-                    <span className="font-medium text-red-600">
-                      {fine.currency === "CLP" ? currencySymbol : ""}
-                      {fine.amount_pending?.toLocaleString()}
-                      {fine.currency === "UF" ? " UF" : ""}
-                    </span>
-                  </div>
-                ))}
+                {debts
+                  .filter((d) => d.income_type === "multa")
+                  .map((fine, idx) => (
+                    <div key={idx} className="flex justify-between">
+                      <span className="text-muted-foreground">{fine.description || "Multa"}</span>
+                      <span className="font-medium text-red-600">
+                        {fine.currency === "CLP" ? currencySymbol : ""}
+                        {fine.amount?.toLocaleString()}
+                        {fine.currency === "UF" ? " UF" : ""}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}

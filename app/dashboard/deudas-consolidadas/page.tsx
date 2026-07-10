@@ -56,13 +56,14 @@ export default async function DeudasConsolidadasPage() {
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
   // Get all houses with their debts
-  const { data: houses } = await supabase
+  const { data: housesRaw } = await supabase
     .from("houses")
-    .select("id, number, owner_profile_id, profiles(first_name, last_name)")
+    .select("*")
     .eq("condo_id", condoId)
-    .order("number", { ascending: true })
 
-  if (!houses || houses.length === 0) {
+  const houses = housesRaw || []
+
+  if (houses.length === 0) {
     return (
       <div className="space-y-6">
         <div>
@@ -106,11 +107,8 @@ export default async function DeudasConsolidadasPage() {
 
       return {
         houseId: house.id,
-        houseNumber: `#${house.number}`,
-        ownerName:
-          house.profiles && house.profiles.length > 0
-            ? `${house.profiles[0].first_name || ""} ${house.profiles[0].last_name || ""}`.trim()
-            : "Sin propietario",
+        houseNumber: `#${house.house_number || house.number || ""}`,
+        ownerName: house.owner_name || "Sin propietario",
         commonExpense,
         variableExpense,
         finesCLP,
