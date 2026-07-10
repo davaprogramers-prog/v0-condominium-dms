@@ -181,6 +181,11 @@ export function MisDeudasClient({
                       ? "Multa"
                       : "Gasto Común"
 
+                const monthName = new Date(debt.period_year, debt.period_month - 1).toLocaleDateString("es-CL", {
+                  month: "long",
+                  year: "numeric",
+                })
+
                 return (
                   <div
                     key={debt.id}
@@ -189,9 +194,12 @@ export function MisDeudasClient({
                   >
                     <Checkbox checked={isSelected} onChange={() => handleDebtToggle(debt)} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{typeLabel}</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="font-medium text-sm">{typeLabel}</p>
+                        <p className="text-xs text-muted-foreground">({monthName})</p>
+                      </div>
                       <p className="text-xs text-muted-foreground truncate">
-                        {debt.description || `${typeLabel} - ${debt.period_month}/${debt.period_year}`}
+                        {debt.description || `${typeLabel} - Casa #${houseNumber}`}
                       </p>
                     </div>
                     <p className="font-semibold text-sm whitespace-nowrap">
