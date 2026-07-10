@@ -46,6 +46,7 @@ import {
   Calendar,
   CalendarDays,
   Package,
+  CheckSquare,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -84,6 +85,7 @@ const iconColorMap: Record<string, string> = {
   "ingresos-multas": "#F59E0B", // Ámbar
   "cartolas": "#0EA5E9",       // Sky blue
   "deudas-consolidadas": "#E11D48", // Rojo oscuro
+  "comprobantes-pago": "#22C55E", // Verde para comprobantes
   
   // Regulaciones
   "infracciones": "#EF4444",   // Rojo alerta
@@ -148,6 +150,7 @@ const adminMenuItems = [
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
       { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
+      { title: "Comprobantes de Pago", href: "/dashboard/comprobantes-pago", icon: CheckSquare },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
@@ -223,6 +226,7 @@ const adminWithPropertyMenuItems = [
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
       { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
+      { title: "Comprobantes de Pago", href: "/dashboard/comprobantes-pago", icon: CheckSquare },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DebtPaymentForm } from "./debt-payment-form"
+import { DebtPaymentContainer } from "./debt-payment-container"
 
 const DEFAULT_THEME = {
   primary_color: "#2563eb",
@@ -63,14 +63,25 @@ export default async function DebtDetailPage({
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
   // Get all debts for this house from condo_income
+  // Filter in code: show debts that are pending OR approved without receipt_url (unpaid)
   const { data: debtsData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
-    .neq("status", "approved")
     .order("created_at", { ascending: false })
-  const debts = debtsData || []
+  
+  // Filter to show only unpaid debts: status != "approved" OR (status == "approved" AND no receipt_url)
+  const debts = (debtsData || []).filter(
+    (item) => item.status !== "approved" || (item.status === "approved" && !item.receipt_url)
+  )
+
+  // Get active exemptions for this house
+  const { data: exemptions } = await supabase
+    .from("exemptions")
+    .select("house_id, fixed_percentage, variable_percentage, is_permanent, start_date, end_date")
+    .eq("condo_id", condoId)
+    .eq("house_id", houseId)
 
   const { data: paymentProofsData } = await supabase
     .from("payment_proofs")
@@ -79,13 +90,35 @@ export default async function DebtDetailPage({
     .order("created_at", { ascending: false })
   const paymentProofs = paymentProofsData || []
 
-  // Calculate totals
-  const commonTotal = debts
+  // Calculate base totals
+  const baseCommonTotal = debts
     .filter((d) => d.income_type === "fixed")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
-  const variableTotal = debts
+  const baseVariableTotal = debts
     .filter((d) => d.income_type === "variable")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
+
+  // Calculate exemption percentages
+  const periodEnd = new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+  const periodStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+  
+  let fixedExemptionPercent = 0
+  let variableExemptionPercent = 0
+
+  for (const ex of exemptions || []) {
+    const start = ex.start_date ? new Date(ex.start_date) : null
+    const end = ex.end_date ? new Date(ex.end_date) : null
+    const startsInTime = !start || start <= periodEnd
+    const endsInTime = ex.is_permanent || !end || end >= periodStart
+    if (startsInTime && endsInTime) {
+      fixedExemptionPercent = Math.max(fixedExemptionPercent, Number(ex.fixed_percentage) || 0)
+      variableExemptionPercent = Math.max(variableExemptionPercent, Number(ex.variable_percentage) || 0)
+    }
+  }
+
+  // Calculate effective totals (with exemptions)
+  const commonTotal = Math.round(baseCommonTotal * (1 - fixedExemptionPercent / 100))
+  const variableTotal = Math.round(baseVariableTotal * (1 - variableExemptionPercent / 100))
   const finesCLP = debts
     .filter((d) => d.income_type === "multa" && d.currency === "CLP")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
@@ -107,7 +140,7 @@ export default async function DebtDetailPage({
           <ChevronLeft className="h-4 w-4" />
           Volver a Deudas Consolidadas
         </Link>
-        <h1 className="text-3xl font-bold">Casa #{house.number}</h1>
+        <h1 className="text-3xl font-bold">Casa #{house.house_number || house.number}</h1>
         <p className="text-muted-foreground">{ownerName}</p>
       </div>
 
@@ -143,196 +176,57 @@ export default async function DebtDetailPage({
       </div>
 
       {/* Debtails */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Deudas Details */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
+      <DebtPaymentContainer
+        debts={debts}
+        currencySymbol={currencySymbol}
+        houseId={houseId}
+        condoId={condoId}
+        houseName={`Casa #${house.house_number || house.number}`}
+        totalDebt={totalDebt}
+        baseCommonTotal={baseCommonTotal}
+        baseVariableTotal={baseVariableTotal}
+        commonTotal={commonTotal}
+        variableTotal={variableTotal}
+        fixedExemptionPercent={fixedExemptionPercent}
+        variableExemptionPercent={variableExemptionPercent}
+      />
 
-          {debts.filter((d) => d.income_type === "fixed").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">
-                Gastos Comunes ({debts.filter((d) => d.income_type === "fixed").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "fixed")
-                  .map((expense, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[expense.period_month] || ""
-                    const yearStr = String(expense.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{expense.description || "Gasto"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium flex-shrink-0">
-                          {currencySymbol}
-                          {expense.amount?.toLocaleString()}
-                        </span>
-                      </div>
-                    )
-                  })}
+      {/* Payment History */}
+      {paymentProofs.length > 0 && (
+        <div className="rounded-lg border bg-card p-4 mt-6">
+          <h3 className="font-semibold mb-3">Comprobantes de Pago</h3>
+          <div className="space-y-2 text-sm">
+            {paymentProofs.slice(0, 5).map((proof, idx) => (
+              <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
+                <div>
+                  <p className="font-medium">
+                    {currencySymbol}
+                    {proof.amount?.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(proof.created_at).toLocaleDateString("es-CL")}
+                  </p>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded text-xs font-semibold ${
+                    proof.status === "approved"
+                      ? "bg-green-100 text-green-800"
+                      : proof.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {proof.status === "approved"
+                    ? "Aprobado"
+                    : proof.status === "rejected"
+                      ? "Rechazado"
+                      : "Pendiente"}
+                </span>
               </div>
-            </div>
-          )}
-
-          {debts.filter((d) => d.income_type === "variable").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">
-                Gastos Variables ({debts.filter((d) => d.income_type === "variable").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "variable")
-                  .map((expense, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[expense.period_month] || ""
-                    const yearStr = String(expense.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{expense.description || "Gasto variable"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium flex-shrink-0">
-                          {currencySymbol}
-                          {expense.amount?.toLocaleString()}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
-
-          {debts.filter((d) => d.income_type === "multa").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3 text-red-600">
-                Multas ({debts.filter((d) => d.income_type === "multa").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "multa")
-                  .map((fine, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[fine.period_month] || ""
-                    const yearStr = String(fine.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{fine.description || "Multa"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium text-red-600 flex-shrink-0">
-                          {fine.currency === "CLP" ? currencySymbol : ""}
-                          {fine.amount?.toLocaleString()}
-                          {fine.currency === "UF" ? " UF" : ""}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-
-        {/* Payment Form */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Informar Pago</h2>
-          <DebtPaymentForm
-            houseId={houseId}
-            houseName={`Casa #${house.number}`}
-            totalDebt={totalDebt}
-            currencySymbol={currencySymbol}
-          />
-
-          {/* Payment History */}
-          {paymentProofs.length > 0 && (
-            <div className="rounded-lg border bg-card p-4 mt-6">
-              <h3 className="font-semibold mb-3">Comprobantes de Pago</h3>
-              <div className="space-y-2 text-sm">
-                {paymentProofs.slice(0, 5).map((proof, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
-                    <div>
-                      <p className="font-medium">
-                        {currencySymbol}
-                        {proof.amount?.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(proof.created_at).toLocaleDateString("es-CL")}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
-                        proof.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : proof.status === "rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {proof.status === "approved"
-                        ? "Aprobado"
-                        : proof.status === "rejected"
-                          ? "Rechazado"
-                          : "Pendiente"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

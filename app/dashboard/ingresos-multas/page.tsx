@@ -56,27 +56,7 @@ export default async function IngresoMultasPage({
   if (condoId) {
     const { data } = await supabase
       .from("condo_income")
-      .select(`
-        *,
-        houses (house_number, owner_name),
-        fine_payments (
-          id,
-          infraction_id,
-          amount_paid,
-          currency,
-          uf_value_at_payment,
-          payment_date,
-          notes,
-          infractions (
-            id,
-            description,
-            fine_amount,
-            amount_pending,
-            currency,
-            payment_status
-          )
-        )
-      `)
+      .select("*, houses(house_number, owner_name)")
       .eq("condo_id", condoId)
       .eq("income_type", "multa")
       .eq("period_year", year)

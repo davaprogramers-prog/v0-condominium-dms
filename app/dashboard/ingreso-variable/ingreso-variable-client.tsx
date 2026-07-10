@@ -13,6 +13,9 @@ interface VariableIncome {
   amount: number | string
   source?: string
   receipt_url?: string
+  houses?: {
+    house_number: string | number
+  }
 }
 
 interface IngresoVariableClientProps {
@@ -52,11 +55,11 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
 export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
-  // Ordenar ingresos por descripción/fuente naturalmente
+  // Ordenar ingresos por número de casa naturalmente
   const sortedIncomes = [...incomes].sort((a, b) => {
-    const descA = (a.description as string) || ""
-    const descB = (b.description as string) || ""
-    return compareHouseNumbers(descA, descB)
+    const houseA = a.houses?.house_number ?? ""
+    const houseB = b.houses?.house_number ?? ""
+    return compareHouseNumbers(houseA, houseB)
   })
 
   const handleDelete = async (incomeId: string) => {

@@ -3,30 +3,54 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Upload, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+interface DebtItem {
+  id: string
+  amount: number | null
+}
+
 interface DebtPaymentFormProps {
   houseId: string
+  condoId: string
   houseName: string
   totalDebt: number
   currencySymbol: string
+  selectedDebts: DebtItem[]
+  selectedTotal: number
+  baseCommonTotal: number
+  baseVariableTotal: number
+  commonTotal: number
+  variableTotal: number
+  fixedExemptionPercent: number
+  variableExemptionPercent: number
 }
 
 export function DebtPaymentForm({
   houseId,
+  condoId,
   houseName,
   totalDebt,
   currencySymbol,
+  selectedDebts,
+  selectedTotal,
+  baseCommonTotal,
+  baseVariableTotal,
+  commonTotal,
+  variableTotal,
+  fixedExemptionPercent,
+  variableExemptionPercent,
 }: DebtPaymentFormProps) {
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
-  const [amount, setAmount] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const displayAmount = selectedTotal > 0 ? selectedTotal : totalDebt
+  const hasSelectedDebts = selectedDebts.length > 0
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -62,66 +86,76 @@ export function DebtPaymentForm({
       return
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      setError("Por favor ingresa un monto válido")
-      return
-    }
-
-    const paymentAmount = parseFloat(amount)
-    if (paymentAmount > totalDebt) {
-      setError(`El monto no puede superar la deuda total (${currencySymbol}${totalDebt.toLocaleString()})`)
+    if (!hasSelectedDebts) {
+      setError("Por favor selecciona al menos una deuda para pagar")
       return
     }
 
     setLoading(true)
 
     try {
-      // Upload file to storage
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${houseId}-${Date.now()}.${fileExt}`
-      const filePath = `payment-proofs/${houseId}/${fileName}`
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
 
-      const { error: uploadError } = await supabase.storage
-        .from("payment-proofs")
-        .upload(filePath, file, { upsert: false })
+      // Upload file to receipts storage (same as propietarios)
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const filePath = `payment-proofs/${houseId}/${Date.now()}.${fileExt}`
 
-      if (uploadError) {
-        setError("Error al subir el comprobante: " + uploadError.message)
-        setLoading(false)
-        return
-      }
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
 
       // Get public URL
       const { data: publicUrl } = supabase.storage
-        .from("payment-proofs")
-        .getPublicUrl(filePath)
+        .from("receipts")
+        .getPublicUrl(uploadData.path)
 
-      // Create payment proof record
-      const { error: dbError } = await supabase.from("payment_proofs").insert({
-        house_id: houseId,
-        amount: paymentAmount,
-        file_url: publicUrl.publicUrl,
-        status: "pending",
-        created_at: new Date().toISOString(),
-      })
+      // Get details of selected debts to link to payment_proofs
+      const { data: selectedDebtsData } = await supabase
+        .from("condo_income")
+        .select("*")
+        .in("id", selectedDebts.map((d) => d.id))
 
-      if (dbError) {
-        setError("Error al guardar el comprobante: " + dbError.message)
-        setLoading(false)
-        return
+      if (!selectedDebtsData || selectedDebtsData.length === 0) {
+        throw new Error("No se encontraron las deudas seleccionadas")
       }
+
+      // Create a payment_proof record for EACH selected debt
+      const paymentProofsToCreate = selectedDebtsData.map((debt) => ({
+        condo_id: condoId,
+        house_id: houseId,
+        uploaded_by: user.id,
+        fixed_amount: debt.income_type === "fixed" ? debt.amount : 0,
+        variable_amount: debt.income_type === "variable" ? debt.amount : 0,
+        fines_amount: 0,
+        receipt_url: publicUrl.publicUrl,
+        status: "pending",
+        period_month: debt.period_month,
+        period_year: debt.period_year,
+        payment_type: "gastos_comunes",
+        fixed_income_id: debt.income_type === "fixed" ? debt.id : null,
+        variable_income_id: debt.income_type === "variable" ? debt.id : null,
+      }))
+
+      const { error: insertError } = await supabase
+        .from("payment_proofs")
+        .insert(paymentProofsToCreate)
+
+      if (insertError) throw insertError
 
       // Success
       setSuccess(true)
       setFile(null)
-      setAmount("")
 
-      // Reset after 3 seconds and refresh
+      // Reset after 2 seconds and refresh
       setTimeout(() => {
         router.refresh()
       }, 2000)
-    } catch (err) {
-      setError("Error al procesar el pago: " + (err as Error).message)
+    } catch (err: any) {
+      console.error("Error:", err)
+      setError(err.message || "Error al procesar el pago")
     } finally {
       setLoading(false)
     }
@@ -148,26 +182,26 @@ export function DebtPaymentForm({
 
       {!success && (
         <>
-          <div>
-            <label className="block text-sm font-medium mb-2">Monto a Pagar</label>
-            <div className="flex gap-2">
-              <span className="flex items-center px-3 bg-muted rounded-lg">{currencySymbol}</span>
-              <Input
-                type="number"
-                placeholder={`Máximo: ${totalDebt.toLocaleString()}`}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="0"
-                max={totalDebt}
-                step="0.01"
-                disabled={loading}
-              />
+          {!hasSelectedDebts && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+              Selecciona las deudas que quieres pagar en el desglose de arriba
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Deuda total: {currencySymbol}
-              {totalDebt.toLocaleString()}
-            </p>
-          </div>
+          )}
+          
+          {hasSelectedDebts && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Monto a Pagar</label>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">
+                  {currencySymbol}
+                  {displayAmount.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Basado en las {selectedDebts.length} deuda(s) seleccionada(s)
+                </p>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-2">Comprobante de Pago</label>
@@ -195,7 +229,7 @@ export function DebtPaymentForm({
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !file || !amount}>
+          <Button type="submit" className="w-full" disabled={loading || !file || !hasSelectedDebts}>
             {loading ? "Enviando..." : "Enviar Comprobante"}
           </Button>
         </>
