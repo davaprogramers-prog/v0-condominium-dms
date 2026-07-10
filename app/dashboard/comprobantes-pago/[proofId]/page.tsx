@@ -31,12 +31,12 @@ export default async function ProofDetailPage({
   }
 
   // Get the proof
-  const { data: proof } = await supabase
+  const { data: proof, error: proofError } = await supabase
     .from("payment_proofs")
     .select("*")
     .eq("id", params.proofId)
     .eq("condo_id", profile.condo_id)
-    .single()
+    .maybeSingle()
 
   if (!proof) {
     return (

@@ -58,10 +58,18 @@ export default async function ProofsPage() {
   const approvedProofs = allProofs?.filter((p) => p.status === "approved") || []
   const rejectedProofs = allProofs?.filter((p) => p.status === "rejected") || []
 
-  const ProofCard = ({ proof }: { proof: any }) => (
+  const ProofCard = ({ proof }: { proof: any }) => {
+    const borderColor =
+      proof.status === "pending"
+        ? "border-orange-500 border-2"
+        : proof.status === "approved"
+          ? "border-green-500 border-2"
+          : "border-red-500 border-2"
+
+    return (
     <Link
       href={`/dashboard/comprobantes-pago/${proof.id}`}
-      className="block p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
+      className={`block p-4 rounded-lg ${borderColor} bg-card hover:bg-accent transition-colors`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
@@ -101,7 +109,8 @@ export default async function ProofsPage() {
         </span>
       </div>
     </Link>
-  )
+    )
+  }
 
   return (
     <main className="min-h-screen bg-background">
