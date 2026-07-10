@@ -29,7 +29,7 @@ export function ProofApprovalDialog({
 }: ApproveProofDialogProps) {
   const [loading, setLoading] = useState(false)
   const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(null)
-  const [error, setError] = useState<string>("")
+  const [error, setError] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const rejectionReasonRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
