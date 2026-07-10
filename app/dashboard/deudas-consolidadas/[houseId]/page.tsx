@@ -62,13 +62,14 @@ export default async function DebtDetailPage({
   const currencySymbol = condo?.currency_symbol || "$"
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
-  // Get all debts for this house from condo_income
-  // Include multas regardless of status since they're stored in condo_income
+  // Get all PENDING debts for this house from condo_income
+  // Filter out approved debts (already paid) but include all multas
   const { data: debtsData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
+    .neq("status", "approved")
     .order("created_at", { ascending: false })
   const debts = debtsData || []
 
@@ -107,7 +108,7 @@ export default async function DebtDetailPage({
           <ChevronLeft className="h-4 w-4" />
           Volver a Deudas Consolidadas
         </Link>
-        <h1 className="text-3xl font-bold">Casa #{house.number}</h1>
+        <h1 className="text-3xl font-bold">Casa #{house.house_number || house.number}</h1>
         <p className="text-muted-foreground">{ownerName}</p>
       </div>
 
