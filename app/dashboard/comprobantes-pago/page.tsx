@@ -1,62 +1,77 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { createClient } from "@/lib/supabase/client"
 
-export default async function ProofsPage() {
-  const supabase = await createClient()
+export default function ProofsPage() {
+  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending")
+  const [allProofs, setAllProofs] = useState<any[]>([])
+  const [houseMap, setHouseMap] = useState(new Map())
+  const [currencySymbol, setCurrencySymbol] = useState("$")
+  const [loading, setLoading] = useState(true)
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient()
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  // Get user profile with condo and role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("condo_id, role")
-    .eq("id", user.id)
-    .single()
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("condo_id, role")
+        .eq("id", user.id)
+        .single()
 
-  if (!profile?.condo_id) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No tienes un condominio asignado.</p>
-      </div>
-    )
-  }
+      if (!profile?.condo_id) return
 
-  // Get condo currency
-  const { data: condo } = await supabase
-    .from("condominiums")
-    .select("currency_symbol")
-    .eq("id", profile.condo_id)
-    .single()
+      // Get condo currency
+      const { data: condo } = await supabase
+        .from("condominiums")
+        .select("currency_symbol")
+        .eq("id", profile.condo_id)
+        .single()
 
-  const currencySymbol = condo?.currency_symbol || "$"
+      setCurrencySymbol(condo?.currency_symbol || "$")
 
-  // Get all payment proofs for this condo (all statuses)
-  const { data: allProofs } = await supabase
-    .from("payment_proofs")
-    .select("*")
-    .eq("condo_id", profile.condo_id)
-    .order("created_at", { ascending: false })
+      // Get all payment proofs
+      const { data: proofs } = await supabase
+        .from("payment_proofs")
+        .select("*")
+        .eq("condo_id", profile.condo_id)
+        .order("created_at", { ascending: false })
 
-  // Get all houses for reference
-  const { data: houses } = await supabase
-    .from("houses")
-    .select("*")
-    .eq("condo_id", profile.condo_id)
+      setAllProofs(proofs || [])
 
-  // Map house IDs to names
-  const houseMap = new Map(
-    houses?.map((h: any) => [h.id, h.house_number || h.number]) || []
-  )
+      // Get houses
+      const { data: houses } = await supabase
+        .from("houses")
+        .select("*")
+        .eq("condo_id", profile.condo_id)
 
-  // Group by status
-  const pendingProofs = allProofs?.filter((p) => p.status === "pending") || []
-  const approvedProofs = allProofs?.filter((p) => p.status === "approved") || []
-  const rejectedProofs = allProofs?.filter((p) => p.status === "rejected") || []
+      const newHouseMap = new Map(
+        houses?.map((h: any) => [h.id, h.house_number || h.number]) || []
+      )
+      setHouseMap(newHouseMap)
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [])
+
+  // Filter proofs based on selected filter
+  const filteredProofs = filter === "all" 
+    ? allProofs 
+    : allProofs.filter((p) => p.status === filter)
+
+  const pendingCount = allProofs.filter((p) => p.status === "pending").length
+  const approvedCount = allProofs.filter((p) => p.status === "approved").length
+  const rejectedCount = allProofs.filter((p) => p.status === "rejected").length
+
 
   const ProofCard = ({ proof }: { proof: any }) => {
     const borderColor =
@@ -115,6 +130,16 @@ export default async function ProofsPage() {
     )
   }
 
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto p-4 md:p-6">
+          <p className="text-muted-foreground">Cargando comprobantes...</p>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-4 md:p-6">
@@ -130,68 +155,57 @@ export default async function ProofsPage() {
           </div>
         </div>
 
-        {/* Pending Proofs */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-semibold">Por Revisar</h2>
-            <Badge variant="outline" className="bg-yellow-50">
-              {pendingProofs.length}
-            </Badge>
-          </div>
-          {pendingProofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pendingProofs.map((proof) => (
-                <ProofCard key={proof.id} proof={proof} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">
-              No hay comprobantes pendientes de revisar
-            </p>
-          )}
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={filter === "pending" ? "default" : "outline"}
+            onClick={() => setFilter("pending")}
+            className="flex items-center gap-2"
+          >
+            Por Revisar
+            <Badge variant="secondary" className="ml-1">{pendingCount}</Badge>
+          </Button>
+          <Button
+            variant={filter === "approved" ? "default" : "outline"}
+            onClick={() => setFilter("approved")}
+            className="flex items-center gap-2"
+          >
+            Aprobados
+            <Badge variant="secondary" className="ml-1">{approvedCount}</Badge>
+          </Button>
+          <Button
+            variant={filter === "rejected" ? "default" : "outline"}
+            onClick={() => setFilter("rejected")}
+            className="flex items-center gap-2"
+          >
+            Rechazados
+            <Badge variant="secondary" className="ml-1">{rejectedCount}</Badge>
+          </Button>
+          <Button
+            variant={filter === "all" ? "default" : "outline"}
+            onClick={() => setFilter("all")}
+          >
+            Todos
+          </Button>
         </div>
 
-        {/* Approved Proofs */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-semibold">Aprobados</h2>
-            <Badge variant="default" className="bg-green-100 text-green-800">
-              {approvedProofs.length}
-            </Badge>
+        {/* Proofs Grid */}
+        {filteredProofs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredProofs.map((proof) => (
+              <ProofCard key={proof.id} proof={proof} />
+            ))}
           </div>
-          {approvedProofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {approvedProofs.map((proof) => (
-                <ProofCard key={proof.id} proof={proof} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">
-              No hay comprobantes aprobados
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground text-center">
+              {filter === "pending" && "No hay comprobantes pendientes de revisar"}
+              {filter === "approved" && "No hay comprobantes aprobados"}
+              {filter === "rejected" && "No hay comprobantes rechazados"}
+              {filter === "all" && "No hay comprobantes"}
             </p>
-          )}
-        </div>
-
-        {/* Rejected Proofs */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-semibold">Rechazados</h2>
-            <Badge variant="destructive" className="bg-red-100 text-red-800">
-              {rejectedProofs.length}
-            </Badge>
           </div>
-          {rejectedProofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rejectedProofs.map((proof) => (
-                <ProofCard key={proof.id} proof={proof} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">
-              No hay comprobantes rechazados
-            </p>
-          )}
-        </div>
+        )}
       </div>
     </main>
   )
