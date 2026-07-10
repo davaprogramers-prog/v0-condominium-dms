@@ -27,7 +27,20 @@ export default async function IngresosPage({
     redirect("/dashboard")
   }
 
-  const isAdmin = true
+  // Verify user role - only admin and super_admin can access Ingresos
+  const { data: userCondo } = await supabase
+    .from("condo_users")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("condo_id", condoId)
+    .single()
+
+  const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
+
+  // Only allow admin access
+  if (!isAdmin) {
+    redirect("/dashboard")
+  }
 
   // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams

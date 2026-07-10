@@ -20,6 +20,21 @@ export default async function CasasPage() {
     redirect("/dashboard")
   }
 
+  // Verify user role - only admin and super_admin can access Casas
+  const { data: userCondo } = await supabase
+    .from("condo_users")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("condo_id", condoId)
+    .single()
+
+  const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
+
+  // Only allow admin access
+  if (!isAdmin) {
+    redirect("/dashboard")
+  }
+
   // Fetch houses and theme together
   const [housesResponse, themeResponse] = await Promise.all([
     supabase
@@ -46,8 +61,6 @@ export default async function CasasPage() {
     const numB = parseInt(b.house_number?.replace(/\D/g, '') || '0', 10)
     return numA - numB
   })
-
-  const isAdmin = true
 
   return (
     <div className="space-y-6">

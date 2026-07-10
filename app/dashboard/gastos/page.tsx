@@ -28,8 +28,21 @@ export default async function GastosPage({
     redirect("/dashboard")
   }
 
-  const isAdmin = true // If we got here via user_condos, they're an admin
-  const isSuperAdmin = false // Will be set below if verified
+  // Verify user role - only admin and super_admin can access Gastos
+  const { data: userCondo } = await supabase
+    .from("condo_users")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("condo_id", condoId)
+    .single()
+
+  const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
+  const isSuperAdmin = userCondo?.role === "super_admin"
+
+  // Only allow admin access
+  if (!isAdmin) {
+    redirect("/dashboard")
+  }
 
   // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams
