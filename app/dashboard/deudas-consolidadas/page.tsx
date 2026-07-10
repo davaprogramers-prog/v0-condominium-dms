@@ -6,7 +6,13 @@ import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function DeudasConsolidadasPage() {
   const supabase = createClient()
-  const { condoId, userId } = await getUserCondoId()
+  const userCondoData = await getUserCondoId()
+  
+  if (!userCondoData) {
+    redirect("/auth/login")
+  }
+
+  const { condoId, userId } = userCondoData
 
   if (!userId || !condoId) redirect("/auth/login")
 

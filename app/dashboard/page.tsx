@@ -178,12 +178,22 @@ export default async function DashboardPage() {
                 {isSuperAdmin ? "Super Administrador - Todos los condominios" : condo?.name || "Condominio"}
               </p>
             </div>
-            <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="w-full sm:w-fit">
-                <Settings className="h-4 w-4 mr-2" />
-                Configuración
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
+                <Button variant="outline" size="sm" className="w-full sm:w-fit">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configuración
+                </Button>
+              </Link>
+              {isAdmin && (
+                <Link href="/dashboard/deudas-consolidadas" className="w-full sm:w-auto">
+                  <Button variant="default" size="sm" className="w-full sm:w-fit bg-red-600 hover:bg-red-700">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Ver Deudas Consolidadas
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
