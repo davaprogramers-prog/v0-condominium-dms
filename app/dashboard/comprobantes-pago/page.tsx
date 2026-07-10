@@ -101,10 +101,13 @@ export default function ProofsPage() {
       }
 
       // Get all profiles to map resident names
-      const { data: residentsData } = await supabase
+      const { data: residentsData, error: residentsError } = await supabase
         .from("profiles")
         .select("id, full_name")
         .eq("condo_id", profile.condo_id)
+
+      console.log("[v0] Residents data:", residentsData, "Error:", residentsError)
+      console.log("[v0] Proofs data sample:", proofData?.[0])
 
       const resMap = new Map<string, string>()
       residentsData?.forEach((resident: any) => {
