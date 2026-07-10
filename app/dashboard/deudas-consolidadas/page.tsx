@@ -78,11 +78,11 @@ export default async function DeudasConsolidadasPage() {
   }
 
   // Get all debts from condo_income for all houses
+  // Include multas regardless of status
   const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .neq("status", "approved")
   const condo_income = condoIncomeData || []
 
   // Calculate debts by house

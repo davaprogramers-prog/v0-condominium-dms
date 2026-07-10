@@ -63,12 +63,12 @@ export default async function DebtDetailPage({
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
   // Get all debts for this house from condo_income
+  // Include multas regardless of status since they're stored in condo_income
   const { data: debtsData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
-    .neq("status", "approved")
     .order("created_at", { ascending: false })
   const debts = debtsData || []
 
