@@ -30,28 +30,26 @@ export function DebtPaymentForm({
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedDebts, setSelectedDebts] = useState<SelectedDebt[]>([])
-  const [selectedTotal, setSelectedTotal] = useState(0)
+  const [updateKey, setUpdateKey] = useState(0)
 
-  // Listen for changes from DebtBreakdownClient
-  useEffect(() => {
-    const checkDebts = () => {
-      if (typeof window !== "undefined" && window.selectedDebts) {
-        setSelectedDebts(window.selectedDebts)
-        setSelectedTotal(window.selectedTotal || 0)
-      }
-    }
-
-    checkDebts()
-    
-    // Poll for updates every 100ms to catch selection changes
-    const interval = setInterval(checkDebts, 100)
-    return () => clearInterval(interval)
-  }, [])
+  // Get selected debts from window directly
+  const selectedDebts: SelectedDebt[] = typeof window !== "undefined" 
+    ? ((window as any).selectedDebts || [])
+    : []
+  const selectedTotal: number = typeof window !== "undefined"
+    ? ((window as any).selectedTotal || 0)
+    : 0
   
-  // Use selectedTotal if debts are selected, otherwise show full debt
   const displayAmount = selectedTotal > 0 ? selectedTotal : totalDebt
   const hasSelectedDebts = selectedDebts.length > 0
+
+  // Poll for selection changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUpdateKey((prev) => prev + 1)
+    }, 200)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
