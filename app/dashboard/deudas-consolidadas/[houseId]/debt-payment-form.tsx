@@ -1,11 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Upload, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+
+interface SelectedDebt {
+  id: string
+  amount: number
+}
 
 interface DebtPaymentFormProps {
   houseId: string
@@ -23,10 +27,31 @@ export function DebtPaymentForm({
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
-  const [amount, setAmount] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedDebts, setSelectedDebts] = useState<SelectedDebt[]>([])
+  const [selectedTotal, setSelectedTotal] = useState(0)
+
+  // Listen for changes from DebtBreakdownClient
+  useEffect(() => {
+    const checkDebts = () => {
+      if (typeof window !== "undefined" && window.selectedDebts) {
+        setSelectedDebts(window.selectedDebts)
+        setSelectedTotal(window.selectedTotal || 0)
+      }
+    }
+
+    checkDebts()
+    
+    // Poll for updates every 100ms to catch selection changes
+    const interval = setInterval(checkDebts, 100)
+    return () => clearInterval(interval)
+  }, [])
+  
+  // Use selectedTotal if debts are selected, otherwise show full debt
+  const displayAmount = selectedTotal > 0 ? selectedTotal : totalDebt
+  const hasSelectedDebts = selectedDebts.length > 0
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -62,14 +87,8 @@ export function DebtPaymentForm({
       return
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      setError("Por favor ingresa un monto válido")
-      return
-    }
-
-    const paymentAmount = parseFloat(amount)
-    if (paymentAmount > totalDebt) {
-      setError(`El monto no puede superar la deuda total (${currencySymbol}${totalDebt.toLocaleString()})`)
+    if (!hasSelectedDebts) {
+      setError("Por favor selecciona al menos una deuda para pagar")
       return
     }
 
@@ -96,27 +115,30 @@ export function DebtPaymentForm({
         .from("payment-proofs")
         .getPublicUrl(filePath)
 
-      // Create payment proof record
-      const { error: dbError } = await supabase.from("payment_proofs").insert({
-        house_id: houseId,
-        amount: paymentAmount,
-        file_url: publicUrl.publicUrl,
-        status: "pending",
-        created_at: new Date().toISOString(),
-      })
+      // Update all selected debt records with the receipt_url
+      const receiptUrl = publicUrl.publicUrl
+      
+      for (const debt of selectedDebts) {
+        const { error: updateError } = await supabase
+          .from("condo_income")
+          .update({
+            status: "approved",
+            receipt_url: receiptUrl,
+          })
+          .eq("id", debt.id)
 
-      if (dbError) {
-        setError("Error al guardar el comprobante: " + dbError.message)
-        setLoading(false)
-        return
+        if (updateError) {
+          setError("Error al actualizar deuda: " + updateError.message)
+          setLoading(false)
+          return
+        }
       }
 
       // Success
       setSuccess(true)
       setFile(null)
-      setAmount("")
 
-      // Reset after 3 seconds and refresh
+      // Reset after 2 seconds and refresh
       setTimeout(() => {
         router.refresh()
       }, 2000)
@@ -148,26 +170,26 @@ export function DebtPaymentForm({
 
       {!success && (
         <>
-          <div>
-            <label className="block text-sm font-medium mb-2">Monto a Pagar</label>
-            <div className="flex gap-2">
-              <span className="flex items-center px-3 bg-muted rounded-lg">{currencySymbol}</span>
-              <Input
-                type="number"
-                placeholder={`Máximo: ${totalDebt.toLocaleString()}`}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="0"
-                max={totalDebt}
-                step="0.01"
-                disabled={loading}
-              />
+          {!hasSelectedDebts && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+              Selecciona las deudas que quieres pagar en el desglose de arriba
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Deuda total: {currencySymbol}
-              {totalDebt.toLocaleString()}
-            </p>
-          </div>
+          )}
+          
+          {hasSelectedDebts && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Monto a Pagar</label>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">
+                  {currencySymbol}
+                  {displayAmount.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Basado en las {selectedDebts.length} deuda(s) seleccionada(s)
+                </p>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-2">Comprobante de Pago</label>
@@ -195,7 +217,7 @@ export function DebtPaymentForm({
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !file || !amount}>
+          <Button type="submit" className="w-full" disabled={loading || !file || !hasSelectedDebts}>
             {loading ? "Enviando..." : "Enviar Comprobante"}
           </Button>
         </>

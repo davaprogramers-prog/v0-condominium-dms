@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DebtPaymentForm } from "./debt-payment-form"
+import { DebtBreakdownClient } from "./debt-breakdown-client"
 
 const DEFAULT_THEME = {
   primary_color: "#2563eb",
@@ -147,146 +148,10 @@ export default async function DebtDetailPage({
       </div>
 
       {/* Debtails */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Deudas Details */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Desglose de Deudas</h2>
-
-          {debts.filter((d) => d.income_type === "fixed").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">
-                Gastos Comunes ({debts.filter((d) => d.income_type === "fixed").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "fixed")
-                  .map((expense, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[expense.period_month] || ""
-                    const yearStr = String(expense.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{expense.description || "Gasto"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium flex-shrink-0">
-                          {currencySymbol}
-                          {expense.amount?.toLocaleString()}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
-
-          {debts.filter((d) => d.income_type === "variable").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3">
-                Gastos Variables ({debts.filter((d) => d.income_type === "variable").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "variable")
-                  .map((expense, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[expense.period_month] || ""
-                    const yearStr = String(expense.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{expense.description || "Gasto variable"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium flex-shrink-0">
-                          {currencySymbol}
-                          {expense.amount?.toLocaleString()}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
-
-          {debts.filter((d) => d.income_type === "multa").length > 0 && (
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-semibold mb-3 text-red-600">
-                Multas ({debts.filter((d) => d.income_type === "multa").length})
-              </h3>
-              <div className="space-y-2 text-sm">
-                {debts
-                  .filter((d) => d.income_type === "multa")
-                  .map((fine, idx) => {
-                    const monthNames = [
-                      "",
-                      "ene",
-                      "feb",
-                      "mar",
-                      "abr",
-                      "may",
-                      "jun",
-                      "jul",
-                      "ago",
-                      "sep",
-                      "oct",
-                      "nov",
-                      "dic",
-                    ]
-                    const monthStr = monthNames[fine.period_month] || ""
-                    const yearStr = String(fine.period_year).slice(-2)
-                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
-
-                    return (
-                      <div key={idx} className="flex justify-between items-start">
-                        <div className="text-muted-foreground">
-                          <div>{fine.description || "Multa"}</div>
-                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
-                        </div>
-                        <span className="font-medium text-red-600 flex-shrink-0">
-                          {fine.currency === "CLP" ? currencySymbol : ""}
-                          {fine.amount?.toLocaleString()}
-                          {fine.currency === "UF" ? " UF" : ""}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Deudas Selection */}
+        <div className="lg:col-span-2">
+          <DebtBreakdownClient debts={debts} currencySymbol={currencySymbol} />
         </div>
 
         {/* Payment Form */}
@@ -294,7 +159,7 @@ export default async function DebtDetailPage({
           <h2 className="text-xl font-semibold">Informar Pago</h2>
           <DebtPaymentForm
             houseId={houseId}
-            houseName={`Casa #${house.number}`}
+            houseName={`Casa #${house.house_number || house.number}`}
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
           />
