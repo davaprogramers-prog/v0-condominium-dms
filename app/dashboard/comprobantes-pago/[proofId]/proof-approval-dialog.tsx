@@ -241,7 +241,6 @@ export function ProofApprovalDialog({
 
       if (updateError) throw updateError
 
-      setOpen(false)
       router.refresh()
     } catch (err: any) {
       console.error("[v0] Error rejecting proof:", err)
