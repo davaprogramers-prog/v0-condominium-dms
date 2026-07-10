@@ -155,44 +155,42 @@ export default async function DebtDetailPage({
         totalDebt={totalDebt}
       />
 
-          {/* Payment History */}
-          {paymentProofs.length > 0 && (
-            <div className="rounded-lg border bg-card p-4 mt-6">
-              <h3 className="font-semibold mb-3">Comprobantes de Pago</h3>
-              <div className="space-y-2 text-sm">
-                {paymentProofs.slice(0, 5).map((proof, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
-                    <div>
-                      <p className="font-medium">
-                        {currencySymbol}
-                        {proof.amount?.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(proof.created_at).toLocaleDateString("es-CL")}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
-                        proof.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : proof.status === "rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {proof.status === "approved"
-                        ? "Aprobado"
-                        : proof.status === "rejected"
-                          ? "Rechazado"
-                          : "Pendiente"}
-                    </span>
-                  </div>
-                ))}
+      {/* Payment History */}
+      {paymentProofs.length > 0 && (
+        <div className="rounded-lg border bg-card p-4 mt-6">
+          <h3 className="font-semibold mb-3">Comprobantes de Pago</h3>
+          <div className="space-y-2 text-sm">
+            {paymentProofs.slice(0, 5).map((proof, idx) => (
+              <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
+                <div>
+                  <p className="font-medium">
+                    {currencySymbol}
+                    {proof.amount?.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(proof.created_at).toLocaleDateString("es-CL")}
+                  </p>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded text-xs font-semibold ${
+                    proof.status === "approved"
+                      ? "bg-green-100 text-green-800"
+                      : proof.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {proof.status === "approved"
+                    ? "Aprobado"
+                    : proof.status === "rejected"
+                      ? "Rechazado"
+                      : "Pendiente"}
+                </span>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
