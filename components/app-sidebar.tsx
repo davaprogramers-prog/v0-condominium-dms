@@ -62,6 +62,7 @@ const iconColorMap: Record<string, string> = {
   
   // Mi Propiedad
   "mi-casa": "#60A5FA",        // Azul brillante
+  "mis-deudas": "#EF4444",     // Rojo para deudas
   "mis-reservas": "#F59E0B",   // Ámbar cálido
   "mis-visitas": "#EC4899",    // Rosa vibrante
   "mis-encomiendas": "#8B5CF6", // Violeta brillante
@@ -82,6 +83,7 @@ const iconColorMap: Record<string, string> = {
   "ingreso-variable": "#A855F7", // Púrpura
   "ingresos-multas": "#F59E0B", // Ámbar
   "cartolas": "#0EA5E9",       // Sky blue
+  "deudas-consolidadas": "#E11D48", // Rojo oscuro
   
   // Regulaciones
   "infracciones": "#EF4444",   // Rojo alerta
@@ -116,6 +118,7 @@ const adminMenuItems = [
   section: "Mi Propiedad",
   items: [
     { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Deudas", href: "/dashboard/mis-deudas", icon: AlertTriangle },
     { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
     { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
@@ -144,6 +147,7 @@ const adminMenuItems = [
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
+      { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
@@ -189,6 +193,7 @@ const adminWithPropertyMenuItems = [
   section: "Mi Propiedad",
   items: [
     { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Deudas", href: "/dashboard/mis-deudas", icon: AlertTriangle },
     { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
     { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },
@@ -217,6 +222,7 @@ const adminWithPropertyMenuItems = [
       { title: "Ingresos", href: "/dashboard/ingresos", icon: DollarSign },
       { title: "Ingresos Variables", href: "/dashboard/ingreso-variable", icon: TrendingUp },
       { title: "Ingresos por Multas", href: "/dashboard/ingresos-multas", icon: AlertTriangle },
+      { title: "Deudas Consolidadas", href: "/dashboard/deudas-consolidadas", icon: AlertTriangle },
       { title: "Cartolas", href: "/dashboard/cartolas", icon: Landmark },
     ]
   },
@@ -261,6 +267,7 @@ const ownerMenuItems = [
   section: "Mi Propiedad",
   items: [
     { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Deudas", href: "/dashboard/mis-deudas", icon: AlertTriangle },
     { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
     { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },

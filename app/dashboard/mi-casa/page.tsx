@@ -4,6 +4,7 @@ import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { DollarSign, FileText, TrendingUp } from "lucide-react"
 import { PaymentUploadDialogThemedWrapper } from "./payment-upload-dialog-themed"
 import { AvatarUpload } from "./avatar-upload"
+import { PendingFines } from "./pending-fines"
 import { type CondoTheme, DEFAULT_THEME } from "@/lib/theme-utils"
 
 export default async function MiCasaPage() {
@@ -72,6 +73,12 @@ export default async function MiCasaPage() {
     .eq("id", condoId)
     .single()
 
+  const { data: infractions } = await supabase
+    .from("infractions")
+    .select("*")
+    .eq("house_id", houseId)
+    .order("infraction_date", { ascending: false })
+
   const { data: themeData } = await supabase
     .from("condominium_themes")
     .select("*")
@@ -133,6 +140,9 @@ export default async function MiCasaPage() {
           currencySymbol={condo?.currency_symbol}
         />
       </div>
+
+      {/* Pending Fines Alert */}
+      {infractions && <PendingFines fines={infractions} currencySymbol={condo?.currency_symbol || "$"} houseId={houseId} />}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

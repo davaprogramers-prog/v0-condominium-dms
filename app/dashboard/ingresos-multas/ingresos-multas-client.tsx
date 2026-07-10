@@ -232,16 +232,18 @@ export function IngresoMultasClient({
             </div>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Casa</TableHead>
-                  <TableHead>Residente</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
-                  {isAdmin && <TableHead className="text-right">Acciones</TableHead>}
-                </TableRow>
-              </TableHeader>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Casa</TableHead>
+                    <TableHead>Residente</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-right">Monto Pagado</TableHead>
+                    <TableHead className="text-right">Saldo Pendiente</TableHead>
+                    <TableHead>Moneda</TableHead>
+                    {isAdmin && <TableHead className="text-right">Acciones</TableHead>}
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {allFinesIncome.map((item, idx) => {
                   const date = item.paid_date || item.income_date
@@ -254,11 +256,32 @@ export function IngresoMultasClient({
                         <Badge variant="outline">#{item.houses?.house_number}</Badge>
                       </TableCell>
                       <TableCell>{item.houses?.owner_name || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-sm max-w-xs">
                         {item.description || "Pago de multa"}
                       </TableCell>
                       <TableCell className="text-right font-semibold text-red-600">
-                        ${(item.fine_amount || item.amount || 0).toLocaleString("es-CL")}
+                        ${(item.amount || 0).toLocaleString("es-CL")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {item.fine_payments?.[0]?.infractions?.amount_pending ? (
+                          <span className="font-semibold">
+                            {item.fine_payments[0].infractions.currency === "UF" 
+                              ? `${item.fine_payments[0].infractions.amount_pending} UF`
+                              : `${currencySymbol}${item.fine_payments[0].infractions.amount_pending.toLocaleString("es-CL")}`
+                            }
+                          </span>
+                        ) : (
+                          <span className="text-green-600 font-semibold">Pagada</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          item.fine_payments?.[0]?.currency === "UF" 
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}>
+                          {item.fine_payments?.[0]?.currency || "CLP"}
+                        </span>
                       </TableCell>
                       {isAdmin && (
                         <TableCell className="text-right space-x-2">
