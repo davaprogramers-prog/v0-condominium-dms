@@ -13,27 +13,21 @@ export default async function CasasPage() {
 
   if (!user) redirect("/auth/login")
 
-  // Get condo_id using the helper function (works for both owners and admins)
-  const condoId = await getUserCondoId(supabase, user.id)
-
-  if (!condoId) {
-    redirect("/dashboard")
-  }
-
-  // Verify user role - only admin and super_admin can access Casas
-  const { data: userCondo } = await supabase
+  // First, check if user is admin in ANY condominium
+  const { data: userCondos } = await supabase
     .from("condo_users")
-    .select("role")
+    .select("condo_id, role")
     .eq("user_id", user.id)
-    .eq("condo_id", condoId)
-    .single()
+    .in("role", ["admin", "super_admin"])
 
-  const isAdmin = userCondo?.role === "admin" || userCondo?.role === "super_admin"
-
-  // Only allow admin access
-  if (!isAdmin) {
+  if (!userCondos || userCondos.length === 0) {
+    // Not an admin anywhere, redirect
     redirect("/dashboard")
   }
+
+  // Get the first admin role condominium
+  const adminCondo = userCondos[0]
+  const condoId = adminCondo.condo_id
 
   // Fetch houses and theme together
   const [housesResponse, themeResponse] = await Promise.all([
