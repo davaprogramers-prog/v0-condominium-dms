@@ -117,7 +117,12 @@ export default async function DeudasConsolidadasPage() {
       }
     })
     .filter((h) => h.totalDebt > 0)
-    .sort((a, b) => b.totalDebt - a.totalDebt)
+    .sort((a, b) => {
+      // Extract numeric part from houseNumber (#8 => 8, #37 => 37)
+      const aNum = parseInt(a.houseNumber.replace("#", "")) || 0
+      const bNum = parseInt(b.houseNumber.replace("#", "")) || 0
+      return aNum - bNum
+    })
 
   if (housesDebts.length === 0) {
     return (
