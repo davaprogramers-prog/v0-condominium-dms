@@ -3,7 +3,6 @@ import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { OwnerHouseCard } from "./owner-house-card"
-import { PendingPaymentsSection } from "./pending-payments-section"
 
 const colorMap: Record<string, { bg: string; }> = {
   "bg-blue-500": { bg: "#3B82F6" },
@@ -179,38 +178,18 @@ export default async function DashboardPage() {
                 {isSuperAdmin ? "Super Administrador - Todos los condominios" : condo?.name || "Condominio"}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
-                <Button variant="outline" size="sm" className="w-full sm:w-fit">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Configuración
-                </Button>
-              </Link>
-              {isAdmin && (
-                <Link href="/dashboard/deudas-consolidadas" className="w-full sm:w-auto">
-                  <Button variant="default" size="sm" className="w-full sm:w-fit bg-red-600 hover:bg-red-700">
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Ver Deudas Consolidadas
-                  </Button>
-                </Link>
-              )}
-            </div>
+            <Link href="/dashboard/configuracion" className="w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="w-full sm:w-fit">
+                <Settings className="h-4 w-4 mr-2" />
+                Configuración
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* Admin Dashboard */}
         {isAdmin && (
-          <div className="space-y-6">
-            {/* Pending Payments Section */}
-            {condoId && (
-              <PendingPaymentsSection 
-                condoId={condoId} 
-                currencySymbol={condo?.currency_symbol || "$"}
-              />
-            )}
-
-            {/* Admin Menu Items */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {adminMenuItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 hover:bg-accent transition-colors cursor-pointer h-full hover:shadow-md hover:border-primary/50">
@@ -227,7 +206,6 @@ export default async function DashboardPage() {
                 </div>
               </Link>
             ))}
-            </div>
           </div>
         )}
 
