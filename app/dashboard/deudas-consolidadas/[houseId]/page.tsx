@@ -156,15 +156,39 @@ export default async function DebtDetailPage({
               <div className="space-y-2 text-sm">
                 {debts
                   .filter((d) => d.income_type === "fixed")
-                  .map((expense, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <span className="text-muted-foreground">{expense.description || "Gasto"}</span>
-                      <span className="font-medium">
-                        {currencySymbol}
-                        {expense.amount?.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
+                  .map((expense, idx) => {
+                    const monthNames = [
+                      "",
+                      "ene",
+                      "feb",
+                      "mar",
+                      "abr",
+                      "may",
+                      "jun",
+                      "jul",
+                      "ago",
+                      "sep",
+                      "oct",
+                      "nov",
+                      "dic",
+                    ]
+                    const monthStr = monthNames[expense.period_month] || ""
+                    const yearStr = String(expense.period_year).slice(-2)
+                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
+
+                    return (
+                      <div key={idx} className="flex justify-between items-start">
+                        <div className="text-muted-foreground">
+                          <div>{expense.description || "Gasto"}</div>
+                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
+                        </div>
+                        <span className="font-medium flex-shrink-0">
+                          {currencySymbol}
+                          {expense.amount?.toLocaleString()}
+                        </span>
+                      </div>
+                    )
+                  })}
               </div>
             </div>
           )}
@@ -177,17 +201,39 @@ export default async function DebtDetailPage({
               <div className="space-y-2 text-sm">
                 {debts
                   .filter((d) => d.income_type === "variable")
-                  .map((expense, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        {expense.description || "Gasto variable"}
-                      </span>
-                      <span className="font-medium">
-                        {currencySymbol}
-                        {expense.amount?.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
+                  .map((expense, idx) => {
+                    const monthNames = [
+                      "",
+                      "ene",
+                      "feb",
+                      "mar",
+                      "abr",
+                      "may",
+                      "jun",
+                      "jul",
+                      "ago",
+                      "sep",
+                      "oct",
+                      "nov",
+                      "dic",
+                    ]
+                    const monthStr = monthNames[expense.period_month] || ""
+                    const yearStr = String(expense.period_year).slice(-2)
+                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
+
+                    return (
+                      <div key={idx} className="flex justify-between items-start">
+                        <div className="text-muted-foreground">
+                          <div>{expense.description || "Gasto variable"}</div>
+                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
+                        </div>
+                        <span className="font-medium flex-shrink-0">
+                          {currencySymbol}
+                          {expense.amount?.toLocaleString()}
+                        </span>
+                      </div>
+                    )
+                  })}
               </div>
             </div>
           )}
@@ -200,16 +246,40 @@ export default async function DebtDetailPage({
               <div className="space-y-2 text-sm">
                 {debts
                   .filter((d) => d.income_type === "multa")
-                  .map((fine, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <span className="text-muted-foreground">{fine.description || "Multa"}</span>
-                      <span className="font-medium text-red-600">
-                        {fine.currency === "CLP" ? currencySymbol : ""}
-                        {fine.amount?.toLocaleString()}
-                        {fine.currency === "UF" ? " UF" : ""}
-                      </span>
-                    </div>
-                  ))}
+                  .map((fine, idx) => {
+                    const monthNames = [
+                      "",
+                      "ene",
+                      "feb",
+                      "mar",
+                      "abr",
+                      "may",
+                      "jun",
+                      "jul",
+                      "ago",
+                      "sep",
+                      "oct",
+                      "nov",
+                      "dic",
+                    ]
+                    const monthStr = monthNames[fine.period_month] || ""
+                    const yearStr = String(fine.period_year).slice(-2)
+                    const period = monthStr && yearStr ? `(${monthStr}-${yearStr})` : ""
+
+                    return (
+                      <div key={idx} className="flex justify-between items-start">
+                        <div className="text-muted-foreground">
+                          <div>{fine.description || "Multa"}</div>
+                          {period && <div className="text-xs text-muted-foreground/70">{period}</div>}
+                        </div>
+                        <span className="font-medium text-red-600 flex-shrink-0">
+                          {fine.currency === "CLP" ? currencySymbol : ""}
+                          {fine.amount?.toLocaleString()}
+                          {fine.currency === "UF" ? " UF" : ""}
+                        </span>
+                      </div>
+                    )
+                  })}
               </div>
             </div>
           )}
