@@ -71,6 +71,9 @@ export function ProofApprovalDialog({
       }
 
       const today = new Date().toISOString().split("T")[0]
+      // Set income_date to the first day of the period for consistency
+      const periodDate = new Date(proof.period_year, proof.period_month - 1, 1)
+      const incomeDateForPeriod = periodDate.toISOString().split("T")[0]
 
       if (isGastosComunes) {
         // For consolidated debts: update the linked income records from payment_proofs
@@ -83,6 +86,7 @@ export function ProofApprovalDialog({
             .update({
               status: "approved",
               receipt_url: proof.receipt_url,
+              income_date: incomeDateForPeriod,
             })
             .eq("id", proof.fixed_income_id)
 
@@ -96,6 +100,7 @@ export function ProofApprovalDialog({
             .update({
               status: "approved",
               receipt_url: proof.receipt_url,
+              income_date: incomeDateForPeriod,
             })
             .eq("id", proof.variable_income_id)
 
@@ -115,13 +120,14 @@ export function ProofApprovalDialog({
           const fixedIncome = existingIncomes?.find(i => i.income_type === "fixed" || i.income_type === "gasto_comun" || i.income_type === "cuota")
           const variableIncome = existingIncomes?.find(i => i.income_type === "variable" || i.income_type === "gasto_comun_variable")
 
-          // Update existing income records to approved status with receipt URL
+          // Update existing income records to approved status with receipt URL and aligned income_date
           if (fixedIncome) {
             const { error: fixedError } = await supabase
               .from("condo_income")
               .update({
                 status: "approved",
                 receipt_url: proof.receipt_url,
+                income_date: incomeDateForPeriod,
               })
               .eq("id", fixedIncome.id)
 
@@ -134,6 +140,7 @@ export function ProofApprovalDialog({
               .update({
                 status: "approved",
                 receipt_url: proof.receipt_url,
+                income_date: incomeDateForPeriod,
               })
               .eq("id", variableIncome.id)
 
@@ -161,7 +168,7 @@ export function ProofApprovalDialog({
             house_id: proof.house_id,
             income_type: "multa",
             amount: totalAmount,
-            income_date: today,
+            income_date: incomeDateForPeriod,
             period_month: proof.period_month,
             period_year: proof.period_year,
             description: `Pago de multas - Casa #${house.house_number}`,
