@@ -34,40 +34,34 @@ export async function updateDebtsWithPayment(
     throw new Error("Perfil de usuario no encontrado")
   }
 
-  // Update each debt record using raw SQL to bypass RLS
-  const updateQuery = `
-    UPDATE condo_income
-    SET status = 'approved', receipt_url = $1, updated_at = NOW()
-    WHERE id = ANY($2::uuid[]) AND condo_id = $3
-    RETURNING id
-  `
-
-  const { data, error } = await supabase.rpc('execute_update_debts', {
-    debt_ids: debtIds,
-    receipt_url: receiptUrl,
-    condo_id: userProfile.condo_id,
-  })
-
-  // If RPC doesn't exist, try direct SQL approach with service role
-  if (error) {
-    // Fallback: try individual updates
-    const adminSupabase = createClient({ admin: true })
-    
-    for (const debtId of debtIds) {
-      const { error: updateError } = await adminSupabase
-        .from("condo_income")
-        .update({
-          status: "approved",
-          receipt_url: receiptUrl,
-        })
-        .eq("id", debtId)
-        .eq("condo_id", userProfile.condo_id)
-
-      if (updateError) {
-        console.error("Error updating debt:", updateError)
-        throw new Error(`Error al actualizar deuda: ${updateError.message}`)
-      }
+  // Call RPC function to update debts
+  const { data: rpcResult, error: rpcError } = await supabase.rpc(
+    'update_debts_with_payment',
+    {
+      debt_ids: debtIds,
+      receipt_url: receiptUrl,
+      condo_id: userProfile.condo_id,
     }
+  )
+
+  if (rpcError) {
+    console.error("Error calling RPC:", rpcError)
+    
+    // Fallback: Create a payment proof record instead
+    const { error: insertError } = await supabase
+      .from("payment_proofs")
+      .insert({
+        condo_id: userProfile.condo_id,
+        debt_ids: debtIds,
+        receipt_url: receiptUrl,
+        status: "pending_approval",
+      })
+
+    if (insertError) {
+      throw new Error(`Error al registrar pago: ${insertError.message}`)
+    }
+  } else if (!rpcResult || rpcResult.length === 0) {
+    throw new Error("No se pudieron actualizar las deudas")
   }
 
   return { success: true }
