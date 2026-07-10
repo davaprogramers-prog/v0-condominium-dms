@@ -86,6 +86,10 @@ export default async function IngresoMultasPage({
     incomeRecords = data || []
     paidCount = incomeRecords.length
     totalFines = incomeRecords.reduce((sum, inc) => sum + (inc.amount || 0), 0)
+    
+    console.log("[v0] Income multas query - period:", { year, month })
+    console.log("[v0] Income multas found:", incomeRecords.length)
+    console.log("[v0] Sample multa:", incomeRecords[0])
   }
 
   // Use only income records (no need to combine from infractions table)
