@@ -77,23 +77,26 @@ export default async function DeudasConsolidadasPage() {
   }
 
   // Get debts for all houses
-  const { data: condo_expenses = [] } = await supabase
+  const { data: condoExpensesData } = await supabase
     .from("condo_expenses")
     .select("*")
     .eq("condo_id", condoId)
     .eq("is_paid", false)
+  const condo_expenses = condoExpensesData || []
 
-  const { data: condo_income = [] } = await supabase
+  const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .neq("status", "approved")
+  const condo_income = condoIncomeData || []
 
-  const { data: infractions = [] } = await supabase
+  const { data: infractionsData } = await supabase
     .from("infractions")
     .select("*")
     .eq("condo_id", condoId)
     .gt("amount_pending", 0)
+  const infractions = infractionsData || []
 
   // Calculate debts by house
   const housesDebts: HouseDebt[] = houses
