@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Upload, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { updateDebtsWithPayment } from "../actions"
 
 interface DebtItem {
   id: string
@@ -100,23 +101,16 @@ export function DebtPaymentForm({
         .from("payment-proofs")
         .getPublicUrl(filePath)
 
-      // Update all selected debt records with the receipt_url
+      // Update all selected debt records using server action
       const receiptUrl = publicUrl.publicUrl
+      const debtIds = selectedDebts.map((d) => d.id)
       
-      for (const debt of selectedDebts) {
-        const { error: updateError } = await supabase
-          .from("condo_income")
-          .update({
-            status: "approved",
-            receipt_url: receiptUrl,
-          })
-          .eq("id", debt.id)
-
-        if (updateError) {
-          setError("Error al actualizar deuda: " + updateError.message)
-          setLoading(false)
-          return
-        }
+      try {
+        await updateDebtsWithPayment(debtIds, receiptUrl)
+      } catch (err) {
+        setError("Error al actualizar deuda: " + (err as Error).message)
+        setLoading(false)
+        return
       }
 
       // Success
