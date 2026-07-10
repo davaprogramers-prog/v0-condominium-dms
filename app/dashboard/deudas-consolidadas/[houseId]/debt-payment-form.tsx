@@ -19,6 +19,12 @@ interface DebtPaymentFormProps {
   currencySymbol: string
   selectedDebts: DebtItem[]
   selectedTotal: number
+  baseCommonTotal: number
+  baseVariableTotal: number
+  commonTotal: number
+  variableTotal: number
+  fixedExemptionPercent: number
+  variableExemptionPercent: number
 }
 
 export function DebtPaymentForm({
@@ -29,6 +35,12 @@ export function DebtPaymentForm({
   currencySymbol,
   selectedDebts,
   selectedTotal,
+  baseCommonTotal,
+  baseVariableTotal,
+  commonTotal,
+  variableTotal,
+  fixedExemptionPercent,
+  variableExemptionPercent,
 }: DebtPaymentFormProps) {
   const supabase = createClient()
   const router = useRouter()
@@ -100,7 +112,8 @@ export function DebtPaymentForm({
         .from("receipts")
         .getPublicUrl(uploadData.path)
 
-      // Create payment proof record using correct schema fields
+      // Create payment proof record using BASE amounts (before exemptions)
+      // This matches the behavior in propietarios
       const now = new Date()
       
       const { error: insertError } = await supabase
@@ -109,8 +122,8 @@ export function DebtPaymentForm({
           condo_id: condoId,
           house_id: houseId,
           uploaded_by: user.id,
-          fixed_amount: selectedTotal,
-          variable_amount: 0,
+          fixed_amount: baseCommonTotal,
+          variable_amount: baseVariableTotal,
           fines_amount: 0,
           receipt_url: publicUrl.publicUrl,
           status: "pending",

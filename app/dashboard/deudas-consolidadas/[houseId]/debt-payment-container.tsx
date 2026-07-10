@@ -21,6 +21,12 @@ interface DebtPaymentContainerProps {
   condoId: string
   houseName: string
   totalDebt: number
+  baseCommonTotal: number
+  baseVariableTotal: number
+  commonTotal: number
+  variableTotal: number
+  fixedExemptionPercent: number
+  variableExemptionPercent: number
 }
 
 export function DebtPaymentContainer({
@@ -30,6 +36,12 @@ export function DebtPaymentContainer({
   condoId,
   houseName,
   totalDebt,
+  baseCommonTotal,
+  baseVariableTotal,
+  commonTotal,
+  variableTotal,
+  fixedExemptionPercent,
+  variableExemptionPercent,
 }: DebtPaymentContainerProps) {
   const [selectedDebts, setSelectedDebts] = useState<Debt[]>([])
 
@@ -58,6 +70,12 @@ export function DebtPaymentContainer({
           currencySymbol={currencySymbol}
           selectedDebts={selectedDebts}
           selectedTotal={selectedTotal}
+          baseCommonTotal={baseCommonTotal}
+          baseVariableTotal={baseVariableTotal}
+          commonTotal={commonTotal}
+          variableTotal={variableTotal}
+          fixedExemptionPercent={fixedExemptionPercent}
+          variableExemptionPercent={variableExemptionPercent}
         />
       </div>
     </div>

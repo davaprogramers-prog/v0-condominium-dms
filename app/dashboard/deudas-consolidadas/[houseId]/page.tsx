@@ -76,6 +76,13 @@ export default async function DebtDetailPage({
     (item) => item.status !== "approved" || (item.status === "approved" && !item.receipt_url)
   )
 
+  // Get active exemptions for this house
+  const { data: exemptions } = await supabase
+    .from("exemptions")
+    .select("house_id, fixed_percentage, variable_percentage, is_permanent, start_date, end_date")
+    .eq("condo_id", condoId)
+    .eq("house_id", houseId)
+
   const { data: paymentProofsData } = await supabase
     .from("payment_proofs")
     .select("*")
@@ -83,13 +90,35 @@ export default async function DebtDetailPage({
     .order("created_at", { ascending: false })
   const paymentProofs = paymentProofsData || []
 
-  // Calculate totals
-  const commonTotal = debts
+  // Calculate base totals
+  const baseCommonTotal = debts
     .filter((d) => d.income_type === "fixed")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
-  const variableTotal = debts
+  const baseVariableTotal = debts
     .filter((d) => d.income_type === "variable")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
+
+  // Calculate exemption percentages
+  const periodEnd = new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+  const periodStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+  
+  let fixedExemptionPercent = 0
+  let variableExemptionPercent = 0
+
+  for (const ex of exemptions || []) {
+    const start = ex.start_date ? new Date(ex.start_date) : null
+    const end = ex.end_date ? new Date(ex.end_date) : null
+    const startsInTime = !start || start <= periodEnd
+    const endsInTime = ex.is_permanent || !end || end >= periodStart
+    if (startsInTime && endsInTime) {
+      fixedExemptionPercent = Math.max(fixedExemptionPercent, Number(ex.fixed_percentage) || 0)
+      variableExemptionPercent = Math.max(variableExemptionPercent, Number(ex.variable_percentage) || 0)
+    }
+  }
+
+  // Calculate effective totals (with exemptions)
+  const commonTotal = Math.round(baseCommonTotal * (1 - fixedExemptionPercent / 100))
+  const variableTotal = Math.round(baseVariableTotal * (1 - variableExemptionPercent / 100))
   const finesCLP = debts
     .filter((d) => d.income_type === "multa" && d.currency === "CLP")
     .reduce((sum, e) => sum + (e.amount || 0), 0)
@@ -154,6 +183,12 @@ export default async function DebtDetailPage({
         condoId={condoId}
         houseName={`Casa #${house.house_number || house.number}`}
         totalDebt={totalDebt}
+        baseCommonTotal={baseCommonTotal}
+        baseVariableTotal={baseVariableTotal}
+        commonTotal={commonTotal}
+        variableTotal={variableTotal}
+        fixedExemptionPercent={fixedExemptionPercent}
+        variableExemptionPercent={variableExemptionPercent}
       />
 
       {/* Payment History */}
