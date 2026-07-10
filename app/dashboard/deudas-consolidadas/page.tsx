@@ -77,12 +77,13 @@ export default async function DeudasConsolidadasPage() {
     )
   }
 
-  // Get all debts from condo_income for all houses
-  // Include multas regardless of status
+  // Get all PENDING debts from condo_income for all houses
+  // Only show unpaid debts (status != "approved")
   const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
+    .neq("status", "approved")
   const condo_income = condoIncomeData || []
 
   // Calculate debts by house
@@ -138,6 +139,13 @@ export default async function DeudasConsolidadasPage() {
     )
   }
 
+  // Calculate totals for summary
+  const totalGeneralDebt = housesDebts.reduce((sum, h) => sum + h.totalDebt, 0)
+  const totalCommonExpense = housesDebts.reduce((sum, h) => sum + h.commonExpense, 0)
+  const totalVariableExpense = housesDebts.reduce((sum, h) => sum + h.variableExpense, 0)
+  const totalFinesCLP = housesDebts.reduce((sum, h) => sum + h.finesCLP, 0)
+  const totalFinesUF = housesDebts.reduce((sum, h) => sum + h.finesUF, 0)
+
   return (
     <div className="space-y-6">
       <div>
@@ -145,6 +153,30 @@ export default async function DeudasConsolidadasPage() {
         <p className="text-muted-foreground">
           Visualiza y gestiona las deudas de todas las casas ({housesDebts.length})
         </p>
+      </div>
+
+      {/* Summary totals */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground mb-2">Total a Recaudar</p>
+          <p className="text-2xl font-bold text-red-600">${totalGeneralDebt.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground mb-2">Gasto Común</p>
+          <p className="text-2xl font-bold text-blue-600">${totalCommonExpense.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground mb-2">Gasto Variable</p>
+          <p className="text-2xl font-bold text-amber-600">${totalVariableExpense.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground mb-2">Multas CLP</p>
+          <p className="text-2xl font-bold text-red-500">${totalFinesCLP.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground mb-2">Multas UF</p>
+          <p className="text-2xl font-bold text-red-500">{totalFinesUF.toLocaleString()} UF</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
