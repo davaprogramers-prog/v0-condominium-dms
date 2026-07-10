@@ -112,25 +112,36 @@ export function DebtPaymentForm({
         .from("receipts")
         .getPublicUrl(uploadData.path)
 
-      // Create payment proof record using BASE amounts (before exemptions)
-      // This matches the behavior in propietarios
-      const now = new Date()
-      
+      // Get details of selected debts to link to payment_proofs
+      const { data: selectedDebtsData } = await supabase
+        .from("condo_income")
+        .select("*")
+        .in("id", selectedDebts.map((d) => d.id))
+
+      if (!selectedDebtsData || selectedDebtsData.length === 0) {
+        throw new Error("No se encontraron las deudas seleccionadas")
+      }
+
+      // Create a payment_proof record for EACH selected debt
+      const paymentProofsToCreate = selectedDebtsData.map((debt) => ({
+        condo_id: condoId,
+        house_id: houseId,
+        uploaded_by: user.id,
+        fixed_amount: debt.income_type === "fixed" ? debt.amount : 0,
+        variable_amount: debt.income_type === "variable" ? debt.amount : 0,
+        fines_amount: 0,
+        receipt_url: publicUrl.publicUrl,
+        status: "pending",
+        period_month: debt.period_month,
+        period_year: debt.period_year,
+        payment_type: "gastos_comunes",
+        fixed_income_id: debt.income_type === "fixed" ? debt.id : null,
+        variable_income_id: debt.income_type === "variable" ? debt.id : null,
+      }))
+
       const { error: insertError } = await supabase
         .from("payment_proofs")
-        .insert({
-          condo_id: condoId,
-          house_id: houseId,
-          uploaded_by: user.id,
-          fixed_amount: baseCommonTotal,
-          variable_amount: baseVariableTotal,
-          fines_amount: 0,
-          receipt_url: publicUrl.publicUrl,
-          status: "pending",
-          period_month: now.getMonth() + 1,
-          period_year: now.getFullYear(),
-          payment_type: "gastos_comunes",
-        })
+        .insert(paymentProofsToCreate)
 
       if (insertError) throw insertError
 
