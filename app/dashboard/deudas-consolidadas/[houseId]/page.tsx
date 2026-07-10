@@ -3,8 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DebtPaymentForm } from "./debt-payment-form"
-import { DebtBreakdownClient } from "./debt-breakdown-client"
+import { DebtPaymentContainer } from "./debt-payment-container"
 
 const DEFAULT_THEME = {
   primary_color: "#2563eb",
@@ -148,21 +147,13 @@ export default async function DebtDetailPage({
       </div>
 
       {/* Debtails */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Deudas Selection */}
-        <div className="lg:col-span-2">
-          <DebtBreakdownClient debts={debts} currencySymbol={currencySymbol} />
-        </div>
-
-        {/* Payment Form */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Informar Pago</h2>
-          <DebtPaymentForm
-            houseId={houseId}
-            houseName={`Casa #${house.house_number || house.number}`}
-            totalDebt={totalDebt}
-            currencySymbol={currencySymbol}
-          />
+      <DebtPaymentContainer
+        debts={debts}
+        currencySymbol={currencySymbol}
+        houseId={houseId}
+        houseName={`Casa #${house.house_number || house.number}`}
+        totalDebt={totalDebt}
+      />
 
           {/* Payment History */}
           {paymentProofs.length > 0 && (

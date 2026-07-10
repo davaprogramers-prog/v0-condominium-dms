@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 
 interface DebtItem {
@@ -16,9 +16,16 @@ interface DebtItem {
 interface DebtBreakdownClientProps {
   debts: DebtItem[]
   currencySymbol: string
+  selectedDebts?: DebtItem[]
+  onSelectionChange?: (debts: DebtItem[]) => void
 }
 
-export function DebtBreakdownClient({ debts, currencySymbol }: DebtBreakdownClientProps) {
+export function DebtBreakdownClient({ 
+  debts, 
+  currencySymbol,
+  selectedDebts: propsSelectedDebts,
+  onSelectionChange
+}: DebtBreakdownClientProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const monthNames = ["", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
@@ -47,6 +54,14 @@ export function DebtBreakdownClient({ debts, currencySymbol }: DebtBreakdownClie
       return { id, amount: debt?.amount || 0 }
     })
   }, [selectedIds, debts])
+
+  // Notify parent component when selection changes
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selected = debts.filter((d) => selectedIds.has(d.id))
+      onSelectionChange(selected)
+    }
+  }, [selectedIds, debts, onSelectionChange])
 
   const handleToggle = (debtId: string) => {
     const newSelected = new Set(selectedIds)

@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Upload, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-interface SelectedDebt {
+interface DebtItem {
   id: string
-  amount: number
+  amount: number | null
 }
 
 interface DebtPaymentFormProps {
@@ -16,6 +16,8 @@ interface DebtPaymentFormProps {
   houseName: string
   totalDebt: number
   currencySymbol: string
+  selectedDebts: DebtItem[]
+  selectedTotal: number
 }
 
 export function DebtPaymentForm({
@@ -23,6 +25,8 @@ export function DebtPaymentForm({
   houseName,
   totalDebt,
   currencySymbol,
+  selectedDebts,
+  selectedTotal,
 }: DebtPaymentFormProps) {
   const supabase = createClient()
   const router = useRouter()
@@ -30,26 +34,9 @@ export function DebtPaymentForm({
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [updateKey, setUpdateKey] = useState(0)
-
-  // Get selected debts from window directly
-  const selectedDebts: SelectedDebt[] = typeof window !== "undefined" 
-    ? ((window as any).selectedDebts || [])
-    : []
-  const selectedTotal: number = typeof window !== "undefined"
-    ? ((window as any).selectedTotal || 0)
-    : 0
   
   const displayAmount = selectedTotal > 0 ? selectedTotal : totalDebt
   const hasSelectedDebts = selectedDebts.length > 0
-
-  // Poll for selection changes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUpdateKey((prev) => prev + 1)
-    }, 200)
-    return () => clearInterval(interval)
-  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
