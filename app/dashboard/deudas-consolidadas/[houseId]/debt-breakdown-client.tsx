@@ -20,6 +20,12 @@ interface DebtBreakdownClientProps {
   onSelectionChange?: (debts: DebtItem[]) => void
 }
 
+// Format number without locale to avoid hydration issues
+const formatNumber = (num: number | null | undefined): string => {
+  if (!num) return "0"
+  return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
 export function DebtBreakdownClient({ 
   debts, 
   currencySymbol,
@@ -131,7 +137,7 @@ export function DebtBreakdownClient({
                 </div>
                 <span className="font-medium flex-shrink-0 whitespace-nowrap">
                   {expense.currency === "CLP" || type !== "multa" ? currencySymbol : ""}
-                  {expense.amount?.toLocaleString()}
+                  {formatNumber(expense.amount)}
                   {expense.currency === "UF" ? " UF" : ""}
                 </span>
               </div>
@@ -156,7 +162,7 @@ export function DebtBreakdownClient({
             <p className="text-sm text-muted-foreground">Monto Seleccionado</p>
             <p className="text-2xl font-bold text-blue-600">
               {currencySymbol}
-              {selectedTotal.toLocaleString()}
+              {formatNumber(selectedTotal)}
             </p>
           </div>
         </div>
