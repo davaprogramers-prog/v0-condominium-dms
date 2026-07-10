@@ -114,7 +114,7 @@ export function DebtPaymentForm({
           status: "pending",
           period_month: now.getMonth() + 1,
           period_year: now.getFullYear(),
-          payment_type: "consolidated_debts",
+          payment_type: "gastos_comunes",
         })
 
       if (insertError) throw insertError
