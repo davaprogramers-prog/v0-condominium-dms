@@ -12,12 +12,12 @@ type FilterType = "pending" | "approved" | "rejected" | "all"
 interface House {
   id: string
   house_number: string | number
+  owner_name?: string
 }
 
 interface Proof {
   id: string
   house_id: string
-  uploaded_by: string
   status: string
   fixed_amount?: number
   variable_amount?: number
@@ -31,7 +31,6 @@ export default function ProofsPage() {
   const [filter, setFilter] = useState<FilterType>("pending")
   const [proofs, setProofs] = useState<Proof[]>([])
   const [houseMap, setHouseMap] = useState<Map<string, string>>(new Map())
-  const [residentMap, setResidentMap] = useState<Map<string, string>>(new Map())
   const [currencySymbol, setCurrencySymbol] = useState("$")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
@@ -76,7 +75,7 @@ export default function ProofsPage() {
       // Get houses first to build map
       const { data: houses } = await supabase
         .from("houses")
-        .select("id, house_number")
+        .select("id, house_number, owner_name")
         .eq("condo_id", profile.condo_id)
 
       const map = new Map<string, string>()
@@ -90,7 +89,7 @@ export default function ProofsPage() {
         .from("payment_proofs")
         .select(`
           *,
-          houses(id, house_number)
+          houses(id, house_number, owner_name)
         `)
         .eq("condo_id", profile.condo_id)
         .order("created_at", { ascending: false })
@@ -99,21 +98,6 @@ export default function ProofsPage() {
         setError(`Error al cargar comprobantes: ${proofError.message}`)
         return
       }
-
-      // Get all profiles to map resident names
-      const { data: residentsData, error: residentsError } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("condo_id", profile.condo_id)
-
-      console.log("[v0] Residents data:", residentsData, "Error:", residentsError)
-      console.log("[v0] Proofs data sample:", proofData?.[0])
-
-      const resMap = new Map<string, string>()
-      residentsData?.forEach((resident: any) => {
-        resMap.set(resident.id, resident.full_name)
-      })
-      setResidentMap(resMap)
 
       setProofs(proofData || [])
 
@@ -221,7 +205,7 @@ export default function ProofsPage() {
                   <div>
                     <p className="font-semibold">Casa #{proof.houses?.house_number || houseMap.get(proof.house_id) || "?"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {residentMap.get(proof.uploaded_by) || "Sin nombre"}
+                      {proof.houses?.owner_name || "Sin propietario"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
