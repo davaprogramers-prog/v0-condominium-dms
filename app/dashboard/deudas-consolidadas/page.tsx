@@ -85,6 +85,12 @@ export default async function DeudasConsolidadasPage() {
     .neq("status", "approved")
   const condo_income = condoIncomeData || []
 
+  console.log("[v0] Total debts found:", condo_income.length)
+  console.log("[v0] Sample debt:", condo_income[0])
+  if (condo_income.length > 0) {
+    console.log("[v0] Fields in condo_income:", Object.keys(condo_income[0]))
+  }
+
   // Calculate debts by house
   const housesDebts: HouseDebt[] = houses
     .map((house) => {
