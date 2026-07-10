@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Upload, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { updateDebtsWithPayment } from "../actions"
 
 interface DebtItem {
   id: string
@@ -81,37 +80,41 @@ export function DebtPaymentForm({
     setLoading(true)
 
     try {
-      // Upload file to storage
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${houseId}-${Date.now()}.${fileExt}`
-      const filePath = `payment-proofs/${houseId}/${fileName}`
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
 
-      const { error: uploadError } = await supabase.storage
-        .from("payment-proofs")
-        .upload(filePath, file, { upsert: false })
+      // Upload file to receipts storage (same as propietarios)
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const filePath = `payment-proofs/${houseId}/${Date.now()}.${fileExt}`
 
-      if (uploadError) {
-        setError("Error al subir el comprobante: " + uploadError.message)
-        setLoading(false)
-        return
-      }
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
 
       // Get public URL
       const { data: publicUrl } = supabase.storage
-        .from("payment-proofs")
-        .getPublicUrl(filePath)
+        .from("receipts")
+        .getPublicUrl(uploadData.path)
 
-      // Update all selected debt records using server action
-      const receiptUrl = publicUrl.publicUrl
+      // Create payment proof record directly (same as propietarios)
       const debtIds = selectedDebts.map((d) => d.id)
       
-      try {
-        await updateDebtsWithPayment(debtIds, receiptUrl)
-      } catch (err) {
-        setError("Error al actualizar deuda: " + (err as Error).message)
-        setLoading(false)
-        return
-      }
+      const { error: insertError } = await supabase
+        .from("payment_proofs")
+        .insert({
+          condo_id: houseId,
+          house_id: houseId,
+          uploaded_by: user.id,
+          debt_ids: debtIds,
+          total_amount: selectedTotal,
+          receipt_url: publicUrl.publicUrl,
+          status: "pending",
+          payment_type: "consolidated_debts",
+        })
+
+      if (insertError) throw insertError
 
       // Success
       setSuccess(true)
@@ -121,8 +124,9 @@ export function DebtPaymentForm({
       setTimeout(() => {
         router.refresh()
       }, 2000)
-    } catch (err) {
-      setError("Error al procesar el pago: " + (err as Error).message)
+    } catch (err: any) {
+      console.error("Error:", err)
+      setError(err.message || "Error al procesar el pago")
     } finally {
       setLoading(false)
     }
