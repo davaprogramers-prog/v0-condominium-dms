@@ -28,6 +28,7 @@ export default async function CasasPage() {
   // Get the first admin role condominium
   const adminCondo = userCondos[0]
   const condoId = adminCondo.condo_id
+  const isAdmin = true // Already verified user is admin above
 
   // Fetch houses and theme together
   const [housesResponse, themeResponse] = await Promise.all([
