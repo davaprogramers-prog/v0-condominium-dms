@@ -43,7 +43,7 @@ export default async function DebtDetailPage({
   // Get house info
   const { data: house } = await supabase
     .from("houses")
-    .select("id, number, owner_profile_id, profiles(first_name, last_name)")
+    .select("*")
     .eq("id", houseId)
     .eq("condo_id", condoId)
     .single()
@@ -94,10 +94,7 @@ export default async function DebtDetailPage({
     .reduce((sum, e) => sum + (e.amount || 0), 0)
   const totalDebt = commonTotal + variableTotal + finesCLP + finesUF
 
-  const ownerName =
-    house.profiles && house.profiles.length > 0
-      ? `${house.profiles[0].first_name || ""} ${house.profiles[0].last_name || ""}`.trim()
-      : "Sin propietario"
+  const ownerName = house.owner_name || "Sin propietario"
 
   return (
     <div className="space-y-6">
