@@ -55,36 +55,40 @@ export default async function DebtDetailPage({ params }: DebtDetailPageProps) {
   const currencySymbol = condo?.currency_symbol || "$"
 
   // Get common expenses
-  const { data: commonExpenses = [] } = await supabase
+  const { data: commonExpensesData } = await supabase
     .from("condo_expenses")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
     .eq("is_paid", false)
+  const commonExpenses = commonExpensesData || []
 
   // Get variable expenses
-  const { data: variableExpenses = [] } = await supabase
+  const { data: variableExpensesData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
     .neq("income_type", "multa")
     .neq("status", "approved")
+  const variableExpenses = variableExpensesData || []
 
   // Get infractions/fines
-  const { data: infractions = [] } = await supabase
+  const { data: infractionsData } = await supabase
     .from("infractions")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
     .gt("amount_pending", 0)
+  const infractions = infractionsData || []
 
   // Get payment proofs
-  const { data: paymentProofs = [] } = await supabase
+  const { data: paymentProofsData } = await supabase
     .from("payment_proofs")
     .select("*")
     .eq("house_id", houseId)
     .order("created_at", { ascending: false })
+  const paymentProofs = paymentProofsData || []
 
   // Calculate totals
   const commonExpenseTotal = commonExpenses.reduce((acc, e) => acc + (e.amount || 0), 0)
