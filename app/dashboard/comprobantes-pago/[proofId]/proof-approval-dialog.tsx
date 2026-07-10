@@ -65,6 +65,11 @@ export function ProofApprovalDialog({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("No autenticado")
 
+      // Validate required fields
+      if (!proof.condo_id) {
+        throw new Error("Comprobante sin condominio asignado")
+      }
+
       const today = new Date().toISOString().split("T")[0]
 
       if (isGastosComunes) {
@@ -98,7 +103,7 @@ export function ProofApprovalDialog({
         }
 
         // If no linked income (regular propietarios payment), find existing records
-        if (!proof.fixed_income_id || !proof.variable_income_id) {
+        if (!proof.fixed_income_id && !proof.variable_income_id) {
           const { data: existingIncomes } = await supabase
             .from("condo_income")
             .select("id, income_type")

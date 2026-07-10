@@ -39,7 +39,7 @@ export default async function ProofDetailPage({
     .maybeSingle()
 
   if (!proof) {
-    console.error("[v0] Proof not found:", { proofId: params.proofId, proofError })
+    console.error("[v0] Proof not found:", { proofId, proofError })
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center space-y-2">
@@ -48,6 +48,18 @@ export default async function ProofDetailPage({
             <p className="text-xs text-red-500">{proofError.message}</p>
           )}
         </div>
+      </div>
+    )
+  }
+
+  console.log("[v0] Proof data:", { condo_id: proof.condo_id, house_id: proof.house_id, profile_condo: profile.condo_id })
+
+  // Verify user has access to this proof's condo
+  if (proof.condo_id !== profile.condo_id) {
+    console.warn("[v0] Access denied: proof.condo_id !== profile.condo_id", { proof: proof.condo_id, profile: profile.condo_id })
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No tienes acceso a este comprobante.</p>
       </div>
     )
   }
