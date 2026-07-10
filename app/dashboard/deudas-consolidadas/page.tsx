@@ -77,14 +77,17 @@ export default async function DeudasConsolidadasPage() {
     )
   }
 
-  // Get all PENDING debts from condo_income for all houses
-  // Only show unpaid debts (status != "approved")
+  // Get all debts from condo_income for all houses
+  // Filter in code: show debts that are pending OR approved without receipt_url (unpaid)
   const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-    .neq("status", "approved")
-  const condo_income = condoIncomeData || []
+  
+  // Filter to show only unpaid debts: status != "approved" OR (status == "approved" AND no receipt_url)
+  const condo_income = (condoIncomeData || []).filter(
+    (item) => item.status !== "approved" || (item.status === "approved" && !item.receipt_url)
+  )
 
   // Calculate debts by house
   const housesDebts: HouseDebt[] = houses

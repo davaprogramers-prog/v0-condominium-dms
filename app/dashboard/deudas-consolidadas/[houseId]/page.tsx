@@ -62,16 +62,19 @@ export default async function DebtDetailPage({
   const currencySymbol = condo?.currency_symbol || "$"
   const theme = condo?.theme ? JSON.parse(condo.theme) : DEFAULT_THEME
 
-  // Get all PENDING debts for this house from condo_income
-  // Filter out approved debts (already paid) but include all multas
+  // Get all debts for this house from condo_income
+  // Filter in code: show debts that are pending OR approved without receipt_url (unpaid)
   const { data: debtsData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
     .eq("house_id", houseId)
-    .neq("status", "approved")
     .order("created_at", { ascending: false })
-  const debts = debtsData || []
+  
+  // Filter to show only unpaid debts: status != "approved" OR (status == "approved" AND no receipt_url)
+  const debts = (debtsData || []).filter(
+    (item) => item.status !== "approved" || (item.status === "approved" && !item.receipt_url)
+  )
 
   const { data: paymentProofsData } = await supabase
     .from("payment_proofs")
