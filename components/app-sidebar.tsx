@@ -267,6 +267,7 @@ const ownerMenuItems = [
   section: "Mi Propiedad",
   items: [
     { title: "Mi Casa", href: "/dashboard/mi-casa", icon: Home },
+    { title: "Mis Deudas", href: "/dashboard/mis-deudas", icon: AlertTriangle },
     { title: "Mis Reservas", href: "/dashboard/mis-reservas", icon: CalendarDays },
     { title: "Mis Visitas", href: "/dashboard/mis-visitas", icon: Calendar },
     { title: "Mis Encomiendas", href: "/dashboard/mis-encomiendas", icon: Package },

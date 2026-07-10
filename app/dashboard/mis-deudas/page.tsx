@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { getUserCondoId } from "@/lib/supabase/owner-utils"
+import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import Link from "next/link"
 import { AlertCircle, ChevronRight } from "lucide-react"
 
@@ -21,16 +21,13 @@ export default async function MisDeudasPage() {
 
   if (!user) redirect("/auth/login")
 
-  const condoId = await getUserCondoId(supabase, user.id)
+  const condoId = await getUserCondoId(supabase, user.id, user.email || undefined)
   if (!condoId) redirect("/dashboard")
 
-  // Get all houses for this user
-  const { data: userHouses } = await supabase
-    .from("house_residents")
-    .select("house_id")
-    .eq("resident_id", user.id)
-
-  if (!userHouses || userHouses.length === 0) {
+  // Get the house(s) for this user
+  const houseId = await getUserHouseId(supabase, user.id, user.email || undefined)
+  
+  if (!houseId) {
     return (
       <div className="space-y-6">
         <div>
@@ -44,7 +41,7 @@ export default async function MisDeudasPage() {
     )
   }
 
-  const houseIds = userHouses.map((h) => h.house_id)
+  const houseIds = [houseId]
 
   // Get house details
   const { data: houses } = await supabase
