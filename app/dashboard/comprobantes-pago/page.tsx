@@ -75,7 +75,10 @@ export default async function ProofsPage() {
         <div className="flex-1">
           <p className="font-medium">Casa #{houseMap.get(proof.house_id)}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {new Date(proof.created_at).toLocaleDateString("es-CL")}
+            {new Date(proof.period_year, proof.period_month - 1).toLocaleDateString("es-CL", {
+              month: "long",
+              year: "numeric"
+            })}
           </p>
         </div>
         <Badge

@@ -8,8 +8,9 @@ import { ProofApprovalDialog } from "./proof-approval-dialog"
 export default async function ProofDetailPage({
   params,
 }: {
-  params: { proofId: string }
+  params: Promise<{ proofId: string }>
 }) {
+  const { proofId } = await params
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -34,7 +35,7 @@ export default async function ProofDetailPage({
   const { data: proof, error: proofError } = await supabase
     .from("payment_proofs")
     .select("*")
-    .eq("id", params.proofId)
+    .eq("id", proofId)
     .maybeSingle()
 
   if (!proof) {
