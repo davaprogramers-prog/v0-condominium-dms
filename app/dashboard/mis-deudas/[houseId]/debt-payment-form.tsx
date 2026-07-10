@@ -1,200 +1,239 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { Button } from "@/components/ui/button"
+import { Upload, CheckCircle, AlertCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+interface DebtItem {
+  id: string
+  amount: number | null
+}
 
 interface DebtPaymentFormProps {
   houseId: string
-  houseNumber: string
+  condoId: string
+  houseName: string
   totalDebt: number
   currencySymbol: string
+  selectedDebts: DebtItem[]
+  selectedTotal: number
+  baseCommonTotal: number
+  baseVariableTotal: number
+  commonTotal: number
+  variableTotal: number
+  fixedExemptionPercent: number
+  variableExemptionPercent: number
 }
 
-export function DebtPaymentForm({ houseId, houseNumber, totalDebt, currencySymbol }: DebtPaymentFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [amount, setAmount] = useState(totalDebt.toString())
-  const [file, setFile] = useState<File | null>(null)
-  const [error, setError] = useState<string>("")
-  const [success, setSuccess] = useState(false)
-
+export function DebtPaymentForm({
+  houseId,
+  condoId,
+  houseName,
+  totalDebt,
+  currencySymbol,
+  selectedDebts,
+  selectedTotal,
+  baseCommonTotal,
+  baseVariableTotal,
+  commonTotal,
+  variableTotal,
+  fixedExemptionPercent,
+  variableExemptionPercent,
+}: DebtPaymentFormProps) {
   const supabase = createClient()
+  const router = useRouter()
+  const [file, setFile] = useState<File | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  const displayAmount = selectedTotal > 0 ? selectedTotal : totalDebt
+  const hasSelectedDebts = selectedDebts.length > 0
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      // Validate file type
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"]
-      if (!validTypes.includes(selectedFile.type)) {
-        setError("Por favor sube un archivo en formato JPG, PNG o PDF")
-        return
-      }
+    if (e.target.files?.[0]) {
+      const selectedFile = e.target.files[0]
+
       // Validate file size (max 5MB)
       if (selectedFile.size > 5 * 1024 * 1024) {
-        setError("El archivo no debe superar 5MB")
+        setError("El archivo no puede superar 5MB")
+        setFile(null)
         return
       }
+
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "application/pdf"]
+      if (!allowedTypes.includes(selectedFile.type)) {
+        setError("Solo se permiten JPG, PNG o PDF")
+        setFile(null)
+        return
+      }
+
       setFile(selectedFile)
-      setError("")
+      setError(null)
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError(null)
     setSuccess(false)
 
     if (!file) {
-      setError("Por favor sube un comprobante de pago")
+      setError("Por favor selecciona un comprobante")
       return
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      setError("Por favor ingresa un monto válido")
+    if (!hasSelectedDebts) {
+      setError("Por favor selecciona al menos una deuda para pagar")
       return
     }
 
-    setIsLoading(true)
+    setLoading(true)
 
     try {
-      // Upload file to Supabase Storage
-      const fileName = `${houseId}/${Date.now()}-${file.name}`
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("No autenticado")
+
+      // Upload file to receipts storage (same as propietarios)
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const filePath = `payment-proofs/${houseId}/${Date.now()}.${fileExt}`
+
       const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: publicUrl } = supabase.storage
+        .from("receipts")
+        .getPublicUrl(uploadData.path)
+
+      // Get details of selected debts to link to payment_proofs
+      const { data: selectedDebtsData } = await supabase
+        .from("condo_income")
+        .select("*")
+        .in("id", selectedDebts.map((d) => d.id))
+
+      if (!selectedDebtsData || selectedDebtsData.length === 0) {
+        throw new Error("No se encontraron las deudas seleccionadas")
+      }
+
+      // Create a payment_proof record for EACH selected debt
+      const paymentProofsToCreate = selectedDebtsData.map((debt) => ({
+        condo_id: condoId,
+        house_id: houseId,
+        uploaded_by: user.id,
+        fixed_amount: debt.income_type === "fixed" ? debt.amount : 0,
+        variable_amount: debt.income_type === "variable" ? debt.amount : 0,
+        fines_amount: 0,
+        receipt_url: publicUrl.publicUrl,
+        status: "pending",
+        period_month: debt.period_month,
+        period_year: debt.period_year,
+        payment_type: "gastos_comunes",
+        fixed_income_id: debt.income_type === "fixed" ? debt.id : null,
+        variable_income_id: debt.income_type === "variable" ? debt.id : null,
+      }))
+
+      const { error: insertError } = await supabase
         .from("payment_proofs")
-        .upload(fileName, file)
+        .insert(paymentProofsToCreate)
 
-      if (uploadError) throw new Error(uploadError.message)
+      if (insertError) throw insertError
 
-      // Create payment proof record
-      const { data: proofData, error: proofError } = await supabase
-        .from("payment_proofs")
-        .insert({
-          house_id: houseId,
-          amount: parseFloat(amount),
-          file_url: uploadData.path,
-          status: "pending",
-          notes: `Comprobante de pago manual para Casa #${houseNumber}`,
-        })
-        .select()
-        .single()
-
-      if (proofError) throw new Error(proofError.message)
-
+      // Success
       setSuccess(true)
       setFile(null)
-      setAmount(totalDebt.toString())
-      
-      // Reset form after 3 seconds
+
+      // Reset after 2 seconds and refresh
       setTimeout(() => {
-        setSuccess(false)
-      }, 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al subir el comprobante")
-      console.error("[v0] Payment error:", err)
+        router.refresh()
+      }, 2000)
+    } catch (err: any) {
+      console.error("Error:", err)
+      setError(err.message || "Error al procesar el pago")
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <Card className="sticky top-4">
-      <CardHeader>
-        <CardTitle>Registrar Pago</CardTitle>
-        <CardDescription>Sube tu comprobante de pago</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Amount Input */}
-          <div className="space-y-2">
-            <Label htmlFor="amount">Monto a Pagar</Label>
-            <div className="flex gap-2">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-input bg-muted text-sm font-medium">
-                {currencySymbol}
-              </span>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                step="0.01"
-                min="0"
-                className="rounded-l-none"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Total a pagar: {currencySymbol}
-              {totalDebt.toLocaleString("es-CL")}
-            </p>
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border bg-card p-4">
+      {success && (
+        <div className="flex gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800">
+          <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-sm">Comprobante enviado exitosamente</p>
+            <p className="text-xs">El administrador revisará tu pago en breve</p>
           </div>
+        </div>
+      )}
 
-          {/* File Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="file">Comprobante de Pago</Label>
-            <div className="relative">
-              <Input
-                id="file"
+      {error && (
+        <div className="flex gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {!success && (
+        <>
+          {!hasSelectedDebts && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+              Selecciona las deudas que quieres pagar en el desglose de arriba
+            </div>
+          )}
+          
+          {hasSelectedDebts && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Monto a Pagar</label>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">
+                  {currencySymbol}
+                  {displayAmount.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Basado en las {selectedDebts.length} deuda(s) seleccionada(s)
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Comprobante de Pago</label>
+            <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/50 transition">
+              <input
                 type="file"
+                accept=".jpg,.jpeg,.png,.pdf"
                 onChange={handleFileChange}
-                accept=".pdf,.jpg,.jpeg,.png"
-                disabled={isLoading}
-                className="cursor-pointer"
+                disabled={loading}
+                className="hidden"
+                id="file-upload"
               />
-              <Upload className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                {file ? (
+                  <p className="text-sm font-medium text-green-600">{file.name}</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">Haz clic para seleccionar</p>
+                    <p className="text-xs text-muted-foreground">o arrastra un archivo</p>
+                  </>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">JPG, PNG o PDF (máx 5MB)</p>
+              </label>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {file ? file.name : "JPG, PNG o PDF • Máx 5MB"}
-            </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="p-3 rounded-md bg-red-50 text-red-900 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="p-3 rounded-md bg-green-50 text-green-900 text-sm">
-              ✓ Comprobante enviado correctamente. Tu pago será verificado próximamente.
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isLoading || !file}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enviando...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Registrar Pago
-              </>
-            )}
+          <Button type="submit" className="w-full" disabled={loading || !file || !hasSelectedDebts}>
+            {loading ? "Enviando..." : "Enviar Comprobante"}
           </Button>
-
-          {/* Info */}
-          <div className="p-3 rounded-md bg-blue-50 text-blue-900 text-xs space-y-1">
-            <p className="font-medium">¿Cómo funciona?</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Sube tu comprobante de pago (transferencia, cheque, etc.)</li>
-              <li>Será verificado por la administración</li>
-              <li>Recibirás confirmación cuando sea aprobado</li>
-            </ul>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        </>
+      )}
+    </form>
   )
 }
