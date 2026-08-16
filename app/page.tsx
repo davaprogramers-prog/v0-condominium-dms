@@ -2,7 +2,45 @@
 
 import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight, Download, Apple, Smartphone } from 'lucide-react'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function Page() {
+  const router = useRouter()
+  const [redirecting, setRedirecting] = useState(false)
+
+  useEffect(() => {
+    // Detectar si la app corre dentro del contenedor nativo (Capacitor Android/iOS)
+    const cap = (window as any).Capacitor
+    const isNative = !!(
+      cap &&
+      (typeof cap.isNativePlatform === 'function' ? cap.isNativePlatform() : cap.isNative)
+    )
+
+    if (isNative) {
+      setRedirecting(true)
+      router.replace('/auth/login')
+    }
+  }, [router])
+
+  // En la app móvil mostramos un splash mientras redirige, evitando ver la landing
+  if (redirecting) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+          <Image
+            src="/logo.png"
+            alt="InteliCon Logo"
+            width={160}
+            height={54}
+            className="h-14 w-auto animate-pulse"
+            priority
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
