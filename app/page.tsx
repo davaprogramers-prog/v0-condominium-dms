@@ -10,18 +10,22 @@ export default function Page() {
   const [redirecting, setRedirecting] = useState(false)
 
   useEffect(() => {
-    // Detectar si la app corre dentro del contenedor nativo (Capacitor Android/iOS)
-    const cap = (window as any).Capacitor
-    const isNative = !!(
-      cap &&
-      (typeof cap.isNativePlatform === 'function' ? cap.isNativePlatform() : cap.isNative)
+    // Capacitor puede no exponer el bridge cuando carga una URL remota.
+    // También aceptamos el indicador explícito `native=1` que puede configurar la app móvil.
+    const cap = (window as Window & { Capacitor?: { isNativePlatform?: () => boolean; isNative?: boolean } }).Capacitor
+    const queryIsNative = new URLSearchParams(window.location.search).get('native') === '1'
+    const userAgentIsNative = /Capacitor|; wv\)/i.test(window.navigator.userAgent)
+    const isNative = Boolean(
+      queryIsNative ||
+      userAgentIsNative ||
+      (cap && (typeof cap.isNativePlatform === 'function' ? cap.isNativePlatform() : cap.isNative)),
     )
 
     if (isNative) {
       setRedirecting(true)
-      router.replace('/auth/login')
+      window.location.replace('/auth/login')
     }
-  }, [router])
+  }, [])
 
   // En la app móvil mostramos un splash mientras redirige, evitando ver la landing
   if (redirecting) {

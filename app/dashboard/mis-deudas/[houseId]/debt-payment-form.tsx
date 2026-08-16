@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Upload, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, Camera, FolderOpen, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface DebtItem {
@@ -205,27 +205,50 @@ export function DebtPaymentForm({
 
           <div>
             <label className="block text-sm font-medium mb-2">Comprobante de Pago</label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/50 transition">
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.pdf"
-                onChange={handleFileChange}
-                disabled={loading}
-                className="hidden"
-                id="file-upload"
-              />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                {file ? (
-                  <p className="text-sm font-medium text-green-600">{file.name}</p>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium">Haz clic para seleccionar</p>
-                    <p className="text-xs text-muted-foreground">o arrastra un archivo</p>
-                  </>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">JPG, PNG o PDF (máx 5MB)</p>
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleFileChange}
+              disabled={loading}
+              className="sr-only"
+              id="payment-file-upload"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              disabled={loading}
+              className="sr-only"
+              id="payment-camera-upload"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <label
+                htmlFor="payment-camera-upload"
+                className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-3 text-center transition hover:bg-muted/50"
+              >
+                <Camera className="h-7 w-7 text-muted-foreground" aria-hidden="true" />
+                <span className="text-sm font-medium">Tomar foto</span>
+                <span className="text-xs text-muted-foreground">Usar cámara</span>
               </label>
+              <label
+                htmlFor="payment-file-upload"
+                className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-3 text-center transition hover:bg-muted/50"
+              >
+                <FolderOpen className="h-7 w-7 text-muted-foreground" aria-hidden="true" />
+                <span className="text-sm font-medium">Elegir archivo</span>
+                <span className="text-xs text-muted-foreground">Galería o PDF</span>
+              </label>
+            </div>
+            <div className="mt-3 rounded-lg bg-muted/50 p-3 text-center">
+              {file ? (
+                <p className="text-sm font-medium text-green-600">{file.name}</p>
+              ) : (
+                <>
+                  <Upload className="mx-auto mb-1 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                  <p className="text-xs text-muted-foreground">JPG, PNG o PDF (máx. 5MB)</p>
+                </>
+              )}
             </div>
           </div>
 
