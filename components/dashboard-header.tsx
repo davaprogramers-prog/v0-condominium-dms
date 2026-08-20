@@ -34,11 +34,22 @@ const pageTitles: Record<string, string> = {
   "/dashboard/alertas": "Alertas",
 }
 
-export function DashboardHeader({ user, profile }: { user: User; profile: Record<string, unknown> | null }) {
+export function DashboardHeader({
+  user,
+  profile,
+  condoName,
+}: {
+  user: User
+  profile: Record<string, unknown> | null
+  condoName?: string
+}) {
   const pathname = usePathname()
-  const isOwnerDashboard = pathname === "/dashboard" && (profile?.role === "propietario" || profile?.role === "owner")
-  const title = isOwnerDashboard && profile?.house_number
-    ? `Mi Casa #${profile.house_number}`
+  const residentName = [profile?.first_name, profile?.last_name]
+    .filter(Boolean)
+    .join(" ") || user.user_metadata?.name || user.email?.split("@")[0] || "Residente"
+  const isResident = profile?.role === "propietario" || profile?.role === "owner"
+  const title = isResident && condoName
+    ? `${residentName} - ${condoName}`
     : pageTitles[pathname] || "Dashboard"
 
   return (

@@ -122,31 +122,33 @@ export default async function MiCasaPage() {
   const balance = totalDue - totalPaid
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <AvatarUpload 
-            currentAvatarUrl={profile?.avatar_url || undefined}
-            userName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario"}
-          />
-          <div>
-            <h1 className="text-3xl font-bold">Mi Casa #{house?.house_number}</h1>
-            <p className="text-muted-foreground">Bienvenido, {profile?.first_name}</p>
-          </div>
-        </div>
-        <PaymentUploadDialogThemedWrapper 
-          condoId={condoId || ""}
-          houseId={houseId}
-          currencySymbol={condo?.currency_symbol}
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <AvatarUpload 
+          currentAvatarUrl={profile?.avatar_url || undefined}
+          userName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario"}
         />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold sm:text-base">
+            {profile?.first_name || "Residente"} {profile?.last_name || ""}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">Casa #{house?.house_number}</p>
+        </div>
+        <div className="shrink-0">
+          <PaymentUploadDialogThemedWrapper 
+            condoId={condoId || ""}
+            houseId={houseId}
+            currencySymbol={condo?.currency_symbol}
+          />
+        </div>
       </div>
 
       {/* Pending Fines Alert */}
       {infractions && <PendingFines fines={infractions} currencySymbol={condo?.currency_symbol || "$"} houseId={houseId} />}
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border-2 p-4" style={{ backgroundColor: cardBgColor, borderColor: "rgba(255,255,255,0.1)", color: cardTextColor }}>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-4">
+        <div className="rounded-lg border-2 p-2.5 sm:p-4" style={{ backgroundColor: cardBgColor, borderColor: "rgba(255,255,255,0.1)", color: cardTextColor }}>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
               <DollarSign className="h-5 w-5 text-white" />
@@ -158,7 +160,7 @@ export default async function MiCasaPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border-2 p-4" style={{ backgroundColor: cardBgColor, borderColor: "rgba(255,255,255,0.1)", color: cardTextColor }}>
+        <div className="rounded-lg border-2 p-2.5 sm:p-4" style={{ backgroundColor: cardBgColor, borderColor: "rgba(255,255,255,0.1)", color: cardTextColor }}>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600">
               <FileText className="h-5 w-5 text-white" />
@@ -191,7 +193,7 @@ export default async function MiCasaPage() {
 
       {/* Historial de Pagos */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Historial de Pagos - Mes Actual</h2>
+        <h2 className="text-lg font-semibold leading-tight sm:text-xl">Historial de Pagos - Mes Actual</h2>
         
         <div className="rounded-lg border-2" style={{ backgroundColor: cardBgColor, borderColor: "rgba(255,255,255,0.1)" }}>
           <div className="overflow-x-auto">

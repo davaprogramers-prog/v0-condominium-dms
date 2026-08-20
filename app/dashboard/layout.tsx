@@ -167,7 +167,7 @@ export default async function DashboardLayout({
             color: theme.main_text_color,
           } : undefined}
         >
-          <DashboardHeader user={user} profile={profile} />
+          <DashboardHeader user={user} profile={profile} condoName={condo?.name} />
             <main 
             className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6"
             style={theme?.enable_custom_theme ? {
