@@ -67,6 +67,22 @@ export default async function DashboardLayout({
     }
   }
 
+  // Resolve the house number for a concise owner-facing mobile header.
+  if ((profile.role === "propietario" || profile.role === "owner") && profile.house_id) {
+    try {
+      const { data: house } = await supabase
+        .from("houses")
+        .select("house_number")
+        .eq("id", profile.house_id)
+        .single()
+      if (house?.house_number !== undefined) {
+        profile.house_number = house.house_number
+      }
+    } catch (e) {
+      console.error("[v0] Error reading house number:", e)
+    }
+  }
+
   // If propietario/owner without condo_id, they need setup
   // The ensureUserProfile action in login-form should have handled this
   if (isOwner && !profile.condo_id) {
@@ -152,8 +168,8 @@ export default async function DashboardLayout({
           } : undefined}
         >
           <DashboardHeader user={user} profile={profile} />
-          <main 
-            className="flex-1 overflow-y-auto p-4 md:p-6"
+            <main 
+            className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6"
             style={theme?.enable_custom_theme ? {
               backgroundColor: theme.main_bg_color,
               color: theme.main_text_color,

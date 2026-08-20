@@ -158,11 +158,11 @@ export function UploadProofDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          className={paymentType === "multas" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
+          className={`w-full min-w-0 whitespace-normal px-3 text-center leading-tight sm:w-auto ${paymentType === "multas" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
           size="sm"
         >
-          <Upload className="h-4 w-4 mr-2" />
-          {buttonLabel}
+          <Upload className="h-4 w-4 shrink-0 mr-2" />
+          <span className="min-w-0">{buttonLabel}</span>
         </Button>
       </DialogTrigger>
       <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-md">
