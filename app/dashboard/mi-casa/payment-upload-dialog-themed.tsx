@@ -134,23 +134,19 @@ export function PaymentUploadDialogThemedWrapper({ condoId, houseId, currencySym
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
+          className="flex min-w-0 max-w-[150px] items-center justify-center gap-1.5 px-2.5 py-2 text-center text-xs leading-tight sm:max-w-none sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
           style={{
             backgroundColor: "#2563eb",
             color: "white",
-            padding: "12px 24px",
-            fontSize: "16px",
             borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
             border: "2px solid #1d4ed8",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
             cursor: "pointer",
             fontWeight: "600"
           }}
         >
-          <Upload className="h-5 w-5" />
-          Subir Comprobante
+          <Upload className="size-4 shrink-0 sm:size-5" />
+          <span>Subir Comprobante</span>
         </button>
       </DialogTrigger>
       <DialogContent
