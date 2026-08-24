@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { DebtBreakdownClient } from "./debt-breakdown-client"
 import { DebtPaymentForm } from "./debt-payment-form"
 
@@ -47,27 +47,31 @@ export function DebtPaymentContainer({
 
   const selectedTotal = selectedDebts.reduce((sum, debt) => sum + (debt.amount || 0), 0)
 
+  // Stable reference so the child's effect doesn't loop on every render.
+  const normalizedDebts = useMemo(
+    () =>
+      debts.map((d) => ({
+        ...d,
+        description: d.description || "Sin descripción",
+        amount: d.amount || 0,
+        currency: d.currency || "",
+      })),
+    [debts],
+  )
+
+  // Stable callback so the child's effect dependency doesn't change each render.
+  const handleSelectionChange = useCallback((selected: unknown) => {
+    setSelectedDebts(selected as Debt[])
+  }, [])
+
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Deudas Selection */}
       <div className="lg:col-span-2">
         <DebtBreakdownClient 
-          debts={debts.map(d => ({
-            ...d,
-            description: d.description || "Sin descripción",
-            amount: d.amount || 0,
-            currency: d.currency || ""
-          }))} 
+          debts={normalizedDebts} 
           currencySymbol={currencySymbol}
-          selectedDebts={selectedDebts.map(d => ({
-            ...d,
-            description: d.description || "Sin descripción",
-            amount: d.amount || 0,
-            currency: d.currency || ""
-          }))}
-          onSelectionChange={(selected) => {
-            setSelectedDebts(selected as Debt[])
-          }}
+          onSelectionChange={handleSelectionChange}
         />
       </div>
 
