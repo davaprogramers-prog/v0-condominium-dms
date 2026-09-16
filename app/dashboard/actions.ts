@@ -358,7 +358,11 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     throw new Error("El monto debe ser mayor a 0")
   }
 
-  const { error } = await supabase
+  // The existing variable_income UPDATE policy only recognizes the condo
+  // administrator. Use the server-only admin client after the strict role
+  // check above, so super_admin edits are not silently filtered by RLS.
+  const adminSupabase = createAdminClient()
+  const { data: updatedIncome, error } = await adminSupabase
     .from("variable_income")
     .update({
       description: formData.get("description") as string,
@@ -368,8 +372,11 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     })
     .eq("id", incomeId)
     .eq("condo_id", condoId)
+    .select("id")
+    .maybeSingle()
 
   if (error) throw error
+  if (!updatedIncome) throw new Error("No se encontró el ingreso variable en este condominio")
   revalidatePath("/dashboard/ingreso-variable")
 }
 
