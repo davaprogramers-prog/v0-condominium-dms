@@ -25,7 +25,6 @@ export function RegistroForm() {
   const [houses, setHouses] = useState<House[]>([])
   const [selectedHouseId, setSelectedHouseId] = useState("")
   const router = useRouter()
-  const supabase = createClient()
 
   // Step 1: Validate email exists in houses
   const handleEmailValidation = async (e: React.FormEvent) => {
@@ -34,6 +33,7 @@ export function RegistroForm() {
     setLoading(true)
 
     try {
+      const supabase = createClient()
       // Check if email exists in houses
       const { data, error: fetchError } = await supabase
         .from("houses")

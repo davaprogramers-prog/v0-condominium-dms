@@ -2,9 +2,17 @@ import { Resend } from 'resend'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const resend = new Resend(process.env.RESENDCONDO_API_KEY)
-
 export async function POST(request: Request) {
+  const resendApiKey = process.env.RESENDCONDO_API_KEY
+  if (!resendApiKey) {
+    console.error('[v0] RESENDCONDO_API_KEY is not configured')
+    return NextResponse.json(
+      { error: 'El servicio de correo no está configurado' },
+      { status: 503 }
+    )
+  }
+
+  const resend = new Resend(resendApiKey)
   try {
     const { email } = await request.json()
 
