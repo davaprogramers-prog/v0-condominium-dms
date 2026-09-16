@@ -338,6 +338,48 @@ export async function createVariableIncome(formData: FormData) {
   revalidatePath("/dashboard/ingreso-variable")
 }
 
+export async function updateVariableIncome(incomeId: string, formData: FormData) {
+  const { supabase, condoId } = await getCondoId()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (profile?.role !== "super_admin") {
+    throw new Error("Solo el super administrador puede editar ingresos variables")
+  }
+
+  const amount = Number(formData.get("amount"))
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("El monto debe ser mayor a 0")
+  }
+
+  // Variable income cards are stored in condo_income and identified by the
+  // same id returned by getCondoIncome. Use the server-only admin client
+  // after the strict role check above so RLS cannot silently filter the row.
+  const adminSupabase = createAdminClient()
+  const { data: updatedIncome, error } = await adminSupabase
+    .from("condo_income")
+    .update({
+      description: formData.get("description") as string,
+      amount,
+      income_date: formData.get("income_date") as string,
+    })
+    .eq("id", incomeId)
+    .eq("condo_id", condoId)
+    .eq("income_type", "variable")
+    .select("id")
+    .maybeSingle()
+
+  if (error) throw error
+  if (!updatedIncome) throw new Error("No se encontró el ingreso variable en este condominio")
+  revalidatePath("/dashboard/ingreso-variable")
+}
+
 // ===== Exemptions =====
 export async function createExemptionType(formData: FormData) {
   const { supabase, condoId } = await getCondoId()

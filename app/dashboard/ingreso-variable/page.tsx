@@ -53,6 +53,7 @@ export default async function IngresoVariablePage({
   // Check if user is admin
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isSuperAdmin = profile?.role === "super_admin"
 
   return (
     <div className="space-y-6">
@@ -93,7 +94,9 @@ export default async function IngresoVariablePage({
       <IngresoVariableClient 
         incomes={variableIncome}
         currencySymbol="$"
+        condoId={condoId}
         isAdmin={isAdmin}
+        isSuperAdmin={isSuperAdmin}
       />
     </div>
   )

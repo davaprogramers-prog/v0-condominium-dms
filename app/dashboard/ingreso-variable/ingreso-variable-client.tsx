@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { deleteVariableIncome } from "@/app/dashboard/ingresos/actions"
+import { CreateVariableIncomeDialog } from "./create-variable-income-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TrendingUp, Trash2, ExternalLink } from "lucide-react"
+import { TrendingUp, Trash2, ExternalLink, Pencil } from "lucide-react"
 
 interface VariableIncome {
   id: string
@@ -21,7 +22,9 @@ interface VariableIncome {
 interface IngresoVariableClientProps {
   incomes: VariableIncome[]
   currencySymbol: string
+  condoId: string
   isAdmin: boolean
+  isSuperAdmin: boolean
 }
 
 type IncomeStatus = "pending" | "paid"
@@ -52,7 +55,21 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
     : { status: "pending", color: "bg-white border-2 border-amber-200", textColor: "text-amber-600" }
 }
 
-export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
+// Date-only database values must not pass through UTC parsing: that shifts
+// the displayed calendar day between server and browser time zones.
+function formatIncomeDate(value: string): string {
+  const [year, month, day] = value.slice(0, 10).split("-").map(Number)
+  if (!year || !month || !day) return value
+
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, day)))
+}
+
+export function IngresoVariableClient({ incomes, currencySymbol, condoId, isAdmin, isSuperAdmin }: IngresoVariableClientProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   // Ordenar ingresos por número de casa naturalmente
@@ -93,7 +110,7 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
                         {(income.description as string) || "Ingreso Variable"}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(income.income_date as string).toLocaleDateString("es-CL")}
+                        {formatIncomeDate(income.income_date as string)}
                       </p>
                     </div>
                     <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${status === "paid" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
@@ -132,6 +149,9 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
 
                   {isAdmin && (
                     <div className="flex gap-2 pt-2">
+                      {isSuperAdmin && (
+                        <CreateVariableIncomeDialog condoId={condoId} income={income} />
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
