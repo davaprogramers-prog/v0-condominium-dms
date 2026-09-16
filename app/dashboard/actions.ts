@@ -358,12 +358,12 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     throw new Error("El monto debe ser mayor a 0")
   }
 
-  // The existing variable_income UPDATE policy only recognizes the condo
-  // administrator. Use the server-only admin client after the strict role
-  // check above, so super_admin edits are not silently filtered by RLS.
+  // Variable income cards are stored in condo_income and identified by the
+  // same id returned by getCondoIncome. Use the server-only admin client
+  // after the strict role check above so RLS cannot silently filter the row.
   const adminSupabase = createAdminClient()
   const { data: updatedIncome, error } = await adminSupabase
-    .from("variable_income")
+    .from("condo_income")
     .update({
       description: formData.get("description") as string,
       amount,
@@ -372,6 +372,7 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     })
     .eq("id", incomeId)
     .eq("condo_id", condoId)
+    .eq("income_type", "variable")
     .select("id")
     .maybeSingle()
 
