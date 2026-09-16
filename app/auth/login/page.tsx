@@ -23,7 +23,6 @@ function LoginPageContent() {
     setLoading(true)
 
     try {
-      document.cookie = `intelicon-remember-session=${rememberDevice ? "true" : "false"}; Path=/; Max-Age=${rememberDevice ? 31536000 : 86400}; SameSite=Lax`
       const supabase = createClient()
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
