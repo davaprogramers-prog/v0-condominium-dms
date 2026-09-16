@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { ensureUserProfile } from "@/app/auth/actions"
@@ -10,6 +11,8 @@ export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberDevice, setRememberDevice] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -19,6 +22,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      document.cookie = `intelicon-remember-session=${rememberDevice ? "true" : "false"}; Path=/; Max-Age=${rememberDevice ? 31536000 : 86400}; SameSite=Lax`
       const supabase = createClient()
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -98,15 +102,35 @@ export default function LoginPage() {
                 ¿Olvidé mi contraseña?
               </Link>
             </div>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="••••••••"
-            />
+            <div className="relative mt-1">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded border border-gray-300 px-3 py-2 pr-11 text-sm focus:border-blue-500 focus:outline-none"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-500 hover:text-blue-600"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+
+            <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={rememberDevice}
+                onChange={(e) => setRememberDevice(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Recordarme en este dispositivo
+            </label>
           </div>
 
           <button
