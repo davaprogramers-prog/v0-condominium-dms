@@ -368,7 +368,6 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
       description: formData.get("description") as string,
       amount,
       income_date: formData.get("income_date") as string,
-      source: formData.get("source") as string || null,
     })
     .eq("id", incomeId)
     .eq("condo_id", condoId)
