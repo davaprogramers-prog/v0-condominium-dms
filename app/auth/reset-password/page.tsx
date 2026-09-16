@@ -19,12 +19,12 @@ export default function ResetPasswordPage() {
   const [successTimer, setSuccessTimer] = useState(5)
   const [error, setError] = useState("")
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     // Handle the hash fragment that Supabase sends for password recovery
     // The URL will be like: /auth/reset-password#access_token=...&type=recovery
     const handleHashFragment = async () => {
+      const supabase = createClient()
       if (typeof window !== 'undefined' && window.location.hash) {
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
     }
 
     handleHashFragment()
-  }, [supabase])
+  }, [])
 
   // Success timer countdown
   useEffect(() => {
@@ -87,6 +87,7 @@ export default function ResetPasswordPage() {
     setLoading(true)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.updateUser({
         password: password
       })
