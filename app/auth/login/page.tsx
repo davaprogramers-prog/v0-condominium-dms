@@ -3,12 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { ensureUserProfile } from "@/app/auth/actions"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -35,22 +36,35 @@ export default function LoginPage() {
       }
 
       if (authData.user) {
-        // Ensure user has a complete profile and get their info
-        const profileResult = await ensureUserProfile(authData.user.id, email)
-        console.log("[v0] Profile ensured result:", profileResult)
-        console.log("[v0] Checking role:", profileResult.role, "hasMultipleProperties:", profileResult.hasMultipleProperties)
-        
-        // Check if user is an owner with multiple properties
-        if ((profileResult.role === 'propietario' || profileResult.role === 'owner') && profileResult.hasMultipleProperties) {
-          console.log("[v0] User has multiple properties - redirecting to selector")
+        let profileResult: Awaited<ReturnType<typeof ensureUserProfile>> | null = null
+
+        try {
+          profileResult = await ensureUserProfile(authData.user.id, email)
+        } catch (profileError) {
+          // Authentication already succeeded; profile provisioning should not
+          // incorrectly send the user back to the login form.
+          console.error("[v0] Profile setup failed after login:", profileError)
+        }
+
+        const nextPath = searchParams.get("next")
+        const safeNextPath = nextPath?.startsWith("/") && !nextPath.startsWith("//")
+          ? nextPath
+          : null
+
+        if (
+          !safeNextPath &&
+          profileResult?.role &&
+          (profileResult.role === "propietario" || profileResult.role === "owner") &&
+          profileResult.hasMultipleProperties
+        ) {
           router.push("/select-condominium")
         } else {
-          console.log("[v0] User is not owner with multiple properties - redirecting to dashboard. Role:", profileResult.role, "HasMultiple:", profileResult.hasMultipleProperties)
-          router.push("/dashboard")
+          router.push(safeNextPath || "/dashboard")
         }
       }
     } catch (err) {
-      setError("Error al iniciar sesión. Intenta de nuevo.")
+      console.error("[v0] Login request failed:", err)
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión. Intenta de nuevo.")
     } finally {
       setLoading(false)
     }
