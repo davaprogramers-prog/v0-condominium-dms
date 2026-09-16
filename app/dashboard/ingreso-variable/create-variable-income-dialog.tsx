@@ -5,13 +5,22 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TrendingUp, Loader2 } from "lucide-react"
+import { TrendingUp, Loader2, Pencil } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createVariableIncome } from "@/app/dashboard/actions"
+import { createVariableIncome, updateVariableIncome } from "@/app/dashboard/actions"
 import { useTheme } from "@/app/dashboard/theme-context"
+
+interface VariableIncomeData {
+  id: string
+  description: string
+  amount: number | string
+  income_date: string
+  source?: string | null
+}
 
 interface CreateVariableIncomeDialogProps {
   condoId: string
+  income?: VariableIncomeData
 }
 
 // Map Supabase error codes to user-friendly messages
@@ -33,8 +42,9 @@ function getErrorMessage(err: any): string {
   return "Error al crear el ingreso variable. Intenta nuevamente."
 }
 
-export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDialogProps) {
+export function CreateVariableIncomeDialog({ condoId, income }: CreateVariableIncomeDialogProps) {
   const [open, setOpen] = useState(false)
+  const isEditing = Boolean(income)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [receiptUrl, setReceiptUrl] = useState("")
@@ -57,7 +67,11 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
       }
 
       formData.set("receipt_url", receiptUrl)
-      await createVariableIncome(formData)
+      if (income) {
+        await updateVariableIncome(income.id, formData)
+      } else {
+        await createVariableIncome(formData)
+      }
 
       setOpen(false)
       setReceiptUrl("")
@@ -89,13 +103,13 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
             fontWeight: "600"
           }}
         >
-          <TrendingUp className="h-5 w-5" />
-          Nuevo Ingreso Variable
+          {isEditing ? <Pencil className="h-4 w-4" /> : <TrendingUp className="h-5 w-5" />}
+          {isEditing ? "Editar" : "Nuevo Ingreso Variable"}
         </Button>
       </DialogTrigger>
       <DialogContent style={{ backgroundColor: dialogBgColor, color: dialogTextColor, borderColor: dialogTextColor }} className="max-w-lg">
         <DialogHeader>
-          <DialogTitle style={{ color: dialogTextColor }}>Registrar Ingreso Variable</DialogTitle>
+          <DialogTitle style={{ color: dialogTextColor }}>{isEditing ? "Editar Ingreso Variable" : "Registrar Ingreso Variable"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -103,7 +117,8 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
             <Input 
               id="description" 
               name="description" 
-              placeholder="Descripción del ingreso" 
+              placeholder="Descripción del ingreso"
+              defaultValue={income?.description || ""}
               required
               style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
             />
@@ -116,7 +131,8 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
                 name="amount" 
                 type="number" 
                 step="0.01" 
-                placeholder="0.00" 
+                placeholder="0.00"
+                defaultValue={income?.amount ?? ""}
                 required
                 style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
@@ -127,7 +143,7 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
                 id="income_date" 
                 name="income_date" 
                 type="date" 
-                defaultValue={new Date().toISOString().split("T")[0]} 
+                defaultValue={income?.income_date || new Date().toISOString().split("T")[0]}
                 required
                 style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
               />
@@ -139,6 +155,7 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
               id="source" 
               name="source" 
               placeholder="Ej: Arriendo sala, Multa, etc."
+              defaultValue={income?.source || ""}
               style={{ backgroundColor: inputBgColor, color: inputTextColor, borderColor: inputTextColor }}
             />
           </div>
@@ -150,7 +167,7 @@ export function CreateVariableIncomeDialog({ condoId }: CreateVariableIncomeDial
           )}
           <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Guardar Ingreso
+            {isEditing ? "Guardar Cambios" : "Guardar Ingreso"}
           </Button>
         </form>
       </DialogContent>

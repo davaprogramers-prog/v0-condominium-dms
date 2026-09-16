@@ -338,6 +338,41 @@ export async function createVariableIncome(formData: FormData) {
   revalidatePath("/dashboard/ingreso-variable")
 }
 
+export async function updateVariableIncome(incomeId: string, formData: FormData) {
+  const { supabase, condoId } = await getCondoId()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (profile?.role !== "super_admin") {
+    throw new Error("Solo el super administrador puede editar ingresos variables")
+  }
+
+  const amount = Number(formData.get("amount"))
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("El monto debe ser mayor a 0")
+  }
+
+  const { error } = await supabase
+    .from("variable_income")
+    .update({
+      description: formData.get("description") as string,
+      amount,
+      income_date: formData.get("income_date") as string,
+      source: formData.get("source") as string || null,
+    })
+    .eq("id", incomeId)
+    .eq("condo_id", condoId)
+
+  if (error) throw error
+  revalidatePath("/dashboard/ingreso-variable")
+}
+
 // ===== Exemptions =====
 export async function createExemptionType(formData: FormData) {
   const { supabase, condoId } = await getCondoId()

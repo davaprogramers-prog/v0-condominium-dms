@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { deleteVariableIncome } from "@/app/dashboard/ingresos/actions"
+import { CreateVariableIncomeDialog } from "./create-variable-income-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TrendingUp, Trash2, ExternalLink } from "lucide-react"
+import { TrendingUp, Trash2, ExternalLink, Pencil } from "lucide-react"
 
 interface VariableIncome {
   id: string
@@ -21,7 +22,9 @@ interface VariableIncome {
 interface IngresoVariableClientProps {
   incomes: VariableIncome[]
   currencySymbol: string
+  condoId: string
   isAdmin: boolean
+  isSuperAdmin: boolean
 }
 
 type IncomeStatus = "pending" | "paid"
@@ -52,7 +55,7 @@ function getVariableIncomeStatus(inc: any): { status: IncomeStatus; color: strin
     : { status: "pending", color: "bg-white border-2 border-amber-200", textColor: "text-amber-600" }
 }
 
-export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: IngresoVariableClientProps) {
+export function IngresoVariableClient({ incomes, currencySymbol, condoId, isAdmin, isSuperAdmin }: IngresoVariableClientProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
 
   // Ordenar ingresos por número de casa naturalmente
@@ -132,6 +135,9 @@ export function IngresoVariableClient({ incomes, currencySymbol, isAdmin }: Ingr
 
                   {isAdmin && (
                     <div className="flex gap-2 pt-2">
+                      {isSuperAdmin && (
+                        <CreateVariableIncomeDialog condoId={condoId} income={income} />
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
