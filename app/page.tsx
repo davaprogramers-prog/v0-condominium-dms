@@ -4,6 +4,7 @@ import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight, Do
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function Page() {
   const router = useRouter()
@@ -23,7 +24,11 @@ export default function Page() {
 
     if (isNative) {
       setRedirecting(true)
-      window.location.replace('/auth/login')
+      const supabase = createClient()
+
+      void supabase.auth.getSession().then(({ data: { session } }) => {
+        window.location.replace(session ? '/dashboard' : '/auth/login')
+      })
     }
   }, [])
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -16,6 +16,18 @@ function LoginPageContent() {
   const [rememberDevice, setRememberDevice] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    const supabase = createClient()
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      const nextPath = searchParams.get("next")
+      const safeNextPath = nextPath?.startsWith("/") && !nextPath.startsWith("//")
+        ? nextPath
+        : "/dashboard"
+      router.replace(safeNextPath)
+    })
+  }, [router, searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
