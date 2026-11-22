@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { Loader2, AlertCircle } from "lucide-react"
-import { registerOwner } from "../actions"
+import { buscarPropiedadesPorCorreo, registerOwner } from "../actions"
 
 interface House {
   id: string
@@ -33,25 +32,13 @@ export function RegistroForm() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      // Check if email exists in houses
-      const { data, error: fetchError } = await supabase
-        .from("houses")
-        .select("id, house_number, condo_id, condominiums(name)")
-        .eq("owner_email", email)
-
-      if (fetchError) throw fetchError
-      if (!data || data.length === 0) {
+      const resultado = await buscarPropiedadesPorCorreo(email)
+      if (!resultado.ok) throw new Error(resultado.error)
+      if (resultado.propiedades.length === 0) {
         throw new Error("Este correo no está registrado en ninguna propiedad. Contacta al administrador del condominio.")
       }
 
-      // Map houses with condo names
-      const mappedHouses: House[] = data.map((h: any) => ({
-        id: h.id,
-        house_number: h.house_number,
-        condo_id: h.condo_id,
-        condoName: h.condominiums?.name || "Condominio",
-      }))
+      const mappedHouses: House[] = resultado.propiedades
 
       setHouses(mappedHouses)
 

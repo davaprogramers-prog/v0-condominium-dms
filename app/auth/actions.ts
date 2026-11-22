@@ -2,6 +2,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { consumirIntento, mensajeEspera } from "@/lib/auth/plataforma/limite"
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -51,6 +52,38 @@ export async function signup(formData: FormData) {
 
 type RegisterResult = { success: true } | { success: false; error: string }
 
+export type PropiedadRegistro = { id: string; house_number: number; condo_id: string; condoName: string }
+
+/**
+ * Paso 1 del registro. Antes el navegador leía `houses` como anónimo (la política dejaba leer todas las casas
+ * con sus correos). Ahora se consulta en el servidor, con límite de intentos, y solo vuelve lo necesario.
+ */
+export async function buscarPropiedadesPorCorreo(
+  correo: string,
+): Promise<{ ok: true; propiedades: PropiedadRegistro[] } | { ok: false; error: string }> {
+  const email = String(correo || "").trim().toLowerCase()
+  if (!email || email.length > 254 || !email.includes("@")) return { ok: false, error: "Correo no válido" }
+
+  const espera = await consumirIntento("recuperacion", `registro-busqueda:${email}`)
+  if (espera > 0) return { ok: false, error: mensajeEspera(espera) }
+
+  const { data, error } = await createServiceClient()
+    .from("houses")
+    .select("id, house_number, condo_id, condominiums(name)")
+    .ilike("owner_email", email)
+  if (error) return { ok: false, error: "No se pudo validar el correo" }
+
+  return {
+    ok: true,
+    propiedades: (data ?? []).map((h: any) => ({
+      id: h.id,
+      house_number: h.house_number,
+      condo_id: h.condo_id,
+      condoName: h.condominiums?.name || "Condominio",
+    })),
+  }
+}
+
 export async function registerOwner(
   email: string,
   password: string,
@@ -60,16 +93,20 @@ export async function registerOwner(
 ): Promise<RegisterResult> {
   const supabase = await createClient()
   const serviceClient = createServiceClient()
+  email = String(email || "").trim().toLowerCase()
 
-  // Get house details to get condo_id
-  const { data: house, error: houseError } = await supabase
+  const espera = await consumirIntento("recuperacion", `registro:${email}`)
+  if (espera > 0) return { success: false, error: mensajeEspera(espera) }
+
+  // La casa debe estar registrada a ESTE correo (antes bastaba cualquier id de casa).
+  const { data: house, error: houseError } = await serviceClient
     .from("houses")
     .select("id, condo_id")
     .eq("id", houseId)
-    .single()
+    .ilike("owner_email", email)
+    .maybeSingle()
 
   if (houseError || !house) {
-    console.error("[v0] House lookup error:", houseError)
     return { success: false, error: "Casa no válida" }
   }
 
@@ -95,44 +132,10 @@ export async function registerOwner(
     return { success: false, error: "Error en la base de datos. Por favor contacta al administrador para verificar la configuración del sistema." }
   }
 
-  // If user already exists, update their profile using the service client (admin lookup)
+  // Cuenta existente: antes se sobrescribía su perfil (rol y condominio) sin probar que fuera suya.
+  // Ahora debe iniciar sesión; ensureUserProfile vincula sus casas tras autenticarse.
   if (authError && (authError.message.includes("already registered") || authError.message.includes("already been registered"))) {
-    console.log("[v0] User already registered, looking up existing auth user by email...")
-
-    // Find the existing auth user by email using the admin API
-    const { data: listData, error: listError } = await serviceClient.auth.admin.listUsers()
-
-    if (listError) {
-      console.error("[v0] Error listing users:", listError)
-      return { success: false, error: "El email ya está registrado. Intenta iniciar sesión." }
-    }
-
-    const existingAuthUser = listData.users.find((u) => u.email?.toLowerCase() === email.toLowerCase())
-
-    if (!existingAuthUser) {
-      return { success: false, error: "El email ya está registrado. Intenta iniciar sesión." }
-    }
-
-    // Upsert their profile with the assigned house/condo
-    const { error: upsertError } = await serviceClient
-      .from("profiles")
-      .upsert({
-        id: existingAuthUser.id,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        house_id: houseId,
-        condo_id: house.condo_id,
-        role: "owner",
-      })
-
-    if (upsertError) {
-      console.error("[v0] Profile upsert error (existing user):", upsertError)
-      return { success: false, error: "Error al actualizar perfil: " + upsertError.message }
-    }
-
-    console.log("[v0] Existing user profile updated:", existingAuthUser.id)
-    return { success: true }
+    return { success: false, error: "El email ya está registrado. Intenta iniciar sesión." }
   }
 
   if (authError) {
