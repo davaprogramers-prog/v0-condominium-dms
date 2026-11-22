@@ -25,7 +25,11 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
   const isLoginRoute = pathname === "/auth/login"
-  const isProtectedRoute = pathname.startsWith("/dashboard") || pathname === "/select-condominium"
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname === "/select-condominium" ||
+    pathname.startsWith("/plataforma") ||
+    pathname.startsWith("/admin")
 
   if (!user && isProtectedRoute) {
     const loginUrl = request.nextUrl.clone()
@@ -35,6 +39,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && isLoginRoute) {
+    const { data: nivel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (nivel?.nextLevel === "aal2" && nivel.currentLevel !== "aal2") return response
     const dashboardUrl = request.nextUrl.clone()
     dashboardUrl.pathname = "/dashboard"
     dashboardUrl.search = ""
@@ -45,5 +51,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth/login", "/dashboard/:path*", "/select-condominium"],
+  matcher: ["/auth/login", "/dashboard/:path*", "/select-condominium", "/plataforma/:path*", "/admin/:path*"],
 }

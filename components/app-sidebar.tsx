@@ -516,13 +516,13 @@ export function AppSidebar({ user, profile, condo, allCondos = [], hasMultiplePr
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={pathname === "/admin"}
+                    isActive={pathname.startsWith("/plataforma")}
                     style={{ color: cardTextColor }}
                     className="hover:opacity-80"
                   >
-                    <Link href="/admin" onClick={handleNavClick}>
+                    <Link href="/plataforma" onClick={handleNavClick}>
                       <Key className="h-4 w-4" style={{ color: "#6366F1" }} />
-                      <span>Panel de Admin</span>
+                      <span>Plataforma</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -80,6 +80,26 @@ export const evaluarSuperAdmin = cache(async (): Promise<EvaluacionGlobal> => {
   return { sesion, registro, decision }
 })
 
+/**
+ * Registro activo y correo coincidente, sin exigir AAL2. Solo para enrolar el primer factor
+ * o entrar al paso de verificación: nunca otorga privilegios globales.
+ */
+export async function evaluarRegistroSinMfa(): Promise<
+  { ok: true; usuario: User; supabase: Supabase; aal: string | null; amr: unknown } | { ok: false; motivo: MotivoRechazo }
+> {
+  const { sesion, registro } = await evaluarSuperAdmin()
+  if (!sesion.usuario) return { ok: false, motivo: "SIN_SESION" }
+  const d = decidirAccesoGlobal({
+    usuarioId: sesion.usuario.id,
+    correoSesion: sesion.usuario.email ?? null,
+    registro,
+    aal: "aal2",
+    error: sesion.error,
+  })
+  if (!d.concedido) return { ok: false, motivo: d.motivo }
+  return { ok: true, usuario: sesion.usuario, supabase: sesion.supabase, aal: sesion.aal, amr: sesion.amr }
+}
+
 /** Para pantallas de condominio: true solo con registro global activo + AAL2 verificados en el servidor. */
 export async function esSuperAdminEfectivo(): Promise<boolean> {
   try {

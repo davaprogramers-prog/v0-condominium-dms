@@ -1,47 +1,40 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { requireGlobalSuperAdmin, respuestaDenegada } from '@/lib/auth/plataforma/guardia'
+import { registrarAuditoria } from '@/lib/auth/plataforma/auditoria'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
-    // Verify user is super_admin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 })
-    }
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    
-    if (profile?.role !== 'super_admin') {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
-    }
-    
+    const guardia = await requireGlobalSuperAdmin('condominios.gestionar')
+    if (!guardia.ok) return respuestaDenegada(guardia)
+
     const { adminId, canChangeTheme } = await request.json()
-    
-    if (!adminId) {
-      return NextResponse.json({ success: false, error: 'Missing adminId' }, { status: 400 })
+
+    if (!adminId || typeof adminId !== 'string') {
+      return NextResponse.json({ success: false, error: 'Falta el administrador' }, { status: 400 })
     }
-    
-    const { error } = await supabase
+
+    const { error } = await guardia.supabase
       .from('profiles')
-      .update({ can_change_theme: canChangeTheme })
+      .update({ can_change_theme: canChangeTheme === true })
       .eq('id', adminId)
-    
+
     if (error) {
-      console.error('[v0] Error updating theme permission:', error)
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      console.error('[plataforma] Error al actualizar permiso de tema:', error.message)
+      return NextResponse.json({ success: false, error: 'No se pudo actualizar el permiso' }, { status: 500 })
     }
-    
+
+    await registrarAuditoria({
+      actorId: guardia.usuario.id,
+      accion: 'administrador.permiso_tema',
+      resultado: 'concedido',
+      objetivoUserId: adminId,
+      motivo: canChangeTheme === true ? 'Permite cambiar tema' : 'Quita cambio de tema',
+    })
     revalidatePath('/dashboard/administradores')
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[v0] API error:', error)
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
+    console.error('[plataforma] theme-permission:', (error as Error).message)
+    return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 })
   }
 }

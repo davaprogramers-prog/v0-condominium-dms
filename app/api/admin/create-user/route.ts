@@ -1,26 +1,12 @@
 import { createClient } from "@supabase/supabase-js"
-import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { requireGlobalSuperAdmin, respuestaDenegada } from "@/lib/auth/plataforma/guardia"
+import { registrarAuditoria } from "@/lib/auth/plataforma/auditoria"
 
 export async function POST(request: Request) {
   try {
-    // Verify the current user is super_admin
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 })
-    }
-    
-    const { data: currentProfile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-    
-    if (currentProfile?.role !== "super_admin") {
-      return NextResponse.json({ error: "No tienes permisos" }, { status: 403 })
-    }
+    const guardia = await requireGlobalSuperAdmin("condominios.gestionar")
+    if (!guardia.ok) return respuestaDenegada(guardia)
 
     const body = await request.json()
     const { email, password, firstName, lastName, condoId } = body
@@ -87,6 +73,13 @@ export async function POST(request: Request) {
       })
     }
 
+    await registrarAuditoria({
+      actorId: guardia.usuario.id,
+      accion: "administrador.crear",
+      resultado: "concedido",
+      condoId: condoId || null,
+      objetivoUserId: newUser.user.id,
+    })
     return NextResponse.json({ success: true, userId: newUser.user.id })
   } catch (error) {
     console.error("[v0] Unexpected error:", error)

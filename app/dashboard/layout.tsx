@@ -58,14 +58,20 @@ export default async function DashboardLayout({
 
   // If no profile, create fallback from metadata
   if (!profile) {
+    const rolServidor = user.app_metadata?.role
     profile = {
-      role: user.user_metadata?.role || "propietario",
+      role: rolServidor && rolServidor !== "super_admin" ? rolServidor : "propietario",
       condo_id: user.user_metadata?.condo_id || null,
       house_id: user.user_metadata?.house_id || null,
       first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
       last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
     }
+  }
+
+  // Sin registro global activo + AAL2, la UI no debe mostrar opciones de super administrador.
+  if (profile.role === "super_admin" && !isSuperAdmin) {
+    profile = { ...profile, role: "guest", plataforma_pendiente: true }
   }
 
   // Resolve the house number for a concise owner-facing mobile header.
