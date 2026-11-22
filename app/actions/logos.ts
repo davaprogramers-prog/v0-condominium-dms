@@ -1,6 +1,7 @@
 'use server'
 
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
+import { autorizarAdminDeCondominio } from "@/lib/auth/condominio"
 import { createClient } from '@/lib/supabase/server'
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
@@ -31,8 +32,11 @@ export async function uploadLogo(
     throw new Error('Solo super admin puede crear logos globales')
   }
 
-  if (scope === 'condo' && !condoId) {
-    throw new Error('condoId requerido para logos de condominio')
+  if (scope !== 'global' && scope !== 'condo') throw new Error('Alcance no válido')
+
+  if (scope === 'condo') {
+    const acceso = await autorizarAdminDeCondominio(condoId)
+    if (!acceso.ok) throw new Error(acceso.error)
   }
 
   // Obtener archivo

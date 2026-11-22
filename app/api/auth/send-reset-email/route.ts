@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { consumirIntento, mensajeEspera } from '@/lib/auth/plataforma/limite'
 
 export async function POST(request: Request) {
   const resendApiKey = process.env.RESENDCONDO_API_KEY
@@ -14,14 +15,22 @@ export async function POST(request: Request) {
 
   const resend = new Resend(resendApiKey)
   try {
-    const { email } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
 
-    if (!email) {
+    if (!email || email.length > 254 || !email.includes('@')) {
       return NextResponse.json(
-        { error: 'Email is required' },
+        { error: 'Correo no válido' },
         { status: 400 }
       )
     }
+
+    const espera = await consumirIntento('recuperacion', `correo:${email}`)
+    if (espera > 0) {
+      return NextResponse.json({ error: mensajeEspera(espera) }, { status: 429, headers: { 'Retry-After': String(espera) } })
+    }
+    // Las cuentas demo no tienen correo real.
+    if (email.endsWith('@demo.invalid')) return NextResponse.json({ success: true })
 
     // Create Supabase admin client to generate recovery link
     const adminClient = createAdminClient(
@@ -42,11 +51,9 @@ export async function POST(request: Request) {
     })
 
     if (linkError || !data) {
-      console.error('[v0] Generate recovery link error:', linkError)
-      return NextResponse.json(
-        { error: 'No se pudo generar el enlace de recuperación' },
-        { status: 500 }
-      )
+      // Misma respuesta que con éxito: no revela si el correo tiene cuenta.
+      console.error('Generate recovery link error:', linkError?.message)
+      return NextResponse.json({ success: true })
     }
 
     const resetUrl = data.properties?.action_link

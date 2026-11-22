@@ -1,22 +1,6 @@
-import { uploadLogo } from '@/app/actions/logos'
-import { NextResponse } from 'next/server'
-import { respuestaAccionDemo, sesionEsDemo } from '@/lib/demo/guardia'
+import { rutaCerrada } from "@/lib/auth/plataforma/ruta-cerrada"
 
-export async function POST(request: Request) {
-  try {
-    if (await sesionEsDemo()) return respuestaAccionDemo()
-    const formData = await request.formData()
-    const logoType = formData.get('logoType') as 'app' | 'expense_category' | 'custom'
-    const scope = formData.get('scope') as 'global' | 'condo'
-    const condoId = formData.get('condoId') as string | undefined
-
-    const blobUrl = await uploadLogo(formData, logoType, scope, condoId)
-    return NextResponse.json({ blob_url: blobUrl })
-  } catch (error) {
-    console.error('Error uploading logo:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error uploading logo' },
-      { status: 400 }
-    )
-  }
+// Sin uso en la app y aceptaba el condominio desde el formulario. La subida de logos va por la acción uploadLogo.
+export async function POST() {
+  return rutaCerrada()
 }

@@ -1285,38 +1285,37 @@ export async function deleteAlert(id: string) {
 }
 
 // ===== File Upload Helper =====
-export async function uploadFile(bucket: string, path: string, file: File) {
-  try {
-    const admin = createAdminClient()
-    const { data, error } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
-    if (error) throw error
-    const { data: urlData } = admin.storage.from(bucket).getPublicUrl(data.path)
-    return urlData.publicUrl
-  } catch (err: any) {
-    console.error("[v0] Error uploading file:", err)
-    throw err
-  }
-}
+// Buckets que usa <FileUpload>; cualquier otro se rechaza (antes se podía escribir en cualquier bucket y pisar archivos).
+const BUCKETS_SUBIDA = new Set(["documents", "expenses", "projects", "receipts", "rentals", "statements"])
+const MAX_BYTES_SUBIDA = 10 * 1024 * 1024
 
 export async function uploadFileToStorage(formData: FormData) {
   try {
     const file = formData.get("file") as File
     const bucket = formData.get("bucket") as string
-    const folder = formData.get("folder") as string || ""
-    
-    if (!file || !bucket) {
+    const folder = String(formData.get("folder") || "").toLowerCase().replace(/[^a-z0-9_-]/g, "")
+
+    if (!file || typeof file === "string" || !bucket) {
       return { error: "Archivo y bucket son requeridos", url: null }
     }
-    
-    console.log("[v0] uploadFileToStorage:", { bucket, folder, fileName: file.name })
-    
-    // Generate unique filename
-    const ext = file.name.split(".").pop()
-    const path = `${folder ? folder + "/" : ""}${Date.now()}.${ext}`
-    
-    // Use admin client to bypass RLS
+    if (!BUCKETS_SUBIDA.has(bucket)) return { error: "Destino no permitido", url: null }
+    if (file.size > MAX_BYTES_SUBIDA) return { error: "El archivo supera 10 MB", url: null }
+    if (!(file.type.startsWith("image/") || file.type === "application/pdf")) {
+      return { error: "Solo se permiten imágenes o PDF", url: null }
+    }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "No autenticado", url: null }
+    if (esUsuarioDemo(user)) return { error: MENSAJE_ACCION_BLOQUEADA, url: null }
+    const { data: perfil } = await createAdminClient().from("profiles").select("condo_id").eq("id", user.id).maybeSingle()
+    const prefijo = perfil?.condo_id ?? `usuarios/${user.id}`
+
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "bin"
+    const path = `${prefijo}/${folder ? folder + "/" : ""}${Date.now()}-${crypto.randomUUID()}.${ext}`
+
     const admin = createAdminClient()
-    const { data, error: uploadError } = await admin.storage.from(bucket).upload(path, file, { upsert: true })
+    const { data, error: uploadError } = await admin.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type })
     
     if (uploadError) {
       console.error("[v0] uploadFileToStorage error:", uploadError)

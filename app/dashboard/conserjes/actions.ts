@@ -1,9 +1,17 @@
 "use server"
 
-import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
-import { createClient } from "@/lib/supabase/server"
-import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
+import { autorizarAdminDeCondominio } from "@/lib/auth/condominio"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
+
+function clienteServicio() {
+  return createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.SUPABASE_SERVICE_ROLE_KEY || "")
+}
+
+async function exigirAdmin(condoId: string) {
+  const acceso = await autorizarAdminDeCondominio(condoId)
+  if (!acceso.ok) throw new Error(acceso.error)
+  return acceso
+}
 
 export async function createConcierge(condoId: string, data: {
   email: string
@@ -11,142 +19,55 @@ export async function createConcierge(condoId: string, data: {
   firstName: string
   lastName: string
 }) {
-  const supabase = await createClient()
+  await exigirAdmin(condoId)
+  const adminSupabase = clienteServicio()
+  const email = String(data.email || "").trim().toLowerCase()
+  if (!email) throw new Error("Correo requerido")
 
-  // Verify user is admin of this condo
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
-
-  const { data: adminProfile } = await supabase
-    .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  if (adminProfile?.role !== "admin" && !(adminProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
-    throw new Error("Solo administradores pueden crear conserjes")
-  }
-
-  if (adminProfile?.condo_id !== condoId) {
-    throw new Error("No autorizado para este condominio")
-  }
-
-  // Use Supabase Admin client
-  const adminSupabase = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-  )
-
-  // Step 1: Check if profile already exists for this email in this condo
   const { data: existingProfile } = await adminSupabase
     .from("profiles")
     .select("id, role, condo_id, email")
-    .eq("email", data.email)
+    .ilike("email", email)
     .maybeSingle()
 
   if (existingProfile) {
-    // Profile exists
     if (existingProfile.condo_id === condoId && existingProfile.role === "conserje") {
-      // Already assigned to this condo as conserje - This is OK, just return success
-      // (idempotent operation)
-      console.log(`[v0] Conserje ${data.email} ya estaba asignado a este condominio`)
       return { success: true, profile: existingProfile, alreadyExists: true }
-    } else if (existingProfile.condo_id !== condoId) {
-      // Profile exists but for a different condo - REASSIGN it
-      console.log(`[v0] Reasignando conserje ${data.email} del condominio ${existingProfile.condo_id} al ${condoId}`)
-      
-      const { data: updatedProfile, error: updateError } = await adminSupabase
-        .from("profiles")
-        .update({
-          condo_id: condoId,
-          role: "conserje",
-          first_name: data.firstName,
-          last_name: data.lastName
-        })
-        .eq("id", existingProfile.id)
-        .select()
-        .single()
-
-      if (updateError) {
-        console.error("[v0] Error updating profile condo:", updateError)
-        throw new Error("Error al asignar conserje al condominio")
-      }
-
-      return { success: true, profile: updatedProfile, wasReassigned: true }
     }
+    // Antes se reasignaba la cuenta (de otro condominio o con otro rol): permitía apropiarse de cuentas ajenas.
+    throw new Error("Este correo ya pertenece a otra cuenta. Usa un correo diferente.")
   }
 
-  // Step 2: Check if auth user exists with this email
-  const { data: authUsers, error: listError } = await adminSupabase.auth.admin.listUsers({
-    perPage: 1000
-  })
-
-  const existingAuthUser = authUsers?.users?.find(u => u.email === data.email)
-
-  if (existingAuthUser) {
-    // Auth user exists, create/update profile for this condo
-    console.log(`[v0] Usuario auth existe: ${existingAuthUser.id}`)
-
-    const { data: profileData, error: profileError } = await adminSupabase
-      .from("profiles")
-      .upsert({
-        id: existingAuthUser.id,
-        email: data.email,
-        role: "conserje",
-        condo_id: condoId,
-        first_name: data.firstName,
-        last_name: data.lastName
-      }, { onConflict: "id" })
-      .select()
-      .single()
-
-    if (profileError) {
-      console.error("[v0] Error upserting profile:", profileError)
-      throw new Error(profileError.message || "Error al crear perfil del conserje")
-    }
-
-    return { success: true, profile: profileData }
-  }
-
-  // Step 3: Create new auth user
   const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
-    email: data.email,
+    email,
     password: data.password,
     email_confirm: true,
-    user_metadata: {
-      first_name: data.firstName,
-      last_name: data.lastName
-    },
+    user_metadata: { first_name: data.firstName, last_name: data.lastName },
     app_metadata: { role: "conserje" },
   })
 
-  if (authError) {
-    console.error("[v0] Error creating auth user:", authError)
-    throw new Error(authError.message || "Error al crear usuario de autenticación")
+  if (authError || !authData.user?.id) {
+    // Un usuario Auth sin perfil también es una cuenta ajena: no se le asigna rol aquí.
+    if (authError?.code === "email_exists") throw new Error("Este correo ya pertenece a otra cuenta. Usa un correo diferente.")
+    console.error("Error creating auth user:", authError)
+    throw new Error(authError?.message || "Error al crear usuario de autenticación")
   }
 
-  if (!authData.user?.id) {
-    throw new Error("No se generó ID de usuario")
-  }
-
-  // Step 4: Create or update profile for new auth user
   const { data: profileData, error: profileError } = await adminSupabase
     .from("profiles")
     .upsert({
       id: authData.user.id,
-      email: data.email,
+      email,
       role: "conserje",
       condo_id: condoId,
       first_name: data.firstName,
-      last_name: data.lastName
+      last_name: data.lastName,
     }, { onConflict: "id" })
     .select()
     .single()
 
   if (profileError) {
-    console.error("[v0] Error creating profile:", profileError)
-    // Delete auth user if profile creation failed
+    console.error("Error creating profile:", profileError)
     await adminSupabase.auth.admin.deleteUser(authData.user.id).catch(() => {})
     throw new Error(profileError.message || "Error al crear perfil del conserje")
   }
@@ -155,13 +76,10 @@ export async function createConcierge(condoId: string, data: {
 }
 
 export async function getConcierges(condoId: string) {
-  // Use service role to bypass RLS and get all conserjes for this condo
-  const adminSupabase = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-  )
+  const acceso = await autorizarAdminDeCondominio(condoId)
+  if (!acceso.ok) return []
 
-  const { data, error } = await adminSupabase
+  const { data, error } = await clienteServicio()
     .from("profiles")
     .select("*")
     .eq("condo_id", condoId)
@@ -169,10 +87,9 @@ export async function getConcierges(condoId: string) {
     .order("created_at", { ascending: false })
 
   if (error) {
-    console.error("[v0] Error getting concierges:", error)
+    console.error("Error getting concierges:", error)
     return []
   }
-
   return data || []
 }
 
@@ -180,104 +97,54 @@ export async function updateConcierge(condoId: string, profileId: string, data: 
   firstName?: string
   lastName?: string
 }) {
-  const supabase = await createClient()
+  await exigirAdmin(condoId)
 
-  // Verify user is admin
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
-
-  const { data: adminProfile } = await supabase
+  const { error } = await clienteServicio()
     .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  if (adminProfile?.condo_id !== condoId) {
-    throw new Error("No autorizado")
-  }
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      first_name: data.firstName,
-      last_name: data.lastName
-    })
+    .update({ first_name: data.firstName, last_name: data.lastName })
     .eq("id", profileId)
     .eq("condo_id", condoId)
+    .eq("role", "conserje")
 
   if (error) {
-    console.error("[v0] Error updating concierge:", error)
+    console.error("Error updating concierge:", error)
     throw new Error(error.message)
   }
-
   return { success: true }
 }
 
 export async function deleteConcierge(condoId: string, profileId: string) {
-  const supabase = await createClient()
+  await exigirAdmin(condoId)
+  const adminSupabase = clienteServicio()
 
-  // Verify user is admin
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
-  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
-
-  const { data: adminProfile } = await supabase
+  const { data: profileData, error: profileFetchError } = await adminSupabase
     .from("profiles")
-    .select("role, condo_id")
-    .eq("id", user.id)
-    .single()
-
-  if (adminProfile?.role !== "admin" && !(adminProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
-    throw new Error("No autorizado")
-  }
-
-  if (adminProfile?.condo_id !== condoId) {
-    throw new Error("No autorizado para este condominio")
-  }
-
-  // Get the profile first to verify it belongs to this condo
-  const { data: profileData, error: profileFetchError } = await supabase
-    .from("profiles")
-    .select("id, condo_id, email")
+    .select("id")
     .eq("id", profileId)
     .eq("condo_id", condoId)
+    .eq("role", "conserje")
     .maybeSingle()
 
-  // If profile doesn't exist, that's OK - just try to delete the auth user
-  if (profileFetchError && profileFetchError.code !== 'PGRST116') {
-    console.error("[v0] Error fetching profile:", profileFetchError)
-    throw new Error("Error al buscar conserje: " + profileFetchError.message)
+  if (profileFetchError) {
+    console.error("Error fetching profile:", profileFetchError)
+    throw new Error("Error al buscar conserje")
+  }
+  if (!profileData) throw new Error("Conserje no encontrado en este condominio")
+
+  const { error: profileError } = await adminSupabase
+    .from("profiles")
+    .delete()
+    .eq("id", profileId)
+    .eq("condo_id", condoId)
+    .eq("role", "conserje")
+  if (profileError) {
+    console.error("Error deleting profile:", profileError)
+    throw new Error(profileError.message)
   }
 
-  // Delete profile if it exists
-  if (profileData) {
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", profileId)
-      .eq("condo_id", condoId)
-
-    if (profileError) {
-      console.error("[v0] Error deleting profile:", profileError)
-      throw new Error(profileError.message)
-    }
-  }
-
-  // Try to delete auth user via API call to admin function
-  try {
-    const response = await fetch("/api/admin/delete-auth-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: profileId })
-    })
-    
-    if (!response.ok) {
-      console.warn("[v0] Warning: Could not delete auth user, but profile was deleted")
-    }
-  } catch (err) {
-    console.warn("[v0] Warning: Error calling delete-auth-user API, but profile was deleted")
-  }
+  // Solo se borra la cuenta Auth de un conserje verificado de este condominio.
+  const { error: authError } = await adminSupabase.auth.admin.deleteUser(profileId)
+  if (authError) console.warn("No se pudo borrar la cuenta Auth del conserje:", authError.message)
 
   return { success: true }
 }
