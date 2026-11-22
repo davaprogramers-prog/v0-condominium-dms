@@ -49,8 +49,8 @@ export async function POST(request: Request) {
       user_metadata: {
         first_name: firstName,
         last_name: lastName,
-        role: "admin",
-      }
+      },
+      app_metadata: { role: "admin" },
     })
 
     if (authError) {

@@ -1343,7 +1343,9 @@ export async function createUser(formData: FormData) {
   const password = formData.get("password") as string
   const firstName = formData.get("first_name") as string || null
   const lastName = formData.get("last_name") as string || null
-  const userRole = formData.get("role") as string || "propietario"
+  const rolSolicitado = (formData.get("role") as string) || "propietario"
+  if (!["propietario", "owner", "conserje"].includes(rolSolicitado)) throw new Error("Rol no permitido")
+  const userRole = rolSolicitado
   const houseId = formData.get("house_id") as string || null
 
   // Create auth user
@@ -1354,8 +1356,8 @@ export async function createUser(formData: FormData) {
     user_metadata: {
       first_name: firstName,
       last_name: lastName,
-      role: userRole,
     },
+    app_metadata: { role: userRole },
   })
 
   if (authError) throw authError

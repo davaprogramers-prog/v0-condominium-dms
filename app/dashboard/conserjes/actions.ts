@@ -114,7 +114,8 @@ export async function createConcierge(condoId: string, data: {
     user_metadata: {
       first_name: data.firstName,
       last_name: data.lastName
-    }
+    },
+    app_metadata: { role: "conserje" },
   })
 
   if (authError) {

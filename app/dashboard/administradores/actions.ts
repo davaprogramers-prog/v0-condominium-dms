@@ -252,9 +252,9 @@ export async function createAdmin(data: {
       .update({
         first_name: data.firstName,
         last_name: data.lastName,
-        role: "admin",
-        condo_id: data.condoId || null,
-      })
+      },
+      app_metadata: { role: "admin" },
+    })
       .eq("id", userId)
     
     if (updateError) {
