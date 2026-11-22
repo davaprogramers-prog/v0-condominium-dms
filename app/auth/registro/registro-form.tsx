@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, AlertCircle } from "lucide-react"
-import { buscarPropiedadesPorCorreo, registerOwner } from "../actions"
+import { Loader2, AlertCircle, MailCheck } from "lucide-react"
+import { REGEXP_ONLY_DIGITS } from "input-otp"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { buscarPropiedadesPorCorreo, registerOwner, solicitarCodigoRegistro } from "../actions"
 
 interface House {
   id: string
@@ -13,7 +15,9 @@ interface House {
 }
 
 export function RegistroForm() {
-  const [step, setStep] = useState<"email" | "select" | "password">("email")
+  const [step, setStep] = useState<"email" | "select" | "password" | "codigo">("email")
+  const [codigo, setCodigo] = useState("")
+  const [aviso, setAviso] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [passwordConfirm, setPasswordConfirm] = useState("")
@@ -62,42 +66,70 @@ export function RegistroForm() {
     setStep("password")
   }
 
-  // Step 3: Create account
+  const enviarCodigo = async () => {
+    const resultado = await solicitarCodigoRegistro(email, selectedHouseId)
+    if (!resultado.ok) throw new Error(resultado.error)
+    setCodigo("")
+    setAviso(`Enviamos un código de 6 dígitos a ${email}.`)
+  }
+
+  // Step 3: datos y clave → se envía el código al correo
   const handlePasswordSetup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
     try {
-      // Validate password
-      if (password.length < 6) {
-        throw new Error("La contraseña debe tener al menos 6 caracteres")
+      if (password.length < 8) {
+        throw new Error("La contraseña debe tener al menos 8 caracteres")
       }
       if (password !== passwordConfirm) {
         throw new Error("Las contraseñas no coinciden")
       }
-
-      // Validate house selection
       if (!selectedHouseId) {
         throw new Error("Debes seleccionar una propiedad")
       }
 
-      // Call server action to register owner
+      await enviarCodigo()
+      setStep("codigo")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al enviar el código")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Step 4: código del correo → se crea la cuenta
+  const crearCuenta = async (valor: string) => {
+    if (loading || valor.length !== 6) return
+    setError("")
+    setLoading(true)
+    try {
       const result = await registerOwner(
         email,
         password,
         firstName || email.split("@")[0],
         lastName || "",
-        selectedHouseId
+        selectedHouseId,
+        valor,
       )
-
-      if (!result.success) {
-        throw new Error(result.error)
-      }
-
+      if (!result.success) throw new Error(result.error)
       router.push("/auth/registro-exitoso")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al crear cuenta")
+      setCodigo("")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const reenviarCodigo = async () => {
+    setError("")
+    setLoading(true)
+    try {
+      await enviarCodigo()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al enviar el código")
     } finally {
       setLoading(false)
     }
@@ -222,11 +254,13 @@ export function RegistroForm() {
             <input
               id="password"
               type="password"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Mínimo 8 caracteres"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={72}
+              autoComplete="new-password"
               disabled={loading}
               className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
@@ -243,7 +277,9 @@ export function RegistroForm() {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={72}
+              autoComplete="new-password"
               disabled={loading}
               className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
@@ -267,10 +303,85 @@ export function RegistroForm() {
               className="flex-1 rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin inline" />}
-              Crear Cuenta
+              Continuar
             </button>
           </div>
         </form>
+      )}
+
+      {/* Step 4: código enviado al correo */}
+      {step === "codigo" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <MailCheck className="h-8 w-8 text-blue-600" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-gray-900">Confirma tu correo</h2>
+            <p className="text-pretty text-sm leading-relaxed text-gray-600" aria-live="polite">
+              {aviso || `Enviamos un código de 6 dígitos a ${email}.`} Vence en 15 minutos.
+            </p>
+          </div>
+
+          {error && (
+            <div role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-3">
+            <label htmlFor="codigo-registro" className="sr-only">
+              Código de 6 dígitos enviado a tu correo
+            </label>
+            <InputOTP
+              id="codigo-registro"
+              maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}
+              value={codigo}
+              onChange={setCodigo}
+              onComplete={crearCuenta}
+              autoFocus
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              disabled={loading}
+            >
+              <InputOTPGroup>
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <InputOTPSlot key={i} index={i} className="h-12 w-11 text-lg text-gray-900" />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+            <button
+              type="button"
+              onClick={() => crearCuenta(codigo)}
+              disabled={loading || codigo.length !== 6}
+              className="w-full rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin inline" />}
+              Crear Cuenta
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={() => {
+                setStep("password")
+                setError("")
+              }}
+              disabled={loading}
+              className="text-gray-600 hover:underline disabled:opacity-50"
+            >
+              Atrás
+            </button>
+            <button
+              type="button"
+              onClick={reenviarCodigo}
+              disabled={loading}
+              className="text-blue-600 hover:underline disabled:opacity-50"
+            >
+              Reenviar código
+            </button>
+          </div>
+        </div>
       )}
     </>
   )

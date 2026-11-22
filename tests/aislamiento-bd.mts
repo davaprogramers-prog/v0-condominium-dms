@@ -26,9 +26,14 @@ async function caso(nombre: string, fn: () => Promise<void>) {
 const usuarios: string[] = []
 const condos: string[] = []
 
-async function crearUsuario(email: string) {
+async function crearUsuario(email: string, correoVerificado = false) {
   const clave = randomBytes(18).toString("base64url")
-  const { data, error } = await admin.auth.admin.createUser({ email, password: clave, email_confirm: true })
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: clave,
+    email_confirm: true,
+    ...(correoVerificado ? { app_metadata: { correo_verificado: true } } : {}),
+  })
   if (error) throw error
   usuarios.push(data.user!.id)
   return { id: data.user!.id, email, clave }
@@ -44,7 +49,9 @@ async function ingresar(email: string, clave: string): Promise<SupabaseClient> {
 try {
   const sufijo = randomUUID().slice(0, 8)
   const adminA = await crearUsuario(`prueba-admin-a-${sufijo}@example.com`)
-  const duenoB = await crearUsuario(`prueba-dueno-b-${sufijo}@example.com`)
+  const duenoB = await crearUsuario(`prueba-dueno-b-${sufijo}@example.com`, true)
+  // Correo de la casa C de B, cuyo dueño real aún no se registra: alguien crea la cuenta por su cuenta.
+  const correoCasaC = `prueba-dueno-c-${sufijo}@example.com`
 
   const [condoA] = await sql`insert into public.condominiums (name, created_by) values (${"Prueba A " + sufijo}, ${adminA.id}) returning id`
   const [condoB] = await sql`insert into public.condominiums (name, created_by) values (${"Prueba B " + sufijo}, ${adminA.id}) returning id`
@@ -52,6 +59,8 @@ try {
   const [casaA] = await sql`insert into public.houses (condo_id, house_number, owner_name) values (${condoA.id}, '1', 'Casa A') returning id`
   const [casaB] = await sql`insert into public.houses (condo_id, house_number, owner_name, owner_email)
                             values (${condoB.id}, '1', 'Casa B', ${duenoB.email}) returning id`
+  const [casaC] = await sql`insert into public.houses (condo_id, house_number, owner_name, owner_email)
+                            values (${condoB.id}, '2', 'Casa C', ${correoCasaC}) returning id`
   await sql`insert into public.expense_types (condo_id, name) values (${condoB.id}, 'Tipo B')`
 
   await sql`update public.profiles set role = 'admin', condo_id = ${condoA.id} where id = ${adminA.id}`
@@ -128,6 +137,61 @@ try {
   await caso("sigue leyendo su propio perfil", async () => {
     const { data } = await clienteB.from("profiles").select("id").eq("id", duenoB.id)
     assert.equal(data?.length, 1)
+  })
+
+  console.log("Cuenta creada con el correo de otro (sin verificar, scripts/153):")
+  await caso("signUp directo con la clave pública no da acceso al condominio de esa casa", async () => {
+    const intruso = createClient(URL, ANON, opciones)
+    const clave = randomBytes(18).toString("base64url")
+    const { data, error } = await intruso.auth.signUp({ email: correoCasaC, password: clave })
+    assert.equal(error, null)
+    if (data.user) usuarios.push(data.user.id)
+    if (!data.session) {
+      const { error: e } = await intruso.auth.signInWithPassword({ email: correoCasaC, password: clave })
+      assert.equal(e, null)
+    }
+    const { data: casas } = await intruso.from("houses").select("id")
+    assert.equal(casas?.length ?? 0, 0)
+    const { data: cs } = await intruso.from("condominiums").select("id")
+    assert.equal(cs?.length ?? 0, 0)
+  })
+
+  console.log("Código de verificación del registro:")
+  const correoCodigo = `prueba-codigo-${sufijo}@example.com`
+  const emitir = (hash: string) =>
+    admin.rpc("fn_registro_emitir_codigo", { p_email: correoCodigo, p_house: casaC.id, p_hash: hash, p_minutos: 15 })
+  const verificar = async (hash: string) => {
+    const { data, error } = await admin.rpc("fn_registro_verificar_codigo", { p_email: correoCodigo, p_hash: hash })
+    assert.equal(error, null)
+    return (Array.isArray(data) ? data[0] : data) as { estado: string; house_id: string | null }
+  }
+  await caso("un código válido sirve una sola vez y devuelve su casa", async () => {
+    await emitir("hash-bueno")
+    assert.equal((await verificar("hash-malo")).estado, "invalido")
+    const r = await verificar("hash-bueno")
+    assert.equal(r.estado, "ok")
+    assert.equal(r.house_id, casaC.id)
+    assert.equal((await verificar("hash-bueno")).estado, "sin_codigo")
+  })
+  await caso("tras 5 fallos el código queda bloqueado aunque luego se acierte", async () => {
+    await emitir("hash-2")
+    for (let i = 0; i < 5; i++) assert.equal((await verificar("x")).estado, "invalido")
+    assert.equal((await verificar("hash-2")).estado, "bloqueado")
+  })
+  await caso("un código nuevo invalida el anterior", async () => {
+    await emitir("hash-viejo")
+    await emitir("hash-nuevo")
+    assert.equal((await verificar("hash-viejo")).estado, "invalido")
+    assert.equal((await verificar("hash-nuevo")).estado, "ok")
+  })
+  await caso("ni sin sesión ni con sesión de usuario se pueden llamar las funciones del código", async () => {
+    const { error: e1 } = await anonimo.rpc("fn_registro_verificar_codigo", { p_email: correoCodigo, p_hash: "x" })
+    const { error: e2 } = await clienteB.rpc("fn_registro_emitir_codigo", {
+      p_email: correoCodigo, p_house: casaC.id, p_hash: "x", p_minutos: 15,
+    })
+    assert.ok(e1 && e2)
+    const { data } = await clienteB.from("registro_codigos_correo").select("id")
+    assert.equal(data?.length ?? 0, 0)
   })
 
   console.log(`\n${ok} casos OK`)

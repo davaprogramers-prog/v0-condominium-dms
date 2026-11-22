@@ -3,7 +3,8 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { DEFAULT_RESET_PASSWORD } from "./constants"
+import { generarClaveTemporal } from "@/lib/auth/clave-temporal"
+import { cerrarSesiones } from "@/lib/auth/plataforma/sesiones"
 import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
 import { autorizarAdminDeCondominio } from "@/lib/auth/condominio"
 
@@ -214,16 +215,24 @@ export async function resetUserPassword(userId: string) {
     // Un administrador de condominio no puede tomar la cuenta de otro administrador.
     if (!acceso.esSuperAdmin && !ROLES_RESETEABLES_POR_ADMIN.has(objetivo.role)) return sinPermiso
 
+    const claveTemporal = generarClaveTemporal()
     const { error } = await adminClient.auth.admin.updateUserById(userId, {
-      password: DEFAULT_RESET_PASSWORD,
+      password: claveTemporal,
     })
 
     if (error) {
-      console.error("[v0] Error resetting password:", error)
-      return { success: false, error: "Error al resetear la contraseña: " + error.message }
+      console.error("Error resetting password:", error.message)
+      return { success: false, error: "No se pudo resetear la contraseña" }
     }
 
-    return { success: true, password: DEFAULT_RESET_PASSWORD }
+    // Quien tuviera la sesión abierta con la clave anterior queda fuera.
+    try {
+      await cerrarSesiones(userId)
+    } catch (e) {
+      console.error("Error closing sessions after reset:", e)
+    }
+
+    return { success: true, password: claveTemporal }
   } catch (err) {
     console.error("Error resetting password:", err)
     return { success: false, error: "Error inesperado al resetear la contraseña" }
