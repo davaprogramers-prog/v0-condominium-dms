@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "setup:buckets": "node scripts/create-buckets.mjs",
     "test:super-admin": "tsx --test tests/super-admin.test.ts",
-    "test:super-admin-api": "tsx --env-file-if-exists=.env.development.local tests/super-admin-api.ts"
+    "test:super-admin-api": "tsx --env-file-if-exists=.env.development.local tests/super-admin-api.ts",
+    "test:demo": "tsx --test tests/demo.test.ts",
+    "test:demo-bd": "tsx --env-file-if-exists=.env.development.local tests/demo-bd.mts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -8,6 +8,8 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { ThemeManagerClient } from "@/components/theme-manager-client"
 import { ThemeProvider } from "@/app/dashboard/theme-context"
 import { type CondoTheme } from "@/lib/theme-utils"
+import { AvisoDemo } from "@/components/demo/aviso-demo"
+import { esUsuarioDemo, etiquetaRolInterno } from "@/lib/demo/reglas"
 
 // Force rebuild - v0 fix for mi-casa pages removed
 export const metadata = {
@@ -27,6 +29,7 @@ export default async function DashboardLayout({
   }
 
   let profile: any = null
+  const esDemo = esUsuarioDemo(user)
 
   // Try to read profile with safe fallback
   try {
@@ -174,6 +177,12 @@ export default async function DashboardLayout({
             color: theme.main_text_color,
           } : undefined}
         >
+          {esDemo && (
+            <AvisoDemo
+              rol={etiquetaRolInterno(profile.role)}
+              expira={typeof user.app_metadata?.demo_expira === "string" ? user.app_metadata.demo_expira : null}
+            />
+          )}
           <DashboardHeader user={user} profile={profile} condoName={condo?.name} />
             <main 
             className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6"

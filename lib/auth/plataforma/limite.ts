@@ -7,6 +7,8 @@ export const LIMITES = {
   recuperacion: { max: 5, ventana: 60 * 60, maxIp: 20 },
   bootstrap: { max: 3, ventana: 60 * 60, maxIp: 10 },
   reautenticacion: { max: 5, ventana: 15 * 60, maxIp: 30 },
+  // Clics en "Probar demo": la identidad ya es la huella de IP; el cupo de altas vive en demo_config.
+  demo: { max: 20, ventana: 15 * 60, maxIp: 20 },
 } as const
 
 export type AccionLimitada = keyof typeof LIMITES

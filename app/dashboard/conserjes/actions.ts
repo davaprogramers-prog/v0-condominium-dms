@@ -2,6 +2,7 @@
 
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
+import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
 
 export async function createConcierge(condoId: string, data: {
@@ -15,6 +16,7 @@ export async function createConcierge(condoId: string, data: {
   // Verify user is admin of this condo
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
 
   const { data: adminProfile } = await supabase
     .from("profiles")
@@ -183,6 +185,7 @@ export async function updateConcierge(condoId: string, profileId: string, data: 
   // Verify user is admin
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
 
   const { data: adminProfile } = await supabase
     .from("profiles")
@@ -217,6 +220,7 @@ export async function deleteConcierge(condoId: string, profileId: string) {
   // Verify user is admin
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
 
   const { data: adminProfile } = await supabase
     .from("profiles")

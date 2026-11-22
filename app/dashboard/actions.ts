@@ -4,11 +4,13 @@ import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
+import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
 
 // ===== Condo Switching =====
 export async function switchCondo(condoId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
   if (!user) throw new Error("No autenticado")
 
   // Verify user has access to this condo
@@ -45,6 +47,7 @@ async function getCondoId() {
 export async function createCondominium(formData: FormData) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
   
   if (authError || !user) {
     console.error("[v0] Auth error:", authError)

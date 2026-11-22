@@ -1,9 +1,11 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { respuestaAccionDemo, sesionEsDemo } from "@/lib/demo/guardia"
 
 export async function POST(request: NextRequest) {
   try {
+    if (await sesionEsDemo()) return respuestaAccionDemo()
     const body = await request.json()
     const { email, password, firstName, lastName, role, condoId, houseId, isOwner } = body
 

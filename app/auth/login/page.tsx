@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { iniciarSesion } from "@/app/auth/acciones-seguridad"
 import { PasoTotp } from "@/components/auth/paso-totp"
+import { SelectorDemo } from "@/components/demo/selector-demo"
 
 function LoginPageContent() {
   const router = useRouter()
@@ -206,6 +207,16 @@ function LoginPageContent() {
             Registrarse aquí
           </Link>
         </div>
+      </div>
+
+      <div className="mt-6 flex w-full justify-center">
+        <SelectorDemo
+          aviso={
+            searchParams.get("demo") === "finalizada"
+              ? "Tu sesión de demostración terminó. Puedes iniciar una nueva cuando quieras."
+              : null
+          }
+        />
       </div>
 
       {/* Footer */}

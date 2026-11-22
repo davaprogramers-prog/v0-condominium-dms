@@ -4,6 +4,7 @@ import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { DEFAULT_RESET_PASSWORD } from "./constants"
+import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
 
 interface CreateUserParams {
   email: string
@@ -24,6 +25,7 @@ export async function createUserWithRole(params: CreateUserParams) {
     if (!currentUser) {
       return { success: false, error: "No autenticado" }
     }
+    if (esUsuarioDemo(currentUser)) return { success: false, error: MENSAJE_ACCION_BLOQUEADA }
 
     // Verify current user is admin or super_admin
     const { data: currentProfile } = await supabase
@@ -211,6 +213,7 @@ export async function resetUserPassword(userId: string) {
     if (!currentUser) {
       return { success: false, error: "No autenticado" }
     }
+    if (esUsuarioDemo(currentUser)) return { success: false, error: MENSAJE_ACCION_BLOQUEADA }
 
     // Verify current user is admin or super_admin
     const { data: currentProfile } = await supabase
