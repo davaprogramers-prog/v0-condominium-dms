@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Building2, DoorOpen, Home, Loader2 } from "lucide-react"
 import { entrarDemo } from "@/app/auth/acciones-demo"
 import { limpiarDatosLocalesDemo } from "./datos-locales"
@@ -26,9 +26,19 @@ const OPCIONES = [
   },
 ] as const
 
-export function SelectorDemo({ aviso }: { aviso?: string | null }) {
+export function SelectorDemo({ aviso, destacar = false }: { aviso?: string | null; destacar?: boolean }) {
   const [cargando, setCargando] = useState<string | null>(null)
   const [error, setError] = useState("")
+  const [parpadeando, setParpadeando] = useState(destacar)
+  const seccionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (!destacar) return
+    setParpadeando(true)
+    seccionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    const temporizador = window.setTimeout(() => setParpadeando(false), 4500)
+    return () => window.clearTimeout(temporizador)
+  }, [destacar])
 
   const entrar = async (rol: string) => {
     setError("")
@@ -49,7 +59,7 @@ export function SelectorDemo({ aviso }: { aviso?: string | null }) {
   }
 
   return (
-    <section aria-labelledby="titulo-demo" className="flex w-full max-w-md flex-col gap-3 rounded-lg border bg-white p-5 shadow-sm">
+    <section ref={seccionRef} id="demo" aria-labelledby="titulo-demo" className="flex w-full max-w-md flex-col gap-3 rounded-lg border bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-1">
         <h2 id="titulo-demo" className="text-sm font-semibold text-gray-900">
           Prueba la demostración
@@ -78,7 +88,9 @@ export function SelectorDemo({ aviso }: { aviso?: string | null }) {
             onClick={() => entrar(rol)}
             disabled={cargando !== null}
             aria-busy={cargando === rol}
-            className="flex items-center gap-3 rounded-md border border-gray-200 p-3 text-left transition-colors hover:border-blue-600 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-60 sm:flex-col sm:items-start sm:gap-2"
+            className={`flex items-center gap-3 rounded-md border border-gray-200 p-3 text-left transition-colors hover:border-blue-600 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-60 sm:flex-col sm:items-start sm:gap-2 ${
+              parpadeando ? "demo-parpadeo border-blue-600" : ""
+            }`}
           >
             {cargando === rol ? (
               <Loader2 className="h-5 w-5 shrink-0 animate-spin text-blue-600" aria-hidden="true" />

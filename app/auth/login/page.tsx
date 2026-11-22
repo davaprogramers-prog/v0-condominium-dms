@@ -211,6 +211,7 @@ function LoginPageContent() {
 
       <div className="mt-6 flex w-full justify-center">
         <SelectorDemo
+          destacar={searchParams.get("demo") === "probar"}
           aviso={
             searchParams.get("demo") === "finalizada"
               ? "Tu sesión de demostración terminó. Puedes iniciar una nueva cuando quieras."

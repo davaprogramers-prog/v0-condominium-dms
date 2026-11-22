@@ -83,9 +83,16 @@ export default function Page() {
               className="px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 whitespace-nowrap"
               style={{ backgroundColor: "#0d3068", color: "#fefce1", borderColor: "#fefce1" }}
             >
-              Registrarse
-            </a>
-          </div>
+  Registrarse
+  </a>
+  <a
+  href="/auth/login?demo=probar"
+  className="px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-dashed whitespace-nowrap text-center"
+  style={{ backgroundColor: "transparent", color: "#fefce1", borderColor: "#fefce1" }}
+  >
+  Prueba sin Registro
+  </a>
+  </div>
         </div>
       </nav>
       
@@ -116,8 +123,11 @@ export default function Page() {
             </a>
             <a href="/auth/login" className="relative px-8 py-3.5 border-2 border-primary/30 text-foreground rounded-full font-semibold text-base group transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-105">
               <span className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative">Ya tengo cuenta</span>
-            </a>
+  <span className="relative">Ya tengo cuenta</span>
+  </a>
+  <a href="/auth/login?demo=probar" className="px-8 py-3.5 border-2 border-dashed border-primary/40 text-foreground rounded-full font-semibold text-base transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-105">
+  Prueba sin Registro
+  </a>
           </div>
         </div>
       </section>

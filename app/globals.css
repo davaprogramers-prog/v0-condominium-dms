@@ -132,3 +132,19 @@ body {
   background-color: var(--input-bg-hover, #e8e8e8) !important;
   color: var(--input-text, #000000) !important;
 }
+
+@keyframes demo-parpadeo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); background-color: transparent; }
+  50% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.45); background-color: rgba(37, 99, 235, 0.08); }
+}
+
+.demo-parpadeo {
+  animation: demo-parpadeo 0.9s ease-in-out 5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-parpadeo {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.45);
+  }
+}
