@@ -11,6 +11,15 @@ import { Loader2, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { regenerateMonthlyIncome } from "./actions"
 
+/**
+ * "2026-01-01" con new Date() se interpreta como medianoche UTC: en Chile se veía 31-12-2025
+ * en el navegador y 01-01-2026 en el servidor (error de hidratación). Se formatea el texto tal cual.
+ */
+function formatearFechaCalendario(fecha: string): string {
+  const coincidencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(fecha)
+  return coincidencia ? `${coincidencia[3]}-${coincidencia[2]}-${coincidencia[1]}` : fecha
+}
+
 interface ParametersFormProps {
   condoId: string
   currentParams: any
@@ -187,7 +196,7 @@ export function ParametersForm({ condoId, currentParams, cardBgColor = "#1e293b"
             <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 Saldo inicial de <strong>${(currentParams?.initial_balance || 0).toLocaleString("es-CL")}</strong> registrado desde{" "}
-                <strong>{new Date(currentParams.initial_balance_date).toLocaleDateString("es-CL")}</strong>
+                <strong>{formatearFechaCalendario(currentParams.initial_balance_date)}</strong>
               </p>
             </div>
           )}

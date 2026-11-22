@@ -226,7 +226,9 @@ async function main() {
 
 async function limpiar() {
   try {
-    await sql.begin(async (tx) => {
+    await sql.begin(async (transaccion) => {
+      // Los tipos de postgres 3.4 pierden la firma invocable de TransactionSql (Omit sobre una interfaz invocable).
+      const tx = transaccion as unknown as typeof sql
       await tx`set local session_replication_role = replica`
       await tx`delete from public.platform_super_admins where user_id = any(${usuarios}::uuid[])`
       await tx`delete from public.platform_mfa_recovery_codes where user_id = any(${usuarios}::uuid[])`
