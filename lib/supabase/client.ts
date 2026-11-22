@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { opcionesCookieSesion } from './opciones-cookie'
 
 export function createClient() {
   return createBrowserClient(
@@ -14,8 +15,7 @@ export function createClient() {
       },
       cookieOptions: {
         maxAge: 60 * 60 * 24 * 365,
-        sameSite: "lax",
-        secure: true,
+        ...opcionesCookieSesion,
       },
     },
   )

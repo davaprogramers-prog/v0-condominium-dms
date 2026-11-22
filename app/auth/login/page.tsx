@@ -35,9 +35,9 @@ function LoginPageContent() {
       const { data: nivel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
       if (nivel?.nextLevel === "aal2" && nivel.currentLevel !== "aal2") {
         setPasoTotp(true)
-        return
       }
-      router.replace(rutaSegura() || "/dashboard")
+      // Con sesión válida el middleware ya redirige antes de mostrar esta página. Si aun así
+      // llegamos aquí, el servidor no ve la sesión: redirigir desde el cliente solo crea un bucle.
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, searchParams])

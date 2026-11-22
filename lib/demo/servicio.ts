@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
+import { opcionesCookieSesion } from "@/lib/supabase/opciones-cookie"
 import { ipSolicitud } from "@/lib/auth/plataforma/auditoria"
 import { consumirIntento } from "@/lib/auth/plataforma/limite"
 import {
@@ -30,8 +31,7 @@ async function guardarCookieReanudar(token: string, expira: string) {
   const almacen = await cookies()
   almacen.set(COOKIE_REANUDAR, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    ...opcionesCookieSesion,
     path: "/",
     expires: new Date(expira),
   })
