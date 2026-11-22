@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ArriendosClient } from "./arriendos-client"
@@ -22,7 +23,7 @@ export default async function ArriendosPage() {
     <ArriendosClient
       rentals={rentals || []}
       currencySymbol={(condo?.currency_symbol as string) || "$"}
-      isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+      isAdmin={profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))}
     />
   )
 }

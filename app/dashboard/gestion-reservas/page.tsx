@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 // Gestión de Reservas - Admin/Conserje page for managing all condo reservations
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
@@ -21,7 +22,7 @@ export default async function GestionReservasPage() {
     .eq("id", user.id)
     .single()
 
-  const isAdminOrConcierge = profile?.role === "admin" || profile?.role === "super_admin" || profile?.role === "conserje"
+  const isAdminOrConcierge = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
   
   // Only admin/conserje can access this page
   if (!isAdminOrConcierge) {

@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getCondoExpenses, getLast12MonthsData } from "./actions"
@@ -32,13 +33,13 @@ export default async function GastosPage({
     redirect("/dashboard")
   }
 
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
   if (!isAdmin) {
     redirect("/dashboard")
   }
 
   const condoId = profile.condo_id
-  const isSuperAdmin = profile.role === "super_admin"
+  const isSuperAdmin = (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams

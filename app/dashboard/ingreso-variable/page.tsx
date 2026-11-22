@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { getCondoIncome } from "../ingresos/actions"
 import { IngresoVariableClient } from "./ingreso-variable-client"
@@ -52,8 +53,8 @@ export default async function IngresoVariablePage({
 
   // Check if user is admin
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  const isSuperAdmin = profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
+  const isSuperAdmin = (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   return (
     <div className="space-y-6">

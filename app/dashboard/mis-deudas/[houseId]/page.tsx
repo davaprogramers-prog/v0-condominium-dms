@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
@@ -27,7 +28,7 @@ export default async function DebtDetailPage({ params }: DebtDetailPageProps) {
     .eq("id", user.id)
     .single()
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
   const isOwner = profile?.house_id === houseId
 
   // Check if user is owner/admin or resident

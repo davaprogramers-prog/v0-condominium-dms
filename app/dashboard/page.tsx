@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, Newspaper, AlertTriangle, Trees, Plus, Building2, Package } from "lucide-react"
 import Link from "next/link"
@@ -114,7 +115,7 @@ export default async function DashboardPage() {
     }
 
     // Super admin without condo_id still gets full admin dashboard
-    const isSuperAdmin = role === "super_admin"
+    const isSuperAdmin = (role === "super_admin" && (await esSuperAdminEfectivo()))
 
     // Fetch condo info (only if user has a condo assigned)
     let condo: any = null
@@ -165,7 +166,7 @@ export default async function DashboardPage() {
       }
     }
 
-    const isAdmin = role === "admin" || role === "super_admin"
+    const isAdmin = role === "admin" || (role === "super_admin" && (await esSuperAdminEfectivo()))
 
     return (
       <div className="space-y-6">

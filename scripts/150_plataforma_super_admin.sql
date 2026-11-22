@@ -319,7 +319,8 @@ RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path = '' AS $$
 DECLARE r text := e;
 BEGIN
   IF r IS NULL THEN RETURN NULL; END IF;
-  r := regexp_replace(r, 'EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+(public\.)?profiles(\s+\w+)?\s+WHERE\s+\(*\s*\(*(\w+\.)?id\s*=\s*auth\.uid\(\)\)*\s+AND\s+\(*(\w+\.)?role\s*=\s*''super_admin''::text\)*\s*\)', 'is_super_admin()', 'gi');
+  r := regexp_replace(r, 'EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+(public\.)?profiles\s+WHERE\s+\(\((profiles\.)?id\s*=\s*auth\.uid\(\)\)\s+AND\s+\((profiles\.)?role\s*=\s*''super_admin''::text\)\)\s*\)', 'is_super_admin()', 'gi');
+  r := regexp_replace(r, 'EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+(public\.)?profiles\s+WHERE\s+\(\((profiles\.)?role\s*=\s*''super_admin''::text\)\s+AND\s+\((profiles\.)?id\s*=\s*auth\.uid\(\)\)\)\s*\)', 'is_super_admin()', 'gi');
   r := regexp_replace(r, 'get_my_role\(\)\s*=\s*''super_admin''::text', 'is_super_admin()', 'gi');
   r := regexp_replace(r, 'get_user_role\(auth\.uid\(\)\)\s*=\s*''super_admin''::text', 'is_super_admin()', 'gi');
   r := regexp_replace(r, '(\w+\.)?role\s*=\s*ANY\s*\(ARRAY\[''admin''::text,\s*''super_admin''::text\]\)', '\1role = ''admin''::text', 'gi');
@@ -351,6 +352,12 @@ BEGIN
 
     nuevo_qual := public.fn_plataforma_reescribir_expr(pol.qual);
     nuevo_check := public.fn_plataforma_reescribir_expr(pol.with_check);
+    IF length(coalesce(nuevo_qual, '')) - length(replace(coalesce(nuevo_qual, ''), '(', ''))
+       <> length(coalesce(nuevo_qual, '')) - length(replace(coalesce(nuevo_qual, ''), ')', ''))
+       OR length(coalesce(nuevo_check, '')) - length(replace(coalesce(nuevo_check, ''), '(', ''))
+       <> length(coalesce(nuevo_check, '')) - length(replace(coalesce(nuevo_check, ''), ')', '')) THEN
+      RAISE EXCEPTION 'REESCRITURA_DESBALANCEADA %.%: % | %', pol.tablename, pol.policyname, nuevo_qual, nuevo_check;
+    END IF;
     sentencia := format('ALTER POLICY %I ON %I.%I', pol.policyname, pol.schemaname, pol.tablename);
     IF nuevo_qual IS NOT NULL THEN sentencia := sentencia || format(' USING (%s)', nuevo_qual); END IF;
     IF nuevo_check IS NOT NULL THEN sentencia := sentencia || format(' WITH CHECK (%s)', nuevo_check); END IF;

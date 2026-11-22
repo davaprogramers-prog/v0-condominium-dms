@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
@@ -19,7 +20,7 @@ export async function uploadExpenseLogo(formData: FormData) {
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "super_admin") {
+  if (!(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("Only super admins can upload logos")
   }
 

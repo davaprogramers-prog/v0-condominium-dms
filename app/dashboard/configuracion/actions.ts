@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
@@ -18,7 +19,7 @@ export async function regenerateMonthlyIncome(condoId: string) {
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+  if (profile?.role !== "admin" && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     return { success: false, message: "No tienes permisos para esta acción" }
   }
 

@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { DEFAULT_RESET_PASSWORD } from "./constants"
@@ -31,7 +32,7 @@ export async function createUserWithRole(params: CreateUserParams) {
       .eq("id", currentUser.id)
       .single()
 
-    if (!currentProfile || !["admin", "super_admin"].includes(currentProfile.role)) {
+    if (!currentProfile || !(currentProfile.role === "admin" || ((currentProfile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       return { success: false, error: "No tienes permisos para crear usuarios" }
     }
 
@@ -144,7 +145,7 @@ export async function updateUser(userId: string, data: any) {
       .eq("id", currentUser.id)
       .single()
 
-    if (!currentProfile || currentProfile.role !== "super_admin") {
+    if (!currentProfile || !(currentProfile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
       return { error: "No tienes permisos para editar usuarios" }
     }
 
@@ -218,7 +219,7 @@ export async function resetUserPassword(userId: string) {
       .eq("id", currentUser.id)
       .single()
 
-    if (!currentProfile || !["admin", "super_admin"].includes(currentProfile.role)) {
+    if (!currentProfile || !(currentProfile.role === "admin" || ((currentProfile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       return { success: false, error: "No tienes permisos para resetear contraseñas" }
     }
 
@@ -256,7 +257,7 @@ export async function deleteUser(userId: string) {
       .eq("id", currentUser.id)
       .single()
 
-    if (!currentProfile || currentProfile.role !== "super_admin") {
+    if (!currentProfile || !(currentProfile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
       return { error: "No tienes permisos para eliminar usuarios" }
     }
 

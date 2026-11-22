@@ -1,5 +1,6 @@
 'use server'
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from '@/lib/supabase/server'
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
@@ -26,7 +27,7 @@ export async function uploadLogo(
     throw new Error('Perfil no encontrado')
   }
 
-  if (scope === 'global' && profile.role !== 'super_admin') {
+  if (scope === 'global' && !(profile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error('Solo super admin puede crear logos globales')
   }
 
@@ -120,7 +121,7 @@ export async function setDefaultLogo(logoId: string) {
     throw new Error('Perfil no encontrado')
   }
 
-  if (logo.scope === 'global' && profile.role !== 'super_admin') {
+  if (logo.scope === 'global' && !(profile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error('Solo super admin puede actualizar logos globales')
   }
 
@@ -169,7 +170,7 @@ export async function deleteLogo(logoId: string) {
     throw new Error('Perfil no encontrado')
   }
 
-  if (logo.scope === 'global' && profile.role !== 'super_admin') {
+  if (logo.scope === 'global' && !(profile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error('Solo super admin puede eliminar logos globales')
   }
 

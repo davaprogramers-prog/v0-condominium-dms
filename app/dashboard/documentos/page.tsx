@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DocumentosClient } from "./documentos-client"
@@ -37,7 +38,7 @@ export default async function DocumentosPage() {
       condoId={condoId}
       documents={documents || []}
       documentTypes={documentTypes || []}
-      isAdmin={profile?.role === "admin" || profile?.role === "super_admin"}
+      isAdmin={profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))}
     />
   )
 }

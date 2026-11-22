@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
@@ -43,7 +44,7 @@ export default async function DashboardLayout({
   }
 
   // Check if super_admin from profiles table
-  const isSuperAdmin = profile?.role === "super_admin"
+  const isSuperAdmin = (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
   const isAdmin = profile?.role === "admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
 
@@ -135,7 +136,7 @@ export default async function DashboardLayout({
   }
 
   // For admin/super_admin, fetch their condos via user_condos
-  if (profile.role === "super_admin" || profile.role === "admin") {
+  if ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) || profile.role === "admin") {
     try {
       const { data: userCondos } = await supabase
         .from("user_condos")

@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 
 export async function createHouse(data: {
@@ -20,7 +21,7 @@ export async function createHouse(data: {
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+  if (profile?.role !== "admin" && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("No autorizado")
   }
 

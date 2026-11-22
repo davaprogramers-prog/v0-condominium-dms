@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { AlertTriangle } from "lucide-react"
 import Link from "next/link"
@@ -22,7 +23,7 @@ export default async function IngresoMultasPage({
     .single()
 
   const condoId = profile?.condo_id
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   // Get period from query params, anchored cookie, or fall back to current month
   const params = await searchParams

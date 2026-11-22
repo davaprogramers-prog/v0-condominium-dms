@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ExoneracionesClient } from "./exoneraciones-client"
@@ -36,7 +37,7 @@ export default async function ExoneracionesPage() {
         exemptions={exemptions || []}
         exemptionTypes={exemptionTypes || []}
         houses={houses || []}
-        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+        isAdmin={profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))}
       />
     </div>
   )

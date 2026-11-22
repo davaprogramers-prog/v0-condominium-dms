@@ -1,5 +1,6 @@
 'use server'
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -14,7 +15,7 @@ export async function getAdminVisits() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') throw new Error('Acceso denegado')
+  if (profile?.role !== 'admin' && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) throw new Error('Acceso denegado')
 
   const { data: visits } = await supabase
     .from('visits')
@@ -36,7 +37,7 @@ export async function getAdminSupplyRequests() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') throw new Error('Acceso denegado')
+  if (profile?.role !== 'admin' && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) throw new Error('Acceso denegado')
 
   const { data: requests } = await supabase
     .from('supply_requests')
@@ -58,7 +59,7 @@ export async function approveSupplyRequest(requestId: string) {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') throw new Error('Acceso denegado')
+  if (profile?.role !== 'admin' && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) throw new Error('Acceso denegado')
 
   const { error } = await supabase
     .from('supply_requests')

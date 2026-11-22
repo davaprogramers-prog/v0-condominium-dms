@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
 
@@ -21,7 +22,7 @@ export async function createConcierge(condoId: string, data: {
     .eq("id", user.id)
     .single()
 
-  if (adminProfile?.role !== "admin" && adminProfile?.role !== "super_admin") {
+  if (adminProfile?.role !== "admin" && !(adminProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("Solo administradores pueden crear conserjes")
   }
 
@@ -223,7 +224,7 @@ export async function deleteConcierge(condoId: string, profileId: string) {
     .eq("id", user.id)
     .single()
 
-  if (adminProfile?.role !== "admin" && adminProfile?.role !== "super_admin") {
+  if (adminProfile?.role !== "admin" && !(adminProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("No autorizado")
   }
 

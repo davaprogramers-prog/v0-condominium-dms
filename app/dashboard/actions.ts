@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
@@ -349,7 +350,7 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "super_admin") {
+  if (!(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("Solo el super administrador puede editar ingresos variables")
   }
 
@@ -778,7 +779,7 @@ export async function uploadDocument(formData: FormData) {
       .eq("id", userId)
       .single()
     
-    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    if (profile?.role !== "admin" && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
       throw new Error("Solo administradores pueden subir documentos")
     }
     

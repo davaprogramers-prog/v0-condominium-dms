@@ -1,5 +1,6 @@
 'use server'
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from '@/lib/supabase/server'
 import { v4 as uuidv4 } from 'uuid'
 import { getSantiagoDateTime } from '@/lib/date-utils'
@@ -32,12 +33,12 @@ export async function createParcel(data: {
 
     // Super admin can create parcels in any condo
     // Other roles must belong to the same condo
-    const isSuperAdmin = profile.role === 'super_admin'
+    const isSuperAdmin = (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
     if (!isSuperAdmin && profile.condo_id !== data.condo_id) {
       throw new Error('No autorizado')
     }
 
-    if (!['admin', 'super_admin', 'conserje'].includes(profile.role)) {
+    if (!(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       throw new Error('Rol no autorizado')
     }
 
@@ -132,7 +133,7 @@ export async function updateParcelStatus(data: {
       .eq('id', user.id)
       .single()
 
-    if (!profile || !['admin', 'super_admin', 'conserje'].includes(profile.role)) {
+    if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       throw new Error('No autorizado')
     }
 
@@ -144,7 +145,7 @@ export async function updateParcelStatus(data: {
       .single()
 
     // Super admin can update parcels in any condo
-    const isSuperAdmin = profile.role === 'super_admin'
+    const isSuperAdmin = (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
     if (!parcel || (!isSuperAdmin && parcel.condo_id !== profile.condo_id)) {
       throw new Error('Encomienda no encontrada')
     }
@@ -258,7 +259,7 @@ export async function editParcelReception(data: {
       .single()
 
     // Super admin can edit parcels in any condo
-    const isSuperAdmin = profile.role === 'super_admin'
+    const isSuperAdmin = (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
     if (!parcel || (!isSuperAdmin && parcel.condo_id !== profile.condo_id)) {
       throw new Error('Encomienda no encontrada')
     }
