@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { InfraccionesClient } from "./infracciones-client"
@@ -81,7 +82,7 @@ export default async function InfraccionesPage({
         infractions={infractions || []}
         houses={houses || []}
         currencySymbol={(condo?.currency_symbol as string) || "$"}
-        isAdmin={profile.role === "admin" || profile.role === "super_admin"}
+        isAdmin={profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))}
       />
     </div>
   )

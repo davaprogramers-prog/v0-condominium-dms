@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { AlertasClient } from "./alertas-client"
@@ -25,7 +26,7 @@ export default async function AlertasPage() {
     .eq("condo_id", profile.condo_id)
     .order("created_at", { ascending: false })
 
-  const isAdmin = ["super_admin", "admin"].includes(profile.role as string)
+  const isAdmin = (profile.role === "admin" || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))
 
   return (
     <AlertasClient

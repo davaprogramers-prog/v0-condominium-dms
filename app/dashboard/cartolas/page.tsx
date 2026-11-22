@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CartolasClient } from "./cartolas-client"
@@ -18,7 +19,7 @@ export default async function CartolasPage() {
     .eq("condo_id", profile.condo_id)
     .order("statement_date", { ascending: false })
 
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   return (
     <div className="space-y-6">

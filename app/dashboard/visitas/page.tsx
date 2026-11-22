@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { Metadata } from 'next'
 import { Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -34,7 +35,7 @@ export default async function VisitasPage() {
   let condoId = profile.condo_id
   const houseId = profile.house_id
   const role = profile.role
-  const isAdmin = role === "admin" || role === "super_admin"
+  const isAdmin = role === "admin" || (role === "super_admin" && (await esSuperAdminEfectivo()))
   const isConcierge = role === "conserje"
   
   // If conserje without condo_id, try to get it from the condos table

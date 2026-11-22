@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CreateUserDialog } from "./create-user-dialog"
@@ -29,7 +30,7 @@ export default async function UsuariosPage() {
     .order("created_at", { ascending: false })
 
   const isAdmin = profile.role === "admin"
-  const isSuperAdmin = profile.role === "super_admin"
+  const isSuperAdmin = (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   // Get condos for super_admin selector
   let condos: Array<{id: string; name: string}> = []

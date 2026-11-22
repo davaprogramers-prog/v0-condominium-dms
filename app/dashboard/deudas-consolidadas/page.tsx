@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
@@ -38,7 +39,7 @@ export default async function DeudasConsolidadasPage() {
     redirect("/dashboard")
   }
 
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
   if (!isAdmin) {
     redirect("/dashboard")
   }

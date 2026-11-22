@@ -1,13 +1,16 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
+import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
 
 // ===== Condo Switching =====
 export async function switchCondo(condoId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
   if (!user) throw new Error("No autenticado")
 
   // Verify user has access to this condo
@@ -44,6 +47,7 @@ async function getCondoId() {
 export async function createCondominium(formData: FormData) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (esUsuarioDemo(user)) throw new Error(MENSAJE_ACCION_BLOQUEADA)
   
   if (authError || !user) {
     console.error("[v0] Auth error:", authError)
@@ -349,7 +353,7 @@ export async function updateVariableIncome(incomeId: string, formData: FormData)
     .eq("id", user.id)
     .single()
 
-  if (profile?.role !== "super_admin") {
+  if (!(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     throw new Error("Solo el super administrador puede editar ingresos variables")
   }
 
@@ -778,7 +782,7 @@ export async function uploadDocument(formData: FormData) {
       .eq("id", userId)
       .single()
     
-    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    if (profile?.role !== "admin" && !(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
       throw new Error("Solo administradores pueden subir documentos")
     }
     
@@ -1343,7 +1347,9 @@ export async function createUser(formData: FormData) {
   const password = formData.get("password") as string
   const firstName = formData.get("first_name") as string || null
   const lastName = formData.get("last_name") as string || null
-  const userRole = formData.get("role") as string || "propietario"
+  const rolSolicitado = (formData.get("role") as string) || "propietario"
+  if (!["propietario", "owner", "conserje"].includes(rolSolicitado)) throw new Error("Rol no permitido")
+  const userRole = rolSolicitado
   const houseId = formData.get("house_id") as string || null
 
   // Create auth user
@@ -1354,8 +1360,8 @@ export async function createUser(formData: FormData) {
     user_metadata: {
       first_name: firstName,
       last_name: lastName,
-      role: userRole,
     },
+    app_metadata: { role: userRole },
   })
 
   if (authError) throw authError

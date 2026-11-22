@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ProyectosClient } from "./proyectos-client"
@@ -24,7 +25,7 @@ export default async function ProyectosPage() {
     .eq("condo_id", profile.condo_id)
     .order("name")
 
-  const isAdmin = ["admin", "super_admin"].includes(profile.role as string)
+  const isAdmin = (profile.role === "admin" || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))
   const canView = true // Todos pueden ver proyectos (admins, conserjes y propietarios)
 
   return (

@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
@@ -7,6 +8,8 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { ThemeManagerClient } from "@/components/theme-manager-client"
 import { ThemeProvider } from "@/app/dashboard/theme-context"
 import { type CondoTheme } from "@/lib/theme-utils"
+import { AvisoDemo } from "@/components/demo/aviso-demo"
+import { esUsuarioDemo, etiquetaRolInterno } from "@/lib/demo/reglas"
 
 // Force rebuild - v0 fix for mi-casa pages removed
 export const metadata = {
@@ -26,6 +29,7 @@ export default async function DashboardLayout({
   }
 
   let profile: any = null
+  const esDemo = esUsuarioDemo(user)
 
   // Try to read profile with safe fallback
   try {
@@ -43,7 +47,7 @@ export default async function DashboardLayout({
   }
 
   // Check if super_admin from profiles table
-  const isSuperAdmin = profile?.role === "super_admin"
+  const isSuperAdmin = (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
   const isAdmin = profile?.role === "admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
 
@@ -57,14 +61,20 @@ export default async function DashboardLayout({
 
   // If no profile, create fallback from metadata
   if (!profile) {
+    const rolServidor = user.app_metadata?.role
     profile = {
-      role: user.user_metadata?.role || "propietario",
+      role: rolServidor && rolServidor !== "super_admin" ? rolServidor : "propietario",
       condo_id: user.user_metadata?.condo_id || null,
       house_id: user.user_metadata?.house_id || null,
       first_name: user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split("@")[0] || "Usuario",
       last_name: user.user_metadata?.last_name || "",
       avatar_url: null,
     }
+  }
+
+  // Sin registro global activo + AAL2, la UI no debe mostrar opciones de super administrador.
+  if (profile.role === "super_admin" && !isSuperAdmin) {
+    profile = { ...profile, role: "guest", plataforma_pendiente: true }
   }
 
   // Resolve the house number for a concise owner-facing mobile header.
@@ -135,7 +145,7 @@ export default async function DashboardLayout({
   }
 
   // For admin/super_admin, fetch their condos via user_condos
-  if (profile.role === "super_admin" || profile.role === "admin") {
+  if ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) || profile.role === "admin") {
     try {
       const { data: userCondos } = await supabase
         .from("user_condos")
@@ -167,6 +177,12 @@ export default async function DashboardLayout({
             color: theme.main_text_color,
           } : undefined}
         >
+          {esDemo && (
+            <AvisoDemo
+              rol={etiquetaRolInterno(profile.role)}
+              expira={typeof user.app_metadata?.demo_expira === "string" ? user.app_metadata.demo_expira : null}
+            />
+          )}
           <DashboardHeader user={user} profile={profile} condoName={condo?.name} />
             <main 
             className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6"

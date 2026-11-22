@@ -1,6 +1,7 @@
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { respuestaAccionDemo, sesionEsDemo } from '@/lib/demo/guardia'
 
 async function ensureAvatarsBucket(supabaseAdmin: any) {
   try {
@@ -27,6 +28,7 @@ async function ensureAvatarsBucket(supabaseAdmin: any) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (await sesionEsDemo()) return respuestaAccionDemo()
     const formData = await request.formData()
     const file = formData.get('file') as File
     const oldUrl = formData.get('oldUrl') as string | null

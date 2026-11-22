@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { TiposGastosClient } from "./tipos-gastos-client"
@@ -15,5 +16,5 @@ export default async function TiposGastosPage() {
     .eq("condo_id", profile.condo_id)
     .order("name")
 
-  return <TiposGastosClient types={types || []} isAdmin={profile.role === "admin" || profile.role === "super_admin"} />
+  return <TiposGastosClient types={types || []} isAdmin={profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))} />
 }

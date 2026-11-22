@@ -1,8 +1,11 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { respuestaAccionDemo, sesionEsDemo } from "@/lib/demo/guardia"
 
 export async function POST(request: NextRequest) {
   try {
+    if (await sesionEsDemo()) return respuestaAccionDemo()
     const body = await request.json()
     const { email, password, firstName, lastName, role, condoId, houseId, isOwner } = body
 
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest) {
       .eq("id", currentUser.id)
       .single()
 
-    if (!currentProfile || !["admin", "super_admin"].includes(currentProfile.role)) {
+    if (!currentProfile || !(currentProfile.role === "admin" || ((currentProfile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       return NextResponse.json({ error: "No tienes permisos para crear usuarios" }, { status: 403 })
     }
 

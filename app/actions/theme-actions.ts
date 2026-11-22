@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { DEFAULT_THEME, type CondoTheme } from "@/lib/theme-utils";
+import { sesionEsDemo } from "@/lib/demo/guardia";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +33,7 @@ export async function updateCondoTheme(
   condoId: string,
   theme: Partial<Omit<CondoTheme, 'id' | 'condo_id' | 'created_at' | 'updated_at'>>
 ): Promise<CondoTheme | null> {
+  if (await sesionEsDemo()) return null
   try {
     // First check if theme exists
     const { data: existing } = await supabase
@@ -83,6 +85,7 @@ export async function updateCondoTheme(
 }
 
 export async function initializeCondoTheme(condoId: string): Promise<CondoTheme | null> {
+  if (await sesionEsDemo()) return null
   try {
     const { data, error } = await supabase
       .from("condominium_themes")

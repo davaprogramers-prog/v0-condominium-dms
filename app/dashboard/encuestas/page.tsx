@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { EncuestasClient } from "./encuestas-client"
@@ -39,7 +40,7 @@ export default async function EncuestasPage() {
     .select("*", { count: "exact", head: true })
     .eq("condo_id", profile.condo_id)
 
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   return (
     <EncuestasClient

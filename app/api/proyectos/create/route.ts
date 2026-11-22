@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .single()
 
-    if (!profile || !["admin", "super_admin"].includes(profile.role)) {
+    if (!profile || !(profile.role === "admin" || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

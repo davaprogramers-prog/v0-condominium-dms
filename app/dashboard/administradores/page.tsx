@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { AdminsTable } from "./admins-table"
@@ -15,7 +16,7 @@ export default async function AdministradoresPage() {
     .single()
 
   // Only super_admin can access this page
-  if (profile?.role !== "super_admin") {
+  if (!(profile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     redirect("/dashboard")
   }
 

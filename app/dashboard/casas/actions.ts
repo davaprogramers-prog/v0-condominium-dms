@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
@@ -25,8 +26,8 @@ export async function createHouse(
     .eq("id", user.id)
     .single()
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  const canAccessCondo = profile?.condo_id === condoId || profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
+  const canAccessCondo = profile?.condo_id === condoId || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
   
   if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para crear casas")
@@ -125,8 +126,8 @@ export async function updateHouse(
     .eq("id", user.id)
     .single()
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
-  const canAccessCondo = profile?.condo_id === house?.condo_id || profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
+  const canAccessCondo = profile?.condo_id === house?.condo_id || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
   
   if (!isAdmin || !canAccessCondo) {
     throw new Error("No tienes permisos para editar casas")

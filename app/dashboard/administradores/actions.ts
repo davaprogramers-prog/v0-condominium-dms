@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
@@ -19,7 +20,7 @@ export async function deleteAdmin(userId: string) {
     .eq("id", user.id)
     .single()
   
-  if (currentProfile?.role !== "super_admin") {
+  if (!(currentProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
 
@@ -72,7 +73,7 @@ export async function updateAdminThemePermission(adminId: string, canChangeTheme
     .eq("id", user.id)
     .single()
   
-  if (currentProfile?.role !== "super_admin") {
+  if (!(currentProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
   
@@ -106,7 +107,7 @@ export async function updateAdminHouse(adminId: string, houseId: string) {
     .eq("id", user.id)
     .single()
   
-  if (currentProfile?.role !== "super_admin") {
+  if (!(currentProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
 
@@ -172,7 +173,7 @@ export async function createAdmin(data: {
     .eq("id", user.id)
     .single()
   
-  if (currentProfile?.role !== "super_admin") {
+  if (!(currentProfile?.role === "super_admin" && (await esSuperAdminEfectivo()))) {
     return { success: false, error: "No tienes permisos para esta acción" }
   }
   
@@ -204,8 +205,8 @@ export async function createAdmin(data: {
       user_metadata: {
         first_name: data.firstName,
         last_name: data.lastName,
-        role: "admin",
-      }
+      },
+      app_metadata: { role: "admin" },
     })
   } else {
     // Create new user with admin API (bypasses rate limits and auto-confirms email)
@@ -216,8 +217,8 @@ export async function createAdmin(data: {
       user_metadata: {
         first_name: data.firstName,
         last_name: data.lastName,
-        role: "admin",
-      }
+      },
+      app_metadata: { role: "admin" },
     })
 
     if (authError) {
@@ -253,7 +254,6 @@ export async function createAdmin(data: {
         first_name: data.firstName,
         last_name: data.lastName,
         role: "admin",
-        condo_id: data.condoId || null,
       })
       .eq("id", userId)
     

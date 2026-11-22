@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PropietariosClient } from "./propietarios-client"
@@ -23,7 +24,7 @@ export default async function PropietariosPage() {
     )
   }
 
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
   const condoId = profile.condo_id
 
   // Get condo currency

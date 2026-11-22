@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { VisitsAdminClient } from "./visits-admin-client"
@@ -16,7 +17,7 @@ export default async function VisitasAdminPage() {
   if (!profile?.condo_id) redirect("/dashboard")
 
   // Check permissions
-  const isAdmin = profile.role === "admin" || profile.role === "super_admin"
+  const isAdmin = profile.role === "admin" || (profile.role === "super_admin" && (await esSuperAdminEfectivo()))
   const isConcierge = profile.role === "conserje"
   const isOwner = profile.role === "propietario"
 

@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { SupabaseClient } from "@supabase/supabase-js"
 
 /**
@@ -44,7 +45,7 @@ export async function getUserCondoId(
       }
       
       // If super_admin with no condo_id, get the first condominium
-      if (profile[0]?.role === "super_admin" || profile[0]?.role === "admin") {
+      if ((profile[0]?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile[0]?.role === "admin") {
         console.log("[v0] User is admin/super_admin without condo_id, fetching first condominium")
         const { data: condos, error: condoError } = await supabase
           .from("condominiums")

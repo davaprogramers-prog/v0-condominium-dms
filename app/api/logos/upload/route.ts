@@ -1,8 +1,10 @@
 import { uploadLogo } from '@/app/actions/logos'
 import { NextResponse } from 'next/server'
+import { respuestaAccionDemo, sesionEsDemo } from '@/lib/demo/guardia'
 
 export async function POST(request: Request) {
   try {
+    if (await sesionEsDemo()) return respuestaAccionDemo()
     const formData = await request.formData()
     const logoType = formData.get('logoType') as 'app' | 'expense_category' | 'custom'
     const scope = formData.get('scope') as 'global' | 'condo'

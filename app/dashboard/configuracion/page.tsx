@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { LogoutButton } from "./logout-button"
@@ -47,7 +48,7 @@ export default async function ConfiguracionPage() {
   const inputBgColor = theme?.enable_custom_theme ? theme.input_bg_color : DEFAULT_THEME.input_bg_color
   const inputTextColor = theme?.enable_custom_theme ? theme.input_text_color : DEFAULT_THEME.input_text_color
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
 
   return (
     <div className="space-y-6">

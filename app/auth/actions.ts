@@ -29,8 +29,6 @@ export async function signup(formData: FormData) {
   const password = formData.get("password") as string
   const firstName = formData.get("first_name") as string
   const lastName = formData.get("last_name") as string
-  const role = (formData.get("role") as string) || "owner"
-
   const { error } = await supabase.auth.signUp({
     email,
     password,
@@ -41,7 +39,6 @@ export async function signup(formData: FormData) {
       data: {
         first_name: firstName,
         last_name: lastName,
-        role,
       },
     },
   })
@@ -176,6 +173,13 @@ export async function registerOwner(
 
 export async function ensureUserProfile(userId: string, email: string) {
   try {
+    const sesion = await createClient()
+    const { data: { user: usuarioSesion } } = await sesion.auth.getUser()
+    if (!usuarioSesion || usuarioSesion.id !== userId) {
+      return { success: false, error: "No autorizado" }
+    }
+    email = usuarioSesion.email ?? email
+
     // Use service client to bypass RLS for profile creation
     const supabase = createServiceClient()
 
@@ -232,8 +236,10 @@ export async function ensureUserProfile(userId: string, email: string) {
       // No house found - user might be conserje, admin, etc.
       // Get the condo_id from auth user metadata if available
       const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId)
-      const condoId = authUser?.user_metadata?.condo_id
-      const role = authUser?.user_metadata?.role || "propietario"
+      // Solo app_metadata (controlado por el servidor); user_metadata lo edita el propio usuario.
+      const condoId = authUser?.app_metadata?.condo_id
+      const rolApp = authUser?.app_metadata?.role
+      const role = ["admin", "conserje", "owner", "propietario"].includes(rolApp) ? rolApp : "propietario"
 
       if (condoId) {
         // User has condo_id but no house - likely conserje, admin, etc.

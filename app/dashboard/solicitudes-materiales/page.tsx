@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { SolicitudesClient } from './solicitudes-client'
@@ -31,8 +32,11 @@ export default async function AdminSolicitudesPage() {
     .single()
 
   // Check permissions
-  const allowedRoles = ["admin", "super_admin", "conserje"]
-  if (!profile?.role || !allowedRoles.includes(profile.role as string)) {
+  const allowedRoles = ["admin", "conserje"]
+  const rolPermitido =
+    allowedRoles.includes(profile?.role as string) ||
+    (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
+  if (!profile?.role || !rolPermitido) {
     return null
   }
 
@@ -57,7 +61,7 @@ export default async function AdminSolicitudesPage() {
       condoId={condoId}
       solicitudes={requests || []}
       staff={staff}
-      isAdmin={["admin", "super_admin"].includes(profile.role as string)}
+      isAdmin={(profile.role === "admin" || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))}
       userRole={profile.role as string}
     />
   )

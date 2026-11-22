@@ -1,3 +1,4 @@
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 // Mis Reservas Page - Reservation management for residents
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
@@ -23,7 +24,7 @@ export default async function MisReservasPage() {
     .eq("id", user.id)
     .single()
 
-  const isAdminOrConcierge = profile?.role === "admin" || profile?.role === "super_admin" || profile?.role === "conserje"
+  const isAdminOrConcierge = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
 
   // Get reservable areas for this condo
   const { data: areas } = await supabase

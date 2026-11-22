@@ -1,11 +1,13 @@
 'use client'
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { ensureUserProfile } from "@/app/auth/actions"
+import { iniciarSesion } from "@/app/auth/acciones-seguridad"
+import { PasoTotp } from "@/components/auth/paso-totp"
+import { SelectorDemo } from "@/components/demo/selector-demo"
 
 function LoginPageContent() {
   const router = useRouter()
@@ -17,56 +19,95 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const [pasoTotp, setPasoTotp] = useState(false)
+  const [aviso, setAviso] = useState("")
+  const [destino, setDestino] = useState<string | null>(null)
+
+  const rutaSegura = () => {
+    const nextPath = searchParams.get("next")
+    return nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : null
+  }
+
+  useEffect(() => {
+    const supabase = createClient()
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return
+      const { data: nivel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (nivel?.nextLevel === "aal2" && nivel.currentLevel !== "aal2") {
+        setPasoTotp(true)
+        return
+      }
+      router.replace(rutaSegura() || "/dashboard")
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, searchParams])
+
+  const continuar = (ruta: string | null) => {
+    router.push(ruta || rutaSegura() || "/dashboard")
+    router.refresh()
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setAviso("")
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInError) {
-        setError(signInError.message)
+      const resultado = await iniciarSesion(email, password)
+      if (!resultado.ok) {
+        setError(resultado.error)
         return
       }
 
-      if (authData.user) {
-        let profileResult: Awaited<ReturnType<typeof ensureUserProfile>> | null = null
+      const nextPath = rutaSegura()
+      const ruta = resultado.configurarPlataforma
+        ? "/plataforma"
+        : !nextPath &&
+        (resultado.rol === "propietario" || resultado.rol === "owner") &&
+        resultado.variasPropiedades
+          ? "/select-condominium"
+          : nextPath || "/dashboard"
 
-        try {
-          profileResult = await ensureUserProfile(authData.user.id, email)
-        } catch (profileError) {
-          // Authentication already succeeded; profile provisioning should not
-          // incorrectly send the user back to the login form.
-          console.error("[v0] Profile setup failed after login:", profileError)
-        }
-
-        const nextPath = searchParams.get("next")
-        const safeNextPath = nextPath?.startsWith("/") && !nextPath.startsWith("//")
-          ? nextPath
-          : null
-
-        if (
-          !safeNextPath &&
-          profileResult?.role &&
-          (profileResult.role === "propietario" || profileResult.role === "owner") &&
-          profileResult.hasMultipleProperties
-        ) {
-          router.push("/select-condominium")
-        } else {
-          router.push(safeNextPath || "/dashboard")
-        }
+      setPassword("")
+      if (resultado.requiereTotp) {
+        setDestino(ruta)
+        setPasoTotp(true)
+        return
       }
+      continuar(ruta)
     } catch (err) {
-      console.error("[v0] Login request failed:", err)
-      setError(err instanceof Error ? err.message : "Error al iniciar sesión. Intenta de nuevo.")
+      console.error("[auth] Error al iniciar sesión:", (err as Error).message)
+      setError("Error al iniciar sesión. Intenta de nuevo.")
     } finally {
       setLoading(false)
     }
+  }
+
+  const cancelarTotp = async () => {
+    await createClient().auth.signOut({ scope: "local" })
+    setPasoTotp(false)
+    setDestino(null)
+  }
+
+  if (pasoTotp) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
+          <PasoTotp
+            onVerificado={() => continuar(destino)}
+            onCancelar={cancelarTotp}
+            onRecuperado={() => {
+              setPasoTotp(false)
+              setDestino(null)
+              setAviso(
+                "Se eliminó tu factor de verificación y se cerraron todas tus sesiones. Inicia sesión y vuelve a configurarlo.",
+              )
+            }}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -82,8 +123,13 @@ function LoginPageContent() {
         </div>
         
         <form onSubmit={handleLogin} className="space-y-4">
+          {aviso && (
+            <div role="status" className="rounded bg-blue-50 p-3 text-sm text-blue-800">
+              {aviso}
+            </div>
+          )}
           {error && (
-            <div className="rounded bg-red-50 p-3 text-sm text-red-700">
+            <div role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -161,6 +207,16 @@ function LoginPageContent() {
             Registrarse aquí
           </Link>
         </div>
+      </div>
+
+      <div className="mt-6 flex w-full justify-center">
+        <SelectorDemo
+          aviso={
+            searchParams.get("demo") === "finalizada"
+              ? "Tu sesión de demostración terminó. Puedes iniciar una nueva cuando quieras."
+              : null
+          }
+        />
       </div>
 
       {/* Footer */}

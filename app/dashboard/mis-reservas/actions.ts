@@ -1,5 +1,6 @@
 "use server"
 
+import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
@@ -224,7 +225,7 @@ export async function createReservation(data: CreateReservationData) {
     .eq("id", user.id)
     .single()
   
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin" || profile?.role === "conserje"
+  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
   if (!isAdmin && profile?.house_id !== data.house_id) {
     throw new Error("No tienes permisos para crear reservas para esta propiedad.")
   }
@@ -395,7 +396,7 @@ export async function confirmReservation(reservationId: string) {
     .eq("id", user.id)
     .single()
 
-  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+  if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
     throw new Error("No tienes permisos para confirmar reservas")
   }
 
@@ -444,7 +445,7 @@ export async function rejectReservation(reservationId: string, reason: string) {
     .eq("id", user.id)
     .single()
 
-  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+  if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
     throw new Error("No tienes permisos para rechazar reservas")
   }
 
@@ -493,7 +494,7 @@ export async function changeReservationHouse(reservationId: string, newHouseId: 
     .eq("id", user.id)
     .single()
 
-  if (!profile || !["admin", "super_admin", "conserje"].includes(profile.role)) {
+  if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
     throw new Error("No tienes permisos para realizar esta acción")
   }
 
