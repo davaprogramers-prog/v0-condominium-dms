@@ -256,7 +256,7 @@ export function IngresoMultasClient({
                         <Badge variant="outline">#{item.houses?.house_number}</Badge>
                       </TableCell>
                       <TableCell>{item.houses?.owner_name || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm max-w-xs">
+                      <TableCell className="text-muted-foreground text-sm w-[24rem] max-w-[24rem] whitespace-normal break-words">
                         {item.description || "Pago de multa"}
                       </TableCell>
                       <TableCell className="text-right font-semibold text-red-600">
