@@ -1,110 +1,100 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useSearchParams, useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useTransition } from "react"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
-export function PeriodSelector() {
+const MONTHS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+]
+
+interface PeriodSelectorProps {
+  month: number
+  year: number
+}
+
+export function PeriodSelector({ month, year }: PeriodSelectorProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-
+  const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
   const now = new Date()
-  const currentYear = parseInt(searchParams.get("año") as string) || now.getFullYear()
-  const currentMonth = parseInt(searchParams.get("mes") as string) || now.getMonth() + 1
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  const years = Array.from({ length: Math.max(1, currentYear - 1999) }, (_, index) => currentYear - index)
 
-  const handlePrevMonth = () => {
-    const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1
-    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear
-    updatePeriod(prevYear, prevMonth)
+  const updatePeriod = (nextYear: number, nextMonth: number) => {
+    const validMonth = nextYear === currentYear ? Math.min(nextMonth, currentMonth) : nextMonth
+    const params = new URLSearchParams(window.location.search)
+    params.set("año", String(nextYear))
+    params.set("mes", String(validMonth))
+    startTransition(() => router.push(`${pathname}?${params.toString()}`, { scroll: false }))
   }
 
-  const handleNextMonth = () => {
-    const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1
-    const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear
-    updatePeriod(nextYear, nextMonth)
-  }
-
-  const handleMonthChange = (value: string) => {
-    updatePeriod(currentYear, parseInt(value))
-  }
-
-  const handleYearChange = (value: string) => {
-    updatePeriod(parseInt(value), currentMonth)
-  }
-
-  const updatePeriod = (year: number, month: number) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("año", String(year))
-    params.set("mes", String(month))
-    router.push(`?${params.toString()}`)
-  }
-
-  const months = [
-    { value: "1", label: "Enero" },
-    { value: "2", label: "Febrero" },
-    { value: "3", label: "Marzo" },
-    { value: "4", label: "Abril" },
-    { value: "5", label: "Mayo" },
-    { value: "6", label: "Junio" },
-    { value: "7", label: "Julio" },
-    { value: "8", label: "Agosto" },
-    { value: "9", label: "Septiembre" },
-    { value: "10", label: "Octubre" },
-    { value: "11", label: "Noviembre" },
-    { value: "12", label: "Diciembre" },
-  ]
-
-  const years = Array.from({ length: 10 }, (_, i) => ({
-    value: String(currentYear - 5 + i),
-    label: String(currentYear - 5 + i),
-  }))
+  const isCurrentPeriod = year === currentYear && month === currentMonth
 
   return (
-    <div className="flex items-center gap-3">
-      <Button variant="outline" size="sm" onClick={handlePrevMonth}>
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-
-      <div className="flex gap-2 min-w-56">
-        <Select value={String(currentMonth)} onValueChange={handleMonthChange}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((m) => (
-              <SelectItem key={m.value} value={m.value}>
-                {m.label}
+    <div className="flex flex-wrap items-center justify-center gap-3" aria-label="Seleccionar período">
+      <Select value={String(month)} onValueChange={(value) => updatePeriod(year, Number(value))} disabled={isPending}>
+        <SelectTrigger className="w-44" aria-label="Mes">
+          <SelectValue placeholder="Seleccionar mes" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {MONTHS.map((name, index) => (
+              <SelectItem
+                key={name}
+                value={String(index + 1)}
+                disabled={year === currentYear && index + 1 > currentMonth}
+              >
+                {name}
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
 
-        <Select value={String(currentYear)} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-20">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y.value} value={y.value}>
-                {y.label}
+      <Select value={String(year)} onValueChange={(value) => updatePeriod(Number(value), month)} disabled={isPending}>
+        <SelectTrigger className="w-28" aria-label="Año">
+          <SelectValue placeholder="Seleccionar año" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {years.map((yearOption) => (
+              <SelectItem key={yearOption} value={String(yearOption)}>
+                {yearOption}
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
 
-      <Button variant="outline" size="sm" onClick={handleNextMonth}>
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+      {!isCurrentPeriod && (
+        <Button variant="outline" onClick={() => updatePeriod(currentYear, currentMonth)} disabled={isPending}>
+          Mes actual
+        </Button>
+      )}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isPending ? "Cargando período seleccionado" : ""}
+      </span>
     </div>
   )
 }
-
