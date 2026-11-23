@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -56,6 +56,9 @@ export function UpdateParcelDialog({
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [cameraActive, setCameraActive] = useState(false)
+  const [cameraReady, setCameraReady] = useState(false)
+  const [cameraError, setCameraError] = useState('')
+  const streamRef = useRef<MediaStream | null>(null)
   const router = useRouter()
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,44 +81,82 @@ export function UpdateParcelDialog({
     }
   }
 
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    if (videoRef.current) videoRef.current.srcObject = null
+    setCameraActive(false)
+    setCameraReady(false)
+  }, [])
+
+  useEffect(() => stopCamera, [stopCamera])
+
+  // El <video> solo existe cuando cameraActive es true: el stream se conecta aquí, al montarse.
+  const conectarVideo = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current = video
+    if (video && streamRef.current && video.srcObject !== streamRef.current) {
+      video.srcObject = streamRef.current
+      video.play().catch(() => {})
+    }
+  }, [])
+
   const startCamera = async () => {
+    setCameraError('')
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError('Este navegador no permite usar la cámara aquí. Usa "Subir Foto".')
+      return
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setCameraActive(true)
+      let stream: MediaStream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false,
+        })
+      } catch (err) {
+        if ((err as DOMException)?.name === 'OverconstrainedError') {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        } else {
+          throw err
+        }
       }
+      streamRef.current = stream
+      setCameraActive(true)
     } catch (error) {
-      console.error('[v0] Error accessing camera:', error)
-      alert('No se pudo acceder a la cámara')
+      const nombre = (error as DOMException)?.name
+      setCameraError(
+        nombre === 'NotAllowedError'
+          ? 'Permiso de cámara denegado. Actívalo en los ajustes del navegador o de la app y vuelve a intentarlo.'
+          : nombre === 'NotFoundError'
+            ? 'No se encontró una cámara en este dispositivo.'
+            : nombre === 'NotReadableError'
+              ? 'La cámara está siendo usada por otra aplicación. Ciérrala y vuelve a intentarlo.'
+              : 'No se pudo acceder a la cámara. Usa "Subir Foto".',
+      )
     }
   }
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d')
-      if (context) {
-        context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
-        canvasRef.current.toBlob((blob) => {
-          if (blob) {
-            const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
-            setPhoto(file)
-            setPhotoPreview(canvasRef.current!.toDataURL('image/jpeg'))
-            stopCamera()
-          }
-        }, 'image/jpeg')
-      }
-    }
-  }
-
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach((track) => track.stop())
-      setCameraActive(false)
-    }
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas || !video.videoWidth) return
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const context = canvas.getContext('2d')
+    if (!context) return
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob(
+      async (blob) => {
+        if (!blob) return
+        const original = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
+        const file = await resizeImageIfNeeded(original, 1920, 1080).catch(() => original)
+        setPhoto(file)
+        setPhotoPreview(URL.createObjectURL(file))
+        stopCamera()
+      },
+      'image/jpeg',
+      0.85,
+    )
   }
 
   const handleSubmit = async () => {
@@ -168,7 +209,7 @@ export function UpdateParcelDialog({
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-2xl"
+        className="max-w-2xl max-h-[92dvh] overflow-y-auto"
         style={{
           backgroundColor: cardBgColor || '#ffffff',
           color: cardTextColor || '#000000',
@@ -239,15 +280,25 @@ export function UpdateParcelDialog({
               </div>
             ) : cameraActive ? (
               <div className="space-y-2">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full rounded-lg border bg-black"
-                />
-                <canvas ref={canvasRef} className="hidden" width="640" height="480" />
+                <div className="relative">
+                  <video
+                    ref={conectarVideo}
+                    autoPlay
+                    playsInline
+                    muted
+                    onLoadedMetadata={() => setCameraReady(true)}
+                    className="w-full max-h-[55dvh] rounded-lg border bg-black object-contain"
+                  />
+                  {!cameraReady && (
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ color: '#ffffff' }}>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      Iniciando cámara…
+                    </div>
+                  )}
+                </div>
+                <canvas ref={canvasRef} className="hidden" />
                 <div className="flex gap-2">
-                  <Button onClick={capturePhoto} className="flex-1">
+                  <Button onClick={capturePhoto} disabled={!cameraReady} className="flex-1">
                     <Camera className="h-4 w-4 mr-2" />
                     Capturar
                   </Button>
@@ -257,6 +308,12 @@ export function UpdateParcelDialog({
                 </div>
               </div>
             ) : (
+              <div className="space-y-2">
+              {cameraError && (
+                <p role="alert" className="rounded-md border p-2 text-sm" style={{ borderColor: '#dc2626', color: cardTextColor || '#000000' }}>
+                  {cameraError}
+                </p>
+              )}
               <div className="flex gap-2">
                 <Button onClick={startCamera} className="flex-1">
                   <Camera className="h-4 w-4 mr-2" />
@@ -273,6 +330,7 @@ export function UpdateParcelDialog({
                     className="hidden"
                   />
                 </label>
+              </div>
               </div>
             )}
           </div>
