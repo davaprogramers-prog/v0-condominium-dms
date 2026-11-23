@@ -1,5 +1,6 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
+import { cobrosAdeudados } from "@/lib/deudas/estado-cobro"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight, AlertCircle } from "lucide-react"
@@ -78,17 +79,12 @@ export default async function DeudasConsolidadasPage() {
     )
   }
 
-  // Get all debts from condo_income for all houses
-  // Filter in code: show debts that are pending OR approved without receipt_url (unpaid)
   const { data: condoIncomeData } = await supabase
     .from("condo_income")
     .select("*")
     .eq("condo_id", condoId)
-  
-  // Filter to show only unpaid debts: status != "approved" OR (status == "approved" AND no receipt_url)
-  const condo_income = (condoIncomeData || []).filter(
-    (item) => item.status !== "approved" || (item.status === "approved" && !item.receipt_url)
-  )
+
+  const condo_income = cobrosAdeudados(condoIncomeData)
 
   // Calculate debts by house
   const housesDebts: HouseDebt[] = houses
