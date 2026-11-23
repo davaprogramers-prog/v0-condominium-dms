@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Resend } from "resend"
 import { consumirIntento, mensajeEspera } from "@/lib/auth/plataforma/limite"
+import { patronCorreoExacto } from "@/lib/auth/correo-exacto"
 import { cerrarSesiones } from "@/lib/auth/plataforma/sesiones"
 import {
   MINUTOS_VIGENCIA_CODIGO,
@@ -71,7 +72,8 @@ export async function buscarPropiedadesPorCorreo(
   correo: string,
 ): Promise<{ ok: true; propiedades: PropiedadRegistro[] } | { ok: false; error: string }> {
   const email = String(correo || "").trim().toLowerCase()
-  if (!email || email.length > 254 || !email.includes("@")) return { ok: false, error: "Correo no válido" }
+  const patron = patronCorreoExacto(email)
+  if (!patron) return { ok: false, error: "Correo no válido" }
 
   const espera = await consumirIntento("recuperacion", `registro-busqueda:${email}`)
   if (espera > 0) return { ok: false, error: mensajeEspera(espera) }
@@ -79,7 +81,7 @@ export async function buscarPropiedadesPorCorreo(
   const { data, error } = await createServiceClient()
     .from("houses")
     .select("id, house_number, condo_id, condominiums(name)")
-    .ilike("owner_email", email)
+    .ilike("owner_email", patron)
   if (error) return { ok: false, error: "No se pudo validar el correo" }
 
   return {
@@ -100,19 +102,23 @@ function normalizarCorreo(valor: string): string {
 }
 
 async function casaDelCorreo(email: string, houseId: string) {
+  const patron = patronCorreoExacto(email)
+  if (!patron) return null
   const { data, error } = await createServiceClient()
     .from("houses")
     .select("id, condo_id")
     .eq("id", houseId)
-    .ilike("owner_email", email)
+    .ilike("owner_email", patron)
     .maybeSingle()
   return error ? null : data
 }
 
 /** Cuenta Auth existente con ese correo (vía profiles, que handle_new_user crea para toda cuenta). */
 async function cuentaExistente(email: string) {
+  const patron = patronCorreoExacto(email)
+  if (!patron) return null
   const service = createServiceClient()
-  const { data: perfil } = await service.from("profiles").select("id").ilike("email", email).maybeSingle()
+  const { data: perfil } = await service.from("profiles").select("id").ilike("email", patron).maybeSingle()
   if (!perfil) return null
   const { data } = await service.auth.admin.getUserById(perfil.id)
   return data.user ?? null

@@ -30,27 +30,14 @@ export default async function BalancePage({
   const now = new Date()
   const { year, month } = await resolvePeriod(params)
 
-  // Get parameters for initial balance
-  let parameters: any = null
-  if (condoId) {
-    const { data } = await supabase
-      .from("parameters")
-      .select("initial_balance, initial_balance_date")
-      .eq("condo_id", condoId)
-      .single()
-    parameters = data
-  }
-
-  // Get expenses and income ONLY for this month
-  let expenses: any[] = []
-  let paidIncome: any[] = []
-  let pendingIncome: any[] = []
-
-  if (condoId) {
-    expenses = await getMonthExpenses(condoId, year, month)
-    paidIncome = await getMonthIncome(condoId, year, month)
-    pendingIncome = await getMonthPendingIncome(condoId, year, month)
-  }
+  // Parámetros y movimientos del mes son independientes: se piden juntos.
+  const [parametrosRes, expenses, paidIncome, pendingIncome]: [{ data: any }, any[], any[], any[]] = await Promise.all([
+    supabase.from("parameters").select("initial_balance, initial_balance_date").eq("condo_id", condoId).maybeSingle(),
+    getMonthExpenses(condoId, year, month),
+    getMonthIncome(condoId, year, month),
+    getMonthPendingIncome(condoId, year, month),
+  ])
+  const parameters: any = parametrosRes.data
 
   // Calculate saldo anterior dynamically
   // This sums ALL ingresos and gastos from the start until the END of the previous month

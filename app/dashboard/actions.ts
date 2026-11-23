@@ -645,14 +645,30 @@ export async function voteSurvey(surveyId: string, optionId: string) {
   
   const { data: profile } = await supabase.from("profiles").select("condo_id, house_id").eq("id", user.id).single()
   if (!profile) throw new Error("Perfil no encontrado")
-  
+
+  const { data: encuesta } = await supabase
+    .from("surveys")
+    .select("id, condo_id, is_active")
+    .eq("id", surveyId)
+    .maybeSingle()
+  if (!encuesta || encuesta.condo_id !== profile.condo_id) throw new Error("Encuesta no encontrada")
+  if (!encuesta.is_active) throw new Error("La encuesta está cerrada")
+
+  const { data: opcion } = await supabase
+    .from("survey_options")
+    .select("id")
+    .eq("id", optionId)
+    .eq("survey_id", surveyId)
+    .maybeSingle()
+  if (!opcion) throw new Error("Opción no válida para esta encuesta")
+
   // Check if user already voted - if so, update their vote (allows changing vote while survey is open)
   const { data: existingVote } = await supabase
     .from("survey_votes")
     .select("id")
     .eq("survey_id", surveyId)
     .eq("voter_id", user.id)
-    .single()
+    .maybeSingle()
   
   if (existingVote) {
     // Update existing vote

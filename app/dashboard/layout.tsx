@@ -1,7 +1,8 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
+import { getUserHouseId } from "@/lib/supabase/owner-utils"
+import { perfilActual, usuarioActual } from "@/lib/auth/sesion"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
@@ -21,33 +22,18 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const { user } = await usuarioActual()
 
-  if (error || !user) {
+  if (!user) {
     redirect("/auth/login")
   }
 
-  let profile: any = null
+  const supabase = await createClient()
   const esDemo = esUsuarioDemo(user)
+  let profile: any = await perfilActual(user.id)
+  if (profile) profile = { ...profile }
 
-  // Try to read profile with safe fallback
-  try {
-    const { data: profileData, error: pError } = await supabase
-      .from("profiles")
-      .select("role, condo_id, house_id, first_name, last_name, avatar_url")
-      .eq("id", user.id)
-      .single()
-
-    if (profileData && !pError) {
-      profile = profileData
-    }
-  } catch (e) {
-    console.error("[v0] Error reading profile:", e)
-  }
-
-  // Check if super_admin from profiles table
-  const isSuperAdmin = (profile?.role === "super_admin" && (await esSuperAdminEfectivo()))
+  const isSuperAdmin = profile?.role === "super_admin" && (await esSuperAdminEfectivo())
   const isAdmin = profile?.role === "admin"
   const isOwner = profile?.role === "propietario" || profile?.role === "owner"
 
@@ -77,93 +63,36 @@ export default async function DashboardLayout({
     profile = { ...profile, role: "guest", plataforma_pendiente: true }
   }
 
-  // Resolve the house number for a concise owner-facing mobile header.
-  if ((profile.role === "propietario" || profile.role === "owner") && profile.house_id) {
-    try {
-      const { data: house } = await supabase
-        .from("houses")
-        .select("house_number")
-        .eq("id", profile.house_id)
-        .single()
-      if (house?.house_number !== undefined) {
-        profile.house_number = house.house_number
-      }
-    } catch (e) {
-      console.error("[v0] Error reading house number:", e)
-    }
-  }
-
   // If propietario/owner without condo_id, they need setup
   // The ensureUserProfile action in login-form should have handled this
   if (isOwner && !profile.condo_id) {
     profile.needs_setup = true
   }
 
-  let condo = null
-  let allCondos: { id: string; name: string }[] = []
-  let theme: CondoTheme | null = null
-  let hasMultipleProperties = false
+  const esResidente = profile.role === "propietario" || profile.role === "owner"
+  const sinDatos = Promise.resolve({ data: null })
 
-  if (profile.condo_id) {
-    try {
-      const { data } = await supabase
-        .from("condominiums")
-        .select("id, name, currency_symbol, logo_url")
-        .eq("id", profile.condo_id)
-        .single()
-      condo = data
+  // Consultas independientes en paralelo (antes iban una tras otra: ~1 viaje a la BD por cada una).
+  const [casa, condoRes, temaRes, casasRes] = await Promise.all([
+    esResidente && profile.house_id
+      ? supabase.from("houses").select("house_number").eq("id", profile.house_id).maybeSingle()
+      : sinDatos,
+    profile.condo_id
+      ? supabase.from("condominiums").select("id, name, currency_symbol, logo_url").eq("id", profile.condo_id).maybeSingle()
+      : sinDatos,
+    profile.condo_id
+      ? supabase.from("condominium_themes").select("*").eq("condo_id", profile.condo_id).maybeSingle()
+      : sinDatos,
+    isOwner && user.email
+      ? supabase.from("houses").select("id").eq("owner_email", user.email).limit(2)
+      : sinDatos,
+  ])
 
-      // Try to fetch condominium theme - will return null if table doesn't exist
-      const { data: themeData } = await supabase
-        .from("condominium_themes")
-        .select("*")
-        .eq("condo_id", profile.condo_id)
-        .single()
-      
-      if (themeData) {
-        theme = themeData as CondoTheme
-      }
-    } catch (e) {
-      console.log("[v0] Error fetching condo or theme:", e)
-    }
-  }
-
-  // For owners, check if they have multiple properties across all condos
-  if (isOwner && user.email) {
-    try {
-      const { data: houses } = await supabase
-        .from("houses")
-        .select("id, condo_id")
-        .eq("owner_email", user.email)
-      
-      if (houses && houses.length > 1) {
-        hasMultipleProperties = true
-      }
-    } catch (e) {
-      console.log("[v0] Error checking properties:", e)
-    }
-  }
-
-  // For admin/super_admin, fetch their condos via user_condos
-  if ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) || profile.role === "admin") {
-    try {
-      const { data: userCondos } = await supabase
-        .from("user_condos")
-        .select("condo_id, condominiums(id, name)")
-        .eq("user_id", user.id)
-      
-      if (userCondos) {
-        allCondos = userCondos
-          .filter(uc => uc.condominiums)
-          .map(uc => ({
-            id: (uc.condominiums as any).id,
-            name: (uc.condominiums as any).name
-          }))
-      }
-    } catch (e) {
-      console.log("[v0] Error fetching user condos:", e)
-    }
-  }
+  if (casa.data?.house_number !== undefined) profile.house_number = casa.data.house_number
+  const condo = condoRes.data
+  const theme = (temaRes.data as CondoTheme | null) ?? null
+  const hasMultipleProperties = Array.isArray(casasRes.data) && casasRes.data.length > 1
+  const allCondos: { id: string; name: string }[] = []
 
   return (
     <ThemeProvider theme={theme}>

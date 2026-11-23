@@ -1,5 +1,6 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
+import { perfilActual, usuarioActual } from "@/lib/auth/sesion"
 import { Home, Users, DollarSign, FileText, Settings, LayoutGrid, ChevronRight, BarChart3, FileCheck, AlertCircle, Newspaper, AlertTriangle, Trees, Plus, Building2, Package } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -43,9 +44,9 @@ const ownerMenuItems = [
 export default async function DashboardPage() {
   try {
     const supabase = await createClient()
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const { user } = await usuarioActual()
 
-    if (userError || !user) {
+    if (!user) {
       return (
         <div className="space-y-6">
           <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
@@ -57,20 +58,7 @@ export default async function DashboardPage() {
     }
 
     // Get profile to check role - with proper error handling
-    let profile: any = null
-    try {
-      const { data: profileData, error } = await supabase
-        .from("profiles")
-        .select("role, condo_id, first_name, house_id")
-        .eq("id", user.id)
-        .single()
-
-      if (profileData && !error) {
-        profile = profileData
-      }
-    } catch (e) {
-      // Profile fetch failed, will use fallback
-    }
+    let profile: any = await perfilActual(user.id)
 
     // If no profile, create fallback from metadata (same as layout)
     if (!profile) {
@@ -117,23 +105,14 @@ export default async function DashboardPage() {
     // Super admin without condo_id still gets full admin dashboard
     const isSuperAdmin = (role === "super_admin" && (await esSuperAdminEfectivo()))
 
-    // Fetch condo info (only if user has a condo assigned)
-    let condo: any = null
-    if (condoId) {
-      try {
-        const { data: condoData } = await supabase
-          .from("condominiums")
-          .select("name")
-          .eq("id", condoId)
-          .single()
-        
-        if (condoData) {
-          condo = condoData
-        }
-      } catch (e) {
-        console.log("[v0] Error fetching condo:", e)
-      }
-    }
+    const esResidenteConCondo = (role === "propietario" || role === "owner") && !!condoId
+    const [condoRes, casasRes] = await Promise.all([
+      condoId ? supabase.from("condominiums").select("name").eq("id", condoId).maybeSingle() : Promise.resolve({ data: null }),
+      esResidenteConCondo
+        ? supabase.from("houses").select("*").eq("condo_id", condoId).eq("owner_user_id", user.id)
+        : Promise.resolve({ data: null }),
+    ])
+    const condo: any = condoRes.data
 
     // If propietario/owner without condo_id, show message
     if ((role === "propietario" || role === "owner") && !condoId) {
@@ -149,24 +128,9 @@ export default async function DashboardPage() {
     }
 
     // For propietarios with condo_id, get their houses
-    let ownerHouses: any[] = []
-    if ((role === "propietario" || role === "owner") && condoId) {
-      try {
-        const { data: houses } = await supabase
-          .from("houses")
-          .select("*")
-          .eq("condo_id", condoId)
-          .eq("owner_user_id", user.id)
-        
-        if (houses) {
-          ownerHouses = houses
-        }
-      } catch (e) {
-        console.log("[v0] Error fetching owner houses:", e)
-      }
-    }
+    const ownerHouses: any[] = (casasRes.data as any[] | null) ?? []
 
-    const isAdmin = role === "admin" || (role === "super_admin" && (await esSuperAdminEfectivo()))
+    const isAdmin = role === "admin" || isSuperAdmin
 
     return (
       <div className="space-y-6">

@@ -4,7 +4,9 @@ import type { CookieOptions } from "@supabase/ssr"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { opcionesCookieSesion } from "@/lib/supabase/opciones-cookie"
 
-export async function middleware(request: NextRequest) {
+// proxy (Next 16) corre en Node.js en la región de las funciones (iad1), junto a Supabase (us-east-1);
+// el antiguo middleware corría en el Edge más cercano al usuario y cada getUser cruzaba el continente.
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
