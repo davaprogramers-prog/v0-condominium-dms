@@ -39,9 +39,16 @@ export default async function MisVisitasPage() {
     .eq("condo_id", condoId)
     .order("visit_date", { ascending: false })
 
+  // La tabla visits no guarda estado: una visita de días anteriores se considera realizada.
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date())
+  const visitasConEstado = (visits || []).map((v) => ({
+    ...v,
+    status: v.status ?? (String(v.visit_date).slice(0, 10) < hoy ? "completed" : "scheduled"),
+  }))
+
   return (
     <MisVisitasClient 
-      visits={visits || []}
+      visits={visitasConEstado}
       houseId={houseId}
       condoId={condoId}
       houseNumber={house?.house_number || ""}
