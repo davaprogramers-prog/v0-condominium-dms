@@ -1,6 +1,7 @@
 'use client'
 
-import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight, Download, Apple, Smartphone } from 'lucide-react'
+import { BarChart3, Home, Vote, FileText, ShieldCheck, Building2, ArrowRight, Play } from 'lucide-react'
+import { SeccionInstalarApp } from '@/components/pwa/seccion-instalar-app'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -87,9 +88,9 @@ export default function Page() {
   </a>
   <a
   href="/auth/login?demo=probar"
-  className="px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-dashed whitespace-nowrap text-center"
-  style={{ backgroundColor: "transparent", color: "#fefce1", borderColor: "#fefce1" }}
+  className="bg-[#fbbf24] text-[#0d3068] hover:bg-[#f59e0b] ring-4 ring-[#fbbf24]/30 focus-visible:outline-none focus-visible:ring-[#fefce1] flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
   >
+  <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
   Prueba sin Registro
   </a>
   </div>
@@ -125,7 +126,8 @@ export default function Page() {
               <span className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
   <span className="relative">Ya tengo cuenta</span>
   </a>
-  <a href="/auth/login?demo=probar" className="px-8 py-3.5 border-2 border-dashed border-primary/40 text-foreground rounded-full font-semibold text-base transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-105">
+  <a href="/auth/login?demo=probar" className="bg-[#fbbf24] text-[#0d3068] hover:bg-[#f59e0b] ring-4 ring-[#fbbf24]/30 focus-visible:outline-none focus-visible:ring-[#fefce1] group flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+  <Play className="w-5 h-5 fill-current transition-transform group-hover:scale-110" aria-hidden="true" />
   Prueba sin Registro
   </a>
           </div>
@@ -204,46 +206,8 @@ export default function Page() {
         </div>
       </section>
 
-      {/* App Download Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-900 to-slate-800">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Descarga nuestra app móvil</h2>
-            <p className="text-base sm:text-lg text-slate-300">Gestiona tu condominio desde cualquier lugar</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
-            {/* Android Download */}
-            <a 
-              href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '#'}
-              download
-              className={`flex items-center gap-3 px-8 py-4 ${process.env.NEXT_PUBLIC_ANDROID_APK_URL ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'} text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
-            >
-              <Smartphone className="w-6 h-6" />
-              <div className="flex flex-col items-start">
-                <span className="text-xs opacity-90">Disponible en</span>
-                <span className="text-base font-bold">Android</span>
-              </div>
-            </a>
-
-            {/* iOS Download */}
-            <a 
-              href="https://apps.apple.com/cl/app/intelicon/id6762440030"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-gray-700"
-            >
-              <Apple className="w-6 h-6" />
-              <div className="flex flex-col items-start">
-                <span className="text-xs opacity-90">Descargar en</span>
-                <span className="text-base font-bold">App Store</span>
-              </div>
-            </a>
-          </div>
-
-
-        </div>
-      </section>
+      {/* App Install Section (PWA) */}
+      <SeccionInstalarApp />
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
