@@ -96,8 +96,9 @@ try {
     assert.notEqual(c.name, "x")
   })
   await caso("no vincula correos reales a una casa demo", async () => {
-    const { error } = await visitante.from("houses").update({ owner_email: "victima@gmail.com" }).eq("id", casaDemo.id)
-    assert.ok(error)
+    await visitante.from("houses").update({ owner_email: "victima@gmail.com" }).eq("id", casaDemo.id)
+    const [c] = await sql`select owner_email from public.houses where id = ${casaDemo.id}`
+    assert.notEqual(c.owner_email, "victima@gmail.com")
   })
   await caso("no puede escalar su rol ni cambiarse de condominio", async () => {
     await visitante.from("profiles").update({ role: "super_admin" }).eq("id", userId)
@@ -116,6 +117,59 @@ try {
     const { error } = await visitante.from("alerts").insert({ condo_id: demo.id, title: "Prueba demo", message: "ok", created_by: userId })
     assert.equal(error, null)
   })
+  console.log("Edición en la demo (solo lo propio y del mismo día):")
+  let avisoPropio = ""
+  await caso("edita un aviso que creó hoy", async () => {
+    const { data, error } = await visitante
+      .from("alerts")
+      .insert({ condo_id: demo.id, title: "Editable", message: "ok", created_by: userId })
+      .select("id")
+      .single()
+    assert.equal(error, null)
+    avisoPropio = data!.id
+    const [reg] = await sql`select 1 from public.demo_filas_creadas where tabla = 'alerts' and fila_id = ${avisoPropio} and user_id = ${userId}`
+    assert.ok(reg, "el disparador registra la fila creada por la demo")
+    await visitante.from("alerts").update({ title: "Editado hoy" }).eq("id", avisoPropio)
+    const [a] = await sql`select title from public.alerts where id = ${avisoPropio}`
+    assert.equal(a.title, "Editado hoy")
+  })
+  await caso("no elimina ni lo que creó hoy", async () => {
+    await visitante.from("alerts").delete().eq("id", avisoPropio)
+    const [sigue] = await sql`select 1 from public.alerts where id = ${avisoPropio}`
+    assert.ok(sigue)
+  })
+  await caso("no edita lo propio de un día anterior", async () => {
+    await sql`update public.alerts set created_at = now() - interval '1 day' where id = ${avisoPropio}`
+    await sql`update public.demo_filas_creadas set creado_at = now() - interval '1 day' where fila_id = ${avisoPropio}`
+    await visitante.from("alerts").update({ title: "Editado ayer" }).eq("id", avisoPropio)
+    const [a] = await sql`select title from public.alerts where id = ${avisoPropio}`
+    assert.equal(a.title, "Editado hoy")
+  })
+  await caso("no edita registros de otros (reserva, aviso, casa)", async () => {
+    const [reserva] = await sql`select id, notes from public.area_reservations
+      where condo_id = ${demo.id} and created_by is distinct from ${userId} limit 1`
+    if (reserva) {
+      await visitante.from("area_reservations").update({ notes: "MODIFICADA POR DEMO", status: "rejected" }).eq("id", reserva.id)
+      const [r] = await sql`select notes from public.area_reservations where id = ${reserva.id}`
+      assert.equal(r.notes, reserva.notes)
+    }
+    const [casa] = await sql`select owner_name from public.houses where id = ${casaDemo.id}`
+    await visitante.from("houses").update({ owner_name: "Cambio demo" }).eq("id", casaDemo.id)
+    const [c] = await sql`select owner_name from public.houses where id = ${casaDemo.id}`
+    assert.equal(c.owner_name, casa.owner_name)
+  })
+  await caso("no consulta la regla con otro usuario", async () => {
+    const { error } = await visitante.rpc("fn_demo_puede_editar_usuario", { p_tabla: "alerts", p_id: avisoPropio, p_user: userId })
+    assert.ok(error)
+  })
+  await caso("la regla del servidor coincide (clave de servicio)", async () => {
+    const { data: ajeno } = await admin.rpc("fn_demo_puede_editar_usuario", { p_tabla: "alerts", p_id: avisoPropio, p_user: userId })
+    assert.equal(ajeno, false)
+    await sql`update public.alerts set created_at = now() where id = ${avisoPropio}`
+    const { data: propio } = await admin.rpc("fn_demo_puede_editar_usuario", { p_tabla: "alerts", p_id: avisoPropio, p_user: userId })
+    assert.equal(propio, true)
+  })
+
   await caso("al vencer pierde el acceso aunque el JWT siga vigente", async () => {
     await sql`update public.demo_identidades set expira_at = now() - interval '1 second' where user_id = ${userId}`
     const { data } = await visitante.from("houses").select("id")

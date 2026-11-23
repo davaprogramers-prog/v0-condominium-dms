@@ -10,7 +10,7 @@
     "setup:buckets": "node scripts/create-buckets.mjs",
     "test:super-admin": "tsx --test tests/super-admin.test.ts",
     "test:super-admin-api": "tsx --env-file-if-exists=.env.development.local tests/super-admin-api.ts",
-    "test:demo": "tsx --test tests/demo.test.ts",
+    "test:demo": "tsx --test tests/demo.test.ts tests/edicion-demo-reservas.test.ts",
     "test:demo-bd": "tsx --env-file-if-exists=.env.development.local tests/demo-bd.mts",
     "demo:poblar": "tsx --env-file-if-exists=.env.development.local scripts/poblar-demo.mts",
     "test:privacidad-casa-bd": "tsx --env-file-if-exists=.env.development.local tests/privacidad-casa-bd.mts",

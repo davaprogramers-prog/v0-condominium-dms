@@ -4,6 +4,8 @@ import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId, getUserHouseId } from "@/lib/supabase/owner-utils"
 import { MisReservasClient } from "./mis-reservas-client"
+import { puedeRechazarReservas } from "@/lib/reservas/permisos"
+import { esUsuarioDemo } from "@/lib/demo/reglas"
 
 export default async function MisReservasPage() {
   const supabase = await createClient()
@@ -24,7 +26,9 @@ export default async function MisReservasPage() {
     .eq("id", user.id)
     .single()
 
-  const isAdminOrConcierge = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
+  const superAdminEfectivo = profile?.role === "super_admin" && (await esSuperAdminEfectivo())
+  const isAdminOrConcierge = profile?.role === "admin" || superAdminEfectivo || profile?.role === "conserje"
+  const puedeRechazar = puedeRechazarReservas(profile?.role, superAdminEfectivo)
 
   // Get reservable areas for this condo
   const { data: areas } = await supabase
@@ -87,6 +91,9 @@ export default async function MisReservasPage() {
       condoId={condoId}
       isAdminOrConcierge={isAdminOrConcierge}
       allHouses={allHouses}
+      puedeRechazar={puedeRechazar}
+      esDemo={esUsuarioDemo(user)}
+      userId={user.id}
     />
   )
 }

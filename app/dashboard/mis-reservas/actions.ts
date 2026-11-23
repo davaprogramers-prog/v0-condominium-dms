@@ -3,6 +3,8 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { exigirEdicionDemoPermitida, exigirNoEliminarDemo } from "@/lib/demo/guardia"
+import { puedeRechazarReservas } from "@/lib/reservas/permisos"
 
 type ContextoReservas = {
   userId: string
@@ -317,6 +319,7 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
   const ctx = await contextoReservas()
   const gestor = gestionaCondominio(ctx, reservation.condo_id ?? area?.condo_id)
   if (!gestor && !esDuenoReserva(ctx, reservation)) throw new Error("Reserva no encontrada")
+  await exigirEdicionDemoPermitida("area_reservations", reservation.id)
 
   // Check modification time limit for non-admin users
   if (!gestor) {
@@ -388,6 +391,7 @@ export async function cancelReservation(reservationId: string, isAdminOrConcierg
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("No autenticado")
+  await exigirNoEliminarDemo()
 
   // Get the reservation using service client to bypass RLS
   const { data: reservation, error: reservationError } = await serviceClient
@@ -461,6 +465,7 @@ export async function confirmReservation(reservationId: string) {
 
   if (reservationError || !reservation) throw new Error("Reserva no encontrada")
   if (!gestionaCondominio(await contextoReservas(), reservation.condo_id)) throw new Error("Reserva no encontrada")
+  await exigirEdicionDemoPermitida("area_reservations", reservation.id)
 
   if (reservation.status !== "pending") {
     throw new Error("Solo se pueden confirmar reservas pendientes")
@@ -483,23 +488,13 @@ export async function confirmReservation(reservationId: string) {
   return { success: true }
 }
 
-// Admin/Conserje function to reject a reservation with reason
+// Solo el administrador del condominio (o super admin efectivo) rechaza reservas; el conserje no.
 export async function rejectReservation(reservationId: string, reason: string) {
-  const supabase = await createClient()
   const serviceClient = createServiceClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("No autenticado")
+  const ctx = await contextoReservas()
 
-  // Get user role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single()
-
-  if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
-    throw new Error("No tienes permisos para rechazar reservas")
+  if (!puedeRechazarReservas(ctx.rol, ctx.esSuperAdmin)) {
+    throw new Error("Solo el administrador puede rechazar reservas")
   }
 
   if (!reason || reason.trim().length === 0) {
@@ -514,7 +509,8 @@ export async function rejectReservation(reservationId: string, reason: string) {
     .single()
 
   if (reservationError || !reservation) throw new Error("Reserva no encontrada")
-  if (!gestionaCondominio(await contextoReservas(), reservation.condo_id)) throw new Error("Reserva no encontrada")
+  if (!gestionaCondominio(ctx, reservation.condo_id)) throw new Error("Reserva no encontrada")
+  await exigirEdicionDemoPermitida("area_reservations", reservation.id)
 
   // Reject reservation - change status to "rejected" and store reason in notes
   const { error } = await serviceClient
@@ -522,7 +518,7 @@ export async function rejectReservation(reservationId: string, reason: string) {
     .update({
       status: "rejected",
       notes: `RECHAZADA: ${reason}${reservation.notes ? `\n\nNota original: ${reservation.notes}` : ""}`,
-      modified_by: user.id,
+      modified_by: ctx.userId,
       updated_at: new Date().toISOString(),
     })
     .eq("id", reservationId)
@@ -555,6 +551,7 @@ export async function changeReservationHouse(reservationId: string, newHouseId: 
   const serviceClient = createServiceClient()
   const { data: reserva } = await serviceClient.from("area_reservations").select("id, condo_id").eq("id", reservationId).maybeSingle()
   if (!reserva || !gestionaCondominio(await contextoReservas(), reserva.condo_id)) throw new Error("Reserva no encontrada")
+  await exigirEdicionDemoPermitida("area_reservations", reserva.id)
   const { data: casa } = await serviceClient.from("houses").select("id").eq("id", newHouseId).eq("condo_id", reserva.condo_id).maybeSingle()
   if (!casa) throw new Error("La casa no pertenece a este condominio")
 

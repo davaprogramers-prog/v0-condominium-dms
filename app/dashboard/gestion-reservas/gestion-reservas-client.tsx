@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Calendar, Clock, MapPin, Edit2, Trash2, Check, Ban, Home, Search, Filter } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
+import { demoPuedeEditar } from "@/lib/demo/edicion"
 import { updateReservation, cancelReservation, confirmReservation, rejectReservation, changeReservationHouse } from "../mis-reservas/actions"
 
 interface GestionReservasClientProps {
@@ -19,9 +20,13 @@ interface GestionReservasClientProps {
   reservations: any[]
   allHouses: { id: string; house_number: string }[]
   condoId: string
+  puedeRechazar: boolean
+  esDemo: boolean
+  userId: string
 }
 
-export function GestionReservasClient({ areas, reservations, allHouses, condoId }: GestionReservasClientProps) {
+export function GestionReservasClient({ areas, reservations, allHouses, condoId, puedeRechazar, esDemo, userId }: GestionReservasClientProps) {
+  const puedeModificar = (reservation: any) => !esDemo || demoPuedeEditar(reservation, userId)
   const [openEdit, setOpenEdit] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [filterArea, setFilterArea] = useState<string>("all")
@@ -268,7 +273,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
                     {/* Confirm button for pending */}
-                    {reservation.status === "pending" && (
+                    {reservation.status === "pending" && puedeModificar(reservation) && (
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white"
@@ -280,8 +285,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                       </Button>
                     )}
 
-                    {/* Reject button for pending or confirmed */}
-                    {(reservation.status === "pending" || reservation.status === "confirmed") && (
+                    {/* Rechazar: solo administrador */}
+                    {puedeRechazar && puedeModificar(reservation) && (reservation.status === "pending" || reservation.status === "confirmed") && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button size="sm" variant="destructive" disabled={loading}>
@@ -322,7 +327,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                     )}
 
                     {/* Edit button */}
-                    {reservation.status !== "cancelled" && reservation.status !== "rejected" && (
+                    {reservation.status !== "cancelled" && reservation.status !== "rejected" && puedeModificar(reservation) && (
                       <Dialog open={openEdit === reservation.id} onOpenChange={(open) => !open && setOpenEdit(null)}>
                         <DialogTrigger asChild>
                           <Button size="sm" variant="outline" onClick={() => setOpenEdit(reservation.id)}>
@@ -392,8 +397,8 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId 
                       </Dialog>
                     )}
 
-                    {/* Cancel button */}
-                    {reservation.status !== "cancelled" && (
+                    {/* Cancel button (la demo no elimina ni cancela) */}
+                    {!esDemo && reservation.status !== "cancelled" && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600" disabled={loading}>

@@ -4,6 +4,8 @@ import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { GestionReservasClient } from "./gestion-reservas-client"
+import { puedeRechazarReservas } from "@/lib/reservas/permisos"
+import { esUsuarioDemo } from "@/lib/demo/reglas"
 
 export default async function GestionReservasPage() {
   const supabase = await createClient()
@@ -22,7 +24,9 @@ export default async function GestionReservasPage() {
     .eq("id", user.id)
     .single()
 
-  const isAdminOrConcierge = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
+  const superAdminEfectivo = profile?.role === "super_admin" && (await esSuperAdminEfectivo())
+  const isAdminOrConcierge = profile?.role === "admin" || superAdminEfectivo || profile?.role === "conserje"
+  const puedeRechazar = puedeRechazarReservas(profile?.role, superAdminEfectivo)
   
   // Only admin/conserje can access this page
   if (!isAdminOrConcierge) {
@@ -62,6 +66,9 @@ export default async function GestionReservasPage() {
       reservations={reservations || []}
       allHouses={allHouses || []}
       condoId={condoId}
+      puedeRechazar={puedeRechazar}
+      esDemo={esUsuarioDemo(user)}
+      userId={user.id}
     />
   )
 }
