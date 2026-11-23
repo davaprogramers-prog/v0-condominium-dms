@@ -200,25 +200,25 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId,
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-yellow-500">{reservations.filter(r => r.status === "pending").length}</div>
+            <div className="text-2xl font-bold" style={{ color: cardTextColor }}>{reservations.filter(r => r.status === "pending").length}</div>
             <div className="text-xs opacity-70">Pendientes</div>
           </CardContent>
         </Card>
         <Card style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-green-500">{reservations.filter(r => r.status === "confirmed").length}</div>
+            <div className="text-2xl font-bold" style={{ color: cardTextColor }}>{reservations.filter(r => r.status === "confirmed").length}</div>
             <div className="text-xs opacity-70">Confirmadas</div>
           </CardContent>
         </Card>
         <Card style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-red-500">{reservations.filter(r => r.status === "rejected").length}</div>
+            <div className="text-2xl font-bold" style={{ color: cardTextColor }}>{reservations.filter(r => r.status === "rejected").length}</div>
             <div className="text-xs opacity-70">Rechazadas</div>
           </CardContent>
         </Card>
         <Card style={{ backgroundColor: cardBgColor, color: cardTextColor }}>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-gray-500">{reservations.filter(r => r.status === "cancelled").length}</div>
+            <div className="text-2xl font-bold" style={{ color: cardTextColor }}>{reservations.filter(r => r.status === "cancelled").length}</div>
             <div className="text-xs opacity-70">Canceladas</div>
           </CardContent>
         </Card>
@@ -264,7 +264,7 @@ export function GestionReservasClient({ areas, reservations, allHouses, condoId,
                       </p>
                     )}
                     {reservation.notes && (
-                      <p className="text-xs mt-2 p-2 rounded" style={{ backgroundColor: inputBgColor }}>
+                      <p className="text-xs mt-2 p-2 rounded" style={{ backgroundColor: inputBgColor, color: inputTextColor }}>
                         {reservation.notes}
                       </p>
                     )}
