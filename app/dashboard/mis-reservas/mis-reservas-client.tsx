@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Calendar, Clock, MapPin, Plus, Edit2, Trash2, AlertTriangle, Home, Check, X, Ban } from "lucide-react"
 import { useTheme } from "@/app/dashboard/theme-context"
+import { demoPuedeEditar } from "@/lib/demo/edicion"
 import { createReservation, updateReservation, cancelReservation, changeReservationHouse, getAvailableSlots, confirmReservation, rejectReservation } from "./actions"
 
 interface Area {
@@ -35,6 +36,8 @@ interface Reservation {
   end_time: string
   status: string
   notes?: string
+  created_by?: string | null
+  created_at?: string | null
   common_areas: {
     name: string
     photo_url?: string
@@ -58,6 +61,9 @@ interface MisReservasClientProps {
   condoId: string
   isAdminOrConcierge: boolean
   allHouses: { id: string; house_number: string }[]
+  puedeRechazar: boolean
+  esDemo: boolean
+  userId: string
 }
 
 export function MisReservasClient({
@@ -67,7 +73,10 @@ export function MisReservasClient({
   houseId,
   condoId,
   isAdminOrConcierge,
-  allHouses
+  allHouses,
+  puedeRechazar,
+  esDemo,
+  userId,
 }: MisReservasClientProps) {
   const [openNew, setOpenNew] = useState(false)
   const [openEdit, setOpenEdit] = useState<string | null>(null)
@@ -204,7 +213,10 @@ export function MisReservasClient({
     }
   }
 
+  const puedeModificarDemo = (reservation: Reservation) => !esDemo || demoPuedeEditar(reservation, userId)
+
   const canModify = (reservation: Reservation) => {
+    if (!puedeModificarDemo(reservation)) return false
     if (isAdminOrConcierge) return true
     const now = new Date()
     const reservationDateTime = new Date(`${reservation.reservation_date}T${reservation.start_time}`)
@@ -476,7 +488,7 @@ export function MisReservasClient({
                     </Badge>
                     
                     {/* Admin/Conserje Actions for Pending/Confirmed Reservations */}
-                    {isAdminOrConcierge && (reservation.status === "pending" || reservation.status === "confirmed") && (
+                    {isAdminOrConcierge && puedeModificarDemo(reservation) && (reservation.status === "pending" || reservation.status === "confirmed") && (
                       <div className="flex gap-1">
                         {reservation.status === "pending" && (
                           <Button 
@@ -493,9 +505,10 @@ export function MisReservasClient({
                             <Check className="h-4 w-4" />
                           </Button>
                         )}
+                        {puedeRechazar && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="destructive">
+                            <Button size="sm" variant="destructive" aria-label="Rechazar reserva">
                               <Ban className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -534,6 +547,7 @@ export function MisReservasClient({
                             </form>
                           </AlertDialogContent>
                         </AlertDialog>
+                        )}
                       </div>
                     )}
                     
@@ -609,6 +623,7 @@ export function MisReservasClient({
                             </DialogContent>
                           </Dialog>
 
+                          {!esDemo && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button size="sm" variant="destructive">
@@ -633,6 +648,7 @@ export function MisReservasClient({
                               </div>
                             </AlertDialogContent>
                           </AlertDialog>
+                          )}
                         </>
                       )}
                     </div>

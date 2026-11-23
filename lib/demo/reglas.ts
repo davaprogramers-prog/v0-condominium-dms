@@ -14,6 +14,9 @@ export const DOMINIO_CORREO_DEMO = "demo.invalid"
 
 export const MENSAJE_NO_DISPONIBLE = "La demostración no está disponible en este momento. Intenta más tarde."
 export const MENSAJE_ACCION_BLOQUEADA = "Esta acción no está disponible en el modo demostración."
+export const MENSAJE_EDICION_DEMO =
+  "En la demostración solo puedes modificar registros que creaste tú hoy. Eliminar no está disponible."
+export const MENSAJE_ELIMINAR_DEMO = "En la demostración no se pueden eliminar ni cancelar registros."
 export const MENSAJE_SESION_ABIERTA =
   "Ya tienes una sesión iniciada. Cierra sesión antes de entrar a la demostración."
 
