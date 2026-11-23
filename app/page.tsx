@@ -218,7 +218,7 @@ export default function Page() {
           <h2 className="text-2xl sm:text-3xl font-bold text-balance" style={{ color: "#0d3068" }}>¿Listo para transformar tu administración?</h2>
           <p className="text-base sm:text-lg text-balance" style={{ color: "#0d3068", opacity: 0.8 }}>Únete a cientos de condominios que ya confían en InteliCon</p>
           <a 
-            href="/auth/registro" 
+            href="/auth/login?demo=probar" 
             className="inline-block px-6 sm:px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             style={{ backgroundColor: "#fefce1", color: "#0d3068" }}
           >
