@@ -1,9 +1,26 @@
 'use server'
 
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
+import { autorizarAdminDeCondominio } from "@/lib/auth/condominio"
 import { createClient } from '@/lib/supabase/server'
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
+
+/** Logos de condominio: solo su administrador (o super admin efectivo). Globales: solo super admin efectivo. */
+async function exigirGestionDeLogo(
+  logo: { scope?: string | null; condo_id?: string | null } | null,
+  accion: 'actualizar' | 'eliminar',
+) {
+  if (!logo) throw new Error('Logo no encontrado')
+  if (logo.scope === 'condo') {
+    const acceso = await autorizarAdminDeCondominio(logo.condo_id)
+    if (!acceso.ok) throw new Error(acceso.error)
+    return
+  }
+  if (!(await esSuperAdminEfectivo())) {
+    throw new Error(`Solo super admin puede ${accion} logos globales`)
+  }
+}
 
 export async function uploadLogo(
   formData: FormData,
@@ -31,8 +48,11 @@ export async function uploadLogo(
     throw new Error('Solo super admin puede crear logos globales')
   }
 
-  if (scope === 'condo' && !condoId) {
-    throw new Error('condoId requerido para logos de condominio')
+  if (scope !== 'global' && scope !== 'condo') throw new Error('Alcance no válido')
+
+  if (scope === 'condo') {
+    const acceso = await autorizarAdminDeCondominio(condoId)
+    if (!acceso.ok) throw new Error(acceso.error)
   }
 
   // Obtener archivo
@@ -108,26 +128,9 @@ export async function setDefaultLogo(logoId: string) {
     .from('logos')
     .select('*')
     .eq('id', logoId)
-    .single()
+    .maybeSingle()
 
-  // Verificar permisos
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, condo_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    throw new Error('Perfil no encontrado')
-  }
-
-  if (logo.scope === 'global' && !(profile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
-    throw new Error('Solo super admin puede actualizar logos globales')
-  }
-
-  if (logo.scope === 'condo' && logo.condo_id !== profile.condo_id) {
-    throw new Error('No puedes actualizar logos de otro condominio')
-  }
+  await exigirGestionDeLogo(logo, 'actualizar')
 
   // Desactivar otros logos del mismo tipo y scope
   await supabase
@@ -158,25 +161,9 @@ export async function deleteLogo(logoId: string) {
     .from('logos')
     .select('*')
     .eq('id', logoId)
-    .single()
+    .maybeSingle()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, condo_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    throw new Error('Perfil no encontrado')
-  }
-
-  if (logo.scope === 'global' && !(profile.role === "super_admin" && (await esSuperAdminEfectivo()))) {
-    throw new Error('Solo super admin puede eliminar logos globales')
-  }
-
-  if (logo.scope === 'condo' && logo.condo_id !== profile.condo_id) {
-    throw new Error('No puedes eliminar logos de otro condominio')
-  }
+  await exigirGestionDeLogo(logo, 'eliminar')
 
   await supabase
     .from('logos')

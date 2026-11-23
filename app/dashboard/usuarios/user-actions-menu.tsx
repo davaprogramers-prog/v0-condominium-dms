@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
 import { deleteUser, resetUserPassword } from "./actions"
-import { DEFAULT_RESET_PASSWORD } from "./constants"
 import { EditUserDialog } from "./edit-user-dialog"
 import { useTheme } from "@/app/dashboard/theme-context"
 
@@ -39,6 +38,7 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
   const [resetDone, setResetDone] = useState(false)
   const [resetError, setResetError] = useState("")
   const [copied, setCopied] = useState(false)
+  const [claveTemporal, setClaveTemporal] = useState("")
   const router = useRouter()
   const { theme } = useTheme()
   
@@ -65,7 +65,8 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
     setResetError("")
     try {
       const result = await resetUserPassword(user.id)
-      if (result.success) {
+      if (result.success && "password" in result && result.password) {
+        setClaveTemporal(result.password)
         setResetDone(true)
       } else {
         setResetError(result.error || "Error al resetear la contraseña")
@@ -80,10 +81,11 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
     setResetDone(false)
     setResetError("")
     setCopied(false)
+    setClaveTemporal("")
   }
 
   const handleCopyPassword = () => {
-    navigator.clipboard.writeText(DEFAULT_RESET_PASSWORD)
+    navigator.clipboard.writeText(claveTemporal)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -166,12 +168,13 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
                   Contraseña reseteada
                 </AlertDialogTitle>
                 <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
-                  La contraseña de {user.first_name} {user.last_name} se restableció. Comparte esta
-                  contraseña temporal con el usuario para que inicie sesión y la cambie desde &quot;Mi Cuenta&quot;.
+                  La contraseña de {user.first_name} {user.last_name} se restableció y se cerraron sus
+                  sesiones abiertas. Comparte esta contraseña temporal con el usuario por un medio privado
+                  para que inicie sesión y la cambie desde &quot;Mi Cuenta&quot;. Solo se muestra esta vez.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="flex items-center justify-between gap-2 rounded-lg border p-3 my-2" style={{ borderColor: dialogTextColor + "40" }}>
-                <code className="text-lg font-bold tracking-wide">{DEFAULT_RESET_PASSWORD}</code>
+                <code className="text-lg font-bold tracking-wide break-all">{claveTemporal}</code>
                 <Button size="sm" variant="outline" onClick={handleCopyPassword} style={{ borderColor: dialogTextColor + "40", color: dialogTextColor }}>
                   {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   <span className="ml-1">{copied ? "Copiado" : "Copiar"}</span>
@@ -191,9 +194,9 @@ export function UserActionsMenu({ user, condos }: UserActionsMenuProps) {
                   Resetear contraseña
                 </AlertDialogTitle>
                 <AlertDialogDescription style={{ color: dialogTextColor, opacity: 0.7 }}>
-                  Se restablecerá la contraseña de {user.first_name} {user.last_name} a la contraseña
-                  temporal <strong>{DEFAULT_RESET_PASSWORD}</strong>. El usuario podrá iniciar sesión con
-                  ella y cambiarla luego desde &quot;Mi Cuenta&quot;.
+                  Se generará una contraseña temporal aleatoria para {user.first_name} {user.last_name} y
+                  se cerrarán sus sesiones abiertas. El usuario podrá iniciar sesión con ella y cambiarla
+                  luego desde &quot;Mi Cuenta&quot;.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               {resetError && (

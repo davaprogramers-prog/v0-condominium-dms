@@ -11,83 +11,35 @@ export async function getUserCondoId(
   userId: string,
   userEmail?: string
 ): Promise<string | null> {
+  void userEmail
   try {
-    // Try to get from profiles first (for owners and any user)
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("condo_id, house_id, role")
       .eq("id", userId)
       .limit(1)
 
-    console.log("[v0] getUserCondoId - profile query result:", { profile, profileError })
+    const fila = profile?.[0]
+    if (!fila) return null
+    if (fila.condo_id) return fila.condo_id
 
-    if (profile && profile.length > 0) {
-      if (profile[0]?.condo_id) {
-        console.log("[v0] Found condo_id in profile:", profile[0].condo_id)
-        return profile[0].condo_id
-      }
-      
-      // If no condo_id but has house_id, get condo_id from the house
-      if (profile[0]?.house_id) {
-        console.log("[v0] Profile has house_id:", profile[0].house_id, "- querying houses table")
-        const { data: house, error: houseError } = await supabase
-          .from("houses")
-          .select("condo_id")
-          .eq("id", profile[0].house_id)
-          .limit(1)
-        
-        console.log("[v0] House query result:", { house, houseError })
-        
-        if (house && house.length > 0 && house[0]?.condo_id) {
-          console.log("[v0] Found condo_id via house:", house[0].condo_id)
-          return house[0].condo_id
-        }
-      }
-      
-      // If super_admin with no condo_id, get the first condominium
-      if ((profile[0]?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile[0]?.role === "admin") {
-        console.log("[v0] User is admin/super_admin without condo_id, fetching first condominium")
-        const { data: condos, error: condoError } = await supabase
-          .from("condominiums")
-          .select("id")
-          .limit(1)
-          .order("created_at", { ascending: true })
-        
-        console.log("[v0] First condominium query result:", { condos, condoError })
-        
-        if (condos && condos.length > 0 && condos[0]?.id) {
-          console.log("[v0] Found first condominium for admin:", condos[0].id)
-          return condos[0].id
-        }
-      }
-    } else {
-      console.log("[v0] No profile found for user:", userId)
-      
-      // If no profile but we have email, try searching via house_owners table
-      if (userEmail) {
-        console.log("[v0] Searching house_owners by email:", userEmail)
-        const { data: houseOwners, error: hoError } = await supabase
-          .from("house_owners")
-          .select("house_id, houses(condo_id)")
-          .eq("email", userEmail)
-          .limit(1)
-        
-        console.log("[v0] House owners query result:", { houseOwners, hoError })
-        
-        if (houseOwners && houseOwners.length > 0 && houseOwners[0]?.houses) {
-          const houses = houseOwners[0].houses as any
-          if (houses?.condo_id) {
-            console.log("[v0] Found condo_id via house_owners:", houses.condo_id)
-            return houses.condo_id
-          }
-        }
-      }
+    if (fila.house_id) {
+      const { data: house } = await supabase.from("houses").select("condo_id").eq("id", fila.house_id).limit(1)
+      if (house?.[0]?.condo_id) return house[0].condo_id
+    }
+
+    // Admin/super admin sin condo_id: primer condominio visible (RLS limita a los accesibles)
+    if (fila.role === "admin" || (fila.role === "super_admin" && (await esSuperAdminEfectivo()))) {
+      const { data: condos } = await supabase
+        .from("condominiums")
+        .select("id")
+        .limit(1)
+        .order("created_at", { ascending: true })
+      if (condos?.[0]?.id) return condos[0].id
     }
   } catch (e) {
-    console.log("[v0] Error getting condo:", e)
+    console.error("[owner-utils] getUserCondoId:", (e as Error).message)
   }
-
-  console.log("[v0] getUserCondoId returning null for user:", userId)
   return null
 }
 
@@ -108,43 +60,15 @@ export async function getUserHouseId(
       .eq("id", userId)
       .limit(1)
 
-    if (profile && profile.length > 0 && profile[0]?.house_id) {
-      console.log("[v0] Found house_id in profile:", profile[0].house_id)
-      return profile[0].house_id
-    }
+    if (profile?.[0]?.house_id) return profile[0].house_id
 
-    // Get email from profile if not provided
-    const email = userEmail || (profile && profile[0]?.email)
-    
+    const email = userEmail || profile?.[0]?.email
     if (email) {
-      // 2. Check houses table by owner_email
-      console.log("[v0] Searching houses by owner_email:", email)
-      const { data: houses } = await supabase
-        .from("houses")
-        .select("id")
-        .eq("owner_email", email)
-        .limit(1)
-      
-      if (houses && houses.length > 0 && houses[0]?.id) {
-        console.log("[v0] Found house_id via houses.owner_email:", houses[0].id)
-        return houses[0].id
-      }
-
-      // 3. Check house_owners table by email
-      console.log("[v0] Searching house_owners by email for house_id:", email)
-      const { data: houseOwners } = await supabase
-        .from("house_owners")
-        .select("house_id")
-        .eq("email", email)
-        .limit(1)
-      
-      if (houseOwners && houseOwners.length > 0 && houseOwners[0]?.house_id) {
-        console.log("[v0] Found house_id via house_owners:", houseOwners[0].house_id)
-        return houseOwners[0].house_id
-      }
+      const { data: houses } = await supabase.from("houses").select("id").eq("owner_email", email).limit(1)
+      if (houses?.[0]?.id) return houses[0].id
     }
   } catch (e) {
-    console.log("[v0] Error getting house from profiles:", e)
+    console.error("[owner-utils] getUserHouseId:", (e as Error).message)
   }
 
   return null

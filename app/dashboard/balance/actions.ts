@@ -23,20 +23,23 @@ export async function calculateSaldoAnterior(
     return initialBalance
   }
 
-  // Get ALL approved ingresos (includes gastos comunes AND multas) up to end of previous month
-  const { data: allIncome, error: incomeError } = await supabase
-    .from("condo_income")
-    .select("amount")
-    .eq("condo_id", condoId)
-    .eq("status", "approved")
-    .lte("income_date", endDate)
-
-  // Get ALL gastos up to end of previous month
-  const { data: allExpenses, error: expensesError } = await supabase
-    .from("condo_expenses")
-    .select("amount")
-    .eq("condo_id", condoId)
-    .lte("expense_date", endDate)
+  // Ingresos aprobados y gastos hasta fin del mes anterior (independientes: en paralelo)
+  const [
+    { data: allIncome, error: incomeError },
+    { data: allExpenses, error: expensesError },
+  ] = await Promise.all([
+    supabase
+      .from("condo_income")
+      .select("amount")
+      .eq("condo_id", condoId)
+      .eq("status", "approved")
+      .lte("income_date", endDate),
+    supabase
+      .from("condo_expenses")
+      .select("amount")
+      .eq("condo_id", condoId)
+      .lte("expense_date", endDate),
+  ])
 
   if (incomeError) {
     console.error("[v0] Error fetching income for saldo anterior:", incomeError)
@@ -66,39 +69,40 @@ export async function getMonthIncome(
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-  // Get ingresos comunes (approved = verified/approved)
-  // Try by period_month/period_year first
-  const { data: periodData, error: periodError } = await supabase
-    .from("condo_income")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("status", "approved")
-    .eq("period_year", year)
-    .eq("period_month", month)
-    .order("income_date", { ascending: false })
-
-  // Fallback to income_date if period fields are null
-  const { data: dateData, error: dateError } = await supabase
-    .from("condo_income")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("status", "approved")
-    .is("period_month", null)
-    .gte("income_date", startDate)
-    .lte("income_date", endDate)
-    .order("income_date", { ascending: false })
+  // Ingresos por período, ingresos sin período (por fecha) y multas pagadas: en paralelo
+  const [
+    { data: periodData, error: periodError },
+    { data: dateData, error: dateError },
+    { data: infractionsData, error: infractionsError },
+  ] = await Promise.all([
+    supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "approved")
+      .eq("period_year", year)
+      .eq("period_month", month)
+      .order("income_date", { ascending: false }),
+    supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "approved")
+      .is("period_month", null)
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
+      .order("income_date", { ascending: false }),
+    supabase
+      .from("infractions")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("is_paid", true)
+      .gte("paid_date", startDate)
+      .lte("paid_date", endDate),
+  ])
 
   const condoIncomeData = [...(periodData || []), ...(dateData || [])]
   const condoIncomeError = periodError && dateError ? periodError : null
-
-  // Get multas (is_paid = true, within date range)
-  const { data: infractionsData, error: infractionsError } = await supabase
-    .from("infractions")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("is_paid", true)
-    .gte("paid_date", startDate)
-    .lte("paid_date", endDate)
 
   if (condoIncomeError) {
     console.error("[v0] Error fetching condo income:", condoIncomeError)
@@ -141,26 +145,26 @@ export async function getMonthPendingIncome(
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
   const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-  // Get pending ingresos comunes (pending = not yet approved)
-  const { data: periodData, error: periodError } = await supabase
-    .from("condo_income")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("status", "pending")
-    .eq("period_year", year)
-    .eq("period_month", month)
-    .order("income_date", { ascending: false })
-
-  // Fallback to income_date if period fields are null
-  const { data: dateData, error: dateError } = await supabase
-    .from("condo_income")
-    .select("*")
-    .eq("condo_id", condoId)
-    .eq("status", "pending")
-    .is("period_month", null)
-    .gte("income_date", startDate)
-    .lte("income_date", endDate)
-    .order("income_date", { ascending: false })
+  // Pendientes por período y sin período (por fecha): en paralelo
+  const [{ data: periodData, error: periodError }, { data: dateData, error: dateError }] = await Promise.all([
+    supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "pending")
+      .eq("period_year", year)
+      .eq("period_month", month)
+      .order("income_date", { ascending: false }),
+    supabase
+      .from("condo_income")
+      .select("*")
+      .eq("condo_id", condoId)
+      .eq("status", "pending")
+      .is("period_month", null)
+      .gte("income_date", startDate)
+      .lte("income_date", endDate)
+      .order("income_date", { ascending: false }),
+  ])
 
   const condoIncomeData = [...(periodData || []), ...(dateData || [])]
   const condoIncomeError = periodError && dateError ? periodError : null

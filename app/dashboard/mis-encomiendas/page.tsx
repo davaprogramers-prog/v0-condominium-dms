@@ -37,19 +37,17 @@ export default async function MisEncomiendasPage() {
     .select(`
       id,
       parcel_type,
-      sender,
+      sender:from_sender,
       tracking_number,
       status,
-      received_at,
-      delivered_at,
+      received_at:received_date,
+      delivered_at:delivered_date,
       notes,
-      reception_photo_url,
-      delivery_photo_url,
       received_by
     `)
     .eq("house_id", houseId)
     .eq("condo_id", condoId)
-    .order("received_at", { ascending: false })
+    .order("received_date", { ascending: false })
 
   // Get photo counts for each parcel
   const parcelIds = (parcels || []).map(p => p.id)

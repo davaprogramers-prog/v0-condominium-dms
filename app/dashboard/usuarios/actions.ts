@@ -3,8 +3,14 @@
 import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { DEFAULT_RESET_PASSWORD } from "./constants"
+import { generarClaveTemporal } from "@/lib/auth/clave-temporal"
+import { cerrarSesiones } from "@/lib/auth/plataforma/sesiones"
 import { MENSAJE_ACCION_BLOQUEADA, esUsuarioDemo } from "@/lib/demo/reglas"
+import { autorizarAdminDeCondominio } from "@/lib/auth/condominio"
+
+// Roles que un administrador puede dar desde el panel; super_admin solo se otorga en /plataforma.
+const ROLES_CREABLES = new Set(["admin", "conserje", "propietario", "arrendatario"])
+const ROLES_RESETEABLES_POR_ADMIN = new Set(["conserje", "propietario", "arrendatario", "owner", "concierge"])
 
 interface CreateUserParams {
   email: string
@@ -27,67 +33,45 @@ export async function createUserWithRole(params: CreateUserParams) {
     }
     if (esUsuarioDemo(currentUser)) return { success: false, error: MENSAJE_ACCION_BLOQUEADA }
 
-    // Verify current user is admin or super_admin
-    const { data: currentProfile } = await supabase
+    if (!ROLES_CREABLES.has(params.role)) {
+      return { success: false, error: "Rol no válido" }
+    }
+
+    // El condominio se valida contra el perfil del administrador (leído en la BD), nunca se confía en el cliente.
+    const { data: currentProfile } = await createAdminClient()
       .from("profiles")
-      .select("role, condo_id")
+      .select("condo_id")
       .eq("id", currentUser.id)
-      .single()
-
-    if (!currentProfile || !(currentProfile.role === "admin" || ((currentProfile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
-      return { success: false, error: "No tienes permisos para crear usuarios" }
+      .maybeSingle()
+    const condoId = params.condoId || currentProfile?.condo_id
+    const acceso = await autorizarAdminDeCondominio(condoId)
+    if (!acceso.ok) {
+      return { success: false, error: acceso.error === "No autenticado" ? acceso.error : "No tienes permisos para crear usuarios en este condominio" }
     }
 
-    const condoId = params.condoId || currentProfile.condo_id
-
-    if (!condoId) {
-      return { success: false, error: "Condominio no especificado" }
-    }
-
-    // Create auth user using ADMIN client with service role key
     const adminClient = createAdminClient()
+
+    if (params.houseId) {
+      const { data: casa } = await adminClient.from("houses").select("id").eq("id", params.houseId).eq("condo_id", acceso.condoId).maybeSingle()
+      if (!casa) return { success: false, error: "La casa no pertenece a este condominio" }
+    }
+
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: params.email,
       password: params.password,
       email_confirm: true,
+      app_metadata: { role: params.role },
     })
 
     if (authError || !authData.user) {
-      console.error("[v0] Auth error creating user:", authError)
-      
-      // If email already exists, try to get the existing user and create profile
-      if (authError?.code === 'email_exists') {
-        console.log("[v0] Email already exists, attempting to create profile for existing user")
-        const existingUser = await adminClient.auth.admin.getUserById(params.email)
-        
-        if (existingUser.data?.user) {
-          // Try to create profile for existing user
-          const { error: profileError } = await adminClient
-            .from("profiles")
-            .insert({
-              id: existingUser.data.user.id,
-              first_name: params.firstName,
-              last_name: params.lastName,
-              role: params.role,
-              condo_id: condoId,
-            })
-            .select()
-          
-          if (profileError && !profileError.message.includes('duplicate key')) {
-            console.error("[v0] Error creating profile for existing user:", profileError)
-            return { 
-              success: false, 
-              error: "Este usuario ya existe. Por favor usa un correo diferente." 
-            }
-          }
-          
-          return { success: true }
-        }
+      console.error("Auth error creating user:", authError)
+      // Un correo existente es una cuenta ajena: nunca se le asigna rol ni condominio desde aquí.
+      if (authError?.code === "email_exists") {
+        return { success: false, error: "Este usuario ya existe. Por favor usa un correo diferente." }
       }
-      
-      return { 
-        success: false, 
-        error: authError?.message || "Error al crear usuario en autenticación" 
+      return {
+        success: false,
+        error: authError?.message || "Error al crear usuario en autenticación"
       }
     }
 
@@ -96,10 +80,11 @@ export async function createUserWithRole(params: CreateUserParams) {
       .from("profiles")
       .insert({
         id: authData.user.id,
+        email: params.email,
         first_name: params.firstName,
         last_name: params.lastName,
         role: params.role,
-        condo_id: condoId,
+        condo_id: acceso.condoId,
       })
 
     if (profileError) {
@@ -215,29 +200,39 @@ export async function resetUserPassword(userId: string) {
     }
     if (esUsuarioDemo(currentUser)) return { success: false, error: MENSAJE_ACCION_BLOQUEADA }
 
-    // Verify current user is admin or super_admin
-    const { data: currentProfile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", currentUser.id)
-      .single()
-
-    if (!currentProfile || !(currentProfile.role === "admin" || ((currentProfile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
-      return { success: false, error: "No tienes permisos para resetear contraseñas" }
-    }
-
-    // Reset the password using the admin client (service role bypasses the encrypted stored password)
     const adminClient = createAdminClient()
+    const sinPermiso = { success: false, error: "No tienes permisos para resetear la contraseña de este usuario" }
+
+    // Antes cualquier admin podía resetear la clave de CUALQUIER cuenta (incluido un super admin): toma de cuentas.
+    const [{ data: objetivo }, { data: registroGlobal }] = await Promise.all([
+      adminClient.from("profiles").select("role, condo_id").eq("id", userId).maybeSingle(),
+      adminClient.from("platform_super_admins").select("user_id").eq("user_id", userId).maybeSingle(),
+    ])
+    if (!objetivo || registroGlobal || objetivo.role === "super_admin" || userId === currentUser.id) return sinPermiso
+
+    const acceso = await autorizarAdminDeCondominio(objetivo.condo_id)
+    if (!acceso.ok) return sinPermiso
+    // Un administrador de condominio no puede tomar la cuenta de otro administrador.
+    if (!acceso.esSuperAdmin && !ROLES_RESETEABLES_POR_ADMIN.has(objetivo.role)) return sinPermiso
+
+    const claveTemporal = generarClaveTemporal()
     const { error } = await adminClient.auth.admin.updateUserById(userId, {
-      password: DEFAULT_RESET_PASSWORD,
+      password: claveTemporal,
     })
 
     if (error) {
-      console.error("[v0] Error resetting password:", error)
-      return { success: false, error: "Error al resetear la contraseña: " + error.message }
+      console.error("Error resetting password:", error.message)
+      return { success: false, error: "No se pudo resetear la contraseña" }
     }
 
-    return { success: true, password: DEFAULT_RESET_PASSWORD }
+    // Quien tuviera la sesión abierta con la clave anterior queda fuera.
+    try {
+      await cerrarSesiones(userId)
+    } catch (e) {
+      console.error("Error closing sessions after reset:", e)
+    }
+
+    return { success: true, password: claveTemporal }
   } catch (err) {
     console.error("Error resetting password:", err)
     return { success: false, error: "Error inesperado al resetear la contraseña" }

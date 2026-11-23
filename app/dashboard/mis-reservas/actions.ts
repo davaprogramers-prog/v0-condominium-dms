@@ -4,6 +4,43 @@ import { esSuperAdminEfectivo } from "@/lib/auth/plataforma/guardia"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
+type ContextoReservas = {
+  userId: string
+  rol: string | null
+  condoId: string | null
+  houseId: string | null
+  esSuperAdmin: boolean
+}
+
+/** Rol, condominio y casa leídos de la BD con la sesión verificada; nunca se confía en flags del cliente. */
+async function contextoReservas(): Promise<ContextoReservas> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("No autenticado")
+  const { data: perfil } = await createServiceClient()
+    .from("profiles")
+    .select("role, condo_id, house_id")
+    .eq("id", user.id)
+    .maybeSingle()
+  const esSuperAdmin = perfil?.role === "super_admin" && (await esSuperAdminEfectivo())
+  return {
+    userId: user.id,
+    rol: perfil?.role ?? null,
+    condoId: perfil?.condo_id ?? null,
+    houseId: perfil?.house_id ?? null,
+    esSuperAdmin,
+  }
+}
+
+function gestionaCondominio(ctx: ContextoReservas, condoId: string | null | undefined) {
+  if (ctx.esSuperAdmin) return true
+  return !!condoId && ["admin", "conserje"].includes(ctx.rol ?? "") && ctx.condoId === condoId
+}
+
+function esDuenoReserva(ctx: ContextoReservas, reserva: { house_id?: string | null; created_by?: string | null }) {
+  return (!!ctx.houseId && reserva.house_id === ctx.houseId) || reserva.created_by === ctx.userId
+}
+
 interface CreateReservationData {
   area_id: string
   house_id: string
@@ -130,7 +167,21 @@ export async function createReservation(data: CreateReservationData) {
 
   // Check for existing reservations on that date (use service client to bypass RLS)
   const serviceClient = createServiceClient()
-  
+
+  // Antes de consultar reservas ajenas: el condominio sale del área (BD), no del cliente,
+  // y la casa debe ser de ese mismo condominio.
+  const ctx = await contextoReservas()
+  const { data: casa } = await serviceClient
+    .from("houses")
+    .select("id")
+    .eq("id", data.house_id)
+    .eq("condo_id", area.condo_id)
+    .maybeSingle()
+  if (!casa) throw new Error("No tienes permisos para crear reservas para esta propiedad.")
+  if (!gestionaCondominio(ctx, area.condo_id) && ctx.houseId !== data.house_id) {
+    throw new Error("No tienes permisos para crear reservas para esta propiedad.")
+  }
+
   // Check if this house already has a reservation for this date (any area)
   const { data: houseReservations } = await serviceClient
     .from("area_reservations")
@@ -218,24 +269,14 @@ export async function createReservation(data: CreateReservationData) {
     }
   }
 
-  // Verify user has permission for this house
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("house_id, role")
-    .eq("id", user.id)
-    .single()
-  
-  const isAdmin = profile?.role === "admin" || (profile?.role === "super_admin" && (await esSuperAdminEfectivo())) || profile?.role === "conserje"
-  if (!isAdmin && profile?.house_id !== data.house_id) {
-    throw new Error("No tienes permisos para crear reservas para esta propiedad.")
-  }
+
 
   // Create reservation using service client to bypass RLS (we already validated permissions above)
   // Status is "pending" - requires admin/conserje confirmation
   const { error } = await serviceClient.from("area_reservations").insert({
     area_id: data.area_id,
     house_id: data.house_id,
-    condo_id: data.condo_id,
+    condo_id: area.condo_id,
     reservation_date: data.reservation_date,
     start_time: data.start_time,
     end_time: data.end_time,
@@ -271,8 +312,14 @@ export async function updateReservation(data: UpdateReservationData, isAdminOrCo
 
   const area = reservation.common_areas
 
+  // isAdminOrConcierge llega del cliente y se ignora: el permiso se calcula en el servidor.
+  void isAdminOrConcierge
+  const ctx = await contextoReservas()
+  const gestor = gestionaCondominio(ctx, reservation.condo_id ?? area?.condo_id)
+  if (!gestor && !esDuenoReserva(ctx, reservation)) throw new Error("Reserva no encontrada")
+
   // Check modification time limit for non-admin users
-  if (!isAdminOrConcierge) {
+  if (!gestor) {
     if (!canModifyReservation(
       reservation.reservation_date,
       reservation.start_time,
@@ -353,8 +400,13 @@ export async function cancelReservation(reservationId: string, isAdminOrConcierg
 
   const area = reservation.common_areas
 
+  void isAdminOrConcierge
+  const ctx = await contextoReservas()
+  const gestor = gestionaCondominio(ctx, reservation.condo_id ?? area?.condo_id)
+  if (!gestor && !esDuenoReserva(ctx, reservation)) throw new Error("Reserva no encontrada")
+
   // Check modification time limit for non-admin users
-  if (!isAdminOrConcierge) {
+  if (!gestor) {
     if (!canModifyReservation(
       reservation.reservation_date,
       reservation.start_time,
@@ -408,6 +460,7 @@ export async function confirmReservation(reservationId: string) {
     .single()
 
   if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+  if (!gestionaCondominio(await contextoReservas(), reservation.condo_id)) throw new Error("Reserva no encontrada")
 
   if (reservation.status !== "pending") {
     throw new Error("Solo se pueden confirmar reservas pendientes")
@@ -461,6 +514,7 @@ export async function rejectReservation(reservationId: string, reason: string) {
     .single()
 
   if (reservationError || !reservation) throw new Error("Reserva no encontrada")
+  if (!gestionaCondominio(await contextoReservas(), reservation.condo_id)) throw new Error("Reserva no encontrada")
 
   // Reject reservation - change status to "rejected" and store reason in notes
   const { error } = await serviceClient
@@ -497,6 +551,12 @@ export async function changeReservationHouse(reservationId: string, newHouseId: 
   if (!profile || !(["admin", "conserje"].includes(profile.role) || ((profile.role === "super_admin" && (await esSuperAdminEfectivo())) && (await esSuperAdminEfectivo())))) {
     throw new Error("No tienes permisos para realizar esta acción")
   }
+
+  const serviceClient = createServiceClient()
+  const { data: reserva } = await serviceClient.from("area_reservations").select("id, condo_id").eq("id", reservationId).maybeSingle()
+  if (!reserva || !gestionaCondominio(await contextoReservas(), reserva.condo_id)) throw new Error("Reserva no encontrada")
+  const { data: casa } = await serviceClient.from("houses").select("id").eq("id", newHouseId).eq("condo_id", reserva.condo_id).maybeSingle()
+  if (!casa) throw new Error("La casa no pertenece a este condominio")
 
   const { error } = await supabase
     .from("area_reservations")

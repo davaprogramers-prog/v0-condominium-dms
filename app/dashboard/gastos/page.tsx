@@ -6,11 +6,12 @@ import { CreateExpenseDialog } from "./create-expense-dialog"
 import { GastosList } from "./gastos-list"
 import { GastosChart } from "./gastos-chart"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
+import { ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getUserCondoId } from "@/lib/supabase/owner-utils"
 import { resolvePeriod } from "@/lib/period"
 import { PeriodAnchor } from "@/components/period-anchor"
+import { PeriodSelector } from "@/components/period-selector"
 
 export default async function GastosPage({
   searchParams,
@@ -67,18 +68,6 @@ export default async function GastosPage({
     expenseTypes = types || []
   }
 
-  // Navigation
-  const prevMonth = month === 1 ? 12 : month - 1
-  const prevYear = month === 1 ? year - 1 : year
-  const nextMonth = month === 12 ? 1 : month + 1
-  const nextYear = month === 12 ? year + 1 : year
-  const canGoNext = year < currentYear || (year === currentYear && month < currentMonth)
-
-  const monthName = new Date(year, month - 1).toLocaleDateString("es-CL", {
-    month: "short",
-    year: "numeric",
-  }).toUpperCase()
-
   // Build categories map from expense types
   const categories: Record<string, string> = {}
   expenseTypes.forEach((type: any) => {
@@ -98,28 +87,7 @@ export default async function GastosPage({
       <PeriodAnchor month={month} year={year} />
       <p className="text-muted-foreground text-sm">Registro de gastos comunes del condominio</p>
 
-      {/* Month Navigation - Centered */}
-      <div className="flex items-center justify-center gap-4">
-        <Link href={`/dashboard/gastos?mes=${prevMonth}&año=${prevYear}`}>
-          <Button variant="outline" size="icon">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <span className="px-4 py-2 text-lg font-semibold capitalize min-w-[180px] text-center">
-          {monthName}
-        </span>
-        {canGoNext ? (
-          <Link href={`/dashboard/gastos?mes=${nextMonth}&año=${nextYear}`}>
-            <Button variant="outline" size="icon">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="outline" size="icon" disabled>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <PeriodSelector month={month} year={year} />
 
       {/* Logos and Add Expense Buttons - Centered */}
       {isAdmin && condoId && (

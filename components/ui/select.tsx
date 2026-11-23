@@ -6,6 +6,11 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+// El menú se monta en un portal fuera del diálogo/página: si ninguna variable de tema
+// llega hasta ahí, cae al color de popover (opaco) en vez de quedar transparente.
+const FONDO_MENU = 'var(--select-bg, var(--input-bg, var(--condo-input-bg, var(--popover))))'
+const TEXTO_MENU = 'var(--select-text, var(--input-text, var(--condo-input-text, var(--popover-foreground))))'
+
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
@@ -67,8 +72,8 @@ function SelectContent({
           className,
         )}
         style={{
-          backgroundColor: 'var(--select-bg, var(--input-bg))',
-          color: 'var(--select-text, var(--input-text))',
+          backgroundColor: FONDO_MENU,
+          color: TEXTO_MENU,
           ...(props as any).style
         }}
         position={position}
@@ -112,12 +117,12 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "bg-input text-input-foreground focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "bg-input text-input-foreground data-[highlighted]:brightness-90 focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className,
       )}
       style={{
-        backgroundColor: 'var(--select-bg, var(--input-bg))',
-        color: 'var(--select-text, var(--input-text))',
+        backgroundColor: FONDO_MENU,
+        color: TEXTO_MENU,
         ...(props as any).style
       }}
       {...props}

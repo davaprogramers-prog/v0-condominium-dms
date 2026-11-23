@@ -47,9 +47,7 @@ export function CreateConciergeDialog({ condoId, onSuccess }: CreateConciergeDia
       // Show success message
       const message = result.alreadyExists
         ? `${firstName} ${lastName} ya estaba asignado`
-        : result.wasReassigned
-          ? `${firstName} ${lastName} ha sido reasignado`
-          : `${firstName} ${lastName} ha sido creado`
+        : `${firstName} ${lastName} ha sido creado`
 
       setSuccessMessage(message)
       setSuccess(true)

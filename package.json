@@ -11,7 +11,10 @@
     "test:super-admin": "tsx --test tests/super-admin.test.ts",
     "test:super-admin-api": "tsx --env-file-if-exists=.env.development.local tests/super-admin-api.ts",
     "test:demo": "tsx --test tests/demo.test.ts",
-    "test:demo-bd": "tsx --env-file-if-exists=.env.development.local tests/demo-bd.mts"
+    "test:demo-bd": "tsx --env-file-if-exists=.env.development.local tests/demo-bd.mts",
+    "demo:poblar": "tsx --env-file-if-exists=.env.development.local scripts/poblar-demo.mts",
+    "test:privacidad-casa-bd": "tsx --env-file-if-exists=.env.development.local tests/privacidad-casa-bd.mts",
+    "test:aislamiento-bd": "tsx --env-file-if-exists=.env.development.local tests/aislamiento-bd.mts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
