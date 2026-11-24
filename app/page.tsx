@@ -80,11 +80,11 @@ export default function Page() {
               Iniciar Sesión
             </a>
             <a 
-              href="/auth/registro" 
-              className="px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 whitespace-nowrap"
+              href="/contacto" 
+              className="px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 whitespace-nowrap text-center"
               style={{ backgroundColor: "#0d3068", color: "#fefce1", borderColor: "#fefce1" }}
             >
-  Registrarse
+  Contacto
   </a>
   <a
   href="/auth/login?demo=probar"
@@ -115,10 +115,10 @@ export default function Page() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a href="/auth/registro" className="relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105 flex items-center gap-2">
+            <a href="/contacto" className="relative px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-semibold text-base shadow-xl hover:shadow-2xl overflow-hidden group transition-all duration-300 hover:scale-105 flex items-center gap-2">
               <span className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2">
-                Comenzar ahora
+                Solicitar cotización
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </span>
             </a>
