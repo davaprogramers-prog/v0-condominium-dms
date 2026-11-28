@@ -38,7 +38,7 @@ export function SelectorDemo({ aviso, destacar = false }: { aviso?: string | nul
   useEffect(() => {
     if (!destacar) return
     setParpadeando(true)
-    seccionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    window.scrollTo({ top: 0 })
     const temporizador = window.setTimeout(() => setParpadeando(false), 4500)
     return () => window.clearTimeout(temporizador)
   }, [destacar])
