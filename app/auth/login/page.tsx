@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { iniciarSesion } from "@/app/auth/acciones-seguridad"
 import { PasoTotp } from "@/components/auth/paso-totp"
 import { SelectorDemo } from "@/components/demo/selector-demo"
+import { CabeceraMarcaMovil, PanelMarcaEscritorio } from "@/components/auth/panel-marca-login"
 
 function LoginPageContent() {
   const router = useRouter()
@@ -92,8 +93,8 @@ function LoginPageContent() {
 
   if (pasoTotp) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[#fefce1] px-4 py-10">
+        <div className="w-full max-w-md rounded-3xl border-2 border-[#0d3068]/10 bg-white p-6 text-[#0d3068] shadow-lg sm:p-8">
           <PasoTotp
             onVerificado={() => continuar(destino)}
             onCancelar={cancelarTotp}
@@ -110,132 +111,153 @@ function LoginPageContent() {
     )
   }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-lg border bg-white p-6 shadow-lg">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <img 
-            src="/intelicon-logo.png" 
-            alt="InteliCon Logo" 
-            className="h-16 w-auto object-contain"
-          />
-          <p className="text-sm text-gray-600">Inicia sesión en tu cuenta</p>
-        </div>
-        
-        <form onSubmit={handleLogin} className="space-y-4">
-          {aviso && (
-            <div role="status" className="rounded bg-blue-50 p-3 text-sm text-blue-800">
-              {aviso}
-            </div>
-          )}
-          {error && (
-            <div role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+  const vieneAProbar = searchParams.get("demo") === "probar"
+  const campo =
+    "h-12 w-full rounded-xl border-2 border-[#0d3068]/15 bg-white px-4 text-base text-[#0d3068] placeholder:text-[#0d3068]/40 focus:border-[#0d3068] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#b4d9fe]"
+  const enlace =
+    "font-semibold text-[#0d3068] underline decoration-[#fbbf24] decoration-2 underline-offset-4 hover:decoration-[#0d3068]"
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              placeholder="tu@email.com"
+  return (
+    <div className="min-h-dvh bg-[#fefce1] text-[#0d3068] lg:grid lg:grid-cols-2">
+      <PanelMarcaEscritorio />
+      <CabeceraMarcaMovil />
+
+      <main className="flex flex-col items-center px-4 py-8 sm:px-6 lg:min-h-dvh lg:justify-center lg:py-12">
+        <div className="flex w-full max-w-lg flex-col gap-6">
+          <section
+            aria-labelledby="titulo-ingreso"
+            className="flex flex-col gap-6 rounded-3xl border-2 border-[#0d3068]/10 bg-white p-6 shadow-lg sm:p-8"
+          >
+            <div className="flex flex-col gap-1">
+              <h2
+                id="titulo-ingreso"
+                className="font-[family-name:var(--font-login-titulo)] text-2xl font-bold text-[#0d3068]"
+              >
+                Inicia sesión
+              </h2>
+              <p className="text-[#0d3068]/75">Ingresa a la cuenta de tu condominio.</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="flex flex-col gap-5">
+              {aviso && (
+                <div role="status" className="rounded-xl bg-[#b4d9fe]/40 p-3 text-sm text-[#0d3068]">
+                  {aviso}
+                </div>
+              )}
+              {error && (
+                <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="text-sm font-semibold text-[#0d3068]">
+                  Correo
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className={campo}
+                  placeholder="tu@email.com"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label htmlFor="password" className="text-sm font-semibold text-[#0d3068]">
+                    Contraseña
+                  </label>
+                  <Link href="/auth/forgot-password" className={`text-sm ${enlace}`}>
+                    ¿Olvidé mi contraseña?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={`${campo} pr-12`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#0d3068]/60 hover:text-[#0d3068] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#b4d9fe]"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                <label className="mt-1 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[#0d3068]/85">
+                  <input
+                    type="checkbox"
+                    checked={rememberDevice}
+                    onChange={(e) => setRememberDevice(e.target.checked)}
+                    className="size-5 rounded accent-[#0d3068]"
+                  />
+                  Recordarme en este dispositivo
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="h-12 w-full rounded-full bg-[#0d3068] font-[family-name:var(--font-login-titulo)] text-base font-semibold text-[#fefce1] shadow-md transition-colors hover:bg-[#0d3068]/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fbbf24] disabled:opacity-60"
+              >
+                {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+              </button>
+            </form>
+
+            <div className="flex flex-col gap-3 border-t border-[#0d3068]/10 pt-5 text-center text-sm leading-relaxed text-[#0d3068]/85">
+              <p className="text-pretty">
+                ¿Eres residente y tu administración te dio de alta?{" "}
+                <Link href="/auth/registro" className={enlace}>
+                  Crea tu cuenta
+                </Link>
+              </p>
+              <p className="text-pretty">
+                ¿Quieres InteliCON para tu condominio?{" "}
+                <Link href="/contacto" className={enlace}>
+                  Solicita una cotización
+                </Link>
+              </p>
+            </div>
+          </section>
+
+          <div className={vieneAProbar ? "order-first lg:order-none" : ""}>
+            <SelectorDemo
+              destacar={vieneAProbar}
+              aviso={
+                searchParams.get("demo") === "finalizada"
+                  ? "Tu sesión de demostración terminó. Puedes iniciar una nueva cuando quieras."
+                  : null
+              }
             />
           </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
-              </label>
-              <Link 
-                href="/auth/forgot-password" 
-                className="text-sm text-blue-600 hover:underline"
-              >
-                ¿Olvidé mi contraseña?
-              </Link>
-            </div>
-            <div className="relative mt-1">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded border border-gray-300 px-3 py-2 pr-11 text-sm focus:border-blue-500 focus:outline-none"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                onClick={() => setShowPassword((visible) => !visible)}
-                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-500 hover:text-blue-600"
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-
-            <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={rememberDevice}
-                onChange={(e) => setRememberDevice(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              Recordarme en este dispositivo
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
-          </button>
-        </form>
-
-        <div className="text-center text-sm">
-          ¿No tienes cuenta?{" "}
-          <Link href="/auth/registro" className="font-semibold text-blue-600 hover:underline">
-            Registrarse aquí
-          </Link>
+          <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-[#0d3068]/75">
+            <Link href="/support" className="py-2 hover:text-[#0d3068] hover:underline">
+              Soporte
+            </Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/privacy-policy" className="py-2 hover:text-[#0d3068] hover:underline">
+              Políticas de Privacidad
+            </Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/terms" className="py-2 hover:text-[#0d3068] hover:underline">
+              Términos de Servicio
+            </Link>
+          </footer>
         </div>
-      </div>
-
-      <div className="mt-6 flex w-full justify-center">
-        <SelectorDemo
-          destacar={searchParams.get("demo") === "probar"}
-          aviso={
-            searchParams.get("demo") === "finalizada"
-              ? "Tu sesión de demostración terminó. Puedes iniciar una nueva cuando quieras."
-              : null
-          }
-        />
-      </div>
-
-      {/* Footer */}
-      <div className="mt-8 text-center text-xs text-gray-500 space-y-2">
-        <div className="flex items-center justify-center gap-2 flex-wrap">
-          <Link href="/support" className="hover:text-blue-600 transition-colors">
-            Soporte
-          </Link>
-          <span>•</span>
-          <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">
-            Políticas de Privacidad
-          </Link>
-          <span>•</span>
-          <Link href="/terms" className="hover:text-blue-600 transition-colors">
-            Términos de Servicio
-          </Link>
-        </div>
-      </div>
+      </main>
     </div>
   )
 }
