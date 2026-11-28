@@ -115,7 +115,7 @@ function LoginPageContent() {
   const campo =
     "h-12 w-full rounded-xl border-2 border-[#0d3068]/15 bg-white px-4 text-base text-[#0d3068] placeholder:text-[#0d3068]/40 focus:border-[#0d3068] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#b4d9fe]"
   const enlace =
-    "font-semibold text-[#0d3068] underline decoration-[#fbbf24] decoration-2 underline-offset-4 hover:decoration-[#0d3068]"
+    "whitespace-nowrap font-semibold text-[#0d3068] underline decoration-[#fbbf24] decoration-2 underline-offset-4 hover:decoration-[#0d3068]"
 
   return (
     <div className="min-h-dvh bg-[#fefce1] text-[#0d3068] lg:grid lg:grid-cols-2">
